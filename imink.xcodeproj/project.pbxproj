@@ -14,6 +14,13 @@
 		8B7F293B2BF6E1BB0010A525 /* iminkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7F293A2BF6E1BB0010A525 /* iminkTests.swift */; };
 		8B7F29452BF6E1BB0010A525 /* iminkUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7F29442BF6E1BB0010A525 /* iminkUITests.swift */; };
 		8B7F29472BF6E1BB0010A525 /* iminkUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7F29462BF6E1BB0010A525 /* iminkUITestsLaunchTests.swift */; };
+		8B7F29552BF6E1D50010A525 /* SplatDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 8B7F29542BF6E1D50010A525 /* SplatDatabase */; };
+		8B7F29582BF6E1F00010A525 /* SplatNet3 in Frameworks */ = {isa = PBXBuildFile; productRef = 8B7F29572BF6E1F00010A525 /* SplatNet3 */; };
+		8B7F295A2BF6E1F00010A525 /* SplatNet3API in Frameworks */ = {isa = PBXBuildFile; productRef = 8B7F29592BF6E1F00010A525 /* SplatNet3API */; };
+		8B7F295F2BF6E4A80010A525 /* NSOAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7F295E2BF6E4A80010A525 /* NSOAPI.swift */; };
+		8B7F29622BF6E5310010A525 /* NSOHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7F29612BF6E5310010A525 /* NSOHash.swift */; };
+		8B7F29642BF6E7E90010A525 /* AppAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7F29632BF6E7E80010A525 /* AppAPI.swift */; };
+		8B7F296C2BF711C40010A525 /* LoginFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7F296B2BF711C40010A525 /* LoginFlow.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +51,11 @@
 		8B7F29402BF6E1BB0010A525 /* iminkUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iminkUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8B7F29442BF6E1BB0010A525 /* iminkUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iminkUITests.swift; sourceTree = "<group>"; };
 		8B7F29462BF6E1BB0010A525 /* iminkUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iminkUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		8B7F295C2BF6E3080010A525 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		8B7F295E2BF6E4A80010A525 /* NSOAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSOAPI.swift; sourceTree = "<group>"; };
+		8B7F29612BF6E5310010A525 /* NSOHash.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSOHash.swift; sourceTree = "<group>"; };
+		8B7F29632BF6E7E80010A525 /* AppAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppAPI.swift; sourceTree = "<group>"; };
+		8B7F296B2BF711C40010A525 /* LoginFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginFlow.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +63,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B7F295A2BF6E1F00010A525 /* SplatNet3API in Frameworks */,
+				8B7F29552BF6E1D50010A525 /* SplatDatabase in Frameworks */,
+				8B7F29582BF6E1F00010A525 /* SplatNet3 in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -74,6 +89,7 @@
 		8B7F291D2BF6E1B90010A525 = {
 			isa = PBXGroup;
 			children = (
+				8B7F295B2BF6E2CF0010A525 /* Shared */,
 				8B7F29282BF6E1B90010A525 /* imink */,
 				8B7F29392BF6E1BB0010A525 /* iminkTests */,
 				8B7F29432BF6E1BB0010A525 /* iminkUITests */,
@@ -94,6 +110,7 @@
 		8B7F29282BF6E1B90010A525 /* imink */ = {
 			isa = PBXGroup;
 			children = (
+				8B7F295C2BF6E3080010A525 /* Info.plist */,
 				8B7F29292BF6E1B90010A525 /* iminkApp.swift */,
 				8B7F292B2BF6E1B90010A525 /* ContentView.swift */,
 				8B7F292D2BF6E1BB0010A525 /* Assets.xcassets */,
@@ -127,6 +144,33 @@
 			path = iminkUITests;
 			sourceTree = "<group>";
 		};
+		8B7F295B2BF6E2CF0010A525 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				8B7F29602BF6E5270010A525 /* Utils */,
+				8B7F295D2BF6E49D0010A525 /* API */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		8B7F295D2BF6E49D0010A525 /* API */ = {
+			isa = PBXGroup;
+			children = (
+				8B7F29632BF6E7E80010A525 /* AppAPI.swift */,
+				8B7F295E2BF6E4A80010A525 /* NSOAPI.swift */,
+				8B7F296B2BF711C40010A525 /* LoginFlow.swift */,
+			);
+			path = API;
+			sourceTree = "<group>";
+		};
+		8B7F29602BF6E5270010A525 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				8B7F29612BF6E5310010A525 /* NSOHash.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -143,6 +187,11 @@
 			dependencies = (
 			);
 			name = imink;
+			packageProductDependencies = (
+				8B7F29542BF6E1D50010A525 /* SplatDatabase */,
+				8B7F29572BF6E1F00010A525 /* SplatNet3 */,
+				8B7F29592BF6E1F00010A525 /* SplatNet3API */,
+			);
 			productName = imink;
 			productReference = 8B7F29262BF6E1B90010A525 /* imink.app */;
 			productType = "com.apple.product-type.application";
@@ -215,6 +264,10 @@
 				Base,
 			);
 			mainGroup = 8B7F291D2BF6E1B90010A525;
+			packageReferences = (
+				8B7F29532BF6E1D50010A525 /* XCRemoteSwiftPackageReference "SplatDatabase" */,
+				8B7F29562BF6E1F00010A525 /* XCRemoteSwiftPackageReference "SplatNet3" */,
+			);
 			productRefGroup = 8B7F29272BF6E1B90010A525 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -257,8 +310,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B7F29642BF6E7E90010A525 /* AppAPI.swift in Sources */,
+				8B7F29622BF6E5310010A525 /* NSOHash.swift in Sources */,
 				8B7F292C2BF6E1B90010A525 /* ContentView.swift in Sources */,
 				8B7F292A2BF6E1B90010A525 /* iminkApp.swift in Sources */,
+				8B7F295F2BF6E4A80010A525 /* NSOAPI.swift in Sources */,
+				8B7F296C2BF711C40010A525 /* LoginFlow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -347,7 +404,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -404,7 +461,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -425,11 +482,13 @@
 				DEVELOPMENT_TEAM = 2ST3TQ6FXT;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = imink/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -454,11 +513,13 @@
 				DEVELOPMENT_TEAM = 2ST3TQ6FXT;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = imink/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -588,6 +649,43 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8B7F29532BF6E1D50010A525 /* XCRemoteSwiftPackageReference "SplatDatabase" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jf666666/SplatDatabase";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		8B7F29562BF6E1F00010A525 /* XCRemoteSwiftPackageReference "SplatNet3" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jf666666/SplatNet3.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8B7F29542BF6E1D50010A525 /* SplatDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8B7F29532BF6E1D50010A525 /* XCRemoteSwiftPackageReference "SplatDatabase" */;
+			productName = SplatDatabase;
+		};
+		8B7F29572BF6E1F00010A525 /* SplatNet3 */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8B7F29562BF6E1F00010A525 /* XCRemoteSwiftPackageReference "SplatNet3" */;
+			productName = SplatNet3;
+		};
+		8B7F29592BF6E1F00010A525 /* SplatNet3API */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8B7F29562BF6E1F00010A525 /* XCRemoteSwiftPackageReference "SplatNet3" */;
+			productName = SplatNet3API;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 8B7F291E2BF6E1B90010A525 /* Project object */;
 }

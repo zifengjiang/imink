@@ -1,0 +1,78 @@
+{
+  "originHash" : "b947eff11acb3a3ff9f09af0964e275ad02fcede6347deba6e20f37630907b71",
+  "pins" : [
+    {
+      "identity" : "grdb.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/groue/GRDB.swift.git",
+      "state" : {
+        "revision" : "639fa9168d36931b36a79e60dc06b7d23852f1f4",
+        "version" : "6.27.0"
+      }
+    },
+    {
+      "identity" : "inkmoya",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/imink-app/InkMoya.git",
+      "state" : {
+        "revision" : "c610f403fa9d0fe718716526d91560438e459fad",
+        "version" : "0.1.1"
+      }
+    },
+    {
+      "identity" : "splatdatabase",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jf666666/SplatDatabase",
+      "state" : {
+        "branch" : "main",
+        "revision" : "a53d8b60c1269828e713bca81758b559492f75f1"
+      }
+    },
+    {
+      "identity" : "splatnet3",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jf666666/SplatNet3.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "ac35cac6b462bdca5809c637f03010c3fcdef15d"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser",
+      "state" : {
+        "revision" : "46989693916f56d1186bd59ac15124caef896560",
+        "version" : "1.3.1"
+      }
+    },
+    {
+      "identity" : "swift-log",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-log.git",
+      "state" : {
+        "revision" : "e97a6fcb1ab07462881ac165fdbb37f067e205d5",
+        "version" : "1.5.4"
+      }
+    },
+    {
+      "identity" : "swiftsoup",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/scinfu/SwiftSoup.git",
+      "state" : {
+        "revision" : "028487d4a8a291b2fe1b4392b5425b6172056148",
+        "version" : "2.7.2"
+      }
+    },
+    {
+      "identity" : "swiftyjson",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SwiftyJSON/SwiftyJSON.git",
+      "state" : {
+        "revision" : "af76cf3ef710b6ca5f8c05f3a31307d44a3c5828",
+        "version" : "5.0.2"
+      }
+    }
+  ],
+  "version" : 3
+}
