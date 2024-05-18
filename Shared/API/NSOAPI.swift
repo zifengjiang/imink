@@ -23,10 +23,7 @@ enum NSOAPI {
                f: String)
     case getWebServiceToken(
             webApiServerToken: String,
-            requestId: String,
-            registrationToken: String,
-            timestamp: Int64,
-            f: String)
+            f: NSOAuthorization.F)
 }
 
 extension NSOAPI: TargetType {
@@ -34,9 +31,9 @@ extension NSOAPI: TargetType {
     public static let clientUrlScheme = "npf\(NSOAPI.clientId)"
     private static var clientVersion: String {
 //        AppUserDefaults.shared.nsoVersion
-        ""
+        "2.10.0"
     }
-    private static let gameServiceId = "5741031244955648"
+    private static let gameServiceId = 4834290508791808
     private static let flapgAPIVersion = "3"
     
     var baseURL: URL {
@@ -111,7 +108,7 @@ extension NSOAPI: TargetType {
                 "X-ProductVersion": NSOAPI.clientVersion,
                 "Accept-Encoding": "gzip, deflate, br"
             ]
-        case .getWebServiceToken(let webApiServerToken, _, _, _, _):
+        case .getWebServiceToken(let webApiServerToken, _):
             return [
                 "User-Agent": "com.nintendo.znca/\(NSOAPI.clientVersion) (iOS/14.2)",
                 "Authorization": "Bearer \(webApiServerToken)",
@@ -186,15 +183,15 @@ extension NSOAPI: TargetType {
                     )
                 )
             )
-        case .getWebServiceToken(_, let requestId, let registrationToken, let timestamp, let f):
+        case .getWebServiceToken(_, let f):
             return .jsonData(
                 WebServiceTokenBody(
                     parameter: WebServiceTokenParamemter(
                         id: NSOAPI.gameServiceId,
-                        requestId: requestId,
-                        registrationToken: registrationToken,
-                        timestamp: timestamp,
-                        f: f)
+                        requestId: f.requestId,
+                        registrationToken: "",
+                        timestamp: f.timestamp,
+                        f: f.f)
                 )
             )
         default:
@@ -226,9 +223,10 @@ fileprivate struct WebServiceTokenBody: Codable {
 }
 
 fileprivate struct WebServiceTokenParamemter: Codable {
-    var id: String
+    var id: Int
     var requestId: String
     var registrationToken: String
     var timestamp: Int64
     var f: String
 }
+

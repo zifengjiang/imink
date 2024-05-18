@@ -1,10 +1,3 @@
-//
-//  iminkUITestsLaunchTests.swift
-//  iminkUITests
-//
-//  Created by 姜锋 on 5/17/24.
-//
-
 import XCTest
 
 final class iminkUITestsLaunchTests: XCTestCase {

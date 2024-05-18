@@ -1,11 +1,5 @@
-//
-//  iminkApp.swift
-//  imink
-//
-//  Created by 姜锋 on 5/17/24.
-//
-
 import SwiftUI
+import SplatDatabase
 
 @main
 struct iminkApp: App {

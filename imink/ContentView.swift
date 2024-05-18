@@ -1,32 +1,36 @@
-//
-//  ContentView.swift
-//  imink
-//
-//  Created by 姜锋 on 5/17/24.
-//
-
 import SwiftUI
 
 struct ContentView: View {
-    var nso = NSOAuthorization()
+    @AppStorage("mainViewTabSelection")
+    var tabSelection:Int = 0
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-            Button {
-                Task{
-                    try await nso.login { sessionToken in
-                        print(sessionToken)
-                    }
+        TabView(selection:$tabSelection){
+            HomePage(viewModel: HomeViewModel())
+                .tabItem {
+                    Label("tab_home", image: "TabBarHome")
                 }
-            } label: {
-                Text("Login")
-            }
+                .tag(0)
 
+            Text("主页")
+                .tabItem {
+                    Label("tab_battle", image: "TabBarBattle")
+                }
+                .tag(1)
+
+
+            Text("主页")
+                .tabItem {
+                    Label("tab_salmon_run", image: "TabBarSalmonRun")
+                }
+                .tag(2)
+
+
+            MePage()
+                .tabItem {
+                    Label("tab_me", image: "TabBarMe")
+                }
+                .tag(3)
         }
-        .padding()
     }
 }
 
