@@ -19,6 +19,14 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "SplatDatabase.insertCoop(json:):Coop.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "json[&quot;id&quot;].stringValue">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "NSOAuthorization.requestLoginToken(sessionToken:):NSOAuthorization.swift">
       </ContextState>
       <ContextState

@@ -7,7 +7,7 @@ class SessionManager {
     private var isValidSubject: CurrentValueSubject<Bool, Never>
 
     private static var isValid: Bool {
-        if let gameServiceToken = AppUserDefaults.shared.gameServiceToken, let gameServiceTokenRefreshTime = AppUserDefaults.shared.gameServiceTokenRefreshTime {
+        if let _ = AppUserDefaults.shared.gameServiceToken, let gameServiceTokenRefreshTime = AppUserDefaults.shared.gameServiceTokenRefreshTime {
                 return Date().timeIntervalSince1970 - Double(gameServiceTokenRefreshTime) < 10800
         }
         return false

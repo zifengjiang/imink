@@ -4,6 +4,7 @@ import Combine
 import GRDB
 import os
 
+//@Observable
 class HomeViewModel: ObservableObject {
     
     @Published var totalCoop: Int = 0
@@ -46,6 +47,8 @@ class HomeViewModel: ObservableObject {
             .assign(to: \.last500Battle, on: self)
             .store(in: &cancelBag)
     }
+
+    
 }
 
 extension SplatDatabase {
@@ -53,9 +56,9 @@ extension SplatDatabase {
         return try! dbQueue.read { db in
             var rows: [Row]
             if isCoop{
-                rows = try! SQL.last_500_coop(accountId: 1).request.fetchAll(db)
+                rows = try! SQL.last_500_coop(accountId: 2).request.fetchAll(db)
             }else{
-                rows = try! SQL.last_500_battle(accountId: 1).request.fetchAll(db)
+                rows = try! SQL.last_500_battle(accountId: 2).request.fetchAll(db)
             }
             return rows.map { row in
                 if let result = row["result"] as Bool? {
@@ -70,7 +73,7 @@ extension SplatDatabase {
         return ValueObservation
             .tracking(
                 Coop
-                    .filter(sql: "accountId = ?", arguments: [1])
+//                    .filter(sql: "accountId = ?", arguments: [0])
                     .fetchCount
             )
             .publisher(in: dbQueue, scheduling: .immediate)
@@ -81,7 +84,7 @@ extension SplatDatabase {
         return ValueObservation
             .tracking(
                 Battle
-                    .filter(sql: "accountId = ?", arguments: [1])
+//                    .filter(sql: "accountId = ?", arguments: [0])
                     .fetchCount
             )
             .publisher(in: dbQueue, scheduling: .immediate)

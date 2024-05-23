@@ -5,7 +5,7 @@ import SplatDatabase
 struct iminkApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainView()
         }
     }
 }

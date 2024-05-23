@@ -1,5 +1,5 @@
 {
-  "originHash" : "b947eff11acb3a3ff9f09af0964e275ad02fcede6347deba6e20f37630907b71",
+  "originHash" : "c8dc4c44c847e40762218a1cb843c1305e1a88491b6fc697b00ad61d310be9f1",
   "pins" : [
     {
       "identity" : "grdb.swift",
@@ -20,12 +20,21 @@
       }
     },
     {
+      "identity" : "spalert",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ivanvorobei/SPAlert.git",
+      "state" : {
+        "revision" : "3b73be8db5a7e7efaf474c6ed919f5a437d843c9",
+        "version" : "5.1.9"
+      }
+    },
+    {
       "identity" : "splatdatabase",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/jf666666/SplatDatabase",
       "state" : {
         "branch" : "main",
-        "revision" : "f8e2c1c7ea4da32019848e0c1e33e153fbf4b0fe"
+        "revision" : "f050e136d7703ca9687ff06d51f6e4e253c4ecf8"
       }
     },
     {
@@ -34,7 +43,16 @@
       "location" : "https://github.com/jf666666/SplatNet3.git",
       "state" : {
         "branch" : "master",
-        "revision" : "c5e2de9786bd285ebf55765ef518725640415692"
+        "revision" : "389891dd7bd3b997bb78e2b3f539f0695532f1de"
+      }
+    },
+    {
+      "identity" : "swift-algorithms",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-algorithms.git",
+      "state" : {
+        "revision" : "f6919dfc309e7f1b56224378b11e28bab5bccc42",
+        "version" : "1.2.0"
       }
     },
     {
@@ -56,6 +74,15 @@
       }
     },
     {
+      "identity" : "swift-numerics",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-numerics.git",
+      "state" : {
+        "revision" : "0a5bc04095a675662cf24757cc0640aa2204253b",
+        "version" : "1.0.2"
+      }
+    },
+    {
       "identity" : "swiftsoup",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/scinfu/SwiftSoup.git",
@@ -71,6 +98,15 @@
       "state" : {
         "revision" : "af76cf3ef710b6ca5f8c05f3a31307d44a3c5828",
         "version" : "5.0.2"
+      }
+    },
+    {
+      "identity" : "zip",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/marmelroy/Zip.git",
+      "state" : {
+        "revision" : "67fa55813b9e7b3b9acee9c0ae501def28746d76",
+        "version" : "2.1.2"
       }
     }
   ],

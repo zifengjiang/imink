@@ -3,11 +3,20 @@ import SplatDatabase
 
 struct SettingPage: View {
     @Binding var showSettings: Bool
-
+    
+    @EnvironmentObject var mainViewModel: MainViewModel
     @State var showFilePicker = false
     var body: some View {
         NavigationStack{
             List{
+                Button {
+                    AppUserDefaults.shared.sessionToken = nil
+//                    mainViewModel.isLogin = false
+                } label: {
+                    Text("setting_button_logout")
+                }
+
+
                 Section(header: Text("setting_section_user_data")){
                     Button {
                         showFilePicker = true
@@ -15,14 +24,8 @@ struct SettingPage: View {
                         Text("setting_button_import_user_data")
                     }
                     .sheet(isPresented: $showFilePicker) {
-                        FilePickerView(fileType: .data) { url in
-                            do{
-                                try SplatDatabase.shared.importFromConchBay(dbPath: url.path()) { progress in
-                                    print(progress)
-                                }
-                            }catch{
-                                print(error)
-                            }
+                        FilePickerView(fileType: .zip) { url in
+                            DataBackup.import(url: url)
                         }
                     }
 

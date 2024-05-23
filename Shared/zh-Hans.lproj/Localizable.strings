@@ -7,3 +7,12 @@
 "setting_section_user_data" = "用户数据";
 "setting_button_import_user_data" = "导入用户数据";
 "setting_button_export_user_data" = "导出用户数据";
+"low_tide" = "干潮";
+"normal" = "普通";
+"high_tide" = "满潮";
+"appearances_number" = "出现数量";
+"boss_salmonids" = "巨大鲑鱼";
+"job_score" = "打工分数";
+"pay_grade" = "评价等级";
+"clear_bonus" = "通关奖励";
+"your_points" = "获得点数";

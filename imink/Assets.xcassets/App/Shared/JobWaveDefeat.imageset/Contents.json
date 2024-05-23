@@ -1,0 +1,20 @@
+{
+  "images" : [
+    {
+      "filename" : "JobWaveDefeat_ja.pdf",
+      "idiom" : "universal"
+    },
+    {
+      "filename" : "JobWaveDefeat.pdf",
+      "idiom" : "universal",
+      "locale" : "en"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  },
+  "properties" : {
+    "localizable" : true
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "images" : [
+    {
+      "filename" : "JobWaveClear_ja.pdf",
+      "idiom" : "universal"
+    },
+    {
+      "filename" : "JobWaveClear.pdf",
+      "idiom" : "universal",
+      "locale" : "en"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  },
+  "properties" : {
+    "localizable" : true
+  }
+}

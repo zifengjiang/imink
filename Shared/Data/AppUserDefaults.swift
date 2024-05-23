@@ -7,6 +7,7 @@ class AppUserDefaults: ObservableObject {
     @AppStorage("firstLaunch", store: .appGroup)
     var firstLaunch: Bool = true {
         didSet {
+
         }
     }
 
@@ -17,7 +18,11 @@ class AppUserDefaults: ObservableObject {
     var currentLanguage: String?
 
     @AppStorage("session_token", store: .appGroup)
-    var sessionToken: String?
+    var sessionToken: String? {
+        didSet {
+            MainViewModel.shared.isLogin = sessionToken != nil
+        }
+    }
 
     @AppStorage("gameServiceToken", store: .appGroup)
     var gameServiceToken: String?
@@ -25,6 +30,7 @@ class AppUserDefaults: ObservableObject {
     @AppStorage("gameServiceTokenRefreshTime", store: .appGroup)
     var gameServiceTokenRefreshTime: Int?
 }
+
 
 extension UserDefaults {
     static let appGroup: UserDefaults = {
