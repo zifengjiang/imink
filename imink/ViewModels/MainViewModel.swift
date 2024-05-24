@@ -35,7 +35,7 @@ class MainViewModel: ObservableObject {
             print(coops.count)
             for coop in coops{
                 let coopId = coop["id"].stringValue
-                if try SplatDatabase.shared.isCoopExist(id: coopId){
+                if try SplatDatabase.shared.isCoopExist(id: coopId,db: nil){
                     print("\(coopId) exist")
                     continue
                 }

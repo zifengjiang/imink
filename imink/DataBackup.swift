@@ -154,7 +154,7 @@ extension DataBackup {
             self.fileTotalCount = battleFilePaths.count + salmonRunFilePaths.count
             self.loadCount = 0
 
-            let batchSize = 10 // 每批处理的文件数量
+            let batchSize = 100 // 每批处理的文件数量
             let battleFileBatches = battleFilePaths.chunks(ofCount: batchSize)
             let salmonRunFileBatches = salmonRunFilePaths.chunks(ofCount: batchSize)
 
@@ -179,32 +179,51 @@ extension DataBackup {
     }
 
     private func processSalmonRunBatch(_ salmonRunFilePaths: ChunksOfCountCollection<[URL]>.Element){
-        for url in salmonRunFilePaths {
-            autoreleasepool {
-                print("load salmon run file: \(url.lastPathComponent)")
-                self.loadCount += 1
-                self.importProgress.loadFilesProgress = Double(self.loadCount) / Double(self.fileTotalCount)
-                do {
-                    let jsonData = try JSON(data: Data(contentsOf: url))
-                    try SplatDatabase.shared.insertCoop(json: jsonData["coopHistoryDetail"])
-                } catch {
-                    print("error: \(error.localizedDescription)")
+        SplatDatabase.shared.dbQueue.asyncWrite { db in
+            for url in salmonRunFilePaths {
+                autoreleasepool {
+                    self.loadCount += 1
+                    self.importProgress.loadFilesProgress = Double(self.loadCount) / Double(self.fileTotalCount)
+                    do {
+                        let jsonData = try JSON(data: Data(contentsOf: url))
+                        if try !SplatDatabase.shared.isCoopExist(id: jsonData["coopHistoryDetail"]["id"].stringValue, db: db){
+                            try SplatDatabase.shared.insertCoop(json: jsonData["coopHistoryDetail"],db: db)
+                        }
+                    } catch {
+                        print("error: \(error.localizedDescription)")
+                    }
                 }
             }
+        } completion: { _, result in
+            if case let .failure(error) = result {
+
+                os_log("Database Error: [saveBattle] \(error.localizedDescription)")
+            }
         }
+
+
     }
 
     private func processBattleBatch(_ battleFilePaths: ChunksOfCountCollection<[URL]>.Element){
-        for url in battleFilePaths {
-            autoreleasepool {
-                self.loadCount += 1
-                self.importProgress.loadFilesProgress = Double(self.loadCount) / Double(self.fileTotalCount)
-                do {
-                    let jsonData = try JSON(data: Data(contentsOf: url))
-                    try SplatDatabase.shared.insertBattle(json: jsonData["vsHistoryDetail"])
-                } catch {
-                    print("error: \(error.localizedDescription)")
+        SplatDatabase.shared.dbQueue.asyncWrite { db in
+            for url in battleFilePaths {
+                autoreleasepool {
+                    self.loadCount += 1
+                    self.importProgress.loadFilesProgress = Double(self.loadCount) / Double(self.fileTotalCount)
+                    do {
+                        let jsonData = try JSON(data: Data(contentsOf: url))
+                        if try !SplatDatabase.shared.isBattleExist(id: jsonData["vsHistoryDetail"]["id"].stringValue, db: db){
+                            try SplatDatabase.shared.insertBattle(json: jsonData["vsHistoryDetail"],db: db)
+                        }
+                    } catch {
+                        print("error: \(error.localizedDescription)")
+                    }
                 }
+            }
+        } completion: { _, result in
+            if case let .failure(error) = result {
+
+                os_log("Database Error: [saveBattle] \(error.localizedDescription)")
             }
         }
     }
