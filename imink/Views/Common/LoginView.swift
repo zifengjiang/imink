@@ -6,19 +6,21 @@
 //
 
 import SwiftUI
+import SplatNet3API
+import SwiftyJSON
 
 struct LoginViewModifier: ViewModifier {
     
-    var isLogined: Bool
+    var isLogin: Bool
     var iconName: String? = nil
     var backgroundColor: Color? = nil
     
     func body(content: Content) -> some View {
         ZStack {
             content
-                .grayscale(isLogined ? 0 : 0.9999)
+                .grayscale(isLogin ? 0 : 0.9999)
 
-            if !isLogined {
+            if !isLogin {
                 LoginView(
                     iconName: iconName,
                     backgroundColor: backgroundColor
@@ -32,9 +34,8 @@ struct LoginView: View {
     
     var iconName: String? = nil
     var backgroundColor: Color? = nil
-    
-    @State private var showLoginView = false
-    
+    @StateObject var viewModel = LoginViewModel()
+
     var body: some View {
         VStack {
             if let iconName = iconName {
@@ -59,18 +60,16 @@ struct LoginView: View {
             .background(Color.accentColor)
             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             .onTapGesture {
-                showLoginView = true
                 Task{
-                    try await NSOAuthorization.shared.login { sessionToken in
-                        print(sessionToken)
-                        AppUserDefaults.shared.sessionToken = sessionToken
-                    }
+                    await viewModel.loginFlow()
                 }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(backgroundColor != nil ? backgroundColor : Color.listBackground.opacity(0.8))
+        .background(backgroundColor != nil ? backgroundColor : Color.listBackground)
     }
+
+    
 }
 
 struct LoginView_Previews: PreviewProvider {

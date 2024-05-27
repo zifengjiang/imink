@@ -150,7 +150,7 @@ WHERE
 --         LIMIT 10 OFFSET 10
     )
     AND coopPlayerResult.'order' = 0
-    AND coop.accountId = 2
+    AND coop.accountId = 1
 ORDER BY
     time DESC LIMIT ? OFFSET ?;
 """
@@ -162,6 +162,44 @@ extension SplatDatabase {
                 .map { row in
                     try! CoopListItemInfo(row: row)
                 }
+        }
+        .publisher(in: dbQueue, scheduling: .immediate)
+        .eraseToAnyPublisher()
+    }
+
+    func coop(id: Int64) -> AnyPublisher<Coop?, Error> {
+        return ValueObservation.tracking { db in
+            try Coop.fetchOne(db, key: id)
+        }
+        .publisher(in: dbQueue, scheduling: .immediate)
+        .eraseToAnyPublisher()
+    }
+
+    func coopPlayerResults(id: Int64) -> AnyPublisher<[CoopPlayerResult], Error> {
+        return ValueObservation.tracking { db in
+            try CoopPlayerResult
+                .filter(Column("coopId") == id)
+                .fetchAll(db)
+        }
+        .publisher(in: dbQueue, scheduling: .immediate)
+        .eraseToAnyPublisher()
+    }
+
+    func coopWaveResults(id: Int64) -> AnyPublisher<[CoopWaveResult], Error> {
+        return ValueObservation.tracking { db in
+            try CoopWaveResult
+                .filter(Column("coopId") == id)
+                .fetchAll(db)
+        }
+        .publisher(in: dbQueue, scheduling: .immediate)
+        .eraseToAnyPublisher()
+    }
+
+    func coopEnemyResults(id: Int64) -> AnyPublisher<[CoopEnemyResult], Error> {
+        return ValueObservation.tracking { db in
+            try CoopEnemyResult
+                .filter(Column("coopId") == id)
+                .fetchAll(db)
         }
         .publisher(in: dbQueue, scheduling: .immediate)
         .eraseToAnyPublisher()

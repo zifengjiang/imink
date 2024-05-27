@@ -1,4 +1,5 @@
 import SwiftUI
+import SplatNet3API
 import os
 
 struct MainView: View {
@@ -38,12 +39,8 @@ struct MainView: View {
         }
         .task {
             MainViewModel.shared.isLogin = AppUserDefaults.shared.sessionToken != nil
-            do{
-                try await MainViewModel.shared.loadCoop()
-            }catch{
-                os_log("Error: [loadCoop] \(error.localizedDescription)")
-            }
 
+            await NSOAccountManager.shared.refreshGameServiceToken()
         }
     }
 }

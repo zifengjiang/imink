@@ -24,6 +24,9 @@ class AppUserDefaults: ObservableObject {
         }
     }
 
+    @AppStorage("accountId", store: .appGroup)
+    var accountId: Int = 1
+
     @AppStorage("gameServiceToken", store: .appGroup)
     var gameServiceToken: String?
 

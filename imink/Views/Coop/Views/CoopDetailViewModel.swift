@@ -17,24 +17,39 @@ class CoopDetailViewModel: ObservableObject {
         self.id = id
     }
 
-    func load() async{
-        await measureTime(title: "CoopDetailViewModel \(id)") {
-            let coop = try! await SplatDatabase.shared.dbQueue.read { db in
-                return try Coop.fetchOne(db, key: self.id)!
+    func load() {
+        SplatDatabase.shared.coop(id: id)
+            .catch { error -> Just<Coop?> in
+                return Just<Coop?>(nil)
             }
-            try! await SplatDatabase.shared.dbQueue.read { db in
-                let waveResults = try CoopWaveResult.fetchAll(db, sql: "SELECT * FROM coopWaveResult WHERE coopId = ?", arguments: [self.id])
-                let enemyResults = try CoopEnemyResult.fetchAll(db, sql: "SELECT * FROM coopEnemyResult WHERE coopId = ?", arguments: [self.id])
-                let playerResults = try CoopPlayerResult.fetchAll(db, sql: "SELECT * FROM coopPlayerResult WHERE coopId = ?", arguments: [self.id])
-                DispatchQueue.main.async {
-                    self.coop = coop
-                    self.waveResults = waveResults
-                    self.enemyResults = enemyResults
-                    self.playerResults = playerResults
-                    self.initialized = true
-                }
+            .assign(to: \.coop, on: self)
+            .store(in: &cancelBag)
+
+        SplatDatabase.shared.coopWaveResults(id: id)
+            .catch { error -> Just<[CoopWaveResult]> in
+                return Just<[CoopWaveResult]>([])
             }
-        }
+            .assign(to: \.waveResults, on: self)
+            .store(in: &cancelBag)
+
+        SplatDatabase.shared.coopEnemyResults(id: id)
+            .catch { error -> Just<[CoopEnemyResult]> in
+                return Just<[CoopEnemyResult]>([])
+            }
+            .assign(to: \.enemyResults, on: self)
+            .store(in: &cancelBag)
+
+        SplatDatabase.shared.coopPlayerResults(id: id)
+            .catch { error -> Just<[CoopPlayerResult]> in
+                return Just<[CoopPlayerResult]>([])
+            }
+            .assign(to: \.playerResults, on: self)
+            .store(in: &cancelBag)
+
+        $coop
+            .map{ _ in self.coop != nil }
+            .assign(to: \.initialized, on: self)
+            .store(in: &cancelBag)
     }
 
 }
@@ -64,8 +79,3 @@ func measureTime<T>(title: String, block: ()  -> T)  -> T {
 
     return result
 }
-
-
-
-
-

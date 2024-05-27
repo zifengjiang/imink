@@ -20,7 +20,7 @@ struct VDGridView: View {
             var itemStatus = VDResult.disconnected
             if i >= haveResultStartIndex {
                 if let result = data[i - haveResultStartIndex] {
-                    itemStatus = result ? .win : .lose
+                    itemStatus = result ? .lose : .win
                 }
             }
             return itemStatus

@@ -1,4 +1,5 @@
 import SwiftUI
+import SplatNet3API
 
 struct CoopListPage: View {
     @EnvironmentObject var mainViewModel: MainViewModel
@@ -33,13 +34,16 @@ struct CoopListPage: View {
             }
             .scrollPosition(id: $activeID, anchor: .bottom)
             .fixSafeareaBackground()
-            .modifier(LoginViewModifier(isLogined: viewModel.isLogin, iconName: "TabBarSalmonRun"))
+            .modifier(LoginViewModifier(isLogin: viewModel.isLogin, iconName: "TabBarSalmonRun"))
             .navigationTitle("tab_salmon_run")
             .navigationBarTitleDisplayMode(.inline)
+
         }
-        .onReceive(mainViewModel.$isLogin) { islogin in
-            print("islogin: \(islogin)")
-            viewModel.isLogin = islogin
+        .refreshable {
+            await SN3Client.shared.fetchCoops()
+        }
+        .onReceive(mainViewModel.$isLogin) { isLogin in
+            viewModel.isLogin = isLogin
         }
     }
 }

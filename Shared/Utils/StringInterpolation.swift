@@ -61,3 +61,23 @@ struct Formatters {
         return formatter
     }
 }
+
+extension String {
+    var base64DecodedString: String {
+        guard let data = Data(base64Encoded: self) else {
+            return ""
+        }
+        return String(data: data, encoding: .utf8) ?? ""
+    }
+
+        /// Extracts the substring after the last dash before the first colon using split.
+    func extractUserId() -> String {
+        guard let data = Data(base64Encoded: self) else {
+            print("Error: String is not a valid Base64 encoded string")
+            return ""
+        }
+        let splitted = String(data: data, encoding: .utf8)?.split(separator: ":").first?.split(separator: "-").last
+
+        return String(splitted!)
+    }
+}

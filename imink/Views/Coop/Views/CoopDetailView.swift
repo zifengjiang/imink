@@ -50,7 +50,7 @@ struct CoopDetailView: View {
         .frame(maxWidth: .infinity)
         .fixSafeareaBackground()
         .task  {
-            await viewModel.load()
+            viewModel.load()
         }
 
     }
@@ -107,14 +107,7 @@ extension CoopDetailView {
                 HStack {
                     VStack(alignment: .leading,spacing: 0) {
                         HStack(spacing: 10) {
-                            switch CoopRule(rawValue: coop.rule){
-                            case .BIG_RUN:
-                                Image(.coopBigrun)
-                            case .TEAM_CONTEST:
-                                Image(.coopTeamContest)
-                            default:
-                                Image(.coopRegular)
-                            }
+                            CoopRule(rawValue: coop.rule)?.icon
 
                             Text(coop.playedTime.toPlayedTimeString(full: true))
                                 .font(.splatoonFont1(size: 15))

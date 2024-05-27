@@ -3,7 +3,6 @@ import AuthenticationServices
 import SwiftyJSON
 
 
-
 class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding {
     static let shared = NSOAuthorization()
 
@@ -15,7 +14,7 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
         return decoder
     }
 
-    func login(sessionToken: (String) async throws ->Void) async throws{
+    func login() async throws -> String{
         let codeVerifier = NSOHash.urandom(length: 32).base64EncodedString
         let authorizeAPI = NSOAPI.authorize(codeVerifier: codeVerifier)
         guard let sessionTokenCode = try await presentLoginSession(url: authorizeAPI.url)?.sessionTokenCode else {throw NSOAuthError.invalidCallbackURL}
@@ -25,7 +24,7 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
             throw NSOAuthError.invalidSessionToken
         }
         let json = JSON(data)
-        try await sessionToken(json["session_token"].stringValue)
+        return json["session_token"].stringValue
     }
 
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
@@ -110,7 +109,7 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             throw NSOAuthError.invalidSessionToken
         }
-        return try decoder.decode(LoginResult.self, from: data)
+        return LoginResult(json: try JSON(data: data))
     }
 
     func requestWebServiceToken(sessionToken:String) async throws -> WebServiceToken {
@@ -208,9 +207,13 @@ extension NSOAuthorization {
             struct User: Decodable {
                 let imageUri: String
                 let id:Int64
+                let friendCode:String
+                let name:String
                 init(json:JSON) {
                     imageUri = json["imageUri"].stringValue
                     id = json["id"].int64Value
+                    friendCode = json["links"]["friendCode"]["id"].stringValue
+                    name = json["name"].stringValue
                 }
             }
         }

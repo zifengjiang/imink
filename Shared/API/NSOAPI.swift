@@ -30,8 +30,7 @@ extension NSOAPI: TargetType {
     private static let clientId = "71b963c1b7b6d119"
     public static let clientUrlScheme = "npf\(NSOAPI.clientId)"
     private static var clientVersion: String {
-//        AppUserDefaults.shared.nsoVersion
-        "2.10.0"
+        AppUserDefaults.shared.NSOVersion
     }
     private static let gameServiceId = 4834290508791808
     private static let flapgAPIVersion = "3"

@@ -42,8 +42,12 @@
 		8B2636492BFEAE1500F8964A /* DataBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B2636482BFEAE1500F8964A /* DataBackup.swift */; };
 		8B26364C2BFEAE9400F8964A /* Zip in Frameworks */ = {isa = PBXBuildFile; productRef = 8B26364B2BFEAE9400F8964A /* Zip */; };
 		8B26364F2BFEB00700F8964A /* AlertKit in Frameworks */ = {isa = PBXBuildFile; productRef = 8B26364E2BFEB00700F8964A /* AlertKit */; };
+		8B2DA5892C0409E500850BAC /* CoopGroupStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B2DA5882C0409E500850BAC /* CoopGroupStatus.swift */; };
 		8B3591432BF892130066BCA3 /* HomePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3591422BF892130066BCA3 /* HomePage.swift */; };
 		8B3591452BF893D60066BCA3 /* MePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3591442BF893D60066BCA3 /* MePage.swift */; };
+		8B4E4F962C01F69900818D31 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4E4F952C01F69900818D31 /* LoginViewModel.swift */; };
+		8B50DBE02C01BED40076AE6D /* SN3Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50DBDF2C01BED30076AE6D /* SN3Client.swift */; };
+		8B50DBE22C01C1C20076AE6D /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50DBE12C01C1C20076AE6D /* Logger.swift */; };
 		8B5276122BFC1DF100022D5B /* OverlayImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5276112BFC1DF100022D5B /* OverlayImage.swift */; };
 		8B5276142BFC228600022D5B /* SpecialWeaponImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5276132BFC228600022D5B /* SpecialWeaponImage.swift */; };
 		8B5276162BFC371300022D5B /* CoopListRowModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5276152BFC371300022D5B /* CoopListRowModel.swift */; };
@@ -66,6 +70,10 @@
 		8BB4A1F42BFDB4CE008DB764 /* FixVectorImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */; };
 		8BB99B372BF77B3B00470408 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB99B362BF77B3B00470408 /* Models.swift */; };
 		8BDA845E2C0003D70038655C /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 8BDA845D2C0003D70038655C /* Algorithms */; };
+		8BDA84602C00A0290038655C /* NSOAccountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BDA845F2C00A0290038655C /* NSOAccountManager.swift */; };
+		8BE0950D2C0315C40089705F /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE0950C2C0315C40089705F /* ActivityView.swift */; };
+		8BE095112C035B000089705F /* CoopShiftDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE095102C035B000089705F /* CoopShiftDetailView.swift */; };
+		8BE095132C035B280089705F /* CoopShiftDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE095122C035B280089705F /* CoopShiftDetailViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -130,8 +138,12 @@
 		8B0D14AA2BFADDD200B82AD1 /* CoopDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopDetailViewModel.swift; sourceTree = "<group>"; };
 		8B2636462BFEADBE00F8964A /* ProgressHUD.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressHUD.swift; sourceTree = "<group>"; };
 		8B2636482BFEAE1500F8964A /* DataBackup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataBackup.swift; sourceTree = "<group>"; };
+		8B2DA5882C0409E500850BAC /* CoopGroupStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopGroupStatus.swift; sourceTree = "<group>"; };
 		8B3591422BF892130066BCA3 /* HomePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePage.swift; sourceTree = "<group>"; };
 		8B3591442BF893D60066BCA3 /* MePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MePage.swift; sourceTree = "<group>"; };
+		8B4E4F952C01F69900818D31 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
+		8B50DBDF2C01BED30076AE6D /* SN3Client.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SN3Client.swift; sourceTree = "<group>"; };
+		8B50DBE12C01C1C20076AE6D /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		8B5276112BFC1DF100022D5B /* OverlayImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayImage.swift; sourceTree = "<group>"; };
 		8B5276132BFC228600022D5B /* SpecialWeaponImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialWeaponImage.swift; sourceTree = "<group>"; };
 		8B5276152BFC371300022D5B /* CoopListRowModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopListRowModel.swift; sourceTree = "<group>"; };
@@ -164,6 +176,10 @@
 		8BB4A1F12BFDB49E008DB764 /* LoginView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FixVectorImage.swift; sourceTree = "<group>"; };
 		8BB99B362BF77B3B00470408 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		8BDA845F2C00A0290038655C /* NSOAccountManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSOAccountManager.swift; sourceTree = "<group>"; };
+		8BE0950C2C0315C40089705F /* ActivityView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
+		8BE095102C035B000089705F /* CoopShiftDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopShiftDetailView.swift; sourceTree = "<group>"; };
+		8BE095122C035B280089705F /* CoopShiftDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopShiftDetailViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -208,6 +224,7 @@
 		8B0D14852BFA212400B82AD1 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				8BDA845F2C00A0290038655C /* NSOAccountManager.swift */,
 				8B0D14832BFA210600B82AD1 /* SessionManager.swift */,
 			);
 			path = Managers;
@@ -218,8 +235,11 @@
 			children = (
 				8B0D148E2BFA2EBE00B82AD1 /* CoopListItemView.swift */,
 				8B0D149D2BFAC56100B82AD1 /* CoopShiftCardView.swift */,
-				8B0D14A52BFAD93A00B82AD1 /* CoopDetailView.swift */,
 				8B0851772BFB78D800AF22C5 /* CoopWaveResultView.swift */,
+				8B0D14A52BFAD93A00B82AD1 /* CoopDetailView.swift */,
+				8B0D14AA2BFADDD200B82AD1 /* CoopDetailViewModel.swift */,
+				8BE095102C035B000089705F /* CoopShiftDetailView.swift */,
+				8BE095122C035B280089705F /* CoopShiftDetailViewModel.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -306,6 +326,7 @@
 		8B7F295D2BF6E49D0010A525 /* API */ = {
 			isa = PBXGroup;
 			children = (
+				8B50DBDF2C01BED30076AE6D /* SN3Client.swift */,
 				8B7F29632BF6E7E80010A525 /* AppAPI.swift */,
 				8B7F295E2BF6E4A80010A525 /* NSOAPI.swift */,
 				8B7F296B2BF711C40010A525 /* NSOAuthorization.swift */,
@@ -346,8 +367,7 @@
 			children = (
 				8B0D14672BF8BE8C00B82AD1 /* HomeViewModel.swift */,
 				8B0D146E2BF9789200B82AD1 /* MainViewModel.swift */,
-				8B0D148A2BFA298A00B82AD1 /* CoopListViewModel.swift */,
-				8B0D14AA2BFADDD200B82AD1 /* CoopDetailViewModel.swift */,
+				8B4E4F952C01F69900818D31 /* LoginViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -364,6 +384,7 @@
 			isa = PBXGroup;
 			children = (
 				8B0D14882BFA28F100B82AD1 /* CoopListPage.swift */,
+				8B0D148A2BFA298A00B82AD1 /* CoopListViewModel.swift */,
 				8B0D14902BFA2EC500B82AD1 /* Views */,
 			);
 			path = Coop;
@@ -396,6 +417,7 @@
 		8B8B287F2BF88BFB00790809 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				8BE0950C2C0315C40089705F /* ActivityView.swift */,
 				8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */,
 				8BB4A1F12BFDB49E008DB764 /* LoginView.swift */,
 				8B0851792BFB790700AF22C5 /* WaveShape.swift */,
@@ -417,6 +439,8 @@
 				8B0D149F2BFAC5FF00B82AD1 /* CoopShiftCard.swift */,
 				8B0851712BFB5FE100AF22C5 /* CoopRule.swift */,
 				8B5276152BFC371300022D5B /* CoopListRowModel.swift */,
+				8B50DBE12C01C1C20076AE6D /* Logger.swift */,
+				8B2DA5882C0409E500850BAC /* CoopGroupStatus.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -585,10 +609,15 @@
 				8B0D148D2BFA2CEF00B82AD1 /* CoopListItemInfo.swift in Sources */,
 				8B0D14712BF9898100B82AD1 /* SettingPage.swift in Sources */,
 				8B0D14AB2BFADDD200B82AD1 /* CoopDetailViewModel.swift in Sources */,
+				8BDA84602C00A0290038655C /* NSOAccountManager.swift in Sources */,
+				8BE0950D2C0315C40089705F /* ActivityView.swift in Sources */,
 				8B2636492BFEAE1500F8964A /* DataBackup.swift in Sources */,
+				8B2DA5892C0409E500850BAC /* CoopGroupStatus.swift in Sources */,
 				8B7F29642BF6E7E90010A525 /* AppAPI.swift in Sources */,
 				8B0D14942BFAB57100B82AD1 /* Date+Ext.swift in Sources */,
+				8BE095132C035B280089705F /* CoopShiftDetailViewModel.swift in Sources */,
 				8B0D14A22BFAC98D00B82AD1 /* GrayscaleTextureView.swift in Sources */,
+				8B50DBE22C01C1C20076AE6D /* Logger.swift in Sources */,
 				8B7F29622BF6E5310010A525 /* NSOHash.swift in Sources */,
 				8B0D14A42BFACD8E00B82AD1 /* StringInterpolation.swift in Sources */,
 				8B0D14682BF8BE8C00B82AD1 /* HomeViewModel.swift in Sources */,
@@ -600,14 +629,17 @@
 				8B0D14892BFA28F100B82AD1 /* CoopListPage.swift in Sources */,
 				8B7F292C2BF6E1B90010A525 /* MainView.swift in Sources */,
 				8B0851782BFB78D800AF22C5 /* CoopWaveResultView.swift in Sources */,
+				8B50DBE02C01BED40076AE6D /* SN3Client.swift in Sources */,
 				8B0D14822BF9B85700B82AD1 /* GameMode.swift in Sources */,
 				8B0D148F2BFA2EBE00B82AD1 /* CoopListItemView.swift in Sources */,
 				8B2636472BFEADBE00F8964A /* ProgressHUD.swift in Sources */,
 				8B0851762BFB6DB400AF22C5 /* WaveAnimationView.swift in Sources */,
 				8B5276142BFC228600022D5B /* SpecialWeaponImage.swift in Sources */,
+				8B4E4F962C01F69900818D31 /* LoginViewModel.swift in Sources */,
 				8B0851722BFB5FE100AF22C5 /* CoopRule.swift in Sources */,
 				8B0D149E2BFAC56100B82AD1 /* CoopShiftCardView.swift in Sources */,
 				8B08517A2BFB790700AF22C5 /* WaveShape.swift in Sources */,
+				8BE095112C035B000089705F /* CoopShiftDetailView.swift in Sources */,
 				8B7F292A2BF6E1B90010A525 /* iminkApp.swift in Sources */,
 				8B0D14A62BFAD93A00B82AD1 /* CoopDetailView.swift in Sources */,
 				8B0D14A82BFAD9F200B82AD1 /* FixSafeareaBackgroundModifier.swift in Sources */,

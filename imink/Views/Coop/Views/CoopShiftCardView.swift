@@ -71,11 +71,20 @@ struct CoopShiftCardView: View {
                         .foregroundStyle(.secondary)
 
                     HStack{
-                        ForEach(card.weapons,id:\.self) { weapon in
-                            Image(weapon)
+                        ForEach(card.weapons.indices,id: \.self) { i in
+                            Image(card.weapons[i])
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 30, height: 30)
+                        }
+                        if card.weapons.count < 4{
+                            let weapons = Array(repeating: card.weapons.last!, count: 4 - card.weapons.count)
+                            ForEach(weapons.indices, id: \.self) { i in
+                                Image(weapons[i])
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 30, height: 30)
+                            }
                         }
                     }
                     .padding([.leading, .trailing], 10)

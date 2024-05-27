@@ -135,6 +135,7 @@ extension DataBackup {
             try Zip.unzipFile(url, destination: importPath, overwrite: true, password: nil, progress: { [weak self] value in
                 self?.importProgress.unzipProgress = value
             })
+            
 
             let battlePath = importPath.appendingPathComponent("battle")
             let battleFilePaths = try fileManager.contentsOfDirectory(
@@ -142,6 +143,7 @@ extension DataBackup {
                 includingPropertiesForKeys: nil,
                 options: [.skipsHiddenFiles])
                 .filter { $0.pathExtension == "json" }
+            importProgress.importBattlesCount = battleFilePaths.count
 
             let salmonRunPath = importPath.appendingPathComponent("salmon_run")
             let salmonRunFilePaths = try fileManager.contentsOfDirectory(
@@ -149,6 +151,7 @@ extension DataBackup {
                 includingPropertiesForKeys: nil,
                 options: [.skipsHiddenFiles])
                 .filter { $0.pathExtension == "json" }
+            importProgress.importJobsCount = salmonRunFilePaths.count
 
                 // Load battle and job files
             self.fileTotalCount = battleFilePaths.count + salmonRunFilePaths.count
@@ -172,6 +175,7 @@ extension DataBackup {
 
         } catch is CocoaError {
             self.importError = .invalidDirectoryStructure
+            try! removeTemporaryFiles()
         } catch let error {
             os_log("Import Error: \(error.localizedDescription)")
             self.importError = .unknownError
@@ -257,21 +261,16 @@ import SplatDatabase
 
 extension DataBackup {
     static func `import`(url: URL) {
+        ProgressHUD.colorHUD = .clear
+        ProgressHUD.colorProgress = .accent
         DataBackup.shared.import(url: url) { progress, error in
             ProgressHUD.showProgress(CGFloat(progress.value))
-
-            if let _ = error {
+            if let error = error {
                 ProgressHUD.dismiss()
-
-                    //                UIAlertController
+                AlertKitAPI.present(title: "Import Failed".localized, subtitle: error.localizedDescription, icon: .error, style: .iOS17AppleMusic, haptic: .error)
             } else if progress.value == 1 {
                 ProgressHUD.dismiss()
-                    //                AlertKit.present(
-                    //                    title: String(format:"Imported %d records".localized, progress.count),
-                    //                    preset: progress.count == 0 ?
-                    //                        .custom(UIImage(systemName: "exclamationmark.circle.fill")!) :
-                    //                        .done
-                    //                )
+                AlertKitAPI.present(title: "Import Success".localized, subtitle: "导入\(progress.count)", icon: .done, style: .iOS17AppleMusic, haptic: .success)
             }
         }
     }
