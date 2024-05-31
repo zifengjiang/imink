@@ -117,11 +117,13 @@ extension CoopDetailView {
                                 .minimumScaleFactor(0.3)
                         }
                         .padding(.bottom, 7)
-
-                        coop.stageImage
-                            .resizable()
-                            .scaledToFit()
-                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        
+                        if let stageImage = coop.stageImage{
+                            Image(stageImage)
+                                .resizable()
+                                .scaledToFit()
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        }
                     }
 
                     VStack {
@@ -238,9 +240,11 @@ extension CoopDetailView {
 
 
                 HStack {
-                    Text(coop.stageName.localizedFromSplatNet)
-                        .font(.splatoonFont(size: 13))
-                        .foregroundStyle(.secondary)
+                    if let stageName = coop.stageName{
+                        Text(stageName.localizedFromSplatNet)
+                            .font(.splatoonFont(size: 13))
+                            .foregroundStyle(.secondary)
+                    }
                     Spacer()
                     HStack(spacing: 3){
                         Image(.golden)
@@ -273,11 +277,13 @@ extension CoopDetailView {
                 .frame(height: 1)
 
                 HStack{
-                    ForEach(coop.suppliedWeapons.indices,id: \.self){ i in
-                        Image(coop.suppliedWeapons[i])
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 30, height: 30)
+                    if let suppliedWeapons = coop.suppliedWeapons{
+                        ForEach(suppliedWeapons.indices,id: \.self){ i in
+                            Image(suppliedWeapons[i])
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 30, height: 30)
+                        }
                     }
                     Spacer()
                     Text(dangerRateText)
@@ -321,7 +327,7 @@ extension CoopDetailView {
     func makeMemberView(result: CoopPlayerResult) -> some View {
         HStack{
             VStack(alignment: .leading, spacing:5){
-                Text(result.player.name)
+                Text(result.player!.name)
                     .font(.splatoonFont(size: 15))
                 Text("\("boss_salmonids".localized) x\(result.defeatEnemyCount)")
                     .font(.splatoonFont(size: 10))
@@ -331,8 +337,8 @@ extension CoopDetailView {
             VStack(alignment: .trailing,spacing: 0){
                 HStack{
                     HStack{
-                        ForEach(result.weapons.indices, id:\.self){i in
-                            Image(result.weapons[i])
+                        ForEach(result.weapons!.indices, id:\.self){i in
+                            Image(result.weapons![i])
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 20, height: 20)
@@ -341,7 +347,7 @@ extension CoopDetailView {
                     .background(Color(.sRGB, white: 121 / 255.0, opacity: 0.1))
                     .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
 
-                    SpecialWeaponImage(imageName: result.specialWeaponName,size: 15)
+                    SpecialWeaponImage(imageName: result.specialWeaponName!,size: 15)
                         .clipShape(Capsule())
                 }
                 .frame(height: 24)
@@ -365,7 +371,7 @@ extension CoopDetailView {
                         }
 
                         HStack(spacing:2){
-                            Image(result.player.species ? .rescueINKLING : .rescueOCTOLING)
+                            Image(result.player!.species ? .rescueINKLING : .rescueOCTOLING)
                                 .resizable()
                                 .scaledToFit()
                                 .frame(height: 12)
@@ -373,7 +379,7 @@ extension CoopDetailView {
                         }
 
                         HStack(spacing:2){
-                            Image(result.player.species ? .rescuedINKLING : .rescuedOCTOLING)
+                            Image(result.player!.species ? .rescuedINKLING : .rescuedOCTOLING)
                                 .resizable()
                                 .scaledToFit()
                                 .frame(height: 12)
@@ -391,11 +397,15 @@ extension CoopDetailView {
 
     func makeEnemyView(result:CoopEnemyResult) -> some View{
         HStack{
-            result.enemyImage
-                .resizable()
-                .scaledToFit()
-            Text(result.enemyName.localizedFromSplatNet)
-                .font(.splatoonFont(size: 15))
+            if let enemyImage = result.enemyImage{
+                Image(enemyImage)
+                    .resizable()
+                    .scaledToFit()
+            }
+            if let enemyName = result.enemyName{
+                Text(enemyName.localizedFromSplatNet)
+                    .font(.splatoonFont(size: 15))
+            }
             Spacer()
             Group {
                 Text("\(result.teamDefeatCount)").font(.splatoonFont2(size: 15)) + Text(result.defeatCount == 0 ? "" : "(\(result.defeatCount))").font(.splatoonFont2(size: 12))

@@ -13,7 +13,7 @@ struct CoopListRowModel:Identifiable{
         if isCoop {
             return "detail-\(coop!.id)"
         }
-        return "card-\(card!.id)"
+        return "card-\(card!.id)-\(card!.count)"
     }
 }
 

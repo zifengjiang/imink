@@ -27,88 +27,58 @@ struct CoopGroupStatus: FetchableRecord, Decodable {
     var highestEgg: Int
     var count: Int
 
+    var suppliedWeapons: [String]? = nil
+    var stageImage: String? = nil
+    var stageName: String? = nil
+
     var failure:Int{
         count - clear - disconnect
     }
 }
 
-extension CoopGroupStatus{
-    var suppliedWeapons: [String] {
-        do {
-            return try SplatDatabase.shared.dbQueue.read { db in
-                return Array(0..<4).compactMap { getImageName(by: suppliedWeapon[$0], db: db)}
-            }
-        } catch {
-            print("Error accessing database: \(error)")
-            return []
+extension CoopGroupStatus:PreComputable{
+    static func create(from db: Database, identifier: (Int, Int)) throws -> CoopGroupStatus? {
+        let (groupId, accountId) = identifier
+        if var status = try CoopGroupStatus.fetchOne(db, sql: "SELECT * FROM coop_group_status_view WHERE accountId = ? AND GroupID = ?", arguments: [accountId, groupId]) {
+            status.suppliedWeapons = Array(0..<4).compactMap { getImageName(by: status.suppliedWeapon[$0], db: db) }
+            status.stageImage = getImageName(by: status.stageId, db: db)
+            status.stageName = getImageNameId(by: status.stageId, db: db)
+            return status
         }
-    }
-
-    var stageImage: Image {
-        do {
-            return Image(try SplatDatabase.shared.dbQueue.read { getImageName(by: stageId, db: $0) })
-        }catch{
-            return Image(.dummyStage)
-        }
-    }
-
-    var stageName: String {
-        do{
-            return try SplatDatabase.shared.dbQueue.read { db in
-                getImageNameId(by: stageId, db: db)
-            }
-        }catch{
-            return "DummyStage"
-        }
+        return nil
     }
 }
 
-extension SplatDatabase{
-    func coopGroupStatus(id:Int) -> AnyPublisher<CoopGroupStatus?, Error> {
-        ValueObservation
-            .tracking { db in
-                try CoopGroupStatus.fetchOne(db, sql: "SELECT * FROM  coop_group_status_view WHERE accountId = ? AND GroupID = ?", arguments: [AppUserDefaults.shared.accountId, id])
-            }
-            .publisher(in: dbQueue, scheduling: .immediate)
-            .eraseToAnyPublisher()
-    }
-}
 
 struct CoopWaveStatus: FetchableRecord, Decodable {
     var eventWaveGroup: String
     var waterLevel: Int
-    var avgDeliverNorm: Double?
-    var avgGoldenPopCount: Double
-    var avgTeamDeliverCount: Double?
+    var deliverNorm: Double?
+    var goldenPopCount: Double
+    var teamDeliverCount: Double?
     var count: Int
+
+
 }
 
-extension SplatDatabase{
-    func coopWaveStatus(id:Int) -> AnyPublisher<[CoopWaveStatus], Error> {
-        ValueObservation
-            .tracking { db in
-                try CoopWaveStatus.fetchAll(db, SplatDatabaseSQL.wave_result(accountId: AppUserDefaults.shared.accountId, GroupID: id).request)
-            }
-            .publisher(in: dbQueue, scheduling: .immediate)
-            .eraseToAnyPublisher()
+extension CoopWaveStatus: FetchableFromDatabase{
+    static func fetchRequest(accountId: Int, groupId: Int) -> SQLRequest<Row> {
+        return SplatDatabaseSQL.wave_result(accountId: accountId, GroupID: groupId).request
     }
 }
+
 
 struct CoopWeaponStatus:FetchableRecord, Decodable {
     var weaponId:String
     var count:Int
 }
 
-extension SplatDatabase{
-    func coopWeaponStatus(id:Int) -> AnyPublisher<[CoopWeaponStatus], Error> {
-        ValueObservation
-            .tracking { db in
-                try CoopWeaponStatus.fetchAll(db, SplatDatabaseSQL.weapon_status(accountId: AppUserDefaults.shared.accountId, GroupID: id).request)
-            }
-            .publisher(in: dbQueue, scheduling: .immediate)
-            .eraseToAnyPublisher()
+extension CoopWeaponStatus:FetchableFromDatabase{
+    static func fetchRequest(accountId: Int, groupId: Int) -> SQLRequest<Row> {
+        return SplatDatabaseSQL.weapon_status(accountId: accountId, GroupID: groupId).request
     }
 }
+
 
 struct CoopEnemyStatus:FetchableRecord, Decodable {
     var name:String
@@ -117,13 +87,10 @@ struct CoopEnemyStatus:FetchableRecord, Decodable {
     var totalPopCount:Int
 }
 
-extension SplatDatabase{
-    func coopEnemyStatus(id:Int) -> AnyPublisher<[CoopEnemyStatus], Error> {
-        ValueObservation
-            .tracking { db in
-                try CoopEnemyStatus.fetchAll(db, SplatDatabaseSQL.enemy_status(accountId: AppUserDefaults.shared.accountId, GroupID: id).request)
-            }
-            .publisher(in: dbQueue, scheduling: .immediate)
-            .eraseToAnyPublisher()
+extension CoopEnemyStatus:FetchableFromDatabase{
+    static func fetchRequest(accountId: Int, groupId: Int) -> SQLRequest<Row> {
+        return SplatDatabaseSQL.enemy_status(accountId: accountId, GroupID: groupId).request
     }
 }
+
+

@@ -69,14 +69,16 @@ struct CoopShiftDetailView: View {
 
 
                             }
-                            coopGroupStatus.stageImage
-                                .resizable()
-                                .scaledToFit()
-                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            if let stageImage = coopGroupStatus.stageImage, let stageName = coopGroupStatus.stageName{
+                                Image(stageImage)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
-                            Text(coopGroupStatus.stageName.localizedFromSplatNet)
-                                .font(.splatoonFont(size: 15))
-                                .foregroundStyle(.secondary)
+                                Text(stageName.localizedFromSplatNet)
+                                    .font(.splatoonFont(size: 15))
+                                    .foregroundStyle(.secondary)
+                            }
                         }
 
                         VStack{
@@ -139,12 +141,14 @@ struct CoopShiftDetailView: View {
                         Spacer()
 
                         HStack{
-                            ForEach(coopGroupStatus.suppliedWeapons.indices, id: \.self){ i in
-                                VStack{
-                                    Image(coopGroupStatus.suppliedWeapons[i])
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 30, height: 30)
+                            if let suppliedWeapons = coopGroupStatus.suppliedWeapons {
+                                ForEach(suppliedWeapons.indices, id: \.self){ i in
+                                    VStack{
+                                        Image(suppliedWeapons[i])
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 30, height: 30)
+                                    }
                                 }
                             }
                         }

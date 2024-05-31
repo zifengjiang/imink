@@ -18,10 +18,6 @@ struct CoopListView: View {
                         }
                         .buttonStyle(PlainButtonStyle())
                     }
-//                    Color.clear
-//                        .onAppear {
-//                            viewModel.loadMore()
-//                        }
                 }
                 .scrollTargetLayout()
             }
@@ -38,7 +34,9 @@ struct CoopListView: View {
 
         }
         .refreshable {
+//            viewModel.cancel()
             await SN3Client.shared.fetchCoops()
+//            viewModel.fetchCoops()
         }
         .onReceive(mainViewModel.$isLogin) { isLogin in
             viewModel.isLogin = isLogin

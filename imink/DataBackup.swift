@@ -268,9 +268,11 @@ extension DataBackup {
             if let error = error {
                 ProgressHUD.dismiss()
                 AlertKitAPI.present(title: "Import Failed".localized, subtitle: error.localizedDescription, icon: .error, style: .iOS17AppleMusic, haptic: .error)
+                CoopListViewModel.shared.fetchCoops()
             } else if progress.value == 1 {
                 ProgressHUD.dismiss()
                 AlertKitAPI.present(title: "Import Success".localized, subtitle: "导入\(progress.count)", icon: .done, style: .iOS17AppleMusic, haptic: .success)
+                CoopListViewModel.shared.fetchCoops()
             }
         }
     }

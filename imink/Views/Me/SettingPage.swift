@@ -5,6 +5,7 @@ struct SettingPage: View {
     @Binding var showSettings: Bool
     
     @EnvironmentObject var mainViewModel: MainViewModel
+    @EnvironmentObject var coopListViewModel: CoopListViewModel
     @State var showFilePicker = false
     @State private var isActivityPresented = false
     @State private var item: Any = URL(fileURLWithPath: SplatDatabase.shared.dbQueue.path)
@@ -27,6 +28,7 @@ struct SettingPage: View {
                     }
                     .sheet(isPresented: $showFilePicker) {
                         FilePickerView(fileType: .zip) { url in
+                            coopListViewModel.cancel()
                             DataBackup.import(url: url)
                         }
                     }

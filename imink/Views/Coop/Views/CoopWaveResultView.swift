@@ -91,20 +91,21 @@ extension CoopDetailView {
 //                        .foregroundStyle(pass ? Color.waveClear : Color.waveDefeat)
                         .position(x:80,y:3)
                 }
-
-                let columns = Array(repeating: GridItem(.fixed(13)), count: min(result.usedSpecialWeapons.count, 4))
-                LazyVGrid(columns: columns, spacing: 2) {
-                    ForEach(0..<result.usedSpecialWeapons.count, id: \.self){index in
-                        Rectangle()
-                            .overlay {
-                                SpecialWeaponImage(imageName: result.usedSpecialWeapons[index])
-                            }
-                            .foregroundStyle(Color.salmonRunSpecialBackground)
-                            .frame(width: 13, height: 13)
-                            .clipShape(Capsule())
+                if let usedSpecialWeapons = result.usedSpecialWeapons{
+                    let columns = Array(repeating: GridItem(.fixed(13)), count: min(usedSpecialWeapons.count, 4))
+                    LazyVGrid(columns: columns, spacing: 2) {
+                        ForEach(0..<usedSpecialWeapons.count, id: \.self){index in
+                            Rectangle()
+                                .overlay {
+                                    SpecialWeaponImage(imageName: usedSpecialWeapons[index])
+                                }
+                                .foregroundStyle(Color.salmonRunSpecialBackground)
+                                .frame(width: 13, height: 13)
+                                .clipShape(Capsule())
+                        }
                     }
+                    .frame(width: 85)
                 }
-                .frame(width: 85)
             }
         }
     }

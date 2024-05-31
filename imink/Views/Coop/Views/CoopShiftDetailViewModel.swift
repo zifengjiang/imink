@@ -29,7 +29,7 @@ class CoopShiftDetailViewModel: ObservableObject {
                 //                self.initialized = self.coopGroupStatus != nil
                 //            }
 
-            SplatDatabase.shared.coopGroupStatus(id: id)
+            CoopGroupStatus.fetch(identifier: (id, AppUserDefaults.shared.accountId))
                 .catch { error -> Just<CoopGroupStatus?> in
                     logError(error)
                     return Just<CoopGroupStatus?>(nil)
@@ -37,7 +37,7 @@ class CoopShiftDetailViewModel: ObservableObject {
                 .assign(to: \.coopGroupStatus, on: self)
                 .store(in: &cancelBag)
 
-            SplatDatabase.shared.coopWaveStatus(id: id)
+            CoopWaveStatus.fetchAll(groupId: id)
                 .catch { error -> Just<[CoopWaveStatus]> in
                     logError(error)
                     return Just<[CoopWaveStatus]>([])
@@ -45,7 +45,7 @@ class CoopShiftDetailViewModel: ObservableObject {
                 .assign(to: \.coopWaveStatus, on: self)
                 .store(in: &cancelBag)
 
-            SplatDatabase.shared.coopWeaponStatus(id: id)
+            CoopWeaponStatus.fetchAll(groupId: id)
                 .catch { error -> Just<[CoopWeaponStatus]> in
                     logError(error)
                     return Just<[CoopWeaponStatus]>([])
@@ -53,7 +53,7 @@ class CoopShiftDetailViewModel: ObservableObject {
                 .assign(to: \.coopWeaponStatus, on: self)
                 .store(in: &cancelBag)
 
-            SplatDatabase.shared.coopEnemyStatus(id: id)
+            CoopEnemyStatus.fetchAll(groupId: id)
                 .catch { error -> Just<[CoopEnemyStatus]> in
                     logError(error)
                     return Just<[CoopEnemyStatus]>([])

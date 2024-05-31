@@ -34,7 +34,7 @@
       "location" : "https://github.com/jf666666/SplatDatabase",
       "state" : {
         "branch" : "main",
-        "revision" : "decb7b4293c1b1e157a792af066572252de6c045"
+        "revision" : "7ef0e1b23a14c7a619f2af1e22c361730e4232b4"
       }
     },
     {
@@ -43,7 +43,7 @@
       "location" : "https://github.com/jf666666/SplatNet3.git",
       "state" : {
         "branch" : "master",
-        "revision" : "389891dd7bd3b997bb78e2b3f539f0695532f1de"
+        "revision" : "6c3d2eb25c3a39f9616bf930da8a7f68671aa12b"
       }
     },
     {

@@ -19,28 +19,28 @@ class CoopDetailViewModel: ObservableObject {
 
     func load() {
 
-        SplatDatabase.shared.coopWaveResults(id: id)
+        CoopWaveResult.fetchAll(identifier: id)
             .catch { error -> Just<[CoopWaveResult]> in
                 return Just<[CoopWaveResult]>([])
             }
             .assign(to: \.waveResults, on: self)
             .store(in: &cancelBag)
 
-        SplatDatabase.shared.coopEnemyResults(id: id)
+        CoopEnemyResult.fetchAll(identifier: id)
             .catch { error -> Just<[CoopEnemyResult]> in
                 return Just<[CoopEnemyResult]>([])
             }
             .assign(to: \.enemyResults, on: self)
             .store(in: &cancelBag)
 
-        SplatDatabase.shared.coopPlayerResults(id: id)
+        CoopPlayerResult.fetchAll(identifier: id)
             .catch { error -> Just<[CoopPlayerResult]> in
                 return Just<[CoopPlayerResult]>([])
             }
             .assign(to: \.playerResults, on: self)
             .store(in: &cancelBag)
 
-        SplatDatabase.shared.coop(id: id)
+        Coop.fetch(identifier: id)
             .catch { error -> Just<Coop?> in
                 return Just<Coop?>(nil)
             }

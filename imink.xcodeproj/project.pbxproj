@@ -66,6 +66,8 @@
 		8B7F296C2BF711C40010A525 /* NSOAuthorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7F296B2BF711C40010A525 /* NSOAuthorization.swift */; };
 		8B8B285E2BF8581800790809 /* SplatNet.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8B8B285C2BF8581800790809 /* SplatNet.strings */; };
 		8B8B286D2BF887D400790809 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B8B286B2BF887D400790809 /* Preview Assets.xcassets */; };
+		8BA017472C099F23001CFC72 /* Precomputable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA017462C099F23001CFC72 /* Precomputable.swift */; };
+		8BA017492C09A8CE001CFC72 /* FetchableFromDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA017482C09A8CE001CFC72 /* FetchableFromDatabase.swift */; };
 		8BB4A1F22BFDB49E008DB764 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB4A1F12BFDB49E008DB764 /* LoginView.swift */; };
 		8BB4A1F42BFDB4CE008DB764 /* FixVectorImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */; };
 		8BB99B372BF77B3B00470408 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB99B362BF77B3B00470408 /* Models.swift */; };
@@ -175,6 +177,8 @@
 		8B8B28672BF8582D00790809 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/SplatNet.strings; sourceTree = "<group>"; };
 		8B8B28682BF8582E00790809 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/SplatNet.strings; sourceTree = "<group>"; };
 		8B8B286B2BF887D400790809 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		8BA017462C099F23001CFC72 /* Precomputable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Precomputable.swift; sourceTree = "<group>"; };
+		8BA017482C09A8CE001CFC72 /* FetchableFromDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchableFromDatabase.swift; sourceTree = "<group>"; };
 		8BB4A1F12BFDB49E008DB764 /* LoginView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FixVectorImage.swift; sourceTree = "<group>"; };
 		8BB99B362BF77B3B00470408 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
@@ -315,6 +319,7 @@
 		8B7F295B2BF6E2CF0010A525 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				8BA017452C099F0B001CFC72 /* Protocol */,
 				8B0D146B2BF9772000B82AD1 /* Data */,
 				8BB99B352BF77B1900470408 /* Models */,
 				8B7F29602BF6E5270010A525 /* Utils */,
@@ -434,6 +439,15 @@
 				8B5276132BFC228600022D5B /* SpecialWeaponImage.swift */,
 			);
 			path = Common;
+			sourceTree = "<group>";
+		};
+		8BA017452C099F0B001CFC72 /* Protocol */ = {
+			isa = PBXGroup;
+			children = (
+				8BA017462C099F23001CFC72 /* Precomputable.swift */,
+				8BA017482C09A8CE001CFC72 /* FetchableFromDatabase.swift */,
+			);
+			path = Protocol;
 			sourceTree = "<group>";
 		};
 		8BB99B352BF77B1900470408 /* Models */ = {
@@ -634,6 +648,7 @@
 				8B0D146F2BF9789200B82AD1 /* MainViewModel.swift in Sources */,
 				8B0D148B2BFA298A00B82AD1 /* CoopListViewModel.swift in Sources */,
 				8B0D14892BFA28F100B82AD1 /* CoopListView.swift in Sources */,
+				8BA017472C099F23001CFC72 /* Precomputable.swift in Sources */,
 				8BFF73E52C0938330048F2A6 /* CoopListDetailView.swift in Sources */,
 				8B7F292C2BF6E1B90010A525 /* MainView.swift in Sources */,
 				8B0851782BFB78D800AF22C5 /* CoopWaveResultView.swift in Sources */,
@@ -651,6 +666,7 @@
 				8B7F292A2BF6E1B90010A525 /* iminkApp.swift in Sources */,
 				8B0D14A62BFAD93A00B82AD1 /* CoopDetailView.swift in Sources */,
 				8B0D14A82BFAD9F200B82AD1 /* FixSafeareaBackgroundModifier.swift in Sources */,
+				8BA017492C09A8CE001CFC72 /* FetchableFromDatabase.swift in Sources */,
 				8B0D146A2BF8BFF700B82AD1 /* VDGridView.swift in Sources */,
 				8B7F295F2BF6E4A80010A525 /* NSOAPI.swift in Sources */,
 				8B0851742BFB673000AF22C5 /* TextureBackGround.swift in Sources */,
