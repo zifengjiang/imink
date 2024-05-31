@@ -150,7 +150,7 @@ WHERE
 --         LIMIT 10 OFFSET 10
     )
     AND coopPlayerResult.'order' = 0
-    AND coop.accountId = 1
+    AND coop.accountId = ?
 ORDER BY
     time DESC LIMIT ? OFFSET ?;
 """
@@ -158,13 +158,23 @@ ORDER BY
 extension SplatDatabase {
     func coops(limit:Int = 30, _ offset: Int = 0) -> AnyPublisher<[CoopListItemInfo], Error> {
         return ValueObservation.tracking { db in
-            try Row.fetchAll(db, sql: fetch_coop_list_item, arguments: [limit,offset])
+            print("fetch_coop_list_item")
+            return try Row.fetchAll(db, sql: fetch_coop_list_item, arguments: [AppUserDefaults.shared.accountId,limit,offset])
                 .map { row in
                     try! CoopListItemInfo(row: row)
                 }
         }
         .publisher(in: dbQueue, scheduling: .immediate)
         .eraseToAnyPublisher()
+    }
+
+    func coops(limit:Int = 30, _ offset: Int = 0) -> [CoopListItemInfo] {
+        return try! dbQueue.read { db in
+            try Row.fetchAll(db, sql: fetch_coop_list_item, arguments: [AppUserDefaults.shared.accountId,limit, offset])
+                .map { row in
+                    try! CoopListItemInfo(row: row)
+                }
+        }
     }
 
     func coop(id: Int64) -> AnyPublisher<Coop?, Error> {

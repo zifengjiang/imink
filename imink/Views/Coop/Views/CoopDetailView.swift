@@ -49,7 +49,8 @@ struct CoopDetailView: View {
         }
         .frame(maxWidth: .infinity)
         .fixSafeareaBackground()
-        .task  {
+        .onAppear  {
+            print("load Coop \(self.id)")
             viewModel.load()
         }
 

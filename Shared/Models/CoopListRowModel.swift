@@ -5,12 +5,12 @@ import GRDB
 
 struct CoopListRowModel:Identifiable{
     
-    let isDetail: Bool
+    let isCoop: Bool
     var coop: CoopListItemInfo?
     var card: CoopShiftCard?
 
     var id: String {
-        if isDetail {
+        if isCoop {
             return "detail-\(coop!.id)"
         }
         return "card-\(card!.id)"

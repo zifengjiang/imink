@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct CoopListItemView: View {
+struct CoopListDetailItemView: View {
     
     var coop: CoopListItemInfo
 
@@ -125,11 +125,19 @@ struct CoopListItemView: View {
             }
             .foregroundColor(Color(.systemGray2))
         }
+        .padding(.top, 7.5)
+        .padding(.bottom, 7)
+        .padding([.leading, .trailing], 8)
+        .background(Color(.listItemBackground))
+        .frame(height: 85)
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .padding([.leading, .trailing])
+        .padding(.top,3)
     }
 }
 
 #Preview {
-    CoopListItemView(coop: CoopListItemInfo(id: 1, rule: .regular , grade: 8, gradePoint: 999, gradeDiff: .up, dangerRate: 3.33,enemyDefeatCount:21, specie:true, stage: "Q29vcFN0YWdlLTk=", boss: "Q29vcEVuZW15LTIz", haveBossDefeated: true, resultWave: 3, goldenEgg: 212, powerEgg: 5341, rescue: 1, rescued: 0, time: Date.init(timeInterval: -30000000, since: Date()),GroupId: 0))
+    CoopListDetailItemView(coop: CoopListItemInfo(id: 1, rule: .regular , grade: 8, gradePoint: 999, gradeDiff: .up, dangerRate: 3.33,enemyDefeatCount:21, specie:true, stage: "Q29vcFN0YWdlLTk=", boss: "Q29vcEVuZW15LTIz", haveBossDefeated: true, resultWave: 3, goldenEgg: 212, powerEgg: 5341, rescue: 1, rescued: 0, time: Date.init(timeInterval: -30000000, since: Date()),GroupId: 0))
         .padding(.top, 8)
         .padding([.leading, .trailing])
         .frame(width: 370)

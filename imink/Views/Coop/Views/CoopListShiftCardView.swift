@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct CoopShiftCardView: View {
+struct CoopListShiftCardView: View {
     let card: CoopShiftCard
 
     var timeSpanText:String {
@@ -71,14 +71,14 @@ struct CoopShiftCardView: View {
                         .foregroundStyle(.secondary)
 
                     HStack{
-                        ForEach(card.weapons.indices,id: \.self) { i in
-                            Image(card.weapons[i])
+                        ForEach(card.weapons!.indices,id: \.self) { i in
+                            Image(card.weapons![i])
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 30, height: 30)
                         }
-                        if card.weapons.count < 4{
-                            let weapons = Array(repeating: card.weapons.last!, count: 4 - card.weapons.count)
+                        if card.weapons!.count < 4{
+                            let weapons = Array(repeating: card.weapons!.last!, count: 4 - card.weapons!.count)
                             ForEach(weapons.indices, id: \.self) { i in
                                 Image(weapons[i])
                                     .resizable()
@@ -158,6 +158,6 @@ struct CoopShiftCardView: View {
 }
 
 #Preview {
-    CoopShiftCardView(card: CoopShiftCard(id: 1, startTime: Date(), endTime: Date.init(timeInterval: 30000, since: Date()), enemy: 21.2, egg: 39.5, eggAssist: 6.4, rescue: 1.3, rescued: 0.9, stage: "Q29vcFN0YWdlLTk=",  count: 31))
+    CoopListShiftCardView(card: CoopShiftCard(id: 1, startTime: Date(), endTime: Date.init(timeInterval: 30000, since: Date()), enemy: 21.2, egg: 39.5, eggAssist: 6.4, rescue: 1.3, rescued: 0.9, stage: "Q29vcFN0YWdlLTk=",  count: 31))
         .preferredColorScheme(.dark)
 }

@@ -22,7 +22,7 @@ struct MainView: View {
                 .tag(1)
 
 
-            CoopListPage()
+            CoopListView()
                 .environmentObject(mainViewModel)
                 .tabItem {
                     Label("tab_salmon_run", image: "TabBarSalmonRun")
@@ -45,6 +45,6 @@ struct MainView: View {
     }
 }
 
-#Preview {
-    MainView()
-}
+//#Preview {
+//    MainView()
+//}

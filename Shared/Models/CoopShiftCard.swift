@@ -3,8 +3,8 @@ import SwiftUI
 import GRDB
 import SplatDatabase
 
-struct CoopShiftCard: Identifiable {
-    var id: Int64
+struct CoopShiftCard: Identifiable,Hashable {
+    var id: Int
     var startTime:Date
     var endTime:Date
     var enemy:Double
@@ -14,24 +14,28 @@ struct CoopShiftCard: Identifiable {
     var rescued:Double
     var stage:String
     var count:Int
-    var weapons: [String]{
-        return try! SplatDatabase.shared.dbQueue.read { db in
-            try String.fetchAll(db, sql:"""
+    var weapons: [String]? = nil
+}
+
+let shift_weapons_sql = """
             SELECT DISTINCT
-            imageMap.name AS weaponName -- Assuming there's a name column in the imageMap table
+                imageMap.name AS weaponName
             FROM
-            weapon
+                weapon
             JOIN coop_view ON weapon.coopId = coop_view.id
             JOIN imageMap ON weapon.imageMapId = imageMap.id
             WHERE
-            coop_view.GroupID = ? AND accountId = 1 -- Selecting the latest group
+                coop_view.GroupID = ? AND accountId = ?
             ORDER BY
             weapon.'order';
+        """
 
-        """,arguments: [id])
+extension SplatDatabase{
+    func shiftWeapons(groupId:Int) -> [String]{
+        return try! dbQueue.read{ db in
+            try String.fetchAll(db, sql: shift_weapons_sql,arguments: [groupId, AppUserDefaults.shared.accountId])
         }
     }
-
 }
 
 
@@ -51,10 +55,8 @@ FROM
     coop_view
     JOIN coopPlayerResult ON coopPlayerResult.coopId = coop_view.id
     JOIN imageMap ON imageMap.id = coop_view.stageId
-WHERE coop_view.GroupID = ? AND coopPlayerResult.'order' = 0 AND coop_view.accountId = 1
+WHERE coop_view.GroupID = ? AND coopPlayerResult.'order' = 0 AND coop_view.accountId = ?
 """
 
-extension CoopShiftCard: Codable, FetchableRecord, MutablePersistableRecord {
-
-}
+extension CoopShiftCard: Codable, FetchableRecord { }
 
