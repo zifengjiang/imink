@@ -10,7 +10,7 @@
 		8B0851722BFB5FE100AF22C5 /* CoopRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0851712BFB5FE100AF22C5 /* CoopRule.swift */; };
 		8B0851742BFB673000AF22C5 /* TextureBackGround.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0851732BFB673000AF22C5 /* TextureBackGround.swift */; };
 		8B0851762BFB6DB400AF22C5 /* WaveAnimationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0851752BFB6DB400AF22C5 /* WaveAnimationView.swift */; };
-		8B0851782BFB78D800AF22C5 /* CoopWaveResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0851772BFB78D800AF22C5 /* CoopWaveResultView.swift */; };
+		8B0851782BFB78D800AF22C5 /* CoopDetailWaveResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0851772BFB78D800AF22C5 /* CoopDetailWaveResultView.swift */; };
 		8B08517A2BFB790700AF22C5 /* WaveShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0851792BFB790700AF22C5 /* WaveShape.swift */; };
 		8B0D14682BF8BE8C00B82AD1 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0D14672BF8BE8C00B82AD1 /* HomeViewModel.swift */; };
 		8B0D146A2BF8BFF700B82AD1 /* VDGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0D14692BF8BFF700B82AD1 /* VDGridView.swift */; };
@@ -51,6 +51,7 @@
 		8B5276122BFC1DF100022D5B /* OverlayImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5276112BFC1DF100022D5B /* OverlayImage.swift */; };
 		8B5276142BFC228600022D5B /* SpecialWeaponImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5276132BFC228600022D5B /* SpecialWeaponImage.swift */; };
 		8B5276162BFC371300022D5B /* CoopListRowModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5276152BFC371300022D5B /* CoopListRowModel.swift */; };
+		8B7059042C0B00510076F680 /* NameplateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7059032C0B00510076F680 /* NameplateView.swift */; };
 		8B7F292A2BF6E1B90010A525 /* iminkApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7F29292BF6E1B90010A525 /* iminkApp.swift */; };
 		8B7F292C2BF6E1B90010A525 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7F292B2BF6E1B90010A525 /* MainView.swift */; };
 		8B7F292E2BF6E1BB0010A525 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B7F292D2BF6E1BB0010A525 /* Assets.xcassets */; };
@@ -71,6 +72,8 @@
 		8BB4A1F22BFDB49E008DB764 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB4A1F12BFDB49E008DB764 /* LoginView.swift */; };
 		8BB4A1F42BFDB4CE008DB764 /* FixVectorImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */; };
 		8BB99B372BF77B3B00470408 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB99B362BF77B3B00470408 /* Models.swift */; };
+		8BD8CD522C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD8CD512C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift */; };
+		8BD8CD542C0ADBC200FED66F /* WavePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD8CD532C0ADBC200FED66F /* WavePicker.swift */; };
 		8BDA845E2C0003D70038655C /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 8BDA845D2C0003D70038655C /* Algorithms */; };
 		8BDA84602C00A0290038655C /* NSOAccountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BDA845F2C00A0290038655C /* NSOAccountManager.swift */; };
 		8BE0950D2C0315C40089705F /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE0950C2C0315C40089705F /* ActivityView.swift */; };
@@ -102,7 +105,7 @@
 		8B0851712BFB5FE100AF22C5 /* CoopRule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopRule.swift; sourceTree = "<group>"; };
 		8B0851732BFB673000AF22C5 /* TextureBackGround.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextureBackGround.swift; sourceTree = "<group>"; };
 		8B0851752BFB6DB400AF22C5 /* WaveAnimationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WaveAnimationView.swift; sourceTree = "<group>"; };
-		8B0851772BFB78D800AF22C5 /* CoopWaveResultView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoopWaveResultView.swift; sourceTree = "<group>"; };
+		8B0851772BFB78D800AF22C5 /* CoopDetailWaveResultView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoopDetailWaveResultView.swift; sourceTree = "<group>"; };
 		8B0851792BFB790700AF22C5 /* WaveShape.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WaveShape.swift; sourceTree = "<group>"; };
 		8B0D14672BF8BE8C00B82AD1 /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
 		8B0D14692BF8BFF700B82AD1 /* VDGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VDGridView.swift; sourceTree = "<group>"; };
@@ -151,6 +154,7 @@
 		8B5276112BFC1DF100022D5B /* OverlayImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayImage.swift; sourceTree = "<group>"; };
 		8B5276132BFC228600022D5B /* SpecialWeaponImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialWeaponImage.swift; sourceTree = "<group>"; };
 		8B5276152BFC371300022D5B /* CoopListRowModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopListRowModel.swift; sourceTree = "<group>"; };
+		8B7059032C0B00510076F680 /* NameplateView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NameplateView.swift; sourceTree = "<group>"; };
 		8B7F29262BF6E1B90010A525 /* imink.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = imink.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8B7F29292BF6E1B90010A525 /* iminkApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iminkApp.swift; sourceTree = "<group>"; };
 		8B7F292B2BF6E1B90010A525 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
@@ -182,6 +186,8 @@
 		8BB4A1F12BFDB49E008DB764 /* LoginView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FixVectorImage.swift; sourceTree = "<group>"; };
 		8BB99B362BF77B3B00470408 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		8BD8CD512C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopShiftDetailWaveStatusView.swift; sourceTree = "<group>"; };
+		8BD8CD532C0ADBC200FED66F /* WavePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WavePicker.swift; sourceTree = "<group>"; };
 		8BDA845F2C00A0290038655C /* NSOAccountManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSOAccountManager.swift; sourceTree = "<group>"; };
 		8BE0950C2C0315C40089705F /* ActivityView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
 		8BE095102C035B000089705F /* CoopShiftDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopShiftDetailView.swift; sourceTree = "<group>"; };
@@ -243,11 +249,13 @@
 			children = (
 				8B0D148E2BFA2EBE00B82AD1 /* CoopListDetailItemView.swift */,
 				8B0D149D2BFAC56100B82AD1 /* CoopListShiftCardView.swift */,
-				8B0851772BFB78D800AF22C5 /* CoopWaveResultView.swift */,
+				8B0851772BFB78D800AF22C5 /* CoopDetailWaveResultView.swift */,
 				8B0D14A52BFAD93A00B82AD1 /* CoopDetailView.swift */,
 				8B0D14AA2BFADDD200B82AD1 /* CoopDetailViewModel.swift */,
 				8BE095102C035B000089705F /* CoopShiftDetailView.swift */,
 				8BE095122C035B280089705F /* CoopShiftDetailViewModel.swift */,
+				8BD8CD512C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift */,
+				8BD8CD532C0ADBC200FED66F /* WavePicker.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -428,6 +436,7 @@
 		8B8B287F2BF88BFB00790809 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				8B7059032C0B00510076F680 /* NameplateView.swift */,
 				8BE0950C2C0315C40089705F /* ActivityView.swift */,
 				8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */,
 				8BB4A1F12BFDB49E008DB764 /* LoginView.swift */,
@@ -627,6 +636,7 @@
 			files = (
 				8B3591452BF893D60066BCA3 /* MePage.swift in Sources */,
 				8B0D148D2BFA2CEF00B82AD1 /* CoopListItemInfo.swift in Sources */,
+				8B7059042C0B00510076F680 /* NameplateView.swift in Sources */,
 				8B0D14712BF9898100B82AD1 /* SettingPage.swift in Sources */,
 				8B0D14AB2BFADDD200B82AD1 /* CoopDetailViewModel.swift in Sources */,
 				8BDA84602C00A0290038655C /* NSOAccountManager.swift in Sources */,
@@ -651,7 +661,7 @@
 				8BA017472C099F23001CFC72 /* Precomputable.swift in Sources */,
 				8BFF73E52C0938330048F2A6 /* CoopListDetailView.swift in Sources */,
 				8B7F292C2BF6E1B90010A525 /* MainView.swift in Sources */,
-				8B0851782BFB78D800AF22C5 /* CoopWaveResultView.swift in Sources */,
+				8B0851782BFB78D800AF22C5 /* CoopDetailWaveResultView.swift in Sources */,
 				8B50DBE02C01BED40076AE6D /* SN3Client.swift in Sources */,
 				8B0D14822BF9B85700B82AD1 /* GameMode.swift in Sources */,
 				8B0D148F2BFA2EBE00B82AD1 /* CoopListDetailItemView.swift in Sources */,
@@ -662,6 +672,7 @@
 				8B0851722BFB5FE100AF22C5 /* CoopRule.swift in Sources */,
 				8B0D149E2BFAC56100B82AD1 /* CoopListShiftCardView.swift in Sources */,
 				8B08517A2BFB790700AF22C5 /* WaveShape.swift in Sources */,
+				8BD8CD522C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift in Sources */,
 				8BE095112C035B000089705F /* CoopShiftDetailView.swift in Sources */,
 				8B7F292A2BF6E1B90010A525 /* iminkApp.swift in Sources */,
 				8B0D14A62BFAD93A00B82AD1 /* CoopDetailView.swift in Sources */,
@@ -678,6 +689,7 @@
 				8BB99B372BF77B3B00470408 /* Models.swift in Sources */,
 				8B3591432BF892130066BCA3 /* HomePage.swift in Sources */,
 				8B0D14842BFA210700B82AD1 /* SessionManager.swift in Sources */,
+				8BD8CD542C0ADBC200FED66F /* WavePicker.swift in Sources */,
 				8BB4A1F22BFDB49E008DB764 /* LoginView.swift in Sources */,
 				8B0D14A02BFAC5FF00B82AD1 /* CoopShiftCard.swift in Sources */,
 			);

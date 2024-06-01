@@ -16,7 +16,6 @@ struct CoopListRowView: View {
             CoopListDetailItemView(coop: coop!)
         } else {
             CoopListShiftCardView(card: card!)
-//            EmptyView()
         }
     }
 }

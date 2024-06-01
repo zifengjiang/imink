@@ -423,7 +423,7 @@ extension CoopDetailView {
         HStack(alignment: .top, spacing: 10) {
             ForEach(range, id: \.self) { waveIndex in
                 let waveResult = viewModel.waveResults[waveIndex]
-                WaveResult(result: waveResult, pass: isWavePassed(waveResult), bossName: viewModel.coop?.bossName)
+                CoopDetailWaveResultView(result: waveResult, pass: isWavePassed(waveResult), bossName: viewModel.coop?.bossName)
                     .rotationEffect(.degrees(-2))
             }
         }

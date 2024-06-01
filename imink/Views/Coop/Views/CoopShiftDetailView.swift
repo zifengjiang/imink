@@ -15,6 +15,10 @@ struct CoopShiftDetailView: View {
                 VStack(spacing:20){
                     if viewModel.initialized{
                         cardView
+                        waveView
+                        weaponView
+                        kingView
+                        enemyView
                     }else{
                         Spacer()
                         Image(.squidLoading)
@@ -199,6 +203,112 @@ struct CoopShiftDetailView: View {
                     .offset(y: -8)
             }
         }
+    }
+
+    var waveView: some View{
+        VStack(alignment: .leading){
+//            Picker(selection: $viewModel.selectedWave, label: Text("")) {
+//                ForEach(viewModel.coopWaveStatus.indices, id: \.self){ index in
+//                    if let event = viewModel.coopWaveStatus[index][0].eventWaveGroup{
+//                        Text(event.localizedFromSplatNet)
+//                            .font(.splatoonFont(size: 15))
+//                            .tag(index)
+//                    }else{
+//                        Text("-")
+//                            .font(.splatoonFont(size: 15))
+//                            .tag(index)
+//                    }
+//                }
+//            }
+//            .labelsHidden()
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack{
+                    ForEach(viewModel.coopWaveStatus.indices, id: \.self){ index in
+                        HStack{
+                            ForEach(viewModel.coopWaveStatus[index], id: \.waterLevel){ wave in
+                                CoopShiftDetailWaveStatusView(result: wave)
+                            }
+                        }
+                    }
+                }
+            }
+            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+            .frame(height: 120)
+        }
+
+    }
+
+    var weaponView: some View{
+        VStack{
+            let columns = Array(repeating: GridItem(.flexible()), count: 8)
+
+            LazyVGrid(columns: columns, spacing: 10) {
+                ForEach(viewModel.coopWeaponStatus, id: \.nameId){ weapon in
+                    VStack(spacing:3){
+                        Image(weapon.name)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30,height: 30)
+                        Text("x\(weapon.count)")
+                            .font(.splatoonFont(size: 15))
+                    }
+                }
+            }
+        }
+        .padding(.all, 10)
+        .textureBackground(texture: .bubble, radius: 18)
+    }
+
+    var kingView:some View{
+        HStack{
+            let kingSorted = self.viewModel.coopEnemyStatus.filter{$0.nameId.order>=23}
+            ForEach(kingSorted,id:\.nameId){king in
+                    VStack{
+                        Image(king.name)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 50, height: 50)
+                        Text("\(king.totalTeamDefeatCount)/\(king.totalPopCount)")
+                            .font(.splatoonFont(size: 12))
+                    }
+
+            }
+
+        }
+    }
+
+    var enemyView: some View{
+        VStack{
+            let enemySorted = viewModel.coopEnemyStatus.filter{$0.nameId.order < 23}
+            ForEach(enemySorted, id:\.name){boss in
+                if boss.name != enemySorted.first?.name{
+                    Divider()
+                }
+                HStack{
+                    Image(boss.name)
+                        .resizable()
+                        .scaledToFit()
+                    Text(boss.nameId.localizedFromSplatNet)
+                        .font(.splatoonFont(size: 15))
+                    Spacer()
+
+                    Text("\(boss.totalTeamDefeatCount)")
+                        .font(.splatoonFont(size: 15)) +
+                    Text(boss.totalDefeatCount == 0 ? "" : "(\(boss.totalDefeatCount))")
+                        .font(.splatoonFont(size: 12))
+                    Text("/")
+                        .font(.splatoonFont(size: 16))
+                    Text("\("appearances_number".localized)x")
+                        .font(.splatoonFont(size: 12)) +
+                    Text("\(boss.totalPopCount)")
+                        .font(.splatoonFont(size: 15))
+                }
+                .frame(height: 40)
+
+            }
+        }
+        .padding(.all, 10)
+        .textureBackground(texture: .bubble, radius: 18)
     }
 }
 

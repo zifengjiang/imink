@@ -8,7 +8,7 @@ struct CoopGroupStatus: FetchableRecord, Decodable {
     var accountId: Int
     var groupId: Int
     var rule: String
-    @Packable var suppliedWeapon: PackableNumbers
+    var suppliedWeapon: PackableNumbers
     var stageId:UInt16
     var startTime: Date
     var endTime: Date
@@ -51,14 +51,13 @@ extension CoopGroupStatus:PreComputable{
 
 
 struct CoopWaveStatus: FetchableRecord, Decodable {
-    var eventWaveGroup: String
+    var eventWaveGroup: String?
     var waterLevel: Int
     var deliverNorm: Double?
     var goldenPopCount: Double
     var teamDeliverCount: Double?
-    var count: Int
-
-
+    var failCount: Int
+    var successCount: Int
 }
 
 extension CoopWaveStatus: FetchableFromDatabase{
@@ -69,7 +68,8 @@ extension CoopWaveStatus: FetchableFromDatabase{
 
 
 struct CoopWeaponStatus:FetchableRecord, Decodable {
-    var weaponId:String
+    var name: String
+    var nameId: String
     var count:Int
 }
 
@@ -82,6 +82,7 @@ extension CoopWeaponStatus:FetchableFromDatabase{
 
 struct CoopEnemyStatus:FetchableRecord, Decodable {
     var name:String
+    var nameId:String
     var totalTeamDefeatCount:Int
     var totalDefeatCount:Int
     var totalPopCount:Int

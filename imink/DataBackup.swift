@@ -183,7 +183,7 @@ extension DataBackup {
     }
 
     private func processSalmonRunBatch(_ salmonRunFilePaths: ChunksOfCountCollection<[URL]>.Element){
-        SplatDatabase.shared.dbQueue.asyncWrite { db in
+        SplatDatabase.shared.dbQueue.customAsyncWrite { db in
             for url in salmonRunFilePaths {
                 autoreleasepool {
                     self.loadCount += 1
@@ -209,7 +209,7 @@ extension DataBackup {
     }
 
     private func processBattleBatch(_ battleFilePaths: ChunksOfCountCollection<[URL]>.Element){
-        SplatDatabase.shared.dbQueue.asyncWrite { db in
+        SplatDatabase.shared.dbQueue.customAsyncWrite { db in
             for url in battleFilePaths {
                 autoreleasepool {
                     self.loadCount += 1

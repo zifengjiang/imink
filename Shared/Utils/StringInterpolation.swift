@@ -80,4 +80,9 @@ extension String {
 
         return String(splitted!)
     }
+
+    var order:Int {
+        
+        return self.base64DecodedString.split(separator: "-").last.flatMap{Int($0)} ?? 0
+    }
 }
