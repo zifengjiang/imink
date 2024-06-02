@@ -1,7 +1,9 @@
 import SwiftUI
+import SplatDatabase
 
 struct CoopShiftDetailView: View {
     @StateObject var viewModel: CoopShiftDetailViewModel
+
     var id: Int
     init(id: Int){
         self.id = id
@@ -17,6 +19,7 @@ struct CoopShiftDetailView: View {
                         cardView
                         waveView
                         weaponView
+                        playerView
                         kingView
                         enemyView
                     }else{
@@ -259,6 +262,35 @@ struct CoopShiftDetailView: View {
         .textureBackground(texture: .bubble, radius: 18)
     }
 
+    var playerView: some View {
+        DisclosureGroup{
+            let columns = Array(repeating: GridItem(.flexible()), count: 3)
+            LazyVGrid(columns: columns, spacing: 10) {
+                ForEach(viewModel.coopPlayerStatus.indices, id: \.self){ index in
+                    VStack{
+                        NameplateView(status: viewModel.coopPlayerStatus[index])
+                            .contextMenu {
+                                Button{
+                                    
+                                } label: {
+                                    Text("ok")
+                                }
+                            } preview: {
+                                CoopPlayerStatusView(status: viewModel.coopPlayerStatus[index])
+                            }
+
+
+                        Text("x\(viewModel.coopPlayerStatus[index].count)")
+                            .font(.splatoonFont(size: 15))
+                    }
+                }
+            }
+        } label: {
+            Text("遇到过的工友")
+                .font(.splatoonFont(size: 15))
+        }
+    }
+
     var kingView:some View{
         HStack{
             let kingSorted = self.viewModel.coopEnemyStatus.filter{$0.nameId.order>=23}
@@ -312,6 +344,75 @@ struct CoopShiftDetailView: View {
     }
 }
 
-    //#Preview {
-    //    CoopShiftDetailView()
-    //}
+struct CoopPlayerStatusView:View {
+    let status:CoopPlayerStatus
+
+    var body: some View {
+        VStack{
+            NameplateView(status: status)
+            if let uniformName = status.uniformName{
+                Image(uniformName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 100, height: 100)
+            }
+            HStack{
+                HStack(spacing: 3){
+                    Image(.salmonRun)
+                        .resizable()
+                        .bold()
+                        .foregroundStyle(Color.green)
+                        .frame(width: 18,height: 18)
+                    Text("\(status.defeatEnemyCount, places: 1)")
+                        .font(.splatoonFont2(size: 18))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.3)
+                }
+//                .frame(width: 45, alignment: .leading)
+
+                HStack(spacing: 3){
+                    Image(.golden)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 18, height: 18)
+                    Text("\(status.goldenDeliverCount, places:1)")
+                        .font(.splatoonFont2(size: 18)) + 
+                    Text("<\(status.goldenAssistCount, places:1)>")
+                        .font(.splatoonFont2(size: 13)).foregroundColor(.secondary)
+                        
+                }
+
+                HStack(spacing: 3){
+                    Image(.jobShiftCardHelp)
+                        .resizable()
+                        .bold()
+                        .foregroundStyle(Color.green)
+                        .frame(width: 18,height: 18)
+                    Text("\(status.rescueCount, places: 1)")
+                        .font(.splatoonFont2(size: 18))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.3)
+                }
+                .frame(width: 45, alignment: .leading)
+
+                HStack(spacing: 3){
+                    Image(.jobShiftCardDead)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 18, height: 18)
+                    Text("\(status.rescuedCount, places:1)")
+                        .font(.splatoonFont2(size: 18))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.3)
+                }
+            }
+        }
+        .frame(width: 280,height: 250)
+        .padding(.all)
+        .textureBackground(texture: .bubble, radius: 18)
+    }
+}
+
+//#Preview {
+//    CoopPlayerStatusView(status: .init(name: "ziFeng", byname: "www", nameId: "4324", nameplate: PackableNumbers([0]), nameplateTextColor: PackableNumbers([0]), uniformId: 1, defeatEnemyCount: 3.4, deliverCount: 4.3, goldenAssistCount: 5.6, goldenDeliverCount: 7.2, rescueCount: 0.2, rescuedCount: 0.3, count: 30, uniformName: "22",_nameplate: .))
+//}

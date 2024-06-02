@@ -40,15 +40,73 @@ extension CoopGroupStatus:PreComputable{
     static func create(from db: Database, identifier: (Int, Int)) throws -> CoopGroupStatus? {
         let (groupId, accountId) = identifier
         if var status = try CoopGroupStatus.fetchOne(db, sql: "SELECT * FROM coop_group_status_view WHERE accountId = ? AND GroupID = ?", arguments: [accountId, groupId]) {
-            status.suppliedWeapons = Array(0..<4).compactMap { getImageName(by: status.suppliedWeapon[$0], db: db) }
-            status.stageImage = getImageName(by: status.stageId, db: db)
-            status.stageName = getImageNameId(by: status.stageId, db: db)
+            status.suppliedWeapons = try Array(0..<4).compactMap { try ImageMap.fetchOne(db, key: status.suppliedWeapon[$0])?.name}
+            let stageRow = try ImageMap.fetchOne(db, key: status.stageId)
+            status.stageImage = stageRow?.name
+            status.stageName = stageRow?.nameId
             return status
         }
         return nil
     }
 }
 
+struct CoopPlayerStatus:FetchableRecord, Decodable{
+    var name: String
+    var byname: String
+    var nameId: String
+    var nameplate: PackableNumbers
+    var nameplateTextColor: PackableNumbers
+    var uniformId: Int
+    var defeatEnemyCount: Double
+    var deliverCount: Double
+    var goldenAssistCount: Double
+    var goldenDeliverCount: Double
+    var rescueCount: Double
+    var rescuedCount: Double
+    var count: Int
+    
+    // MARK: - Computed
+    var uniformName: String? = nil
+    var _nameplate: Nameplate? = nil
+
+    var id:String{
+        "\(name)-\(byname)-\(nameId)"
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case name
+        case byname
+        case nameId
+        case nameplate
+        case nameplateTextColor
+        case uniformId
+        case defeatEnemyCount
+        case deliverCount
+        case goldenAssistCount
+        case goldenDeliverCount
+        case rescueCount
+        case rescuedCount
+        case count
+    }
+}
+
+extension CoopPlayerStatus: Equatable {
+    static func == (lhs: CoopPlayerStatus, rhs: CoopPlayerStatus) -> Bool {
+        return lhs.id == rhs.id
+    }
+}
+
+extension CoopPlayerStatus: PreComputable{
+    static func create(from db: Database, identifier: (Int,Int)) throws -> [CoopPlayerStatus] {
+        let (groupId, accountId) = identifier
+        var rows = try CoopPlayerStatus.fetchAll(db, SplatDatabaseSQL.coop_player_status(accountId: accountId, GroupID: groupId).request)
+        for index in rows.indices {
+            rows[index]._nameplate = .init(nameplate: rows[index].nameplate, textColor: rows[index].nameplateTextColor, db: db)
+            rows[index].uniformName = try ImageMap.fetchOne(db, key: rows[index].uniformId)?.name
+        }
+        return rows
+    }
+}
 
 struct CoopWaveStatus: FetchableRecord, Decodable {
     var eventWaveGroup: String?

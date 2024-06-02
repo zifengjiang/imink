@@ -40,7 +40,7 @@ class CoopDetailViewModel: ObservableObject {
             .assign(to: \.playerResults, on: self)
             .store(in: &cancelBag)
 
-        Coop.fetch(identifier: id)
+        Coop.fetchOne(identifier: id)
             .catch { error -> Just<Coop?> in
                 return Just<Coop?>(nil)
             }

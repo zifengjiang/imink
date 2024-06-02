@@ -10,6 +10,7 @@ class CoopShiftDetailViewModel: ObservableObject {
     @Published var coopWaveStatus: [[CoopWaveStatus]] = []
     @Published var coopWeaponStatus: [CoopWeaponStatus] = []
     @Published var coopEnemyStatus: [CoopEnemyStatus] = []
+    @Published var coopPlayerStatus: [CoopPlayerStatus] = []
     @Published var allInitialized:[Bool] = [false,false,false,false]
 
     var cancelBag = Set<AnyCancellable>()
@@ -22,7 +23,7 @@ class CoopShiftDetailViewModel: ObservableObject {
     func load() {
         measureTime(title: "load CoopShiftDetailViewModel") {
 
-            CoopGroupStatus.fetch(identifier: (id, AppUserDefaults.shared.accountId))
+            CoopGroupStatus.fetchOne(identifier: (id, AppUserDefaults.shared.accountId))
                 .catch { error -> Just<CoopGroupStatus?> in
                     logError(error)
                     return Just<CoopGroupStatus?>(nil)
@@ -73,6 +74,14 @@ class CoopShiftDetailViewModel: ObservableObject {
                     return status.sorted{$0.nameId.order < $1.nameId.order}
                 }
                 .assign(to: \.coopEnemyStatus, on: self)
+                .store(in: &cancelBag)
+
+            CoopPlayerStatus.fetchAll(identifier: (id,AppUserDefaults.shared.accountId))
+                .catch { error -> Just<[CoopPlayerStatus]> in
+                    logError(error)
+                    return Just<[CoopPlayerStatus]>([])
+                }
+                .assign(to: \.coopPlayerStatus, on: self)
                 .store(in: &cancelBag)
 
             $allInitialized
