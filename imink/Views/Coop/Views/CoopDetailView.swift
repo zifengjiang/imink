@@ -74,12 +74,12 @@ struct CoopDetailView: View {
     }
 
     var memberView: some View {
-        VStack{
+        VStack(spacing: 0){
             ForEach(viewModel.playerResults.indices, id: \.self){i in
                 if i != 0{
                     Divider()
                 }
-                makeMemberView(result: viewModel.playerResults[i])
+                MemberView(result: viewModel.playerResults[i])
             }
         }
         .padding(.all,10)
@@ -324,76 +324,104 @@ extension CoopDetailView {
         .textureBackground(texture: .bubble, radius: 18)
     }
 
-    func makeMemberView(result: CoopPlayerResult) -> some View {
-        HStack{
-            VStack(alignment: .leading, spacing:5){
-                Text(result.player!.name)
-                    .font(.splatoonFont(size: 15))
-                Text("\("boss_salmonids".localized) x\(result.defeatEnemyCount)")
-                    .font(.splatoonFont(size: 10))
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            VStack(alignment: .trailing,spacing: 0){
+
+        struct MemberView:View {
+            let result: CoopPlayerResult
+            var body: some View {
                 HStack{
-                    HStack{
-                        ForEach(result.weapons!.indices, id:\.self){i in
-                            Image(result.weapons![i])
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 20, height: 20)
-                        }
+                    VStack(alignment: .leading, spacing:5){
+                        Text(result.player!.name)
+                            .font(.splatoonFont(size: 15))
+                        Text("\("boss_salmonids".localized) x\(result.defeatEnemyCount)")
+                            .font(.splatoonFont(size: 10))
+                            .foregroundStyle(.secondary)
                     }
-                    .background(Color(.sRGB, white: 121 / 255.0, opacity: 0.1))
-                    .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                    Spacer()
+                    VStack(alignment: .trailing,spacing: 0){
+                        HStack{
+                            HStack{
+                                if let weapons = result.weapons{
+                                    ForEach(weapons.indices, id:\.self){i in
+                                        Image(weapons[i])
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 20, height: 20)
+                                    }
+                                }
+                            }
+                            .background(Color(.sRGB, white: 121 / 255.0, opacity: 0.1))
+                            .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                            if let specialWeaponName = result.specialWeaponName{
+                                SpecialWeaponImage(imageName: specialWeaponName,size: 15)
+                                    .clipShape(Capsule())
+                            }
+                        }
+                        .frame(height: 24)
 
-                    SpecialWeaponImage(imageName: result.specialWeaponName!,size: 15)
-                        .clipShape(Capsule())
+                        HStack{
+                            HStack(spacing:2){
+                                Image(.golden)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 12)
+                                Text("\(result.goldenDeliverCount)").font(.splatoonFont2(size: 12))+Text("+\(result.goldenAssistCount)").font(.splatoonFont2(size: 9))
+                            }
+
+                            Group{
+                                HStack(spacing:2){
+                                    Image(.egg)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(height: 12)
+                                    Text("\(result.deliverCount)")
+                                }
+
+                                HStack(spacing:2){
+                                    Image(result.player!.species ? .rescueINKLING : .rescueOCTOLING)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(height: 12)
+                                    Text("\(result.rescueCount)")
+                                }
+
+                                HStack(spacing:2){
+                                    Image(result.player!.species ? .rescuedINKLING : .rescuedOCTOLING)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(height: 12)
+                                    Text("\(result.rescuedCount)")
+                                }
+                            }
+                            .font(.splatoonFont2(size: 12))
+                        }
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.3)
+                    }
                 }
-                .frame(height: 24)
+                .frame(height: 45)
+                .contextMenu {
+                    Button {
 
-                HStack{
-                    HStack(spacing:2){
-                        Image(.golden)
+                    } label: {
+                        Text("ok")
+                    }
+
+                } preview: {
+                    VStack{
+                        NameplateView(result: result)
+                        Image(result.player!.uniformName!)
                             .resizable()
                             .scaledToFit()
-                            .frame(height: 12)
-                        Text("\(result.goldenDeliverCount)").font(.splatoonFont2(size: 12))+Text("+\(result.goldenAssistCount)").font(.splatoonFont2(size: 9))
                     }
-
-                    Group{
-                        HStack(spacing:2){
-                            Image(.egg)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 12)
-                            Text("\(result.deliverCount)")
-                        }
-
-                        HStack(spacing:2){
-                            Image(result.player!.species ? .rescueINKLING : .rescueOCTOLING)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 12)
-                            Text("\(result.rescueCount)")
-                        }
-
-                        HStack(spacing:2){
-                            Image(result.player!.species ? .rescuedINKLING : .rescuedOCTOLING)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 12)
-                            Text("\(result.rescuedCount)")
-                        }
-                    }
-                    .font(.splatoonFont2(size: 12))
+                    .frame(width: 300, height: 300)
+                    .padding()
+                    .textureBackground(texture: .bubble, radius: 18)
                 }
-                .lineLimit(1)
-                .minimumScaleFactor(0.3)
             }
         }
-        .frame(height: 45)
-    }
+
+
+
 
     func makeEnemyView(result:CoopEnemyResult) -> some View{
         HStack{

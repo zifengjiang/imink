@@ -1,27 +1,29 @@
 import Foundation
+import SplatNet3API
 import Combine
 import SplatDatabase
 import GRDB
 import SwiftUI
 
-@Observable
 class CoopListViewModel: ObservableObject {
     static let shared = CoopListViewModel()
+    
+    @Published var rows: [CoopListRowModel] = []
+    @Published var filter: Filter = Filter()
 
-    var rows: [CoopListRowModel] = []
     var groupId = 0
-    var activeID: String?
     var isLogin: Bool = AppUserDefaults.shared.sessionToken != nil
     private var offset: Int = 0
     private var cancelBag = Set<AnyCancellable>()
 
     init() {
-        fetchCoops()
+        loadCoops()
     }
 
-    func fetchCoops(limit: Int = 50, offset: Int = 0) {
+    func loadCoops(limit: Int = 50, offset: Int = 0) {
         self.groupId = 0
-        fetchCoopsFromDatabase(limit: limit, offset: offset)
+        coops(filter: filter, limit: limit, offset)
+            .catch { _ in Just<[CoopListItemInfo]>([]) }
             .map { [weak self] coops in
                 self?.processCoops(coops) ?? []
             }
@@ -34,12 +36,17 @@ class CoopListViewModel: ObservableObject {
             .store(in: &cancelBag)
     }
 
+    func fetchCoops() async {
+        await SN3Client.shared.fetchCoops()
+    }
+
     func cancel() {
         cancelBag.forEach { $0.cancel() }
     }
 
     func loadMore() {
-        fetchCoopsFromDatabase(limit: 10, offset: offset)
+        coops(filter:filter, limit: 10, offset)
+            .catch { _ in Just<[CoopListItemInfo]>([]) }
             .map { [weak self] coops in
                 self?.processCoops(coops) ?? []
             }
@@ -53,7 +60,7 @@ class CoopListViewModel: ObservableObject {
     }
 
     private func fetchCoopsFromDatabase(limit: Int, offset: Int) -> AnyPublisher<[CoopListItemInfo], Never> {
-        return SplatDatabase.shared.coops(limit: limit, offset)
+        return coops(limit: limit, offset)
             .catch { _ in Just<[CoopListItemInfo]>([]) }
             .eraseToAnyPublisher()
     }

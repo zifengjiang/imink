@@ -40,9 +40,9 @@ struct CoopShiftDetailView: View {
         }
         .frame(maxWidth: .infinity)
         .fixSafeareaBackground()
-        .onAppear  {
+        .task  {
             print("load Shift \(self.id)")
-            viewModel.load()
+           await viewModel.load()
         }
     }
 

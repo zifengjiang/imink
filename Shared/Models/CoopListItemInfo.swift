@@ -32,6 +32,7 @@ struct CoopListItemInfo:Identifiable {
     }
 }
 
+
 extension CoopListItemInfo: Codable, FetchableRecord, MutablePersistableRecord{
 
 }
@@ -109,73 +110,24 @@ extension CoopListItemInfo.GradeDiff {
     }
 }
 
-let fetch_coop_list_item = """
-SELECT
-    coop.id,
-    coop.rule AS RULE,
-    coop.afterGrade AS grade,
-    coop.afterGradePoint AS gradePoint,
-    CASE
-        WHEN coop.wave = 3 AND coop.rule != 'TEAM_CONTEST' AND coop.afterGradePoint < 999 THEN 'UP'
-        WHEN (coop.wave = 2 AND coop.rule != 'TEAM_CONTEST') OR (coop.wave = 3 AND coop.rule != 'TEAM_CONTEST' AND coop.afterGradePoint = 999) THEN 'KEEP'
-        WHEN coop.rule = 'TEAM_CONTEST' THEN NULL
-        ELSE 'DOWN'
-    END AS gradeDiff,
-    coop.dangerRate,
-    coopPlayerResult.defeatEnemyCount AS enemyDefeatCount,
-    player.species AS specie,
-    imageMap.nameId AS stage,
-    bossI18n.key AS boss,
-    coop.bossDefeated AS haveBossDefeated,
-    coop.wave AS resultWave,
-    coop.egg AS goldenEgg,
-    coop.powerEgg,
-    coopPlayerResult.rescueCount AS rescue,
-    coopPlayerResult.rescuedCount AS rescued,
-    coop.playedTime AS time,
-    coop.GroupID
-FROM
-    coop_view AS coop -- Use coop_view for group information
-    JOIN coopPlayerResult ON coopPlayerResult.coopId = coop.id
-    JOIN imageMap ON coop.stageId = imageMap.id
-    JOIN player ON player.coopPlayerResultId = coopPlayerResult.id
-    LEFT JOIN imageMap AS bossImageMap ON coop.boss = bossImageMap.id
-    LEFT JOIN coopWaveResult ON coopWaveResult.coopId = coop.id AND coopWaveResult.waveNumber = 4
-    LEFT JOIN i18n AS bossI18n ON coopWaveResult.eventWave = bossI18n.id
-WHERE
-    coop.GroupID IN (
-        SELECT DISTINCT GroupID -- Select the 10 most recent groups
-        FROM coop_view
-        ORDER BY playedTime DESC
---         LIMIT 10 OFFSET 10
-    )
-    AND coopPlayerResult.'order' = 0
-    AND coop.accountId = ?
-ORDER BY
-    time DESC LIMIT ? OFFSET ?;
-"""
-
-extension SplatDatabase {
-    func coops(limit:Int = 30, _ offset: Int = 0) -> AnyPublisher<[CoopListItemInfo], Error> {
-        return ValueObservation.tracking { db in
-            print("fetch_coop_list_item")
-            return try Row.fetchAll(db, sql: fetch_coop_list_item, arguments: [AppUserDefaults.shared.accountId, limit, offset])
-                .map { row in
-                    try! CoopListItemInfo(row: row)
-                }
-        }
-        .publisher(in: dbQueue, scheduling: .immediate)
-        .eraseToAnyPublisher()
+func coops(filter:Filter = Filter(), limit:Int = 30, _ offset: Int = 0) -> AnyPublisher<[CoopListItemInfo], Error> {
+    return ValueObservation.tracking { db in
+        print("fetch_coop_list_item")
+        return try Row.fetchAll(db, filter.buildCoopQuery(limit:limit, offset:offset))
+            .map { row in
+                try! CoopListItemInfo(row: row)
+            }
     }
-
-    func coops(limit:Int = 30, _ offset: Int = 0) -> [CoopListItemInfo] {
-        return try! dbQueue.read { db in
-            try Row.fetchAll(db, sql: fetch_coop_list_item, arguments: [AppUserDefaults.shared.accountId,limit, offset])
-                .map { row in
-                    try! CoopListItemInfo(row: row)
-                }
-        }
-    }
-
-
+    .publisher(in: SplatDatabase.shared.dbQueue, scheduling: .immediate)
+    .eraseToAnyPublisher()
 }
+
+func coops(filter:Filter = Filter(), limit:Int = 30, _ offset: Int = 0) -> [CoopListItemInfo] {
+    return try! SplatDatabase.shared.dbQueue.read { db in
+        try Row.fetchAll(db, filter.buildCoopQuery(limit:limit, offset:offset))
+            .map { row in
+                try! CoopListItemInfo(row: row)
+            }
+    }
+}
+

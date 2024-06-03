@@ -1,10 +1,11 @@
 import SwiftUI
-import SplatNet3API
 
 struct CoopListView: View {
     @EnvironmentObject var mainViewModel: MainViewModel
     @EnvironmentObject var viewModel: CoopListViewModel
     @State var activeID:String?
+    @State var showFilterSheet = false
+
     var body: some View {
         NavigationStack {
             ScrollView{
@@ -31,15 +32,29 @@ struct CoopListView: View {
                     viewModel.loadMore()
                 }
             }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button{
+                        showFilterSheet = true
+                    } label: {
+                            /// Filter
+                        Label("11", systemImage: "line.horizontal.3.decrease.circle")
+                    }
+                }
+            }
 
         }
         .refreshable {
-//            viewModel.cancel()
-            await SN3Client.shared.fetchCoops()
-//            viewModel.fetchCoops()
+            await viewModel.fetchCoops()
         }
         .onReceive(mainViewModel.$isLogin) { isLogin in
             viewModel.isLogin = isLogin
+        }
+        .sheet(isPresented: $showFilterSheet){
+            CoopFilterView(showFilterView: $showFilterSheet, filter: $viewModel.filter){
+                viewModel.cancel()
+                viewModel.loadCoops()
+            }
         }
     }
 

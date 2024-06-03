@@ -49,7 +49,7 @@ extension SN3Client {
                 }
             }
             DispatchQueue.main.async {
-                CoopListViewModel.shared.fetchCoops()
+                CoopListViewModel.shared.loadCoops()
             }
         }catch SN3Client.Error.invalidGameServiceToken{
 //            try await refreshGameServiceToken()

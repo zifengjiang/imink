@@ -81,6 +81,8 @@
 		8BE0950D2C0315C40089705F /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE0950C2C0315C40089705F /* ActivityView.swift */; };
 		8BE095112C035B000089705F /* CoopShiftDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE095102C035B000089705F /* CoopShiftDetailView.swift */; };
 		8BE095132C035B280089705F /* CoopShiftDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE095122C035B280089705F /* CoopShiftDetailViewModel.swift */; };
+		8BFE91702C0C9F0D00C12CBE /* FilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFE916F2C0C9F0D00C12CBE /* FilterView.swift */; };
+		8BFE91722C0D7CE000C12CBE /* Filter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFE91712C0D7CE000C12CBE /* Filter.swift */; };
 		8BFF73E52C0938330048F2A6 /* CoopListDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF73E42C0938330048F2A6 /* CoopListDetailView.swift */; };
 		8BFF73E72C0939160048F2A6 /* CoopListRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF73E62C0939160048F2A6 /* CoopListRowView.swift */; };
 /* End PBXBuildFile section */
@@ -196,6 +198,8 @@
 		8BE0950C2C0315C40089705F /* ActivityView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
 		8BE095102C035B000089705F /* CoopShiftDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopShiftDetailView.swift; sourceTree = "<group>"; };
 		8BE095122C035B280089705F /* CoopShiftDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopShiftDetailViewModel.swift; sourceTree = "<group>"; };
+		8BFE916F2C0C9F0D00C12CBE /* FilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterView.swift; sourceTree = "<group>"; };
+		8BFE91712C0D7CE000C12CBE /* Filter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Filter.swift; sourceTree = "<group>"; };
 		8BFF73E42C0938330048F2A6 /* CoopListDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopListDetailView.swift; sourceTree = "<group>"; };
 		8BFF73E62C0939160048F2A6 /* CoopListRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopListRowView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -452,6 +456,7 @@
 				8B0D147F2BF9908800B82AD1 /* FilePickerView.swift */,
 				8B0D14A12BFAC98D00B82AD1 /* GrayscaleTextureView.swift */,
 				8B5276132BFC228600022D5B /* SpecialWeaponImage.swift */,
+				8BFE916F2C0C9F0D00C12CBE /* FilterView.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -476,6 +481,7 @@
 				8B5276152BFC371300022D5B /* CoopListRowModel.swift */,
 				8B50DBE12C01C1C20076AE6D /* Logger.swift */,
 				8B2DA5882C0409E500850BAC /* CoopGroupStatus.swift */,
+				8BFE91712C0D7CE000C12CBE /* Filter.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -641,6 +647,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8B3591452BF893D60066BCA3 /* MePage.swift in Sources */,
+				8BFE91722C0D7CE000C12CBE /* Filter.swift in Sources */,
 				8B0D148D2BFA2CEF00B82AD1 /* CoopListItemInfo.swift in Sources */,
 				8B7059042C0B00510076F680 /* NameplateView.swift in Sources */,
 				8B0D14712BF9898100B82AD1 /* SettingPage.swift in Sources */,
@@ -695,6 +702,7 @@
 				8B0D14962BFAB8C100B82AD1 /* Font+Ext.swift in Sources */,
 				8BB4A1F42BFDB4CE008DB764 /* FixVectorImage.swift in Sources */,
 				8BB99B372BF77B3B00470408 /* Models.swift in Sources */,
+				8BFE91702C0C9F0D00C12CBE /* FilterView.swift in Sources */,
 				8B3591432BF892130066BCA3 /* HomePage.swift in Sources */,
 				8B0D14842BFA210700B82AD1 /* SessionManager.swift in Sources */,
 				8BD8CD542C0ADBC200FED66F /* WavePicker.swift in Sources */,

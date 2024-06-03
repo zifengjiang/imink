@@ -42,6 +42,14 @@ struct NameplateView: View {
         nameId = status.nameId
     }
     
+    init(result: CoopPlayerResult) {
+        name = result.player!.name
+        background = result.player!._nameplate!.background
+        byname = result.player!.byname
+        textColor = result.player!._nameplate!.textColor
+        badges = result.player!._nameplate!.badges
+        nameId = result.player!.nameId
+    }
 
     var body: some View {
         GeometryReader { geometry in

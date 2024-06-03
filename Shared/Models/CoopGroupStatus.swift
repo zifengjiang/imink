@@ -124,6 +124,13 @@ extension CoopWaveStatus: FetchableFromDatabase{
     }
 }
 
+extension CoopWaveStatus: PreComputable {
+    static func create(from db: Database, identifier: (Int, Int)) throws -> [CoopWaveStatus] {
+        let (groupId, accountId) = identifier
+        return try CoopWaveStatus.fetchAll(db, SplatDatabaseSQL.wave_result(accountId: accountId, GroupID: groupId).request)
+    }
+}
+
 
 struct CoopWeaponStatus:FetchableRecord, Decodable {
     var name: String
@@ -134,6 +141,13 @@ struct CoopWeaponStatus:FetchableRecord, Decodable {
 extension CoopWeaponStatus:FetchableFromDatabase{
     static func fetchRequest(accountId: Int, groupId: Int) -> SQLRequest<Row> {
         return SplatDatabaseSQL.weapon_status(accountId: accountId, GroupID: groupId).request
+    }
+}
+
+extension CoopWeaponStatus: PreComputable {
+    static func create(from db: Database, identifier: (Int, Int)) throws -> [CoopWeaponStatus] {
+        let (groupId, accountId) = identifier
+        return try CoopWeaponStatus.fetchAll(db, SplatDatabaseSQL.weapon_status(accountId: accountId, GroupID: groupId).request)
     }
 }
 
@@ -149,6 +163,13 @@ struct CoopEnemyStatus:FetchableRecord, Decodable {
 extension CoopEnemyStatus:FetchableFromDatabase{
     static func fetchRequest(accountId: Int, groupId: Int) -> SQLRequest<Row> {
         return SplatDatabaseSQL.enemy_status(accountId: accountId, GroupID: groupId).request
+    }
+}
+
+extension CoopEnemyStatus: PreComputable {
+    static func create(from db: Database, identifier: (Int, Int)) throws -> [CoopEnemyStatus] {
+        let (groupId, accountId) = identifier
+        return try CoopEnemyStatus.fetchAll(db, SplatDatabaseSQL.enemy_status(accountId: accountId, GroupID: groupId).request)
     }
 }
 
