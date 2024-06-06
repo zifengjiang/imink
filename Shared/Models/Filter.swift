@@ -1,13 +1,20 @@
 import Foundation
 import GRDB
+import SplatDatabase
+
+func getCoopEarliestPlayedTime() -> Date{
+    try! SplatDatabase.shared.dbQueue.read { db in
+        try Date.fetchOne(db, sql: "SELECT MIN(playedTime) FROM coop") ?? Date(timeIntervalSince1970: 0)
+    }
+}
 
 struct Filter {
     var modes: Set<String> = []
     var rules: Set<String> = []
     var stageIds: Set<Int> = []
     var weaponIds: Set<Int> = []
-    var start: Date?
-    var end: Date?
+    var start: Date = getCoopEarliestPlayedTime()
+    var end: Date = Date()
 
     func buildCoopQuery(accountId: Int = AppUserDefaults.shared.accountId, limit:Int, offset:Int) -> SQLRequest<Row> {
         var conditions: [String] = []
@@ -34,15 +41,15 @@ struct Filter {
             arguments.append(contentsOf: array)
         }
 
-        if let start = start {
+
             conditions.append("coop.playedTime >= ?")
             arguments.append(start)
-        }
 
-        if let end = end {
+
+
             conditions.append("coop.playedTime <= ?")
             arguments.append(end)
-        }
+        
 
         let whereClause = conditions.isEmpty ? "1" : conditions.joined(separator: " AND ")
         let sql = """

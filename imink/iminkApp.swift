@@ -1,5 +1,6 @@
 import SwiftUI
 import SplatDatabase
+import IndicatorsKit
 
 @main
 struct iminkApp: App {
@@ -13,8 +14,13 @@ struct iminkApp: App {
 
     var body: some Scene {
         WindowGroup {
-            MainView()
-                .environmentObject(coopListViewModel)
+            ZStack{
+                MainView()
+                    .environmentObject(coopListViewModel)
+            }
+            .overlay(alignment: .top) {
+                IndicatorsOverlay(model: Indicators.shared)
+            }
         }
     }
 }

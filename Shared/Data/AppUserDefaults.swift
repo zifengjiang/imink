@@ -31,7 +31,7 @@ class AppUserDefaults: ObservableObject {
     var gameServiceToken: String?
 
     @AppStorage("gameServiceTokenRefreshTime", store: .appGroup)
-    var gameServiceTokenRefreshTime: Int?
+    var gameServiceTokenRefreshTime: Int = 0
 }
 
 

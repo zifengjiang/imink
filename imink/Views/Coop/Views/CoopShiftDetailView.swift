@@ -76,13 +76,13 @@ struct CoopShiftDetailView: View {
 
 
                             }
-                            if let stageImage = coopGroupStatus.stageImage, let stageName = coopGroupStatus.stageName{
-                                Image(stageImage)
+                            if let stage = coopGroupStatus._stage{
+                                Image(stage.name)
                                     .resizable()
                                     .scaledToFit()
                                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
-                                Text(stageName.localizedFromSplatNet)
+                                Text(stage.nameId.localizedFromSplatNet)
                                     .font(.splatoonFont(size: 15))
                                     .foregroundStyle(.secondary)
                             }
@@ -148,10 +148,10 @@ struct CoopShiftDetailView: View {
                         Spacer()
 
                         HStack{
-                            if let suppliedWeapons = coopGroupStatus.suppliedWeapons {
-                                ForEach(suppliedWeapons.indices, id: \.self){ i in
+                            if let suppliedWeapon = coopGroupStatus._suppliedWeapon{
+                                ForEach(suppliedWeapon.indices, id: \.self){ i in
                                     VStack{
-                                        Image(suppliedWeapons[i])
+                                        Image(suppliedWeapon[i].name)
                                             .resizable()
                                             .scaledToFit()
                                             .frame(width: 30, height: 30)
@@ -235,7 +235,6 @@ struct CoopShiftDetailView: View {
                     }
                 }
             }
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             .frame(height: 120)
         }
 
@@ -364,7 +363,7 @@ struct CoopPlayerStatusView:View {
                         .foregroundStyle(Color.green)
                         .frame(width: 18,height: 18)
                     Text("\(status.defeatEnemyCount, places: 1)")
-                        .font(.splatoonFont2(size: 18))
+                        .font(.splatoonFont(size: 18))
                         .lineLimit(1)
                         .minimumScaleFactor(0.3)
                 }
@@ -376,9 +375,9 @@ struct CoopPlayerStatusView:View {
                         .scaledToFit()
                         .frame(width: 18, height: 18)
                     Text("\(status.goldenDeliverCount, places:1)")
-                        .font(.splatoonFont2(size: 18)) + 
+                        .font(.splatoonFont(size: 18)) + 
                     Text("<\(status.goldenAssistCount, places:1)>")
-                        .font(.splatoonFont2(size: 13)).foregroundColor(.secondary)
+                        .font(.splatoonFont(size: 13)).foregroundColor(.secondary)
                         
                 }
 
@@ -389,7 +388,7 @@ struct CoopPlayerStatusView:View {
                         .foregroundStyle(Color.green)
                         .frame(width: 18,height: 18)
                     Text("\(status.rescueCount, places: 1)")
-                        .font(.splatoonFont2(size: 18))
+                        .font(.splatoonFont(size: 18))
                         .lineLimit(1)
                         .minimumScaleFactor(0.3)
                 }
@@ -401,7 +400,7 @@ struct CoopPlayerStatusView:View {
                         .scaledToFit()
                         .frame(width: 18, height: 18)
                     Text("\(status.rescuedCount, places:1)")
-                        .font(.splatoonFont2(size: 18))
+                        .font(.splatoonFont(size: 18))
                         .lineLimit(1)
                         .minimumScaleFactor(0.3)
                 }

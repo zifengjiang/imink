@@ -122,8 +122,8 @@ func coops(filter:Filter = Filter(), limit:Int = 30, _ offset: Int = 0) -> AnyPu
     .eraseToAnyPublisher()
 }
 
-func coops(filter:Filter = Filter(), limit:Int = 30, _ offset: Int = 0) -> [CoopListItemInfo] {
-    return try! SplatDatabase.shared.dbQueue.read { db in
+func coops(filter:Filter = Filter(), limit:Int = 30, _ offset: Int = 0) async -> [CoopListItemInfo] {
+    return try! await SplatDatabase.shared.dbQueue.read { db in
         try Row.fetchAll(db, filter.buildCoopQuery(limit:limit, offset:offset))
             .map { row in
                 try! CoopListItemInfo(row: row)

@@ -39,13 +39,15 @@ struct CoopFilterView:View {
     
     @Binding var showFilterView: Bool
     @Binding var filter: Filter
-    
-    var onDismiss: () -> Void
+
+    var onDismiss: () async -> Void
 
     var body: some View {
         NavigationStack{
             ScrollView{
                 VStack{
+                    DatePicker("开始时间", selection: $filter.start, displayedComponents: [.date,.hourAndMinute])
+                    DatePicker("结束时间", selection: $filter.end, displayedComponents: [.date,.hourAndMinute])
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 8)) {
                         ForEach(viewModel.weapons, id: \.hash){ weapon in
                             Button {
@@ -64,13 +66,17 @@ struct CoopFilterView:View {
 
                         }
                     }
+
                 }
+                .padding()
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
                         showFilterView = false
-                        onDismiss()
+                        Task{
+                            await onDismiss()
+                        }
                     }) {
                         Text("setting_page_done")
                             .foregroundStyle(.accent)

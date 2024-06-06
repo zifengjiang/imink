@@ -3,9 +3,9 @@ import SwiftUI
 struct CoopListRowView: View {
     let isCoop: Bool
     var coop: CoopListItemInfo?
-    var card: CoopShiftCard?
+    var card: CoopGroupStatus?
 
-    init(isCoop: Bool, coop: CoopListItemInfo? = nil, card: CoopShiftCard? = nil) {
+    init(isCoop: Bool, coop: CoopListItemInfo? = nil, card: CoopGroupStatus? = nil) {
         self.isCoop = isCoop
         self.coop = coop
         self.card = card
@@ -15,7 +15,7 @@ struct CoopListRowView: View {
         if isCoop {
             CoopListDetailItemView(coop: coop!)
         } else {
-            CoopListShiftCardView(card: card!)
+            CoopListShiftCardView(status: card!)
         }
     }
 }
@@ -28,7 +28,7 @@ extension CoopListRowView:Equatable {
         if lhs.isCoop {
             return lhs.coop?.id == rhs.coop?.id
         } else {
-            return lhs.card?.id == rhs.card?.id
+            return lhs.card?.startTime == rhs.card?.startTime
         }
     }
 }

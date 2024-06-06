@@ -27,12 +27,16 @@ struct CoopGroupStatus: FetchableRecord, Decodable {
     var highestEgg: Int
     var count: Int
 
-    var suppliedWeapons: [String]? = nil
-    var stageImage: String? = nil
-    var stageName: String? = nil
+    var _suppliedWeapon: [ImageMap]? = []
+    var _stage: ImageMap? = nil
+
 
     var failure:Int{
         count - clear - disconnect
+    }
+
+    var clearRate:Double {
+        return Double(clear) / Double(count)
     }
 }
 
@@ -40,10 +44,13 @@ extension CoopGroupStatus:PreComputable{
     static func create(from db: Database, identifier: (Int, Int)) throws -> CoopGroupStatus? {
         let (groupId, accountId) = identifier
         if var status = try CoopGroupStatus.fetchOne(db, sql: "SELECT * FROM coop_group_status_view WHERE accountId = ? AND GroupID = ?", arguments: [accountId, groupId]) {
-            status.suppliedWeapons = try Array(0..<4).compactMap { try ImageMap.fetchOne(db, key: status.suppliedWeapon[$0])?.name}
-            let stageRow = try ImageMap.fetchOne(db, key: status.stageId)
-            status.stageImage = stageRow?.name
-            status.stageName = stageRow?.nameId
+            status._suppliedWeapon = try Array(0..<4).compactMap { try ImageMap.fetchOne(db, key: status.suppliedWeapon[$0])}
+            status._stage = try ImageMap.fetchOne(db, key: status.stageId)
+            let rule:Schedule.Rule = status.rule == "REGULAR" ? .salmonRun : (status.rule == "TEAM_CONTEST" ?  .teamContest : .bigRun)
+            if let schedule = try Schedule.fetchOne(db, sql: "SELECT * FROM schedule WHERE ? BETWEEN startTime AND endTime AND mode = ? AND rule1 = ?", arguments: [status.startTime, Schedule.Mode.salmonRun.rawValue, rule.rawValue]){
+                status.startTime = schedule.startTime
+                status.endTime = schedule.endTime
+            }
             return status
         }
         return nil

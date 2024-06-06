@@ -1,5 +1,5 @@
 {
-  "originHash" : "b0a9cd7e4f183eaaf54a9d08d3c424de0aa80845233b91277825d8a32832f9d5",
+  "originHash" : "b510f1065b116972b60edbddc7b1340b115b7f7a5ac2316cbfc49961dfd6b987",
   "pins" : [
     {
       "identity" : "grdb.swift",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "639fa9168d36931b36a79e60dc06b7d23852f1f4",
         "version" : "6.27.0"
+      }
+    },
+    {
+      "identity" : "indicatorskit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jf666666/IndicatorsKit.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "e1120261aa5bc5205e5c48e2bdd6dd3098bc0163"
       }
     },
     {
@@ -34,7 +43,7 @@
       "location" : "https://github.com/jf666666/SplatDatabase",
       "state" : {
         "branch" : "main",
-        "revision" : "2a394cf74590a46306a75c117c62eb76277dd189"
+        "revision" : "3b82696854ec7f2a7733a85afb4aebdc807f47d4"
       }
     },
     {
@@ -43,7 +52,7 @@
       "location" : "https://github.com/jf666666/SplatNet3.git",
       "state" : {
         "branch" : "master",
-        "revision" : "6c3d2eb25c3a39f9616bf930da8a7f68671aa12b"
+        "revision" : "4b82aae468dc96360258a48d679d4242742e9c96"
       }
     },
     {

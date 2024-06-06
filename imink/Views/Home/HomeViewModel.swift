@@ -1,8 +1,10 @@
 import Foundation
+import SplatNet3API
 import SplatDatabase
 import Combine
 import GRDB
 import os
+import SwiftyJSON
 
 //@Observable
 class HomeViewModel: ObservableObject {
@@ -11,12 +13,25 @@ class HomeViewModel: ObservableObject {
     @Published var totalBattle: Int = 0
     @Published var last500Battle: [Bool?] = []
     @Published var last500Coop: [Bool?] = []
+    @Published var schedules: [Schedule] = []
+    @Published var salmonRunStatus: CoopGroupStatus?
+
+    var scheduleGroups: [Date: [Schedule]] {
+        Dictionary(grouping: schedules.filter { $0.mode != .salmonRun }, by: { $0.startTime })
+    }
+
+    var salmonRunSchedules: [Schedule] {
+        schedules.filter { $0.mode == .salmonRun }/*.sorted { $0.rule1.rawValue > $1.rule1.rawValue }*/
+    }
 
     private var cancelBag = Set<AnyCancellable>()
+    private var scheduleCancelBag = Set<AnyCancellable>()
 
     init() {
         updateStatus()
+        loadSchedules()
     }
+
 
     func updateStatus() {
         cancelBag = Set<AnyCancellable>()
@@ -37,6 +52,7 @@ class HomeViewModel: ObservableObject {
             .assign(to: \.totalBattle, on: self)
             .store(in: &cancelBag)
 
+
         $totalCoop
             .map{ _ in SplatDatabase.shared.fetchLast500(isCoop:true) }
             .assign(to: \.last500Coop, on: self)
@@ -48,7 +64,56 @@ class HomeViewModel: ObservableObject {
             .store(in: &cancelBag)
     }
 
-    
+    func loadLastSalmonRunStatus() async {
+        do{
+            try await SplatDatabase.shared.dbQueue.read { db in
+                if let groupId = try Int.fetchOne(db, sql: "SELECT MAX(GroupId) FROM coop_group_status_view WHERE accountId = ?", arguments: [AppUserDefaults.shared.accountId]), let status = try CoopGroupStatus.create(from: db, identifier: (groupId, AppUserDefaults.shared.accountId)){
+                    DispatchQueue.main.async {
+                        self.salmonRunStatus = status
+                    }
+                }
+            }
+        }catch{
+            logError(error)
+        }
+    }
+
+    func loadSchedules(date:Date = Date()){
+        scheduleCancelBag = Set<AnyCancellable>()
+        DispatchQueue.main.async{
+            Schedule.fetchAll(identifier: SQLRequest(sql: "SELECT * FROM schedule WHERE startTime >= ? OR (startTime <= ? AND endTime >= ?) ORDER BY startTime ASC", arguments: [date, date, date]))
+                .catch { error -> Just<[Schedule]> in
+                    os_log("Database Error: [loadSchedules] \(error.localizedDescription)")
+                    return Just<[Schedule]>([])
+                }
+                .map{
+                    $0.sorted(by: { $0.startTime < $1.startTime })
+                }
+                .assign(to: \.schedules, on: self)
+                .store(in: &self.scheduleCancelBag)
+        }
+    }
+
+    func fetchSchedules() async {
+        do{
+            print("fetchSchedules")
+            let json = try await Splatoon3InkAPI.schedule.GetJSON()
+            try await SplatDatabase.shared.dbQueue.write { db in
+                try insertSchedules(json: json, db: db)
+            }
+            loadSchedules()
+        }catch{
+            loadSchedules()
+            logError(error)
+        }
+    }
+
+}
+
+extension Schedule: Identifiable {
+    public var id:String{
+        UUID().uuidString
+    }
 }
 
 extension SplatDatabase {

@@ -1,98 +1,57 @@
 import SwiftUI
 
 struct CoopListShiftCardView: View {
-    let card: CoopShiftCard
+    let status: CoopGroupStatus
 
     var timeSpanText:String {
         let formatter = DateFormatter()
         formatter.dateFormat = "MM/dd HH:mm"
-        return "\(formatter.string(from: card.startTime)) - \(formatter.string(from: card.endTime))"
+        return "\(formatter.string(from: status.startTime)) - \(formatter.string(from: status.endTime))"
     }
 
     var body: some View {
         VStack(spacing: -1) {
-            HStack {
-                VStack(alignment: .leading,spacing: 0){
+            VStack{
+                HStack{
                     Text(timeSpanText)
-                        .font(.splatoonFont2(size: 12))
-                    VStack(alignment: .leading,spacing: 3){
-                        HStack(spacing: 2){
-                            HStack(spacing: 3){
-                                Image(.salmonRun)
-                                    .resizable()
-                                    .bold()
-                                    .foregroundStyle(Color.green)
-                                    .frame(width: 12,height: 12)
-                                Text("\(card.enemy, places: 1)")
-                                    .font(.splatoonFont2(size: 12))
-                            }
-                            .frame(width: 45, alignment: .leading)
-
-                            HStack(spacing: 3){
-                                Image(.golden)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 12, height: 12)
-                                Text("\(card.egg, places:1)")
-                                    .font(.splatoonFont2(size: 12)) + Text("<\(card.eggAssist, places:1)>")
-                                    .font(.splatoonFont2(size: 9)).foregroundColor(.secondary)
-                            }
-                        }
-
-                        HStack(spacing: 2){
-                            HStack(spacing: 3){
-                                Image(.jobShiftCardHelp)
-                                    .resizable()
-                                    .bold()
-                                    .foregroundStyle(Color.green)
-                                    .frame(width: 12,height: 12)
-                                Text("\(card.rescue, places: 1)")
-                                    .font(.splatoonFont2(size: 12))
-                            }
-                            .frame(width: 45, alignment: .leading)
-
-                            HStack(spacing: 3){
-                                Image(.jobShiftCardDead)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 12, height: 12)
-                                Text("\(card.rescued, places:1)")
-                                    .font(.splatoonFont2(size: 12))
-                            }
-                        }
+                        .font(.splatoonFont(size: 12))
+                    Spacer()
+                    if let stage = status._stage{
+                        Text(stage.nameId.localizedFromSplatNet)
+                            .font(.splatoonFont(size: 10))
+                            .foregroundStyle(.secondary)
                     }
                 }
+                HStack {
+                    
+                    StatusView(status: status)
 
-                Spacer()
-
-                VStack(alignment: .trailing,spacing: 10){
-                    Text(card.stage.localizedFromSplatNet)
-                        .font(.splatoonFont(size: 10))
-                        .foregroundStyle(.secondary)
-
-                    HStack{
-                        ForEach(card.weapons!.indices,id: \.self) { i in
-                            Image(card.weapons![i])
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 30, height: 30)
-                        }
-                        if card.weapons!.count < 4{
-                            let weapons = Array(repeating: card.weapons!.last!, count: 4 - card.weapons!.count)
-                            ForEach(weapons.indices, id: \.self) { i in
-                                Image(weapons[i])
+                    Spacer()
+                    if let suppliedWeapon = status._suppliedWeapon{
+                        HStack{
+                            ForEach(suppliedWeapon.indices,id: \.self) { i in
+                                Image(suppliedWeapon[i].name)
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 30, height: 30)
                             }
+                            if suppliedWeapon.count < 4{
+                                let weapons = Array(repeating: suppliedWeapon.last!, count: 4 - suppliedWeapon.count)
+                                ForEach(weapons.indices, id: \.self) { i in
+                                    Image(weapons[i].name)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 30, height: 30)
+                                }
+                            }
                         }
+                        .padding([.leading, .trailing], 10)
+                        .padding([.top, .bottom], 6)
+                        .background(Color(.sRGB, white: 151 / 255.0, opacity: 0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
                     }
-                    .padding([.leading, .trailing], 10)
-                    .padding([.top, .bottom], 6)
-                    .background(Color(.sRGB, white: 151 / 255.0, opacity: 0.1))
-                    .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+
                 }
-                .padding(.bottom, 2)
             }
             .padding([.leading, .top, .trailing], 13)
             .padding(.bottom, 11)
@@ -134,13 +93,13 @@ struct CoopListShiftCardView: View {
                 )
                 .overlay {
                     HStack(spacing:0){
-                        Text("\(card.count)场打工")
+                        Text("\(status.count)场打工")
                             .font(.splatoonFont(size: 12))
-//                        if stats.count != details.count{
-//                            Text("<\(details.count-stats.count)场掉线>")
-//                                .inkFont(.font1, size: 10, relativeTo: .body)
-//                                .foregroundStyle(Color.waveDefeat)
-//                        }
+                        if status.disconnect != 0{
+                            Text("<\(status.disconnect)场掉线>")
+                                .font(.splatoonFont(size: 10))
+                                .foregroundStyle(Color.waveDefeat)
+                        }
                     }
                     .foregroundStyle(Color.green)
                     .offset(y:2)
@@ -155,9 +114,61 @@ struct CoopListShiftCardView: View {
         .padding(.top, 15)
         .padding(.bottom, 0.1)
     }
+
+    struct StatusView:View {
+        let status:CoopGroupStatus
+        var body: some View {
+            VStack(alignment: .leading,spacing: 8){
+                HStack(spacing: 5){
+                    HStack(spacing: 3){
+                        Image(.salmonRun)
+                            .resizable()
+                            .bold()
+                            .foregroundStyle(Color.green)
+                            .frame(width: 12,height: 12)
+                        Text("\(status.avg_defeatEnemyCount, places: 1)")
+                            .font(.splatoonFont(size: 12))
+                    }
+                    .frame(width: 45, alignment: .leading)
+
+                    HStack(spacing: 3){
+                        Image(.golden)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 12, height: 12)
+                        Text("\(status.avg_goldenDeliverCount, places:1)")
+                            .font(.splatoonFont(size: 12)) + Text("<\(status.avg_goldenAssistCount, places:1)>")
+                            .font(.splatoonFont(size: 9)).foregroundColor(.secondary)
+                    }
+                }
+
+                HStack(spacing: 5){
+                    HStack(spacing: 3){
+                        Image(.jobShiftCardHelp)
+                            .resizable()
+                            .bold()
+                            .foregroundStyle(Color.green)
+                            .frame(width: 12,height: 12)
+                        Text("\(status.avg_rescueCount, places: 1)")
+                            .font(.splatoonFont(size: 12))
+                    }
+                    .frame(width: 45, alignment: .leading)
+
+                    HStack(spacing: 3){
+                        Image(.jobShiftCardDead)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 12, height: 12)
+                        Text("\(status.avg_rescuedCount, places:1)")
+                            .font(.splatoonFont(size: 12))
+                    }
+                }
+            }
+        }
+    }
 }
 
-#Preview {
-    CoopListShiftCardView(card: CoopShiftCard(id: 1, startTime: Date(), endTime: Date.init(timeInterval: 30000, since: Date()), enemy: 21.2, egg: 39.5, eggAssist: 6.4, rescue: 1.3, rescued: 0.9, stage: "Q29vcFN0YWdlLTk=",  count: 31))
-        .preferredColorScheme(.dark)
-}
+//#Preview {
+//    CoopListShiftCardView(card: CoopShiftCard(id: 1, startTime: Date(), endTime: Date.init(timeInterval: 30000, since: Date()), enemy: 21.2, egg: 39.5, eggAssist: 6.4, rescue: 1.3, rescued: 0.9, stage: "Q29vcFN0YWdlLTk=",  count: 31))
+//        .preferredColorScheme(.dark)
+//}

@@ -40,11 +40,9 @@ struct MainView: View {
         .task {
             MainViewModel.shared.isLogin = AppUserDefaults.shared.sessionToken != nil
 
-            await NSOAccountManager.shared.refreshGameServiceToken()
+            await NSOAccountManager.shared.refreshGameServiceTokenIfNeeded()
         }
     }
 }
 
-//#Preview {
-//    MainView()
-//}
+

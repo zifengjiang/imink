@@ -28,6 +28,7 @@ struct SettingPage: View {
                     }
                     .sheet(isPresented: $showFilePicker) {
                         FilePickerView(fileType: .zip) { url in
+                            showSettings = false
                             coopListViewModel.cancel()
                             DataBackup.import(url: url)
                         }
@@ -37,6 +38,14 @@ struct SettingPage: View {
                         //TODO: export user data
                     } label: {
                         Text("setting_button_export_user_data")
+                    }
+
+                    Button{
+                        Task{
+                            await fetchHistorySchedules()
+                        }
+                    } label: {
+                        Text("获取历史日程")
                     }
 
                     Button {

@@ -11,8 +11,8 @@ class NSOAccountManager:ObservableObject {
     @Published var isLogin:Bool = AppUserDefaults.shared.sessionToken != nil
     @Published var accountId:Int? = AppUserDefaults.shared.accountId
 
-    func refreshGameServiceToken() async {
-        if let sessionToken = AppUserDefaults.shared.sessionToken{
+    func refreshGameServiceTokenIfNeeded() async {
+        if let sessionToken = AppUserDefaults.shared.sessionToken, AppUserDefaults.shared.gameServiceTokenRefreshTime + 10800 < Int(Date().timeIntervalSince1970){
             do{
                 let gameServiceToken = try await NSOAuthorization.shared.requestWebServiceToken(sessionToken:sessionToken).result.accessToken
                 AppUserDefaults.shared.gameServiceToken = gameServiceToken

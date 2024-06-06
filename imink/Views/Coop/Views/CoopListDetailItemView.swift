@@ -60,7 +60,7 @@ struct CoopListDetailItemView: View {
                             .scaledToFit()
                             .frame(width: 12, height: 12)
                         Text("\(coop.enemyDefeatCount)")
-                            .font(.splatoonFont2(size: 10))
+                            .font(.splatoonFont(size: 10))
 
                     }
 
@@ -70,7 +70,7 @@ struct CoopListDetailItemView: View {
                             .scaledToFit()
                             .frame(width: 20, height: 20)
                         Text("\(coop.rescue)")
-                            .font(.splatoonFont2(size: 10))
+                            .font(.splatoonFont(size: 10))
 
                     }
 
@@ -80,7 +80,7 @@ struct CoopListDetailItemView: View {
                             .scaledToFit()
                             .frame(width: 20, height: 20)
                         Text("\(coop.rescued)")
-                            .font(.splatoonFont2(size: 10))
+                            .font(.splatoonFont(size: 10))
 
                     }
 
@@ -90,7 +90,7 @@ struct CoopListDetailItemView: View {
                             .scaledToFit()
                             .frame(width: 12, height: 12)
                         Text("\(coop.goldenEgg)")
-                            .font(.splatoonFont2(size: 10))
+                            .font(.splatoonFont(size: 10))
                     }
 
                     HStack(spacing: 3) {
@@ -99,7 +99,7 @@ struct CoopListDetailItemView: View {
                             .scaledToFit()
                             .frame(width: 12, height: 12)
                         Text("\(coop.powerEgg)")
-                            .font(.splatoonFont2(size: 10))
+                            .font(.splatoonFont(size: 10))
                     }
 
                 }
@@ -118,12 +118,13 @@ struct CoopListDetailItemView: View {
 
             HStack {
                 Text("危险度").font(.splatoonFont(size: 10))+Text(dangerRateText)
-                    .font(.splatoonFont2(size: 10))
+                    .font(.splatoonFont(size: 10))
                 Spacer()
                 Text("\(coop.time.toPlayedTimeString())")
-                    .font(.splatoonFont2(size: 10))
+                    .font(.splatoonFont(size: 10))
             }
             .foregroundColor(Color(.systemGray2))
+            .padding(.top, 1)
         }
         .padding(.top, 7.5)
         .padding(.bottom, 7)

@@ -1,4 +1,6 @@
 import SwiftUI
+import SplatNet3API
+import IndicatorsKit
 
 struct CoopListView: View {
     @EnvironmentObject var mainViewModel: MainViewModel
@@ -12,7 +14,7 @@ struct CoopListView: View {
                 LazyVStack{
                     ForEach(viewModel.rows, id:\.id){ row in
                         NavigationLink{
-                            CoopListDetailView(isCoop: row.isCoop, coopId: row.coop?.id, shiftId: row.card?.id)
+                            CoopListDetailView(isCoop: row.isCoop, coopId: row.coop?.id, shiftId: row.card?.groupId)
                         } label:{
                             CoopListRowView(isCoop: row.isCoop, coop: row.coop, card: row.card)
                                 .id(row.id)
@@ -25,11 +27,13 @@ struct CoopListView: View {
             .scrollPosition(id: $activeID, anchor: .bottom)
             .fixSafeareaBackground()
             .modifier(LoginViewModifier(isLogin: viewModel.isLogin, iconName: "TabBarSalmonRun"))
-            .navigationTitle("tab_salmon_run")
+            .navigationTitle(viewModel.navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .onChange(of: activeID) { oldValue, newValue in
                 if newValue == viewModel.rows.last?.id {
-                    viewModel.loadMore()
+                    Task{
+                        await viewModel.loadMore()
+                    }
                 }
             }
             .toolbar {
@@ -42,10 +46,29 @@ struct CoopListView: View {
                     }
                 }
             }
+            .toolbarTitleMenu {
+                ForEach(CoopRule.allCases, id:\.rawValue){rule in
+                    Button{
+                        viewModel.filter.rules.removeAll()
+                        if rule != .ALL{
+                            viewModel.filter.rules.insert(rule.rawValue)
+                        }
+                        viewModel.navigationTitle = rule.name
+                        Task{
+                            await viewModel.loadCoops()
+                        }
+                    } label: {
+                        Label(
+                            title: { Text("\(rule.name)") },
+                            icon: { rule.icon }
+                        )
+                    }
+                }
+            }
 
         }
         .refreshable {
-            await viewModel.fetchCoops()
+            await SN3Client.shared.fetchCoops()
         }
         .onReceive(mainViewModel.$isLogin) { isLogin in
             viewModel.isLogin = isLogin
@@ -53,7 +76,7 @@ struct CoopListView: View {
         .sheet(isPresented: $showFilterSheet){
             CoopFilterView(showFilterView: $showFilterSheet, filter: $viewModel.filter){
                 viewModel.cancel()
-                viewModel.loadCoops()
+                await viewModel.loadCoops()
             }
         }
     }

@@ -4,9 +4,11 @@
 <dict>
 	<key>UIAppFonts</key>
 	<array>
-		<string>Splatoon2.otf</string>
+		<string>KoreanERIN-M.ttf</string>
 		<string>Splatoon1.otf</string>
 		<string>DFPZongYiW7-GB.ttf</string>
+		<string>DFHuaZong-W5-WINP-BF.ttf</string>
+		<string>KurokaneStd-EB.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>

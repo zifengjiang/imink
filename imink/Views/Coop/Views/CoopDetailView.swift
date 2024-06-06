@@ -252,7 +252,7 @@ extension CoopDetailView {
                             .scaledToFit()
                             .frame(width: 12, height: 12)
                         Text("\(coop.egg)")
-                            .font(.splatoonFont2(size: 15))
+                            .font(.splatoonFont(size: 15))
                     }
 
 
@@ -262,7 +262,7 @@ extension CoopDetailView {
                             .scaledToFit()
                             .frame(width: 12, height: 12)
                         Text("\(coop.powerEgg)")
-                            .font(.splatoonFont2(size: 15))
+                            .font(.splatoonFont(size: 15))
                     }
                 }
 
@@ -364,7 +364,7 @@ extension CoopDetailView {
                                     .resizable()
                                     .scaledToFit()
                                     .frame(height: 12)
-                                Text("\(result.goldenDeliverCount)").font(.splatoonFont2(size: 12))+Text("+\(result.goldenAssistCount)").font(.splatoonFont2(size: 9))
+                                Text("\(result.goldenDeliverCount)").font(.splatoonFont(size: 12))+Text("+\(result.goldenAssistCount)").font(.splatoonFont(size: 9))
                             }
 
                             Group{
@@ -392,7 +392,7 @@ extension CoopDetailView {
                                     Text("\(result.rescuedCount)")
                                 }
                             }
-                            .font(.splatoonFont2(size: 12))
+                            .font(.splatoonFont(size: 12))
                         }
                         .lineLimit(1)
                         .minimumScaleFactor(0.3)
@@ -436,10 +436,10 @@ extension CoopDetailView {
             }
             Spacer()
             Group {
-                Text("\(result.teamDefeatCount)").font(.splatoonFont2(size: 15)) + Text(result.defeatCount == 0 ? "" : "(\(result.defeatCount))").font(.splatoonFont2(size: 12))
+                Text("\(result.teamDefeatCount)").font(.splatoonFont(size: 15)) + Text(result.defeatCount == 0 ? "" : "(\(result.defeatCount))").font(.splatoonFont(size: 12))
                 Text("/")
-                    .font(.splatoonFont2(size: 16))
-                Text("\("appearances_number".localized)x").font(.splatoonFont(size: 12)) + Text("\(result.popCount)").font(.splatoonFont2(size: 15))
+                    .font(.splatoonFont(size: 16))
+                Text("\("appearances_number".localized)x").font(.splatoonFont(size: 12)) + Text("\(result.popCount)").font(.splatoonFont(size: 15))
             }
             .foregroundStyle(result.popCount == result.teamDefeatCount ? Color.waveClear : Color.coopEnemyNotAllClear)
 

@@ -32,8 +32,8 @@ extension DataBackupError: LocalizedError {
 }
 
 struct DataBackupProgress {
-    let unzipProgressScale = 0.5
-    let loadFilesProgressScale = 0.5
+    let unzipProgressScale = 0.2
+    let loadFilesProgressScale = 0.8
     var importBattlesProgressScale = 0.15
     var importJobsProgressScale = 0.05
 
@@ -192,6 +192,7 @@ extension DataBackup {
                         let jsonData = try JSON(data: Data(contentsOf: url))
                         if try !SplatDatabase.shared.isCoopExist(id: jsonData["coopHistoryDetail"]["id"].stringValue, db: db){
                             try SplatDatabase.shared.insertCoop(json: jsonData["coopHistoryDetail"],db: db)
+                            self.importProgress.importJobsProgress += 1
                         }
                     } catch {
                         print("error: \(error.localizedDescription)")
@@ -218,6 +219,7 @@ extension DataBackup {
                         let jsonData = try JSON(data: Data(contentsOf: url))
                         if try !SplatDatabase.shared.isBattleExist(id: jsonData["vsHistoryDetail"]["id"].stringValue, db: db){
                             try SplatDatabase.shared.insertBattle(json: jsonData["vsHistoryDetail"],db: db)
+                            self.importProgress.importBattlesProgress += 1
                         }
                     } catch {
                         print("error: \(error.localizedDescription)")
@@ -256,24 +258,70 @@ extension DataBackup {
 }
 
 import UIKit
-import AlertKit
 import SplatDatabase
+import IndicatorsKit
+
+struct ProgressTracker {
+    var startTime: Date?
+    var lastUpdateTime: Date?
+    var progressValues: [Double] = []
+
+    mutating func update(progress: Double) -> TimeInterval? {
+        let currentTime = Date()
+        if startTime == nil {
+            startTime = currentTime
+        }
+
+        lastUpdateTime = currentTime
+        progressValues.append(progress)
+
+        guard progressValues.count > 1 else {
+            return nil
+        }
+
+        let elapsedTime = currentTime.timeIntervalSince(startTime!)
+        let completedProgress = progressValues.last!
+
+        guard completedProgress > 0 else {
+            return nil
+        }
+
+        let averageSpeed = elapsedTime / completedProgress
+        let remainingTime = (1.0 - completedProgress) * averageSpeed
+
+        return remainingTime
+    }
+}
 
 extension DataBackup {
     static func `import`(url: URL) {
-        ProgressHUD.colorHUD = .clear
-        ProgressHUD.colorProgress = .accent
+        let progressIndicatorId = UUID().uuidString
+        Indicators.shared.display(.init(id: progressIndicatorId, title: "正在导入数据", progress: 0))
+
+        var progressTracker = ProgressTracker()
+
         DataBackup.shared.import(url: url) { progress, error in
-            ProgressHUD.showProgress(CGFloat(progress.value))
+            if let remainingTime = progressTracker.update(progress: progress.value) {
+                let remainingTimeString = formatTimeInterval(remainingTime)
+                Indicators.shared.updateProgress(for: progressIndicatorId, progress: progress.value)
+                Indicators.shared.updateSubtitle(for: progressIndicatorId, subtitle: "预计剩余时间: \(remainingTimeString)")
+                Indicators.shared.updateExpandedText(for: progressIndicatorId, expandedText: "已导入\(Int(progress.importJobsProgress))个打工记录，\(Int(progress.importBattlesProgress))个对战记录")
+            } else {
+                Indicators.shared.updateProgress(for: progressIndicatorId, progress: progress.value)
+            }
             if let error = error {
-                ProgressHUD.dismiss()
-                AlertKitAPI.present(title: "Import Failed".localized, subtitle: error.localizedDescription, icon: .error, style: .iOS17AppleMusic, haptic: .error)
-                CoopListViewModel.shared.loadCoops()
+                Indicators.shared.dismiss(with: progressIndicatorId)
+                Indicators.shared.display(.init(id: UUID().uuidString, icon: .systemImage("xmark.circle.fill"), title: "导入失败",subtitle: error.localizedDescription, dismissType: .after(5),style: .error))
             } else if progress.value == 1 {
-                ProgressHUD.dismiss()
-                AlertKitAPI.present(title: "Import Success".localized, subtitle: "导入\(progress.count)", icon: .done, style: .iOS17AppleMusic, haptic: .success)
-                CoopListViewModel.shared.loadCoops()
+                Indicators.shared.dismiss(with: progressIndicatorId)
+                Indicators.shared.display(.init(id: UUID().uuidString, icon: .systemImage("checkmark.circle.fill"), title: "导入成功",subtitle: "成功导入\(progress.count)个记录", dismissType: .manual))
             }
         }
+    }
+
+    static func formatTimeInterval(_ interval: TimeInterval) -> String {
+        let minutes = Int(interval) / 60
+        let seconds = Int(interval) % 60
+        return String(format: "%02d:%02d", minutes, seconds)
     }
 }

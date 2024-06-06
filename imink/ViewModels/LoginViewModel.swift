@@ -4,6 +4,7 @@ import SplatNet3API
 import Combine
 import SplatDatabase
 import GRDB
+import IndicatorsKit
 
 class LoginViewModel:ObservableObject{
     enum Status {
@@ -21,11 +22,17 @@ class LoginViewModel:ObservableObject{
             self.status = .loading
         }
         do{
+            let loginIndicator = Indicator(id: UUID().uuidString, icon: .progressIndicator, title: "登录中", subtitle: "获取sessionToken",dismissType: .manual,isUserDismissible: false)
+            Indicators.shared.display(loginIndicator)
             let sessionToken = try await NSOAuthorization.shared.login()
+            Indicators.shared.updateSubtitle(for: loginIndicator.id, subtitle: "获取apiToken")
             let apiToken = try await NSOAuthorization.shared.requestLoginToken(sessionToken: sessionToken)
+            Indicators.shared.updateSubtitle(for: loginIndicator.id, subtitle: "获取用户信息")
             let naUser = try await NSOAuthorization.shared.requestUserInfo(accessToken: apiToken.accessToken)
+            Indicators.shared.updateSubtitle(for: loginIndicator.id, subtitle: "获取webServiceToken")
             let loginResult = try await NSOAuthorization.shared.requestLogin(accessToken: apiToken.accessToken, naUser: naUser)
             let webServiceToken = try await NSOAuthorization.shared.requestWebServiceToken(webApiServerToken: loginResult.result.webApiServerCredential.accessToken, accessToken: apiToken.accessToken, naUser: naUser)
+            Indicators.shared.updateSubtitle(for: loginIndicator.id, subtitle: "获取accountId")
             try await SN3Client.shared.setToken(webServiceToken.result.accessToken)
             let sp3PrincipalId = try await getAccountId()?.extractUserId()
             let avatar = loginResult.result.user.imageUri
@@ -35,6 +42,7 @@ class LoginViewModel:ObservableObject{
             let accountId = (try await SplatDatabase.shared.dbQueue.read { db in
                 return try Account.filter(Column("sp3Id") == sp3PrincipalId).fetchOne(db)?.id
             })!
+            Indicators.shared.updateSubtitle(for: loginIndicator.id, subtitle: "登录成功")
             DispatchQueue.main.async {
                 self.status = .loginSuccess
                 MainViewModel.shared.isLogin = true
@@ -43,6 +51,7 @@ class LoginViewModel:ObservableObject{
                 AppUserDefaults.shared.gameServiceToken = webServiceToken.result.accessToken
                 AppUserDefaults.shared.gameServiceTokenRefreshTime = Int(Date().timeIntervalSince1970)
             }
+            await Indicators.shared.dismiss(loginIndicator)
         }catch{
             logError(error)
         }
