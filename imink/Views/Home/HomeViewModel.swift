@@ -14,6 +14,7 @@ class HomeViewModel: ObservableObject {
     @Published var last500Battle: [Bool?] = []
     @Published var last500Coop: [Bool?] = []
     @Published var schedules: [Schedule] = []
+    @Published var lastCoopGroupId: Int?
     @Published var salmonRunStatus: CoopGroupStatus?
 
     var scheduleGroups: [Date: [Schedule]] {
@@ -51,7 +52,19 @@ class HomeViewModel: ObservableObject {
             }
             .assign(to: \.totalBattle, on: self)
             .store(in: &cancelBag)
-
+        
+        ValueObservation
+            .tracking { db in
+                try Int.fetchOne(db, sql: "SELECT MAX(GroupId) FROM coop_group_status_view WHERE accountId = ?", arguments: [AppUserDefaults.shared.accountId])
+            }
+            .publisher(in: SplatDatabase.shared.dbQueue, scheduling: .immediate)
+            .eraseToAnyPublisher()
+            .catch { error -> Just<Int?> in
+                logError(error)
+                return Just<Int?>(nil)
+            }
+            .assign(to: \.lastCoopGroupId, on: self)
+            .store(in: &cancelBag)
 
         $totalCoop
             .map{ _ in SplatDatabase.shared.fetchLast500(isCoop:true) }
@@ -62,21 +75,22 @@ class HomeViewModel: ObservableObject {
             .map{ _ in SplatDatabase.shared.fetchLast500(isCoop:false) }
             .assign(to: \.last500Battle, on: self)
             .store(in: &cancelBag)
-    }
 
-    func loadLastSalmonRunStatus() async {
-        do{
-            try await SplatDatabase.shared.dbQueue.read { db in
-                if let groupId = try Int.fetchOne(db, sql: "SELECT MAX(GroupId) FROM coop_group_status_view WHERE accountId = ?", arguments: [AppUserDefaults.shared.accountId]), let status = try CoopGroupStatus.create(from: db, identifier: (groupId, AppUserDefaults.shared.accountId)){
-                    DispatchQueue.main.async {
-                        self.salmonRunStatus = status
-                    }
+        $lastCoopGroupId
+            .sink{ _ in
+                if let lastCoopGroupId = self.lastCoopGroupId{
+                    CoopGroupStatus.fetchOne(identifier: (lastCoopGroupId, AppUserDefaults.shared.accountId))
+                        .catch { error -> Just<CoopGroupStatus?> in
+                            logError(error)
+                            return Just<CoopGroupStatus?>(nil)
+                        }
+                        .assign(to: \.salmonRunStatus, on: self)
+                        .store(in: &self.cancelBag)
                 }
             }
-        }catch{
-            logError(error)
-        }
+            .store(in: &cancelBag)
     }
+
 
     func loadSchedules(date:Date = Date()){
         scheduleCancelBag = Set<AnyCancellable>()

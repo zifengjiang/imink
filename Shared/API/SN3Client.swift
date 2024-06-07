@@ -62,9 +62,11 @@ extension SN3Client {
 //                    Indicators.shared.dismiss(with: "成功加载")
 //                }
             }
+        }catch SN3Client.Error.invalidGameServiceToken{
+            Indicators.shared.display(.init(id: UUID().uuidString, icon: .systemImage("xmark.seal"),title: "加载失败",expandedText: "invalidGameServiceToken", dismissType: .automatic, style: .error))
         }catch{
             Indicators.shared.dismiss(with: indicatorId)
-            Indicators.shared.display(.init(id: UUID().uuidString, icon: .systemImage("xmark.seal"),title: "加载失败",subtitle: error.localizedDescription, dismissType: .automatic, style: .error))
+            Indicators.shared.display(.init(id: UUID().uuidString, icon: .systemImage("xmark.seal"),title: "加载失败",expandedText: error.localizedDescription, dismissType: .automatic, style: .error))
             logError(error)
         }
     }

@@ -42,6 +42,7 @@ struct SettingPage: View {
 
                     Button{
                         Task{
+                            showSettings = false
                             await fetchHistorySchedules()
                         }
                     } label: {

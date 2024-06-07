@@ -55,10 +55,10 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
     
     func requestF(naId:String, accessToken:String, hashMethod:AppAPI.HashMethod) async throws -> F {
         do {
-            let fAPI = AppAPI.imink_f(naId: naId, naIdToken: accessToken, hashMethod: hashMethod)
+            let fAPI = AppAPI.nxapiZnca_f(naId: naId, naIdToken: accessToken, hashMethod: hashMethod)
             return try await requestF(fAPI: fAPI)
         } catch {
-            let fAPI = AppAPI.nxapiZnca_f(naId: naId, naIdToken: accessToken, hashMethod: hashMethod)
+            let fAPI = AppAPI.imink_f(naId: naId, naIdToken: accessToken, hashMethod: hashMethod)
             return try await requestF(fAPI: fAPI)
         }
     }

@@ -1,13 +1,13 @@
 {
-  "originHash" : "b510f1065b116972b60edbddc7b1340b115b7f7a5ac2316cbfc49961dfd6b987",
+  "originHash" : "be33893171b7508667ee5ebd574a250720b564ff692f059db1cc27f9b0585510",
   "pins" : [
     {
       "identity" : "grdb.swift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/groue/GRDB.swift.git",
       "state" : {
-        "revision" : "639fa9168d36931b36a79e60dc06b7d23852f1f4",
-        "version" : "6.27.0"
+        "branch" : "master",
+        "revision" : "4b934fda754b1cab34394ea89c2dd5acd170d50e"
       }
     },
     {
@@ -38,24 +38,6 @@
       }
     },
     {
-      "identity" : "splatdatabase",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/jf666666/SplatDatabase",
-      "state" : {
-        "branch" : "main",
-        "revision" : "3b82696854ec7f2a7733a85afb4aebdc807f47d4"
-      }
-    },
-    {
-      "identity" : "splatnet3",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/jf666666/SplatNet3.git",
-      "state" : {
-        "branch" : "master",
-        "revision" : "4b82aae468dc96360258a48d679d4242742e9c96"
-      }
-    },
-    {
       "identity" : "swift-algorithms",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-algorithms.git",
@@ -69,8 +51,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-argument-parser",
       "state" : {
-        "revision" : "46989693916f56d1186bd59ac15124caef896560",
-        "version" : "1.3.1"
+        "revision" : "0fbc8848e389af3bb55c182bc19ca9d5dc2f255b",
+        "version" : "1.4.0"
       }
     },
     {

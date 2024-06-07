@@ -92,7 +92,7 @@ struct HomePage: View {
             }
             .task {
                 await viewModel.fetchSchedules()
-                await viewModel.loadLastSalmonRunStatus()
+//                await viewModel.loadLastSalmonRunStatus()
             }
             .onReceive(timer) { currentTime in
                 if let endTime = viewModel.schedules.filter({$0.mode != .salmonRun}).first?.endTime, currentTime > endTime{
@@ -231,8 +231,18 @@ struct SalmonRunStatusView:View {
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
 
-                VStack{
-                    CoopListShiftCardView.StatusView(status: status)
+                VStack(alignment: .leading){
+                    CoopListShiftCardView.StatusView(status: status, hSpace: 0, vSpace: 3)
+                    if let weapons = status._suppliedWeapon {
+                        HStack{
+                            ForEach(weapons.indices, id: \.self){ index in
+                                Image(weapons[index].name)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 20,height: 20)
+                            }
+                        }
+                    }
                 }
                 .frame(width: geometry.size.width/2 - 4)
                 .padding([.top,.bottom],5)

@@ -3,6 +3,7 @@ import SwiftUI
 import SplatDatabase
 import SwiftyJSON
 import SplatNet3API
+import IndicatorsKit
 
 
 func performTaskEveryHourSince(startDate: Date, task: @escaping (Date) async throws -> Void, progress: @escaping (Double) -> Void) async {
@@ -36,6 +37,8 @@ func performTaskEveryHourSince(startDate: Date, task: @escaping (Date) async thr
 }
 
 func fetchHistorySchedules() async {
+    let indicatorId = UUID().uuidString
+    Indicators.shared.display(.init(id: indicatorId, title: "正在获取历史日程", progress: 0))
     await performTaskEveryHourSince(startDate: getCoopEarliestPlayedTime()) { date in
         let api = Splatoon3InkAPI.historySchedule(date)
         let (data, _) = try await URLSession.shared.data(for: api.request)
@@ -44,15 +47,10 @@ func fetchHistorySchedules() async {
             try insertSchedules(json: json, db: db)
         }
     } progress: { date in
-        DispatchQueue.main.async {
-            ProgressHUD.showProgress(CGFloat(date))
-            if date == 1.0 {
-                ProgressHUD.dismiss()
-            }
+        Indicators.shared.updateProgress(for: indicatorId, progress: date)
+        if date == 1.0 {
+            Indicators.shared.dismiss(with: indicatorId)
         }
-    }
-    DispatchQueue.main.async {
-        ProgressHUD.dismiss()
     }
 }
 

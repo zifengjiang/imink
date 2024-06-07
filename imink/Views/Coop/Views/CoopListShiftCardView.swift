@@ -117,9 +117,11 @@ struct CoopListShiftCardView: View {
 
     struct StatusView:View {
         let status:CoopGroupStatus
+        var hSpace: CGFloat = 5
+        var vSpace: CGFloat = 8
         var body: some View {
-            VStack(alignment: .leading,spacing: 8){
-                HStack(spacing: 5){
+            VStack(alignment: .leading,spacing: vSpace){
+                HStack(spacing: hSpace){
                     HStack(spacing: 3){
                         Image(.salmonRun)
                             .resizable()
@@ -142,7 +144,7 @@ struct CoopListShiftCardView: View {
                     }
                 }
 
-                HStack(spacing: 5){
+                HStack(spacing: hSpace){
                     HStack(spacing: 3){
                         Image(.jobShiftCardHelp)
                             .resizable()
