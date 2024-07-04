@@ -28,6 +28,7 @@ struct CoopDetailView: View {
                 VStack(spacing:20){
                     if viewModel.initialized{
                         cardView
+                            .padding(.top,10)
                         waveView
                         memberView
                         enemyView

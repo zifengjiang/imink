@@ -73,9 +73,9 @@
 		8B93C0C92C12EA8D00D7EFBC /* SplatNet3Helper in Frameworks */ = {isa = PBXBuildFile; productRef = 8B93C0C82C12EA8D00D7EFBC /* SplatNet3Helper */; };
 		8B93C0CC2C12EB1A00D7EFBC /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 8B93C0CB2C12EB1A00D7EFBC /* GRDB */; };
 		8B93C0D02C12EBA300D7EFBC /* SplatDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 8B93C0CF2C12EBA300D7EFBC /* SplatDatabase */; };
+		8B93C0D32C12ED6E00D7EFBC /* IndicatorsKit in Frameworks */ = {isa = PBXBuildFile; productRef = 8B93C0D22C12ED6E00D7EFBC /* IndicatorsKit */; };
 		8BA017472C099F23001CFC72 /* Precomputable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA017462C099F23001CFC72 /* Precomputable.swift */; };
 		8BA017492C09A8CE001CFC72 /* FetchableFromDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA017482C09A8CE001CFC72 /* FetchableFromDatabase.swift */; };
-		8BAADA512C11BC5E002D6370 /* IndicatorsKit in Frameworks */ = {isa = PBXBuildFile; productRef = 8BAADA502C11BC5E002D6370 /* IndicatorsKit */; };
 		8BAADA532C11BD77002D6370 /* Indicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAADA522C11BD77002D6370 /* Indicators.swift */; };
 		8BAADA552C11C382002D6370 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 8BAADA542C11C382002D6370 /* .swiftlint.yml */; };
 		8BAADA572C128DB6002D6370 /* RightCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAADA562C128DB6002D6370 /* RightCardView.swift */; };
@@ -233,8 +233,8 @@
 				8B93C0C52C12EA8D00D7EFBC /* SplatNet3 in Frameworks */,
 				8B93C0CC2C12EB1A00D7EFBC /* GRDB in Frameworks */,
 				8BDA845E2C0003D70038655C /* Algorithms in Frameworks */,
+				8B93C0D32C12ED6E00D7EFBC /* IndicatorsKit in Frameworks */,
 				8B26364F2BFEB00700F8964A /* AlertKit in Frameworks */,
-				8BAADA512C11BC5E002D6370 /* IndicatorsKit in Frameworks */,
 				8B26364C2BFEAE9400F8964A /* Zip in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -543,12 +543,12 @@
 				8B26364B2BFEAE9400F8964A /* Zip */,
 				8B26364E2BFEB00700F8964A /* AlertKit */,
 				8BDA845D2C0003D70038655C /* Algorithms */,
-				8BAADA502C11BC5E002D6370 /* IndicatorsKit */,
 				8B93C0C42C12EA8D00D7EFBC /* SplatNet3 */,
 				8B93C0C62C12EA8D00D7EFBC /* SplatNet3API */,
 				8B93C0C82C12EA8D00D7EFBC /* SplatNet3Helper */,
 				8B93C0CB2C12EB1A00D7EFBC /* GRDB */,
 				8B93C0CF2C12EBA300D7EFBC /* SplatDatabase */,
+				8B93C0D22C12ED6E00D7EFBC /* IndicatorsKit */,
 			);
 			productName = imink;
 			productReference = 8B7F29262BF6E1B90010A525 /* imink.app */;
@@ -636,11 +636,11 @@
 				8B26364A2BFEAE9400F8964A /* XCRemoteSwiftPackageReference "Zip" */,
 				8B26364D2BFEB00700F8964A /* XCRemoteSwiftPackageReference "SPAlert" */,
 				8BDA845C2C0003D70038655C /* XCRemoteSwiftPackageReference "swift-algorithms" */,
-				8BAADA4F2C11BC5E002D6370 /* XCRemoteSwiftPackageReference "IndicatorsKit" */,
 				8B93C0C22C12EA6900D7EFBC /* XCLocalSwiftPackageReference "../../SplatDatabase" */,
 				8B93C0C32C12EA8D00D7EFBC /* XCLocalSwiftPackageReference "../SplatNet3" */,
 				8B93C0CA2C12EB1A00D7EFBC /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 				8B93C0CD2C12EB4800D7EFBC /* XCRemoteSwiftPackageReference "SwiftyJSON" */,
+				8B93C0D12C12ED6E00D7EFBC /* XCLocalSwiftPackageReference "../IndicatorsKit" */,
 			);
 			productRefGroup = 8B7F29272BF6E1B90010A525 /* Products */;
 			projectDirPath = "";
@@ -971,7 +971,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -979,6 +979,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = jiangfeng.imink;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1004,7 +1008,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1012,6 +1016,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = jiangfeng.imink;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1144,6 +1152,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../SplatNet3;
 		};
+		8B93C0D12C12ED6E00D7EFBC /* XCLocalSwiftPackageReference "../IndicatorsKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../IndicatorsKit;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -1177,14 +1189,6 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 5.0.2;
-			};
-		};
-		8BAADA4F2C11BC5E002D6370 /* XCRemoteSwiftPackageReference "IndicatorsKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/jf666666/IndicatorsKit.git";
-			requirement = {
-				branch = main;
-				kind = branch;
 			};
 		};
 		8BDA845C2C0003D70038655C /* XCRemoteSwiftPackageReference "swift-algorithms" */ = {
@@ -1230,9 +1234,8 @@
 			package = 8B93C0C22C12EA6900D7EFBC /* XCLocalSwiftPackageReference "../../SplatDatabase" */;
 			productName = SplatDatabase;
 		};
-		8BAADA502C11BC5E002D6370 /* IndicatorsKit */ = {
+		8B93C0D22C12ED6E00D7EFBC /* IndicatorsKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 8BAADA4F2C11BC5E002D6370 /* XCRemoteSwiftPackageReference "IndicatorsKit" */;
 			productName = IndicatorsKit;
 		};
 		8BDA845D2C0003D70038655C /* Algorithms */ = {

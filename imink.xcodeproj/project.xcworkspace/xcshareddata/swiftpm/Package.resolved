@@ -1,5 +1,5 @@
 {
-  "originHash" : "be33893171b7508667ee5ebd574a250720b564ff692f059db1cc27f9b0585510",
+  "originHash" : "06fe823b6008fc1279311da24af95711350d07da3453b36426aaac7f5923a3d0",
   "pins" : [
     {
       "identity" : "grdb.swift",
@@ -8,15 +8,6 @@
       "state" : {
         "branch" : "master",
         "revision" : "4b934fda754b1cab34394ea89c2dd5acd170d50e"
-      }
-    },
-    {
-      "identity" : "indicatorskit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/jf666666/IndicatorsKit.git",
-      "state" : {
-        "branch" : "main",
-        "revision" : "e1120261aa5bc5205e5c48e2bdd6dd3098bc0163"
       }
     },
     {
