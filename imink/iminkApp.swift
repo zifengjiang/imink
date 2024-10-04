@@ -5,6 +5,7 @@ import IndicatorsKit
 @main
 struct iminkApp: App {
     @StateObject var coopListViewModel = CoopListViewModel.shared
+    @Environment(\.scenePhase) var scenePhase
 
     init(){
         #if DEBUG
@@ -20,6 +21,16 @@ struct iminkApp: App {
             }
             .overlay(alignment: .top) {
                 IndicatorsOverlay(model: Indicators.shared)
+            }
+            .onChange(of: scenePhase) { newPhase in
+                switch newPhase {
+                case .active:
+                    Task{
+                        await coopListViewModel.fetchCoops()
+                    }
+                default:
+                    break
+                }
             }
         }
     }

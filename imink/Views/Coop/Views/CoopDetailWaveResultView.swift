@@ -51,7 +51,7 @@ struct CoopDetailWaveResultView:View {
                         if isBossWave{
                             Text("EX-WAVE")
 
-                            Text("\(result.eventName!.localizedFromSplatNet)")
+                            Text("\(result.eventName?.localizedFromSplatNet ?? "头目联合")")
 
                         }else{
                             Text("WAVE \(result.waveNumber)")

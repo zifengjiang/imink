@@ -1,5 +1,5 @@
 {
-  "originHash" : "06fe823b6008fc1279311da24af95711350d07da3453b36426aaac7f5923a3d0",
+  "originHash" : "5d96357c7ca1059bf5f52d44f7bd61841172c3c36cf60acc3d659289dff2703f",
   "pins" : [
     {
       "identity" : "grdb.swift",
@@ -7,7 +7,7 @@
       "location" : "https://github.com/groue/GRDB.swift.git",
       "state" : {
         "branch" : "master",
-        "revision" : "4b934fda754b1cab34394ea89c2dd5acd170d50e"
+        "revision" : "2cf6c756e1e5ef6901ebae16576a7e4e4b834622"
       }
     },
     {
@@ -26,6 +26,15 @@
       "state" : {
         "revision" : "3b73be8db5a7e7efaf474c6ed919f5a437d843c9",
         "version" : "5.1.9"
+      }
+    },
+    {
+      "identity" : "splatdatabase",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/zifengjiang/SplatDatabase.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "3ff7a64045bca7efd468f7da5faac7a9ddf52a80"
       }
     },
     {

@@ -61,7 +61,7 @@ struct CoopListView: View {
                 }
                 .scrollPosition(id: $activeID, anchor: .bottom)
                 .fixSafeareaBackground()
-                    //            .modifier(LoginViewModifier(isLogin: viewModel.isLogin, iconName: "TabBarSalmonRun"))
+                .modifier(LoginViewModifier(isLogin: viewModel.isLogin, iconName: "TabBarSalmonRun"))
                 .navigationTitle(viewModel.navigationTitle)
                 .navigationBarTitleDisplayMode(.inline)
                 .onChange(of: activeID) { oldValue, newValue in

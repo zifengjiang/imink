@@ -12,7 +12,7 @@ class AppUserDefaults: ObservableObject {
     }
 
     @AppStorage("NSOVersion", store: .appGroup)
-    var NSOVersion: String = "2.10.0"
+    var NSOVersion: String = "2.10.1"
 
     @AppStorage("currentLanguage", store: .appGroup)
     var currentLanguage: String?

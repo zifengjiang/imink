@@ -18,18 +18,19 @@ struct SalmonRunScheduleCardView: View {
             .padding(.bottom, 5)
 
             HStack{
-                VStack{
-                    Text(schedule._stage[0].nameId.localizedFromSplatNet)
-                        .font(.splatoonFont(size: 15))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.3)
+                if schedule._stage.count >= 1{
+                    VStack{
+                        Text(schedule._stage[0].nameId.localizedFromSplatNet)
+                            .font(.splatoonFont(size: 15))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.3)
 
-                    Image(schedule._stage[0].name)
-                        .resizable()
-                        .scaledToFit()
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        Image(schedule._stage[0].name)
+                            .resizable()
+                            .scaledToFit()
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    }
                 }
-
                 VStack(spacing: 8){
                     HStack{
                         schedule.rule1.icon

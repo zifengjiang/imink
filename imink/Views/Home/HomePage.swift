@@ -21,57 +21,38 @@ struct HomePage: View {
 
             ScrollView{
                 VStack{
-                    TabView {
-                        VStack{
-                            VStack(spacing: 10) {
-                                HStack(alignment: .firstTextBaseline) {
-                                    Text("今日")
-                                        .font(.splatoonFont(size: 22))
-                                    Spacer()
-                                }
-                                if let salmonRunStatus = viewModel.salmonRunStatus{
-                                    SalmonRunStatusView(status: salmonRunStatus)
-                                }else{
-                                    ProgressView()
-                                }
-                            }
-                            .padding(.top)
 
-                            VStack(spacing: 0) {
-                                HStack(alignment: .firstTextBaseline) {
-                                    Text("近期工况")
-                                        .font(.splatoonFont(size: 22))
-                                        .foregroundStyle(Color.appLabel)
-
-                                    Text("(\(NSLocalizedString("最近500场", comment: "")))")
-                                        .font(.splatoonFont(size: 12))
-                                        .foregroundStyle(.secondary)
-
-                                    Spacer()
-                                }
-
-                                HStack {
-                                    Spacer()
-                                    Text("最近50场")
-                                        .font(.splatoonFont(size: 8))
-                                        .foregroundStyle(.secondary)
-                                        .lineLimit(1)
-                                        .minimumScaleFactor(0.2)
-                                        .frame(width: vdChartLastBlockWidth)
-                                }
-                                .frame(height: 20)
-
-                                VDGridView(data: viewModel.last500Coop, height: $vdChartViewHeight, lastBlockWidth: $vdChartLastBlockWidth)
-                                    .frame(height: vdChartViewHeight)
-                            }
+                    VStack{
+                        if selectedScheduleType == 1{
+                            todayBattleStatusView
+                        }else{
+                            todaySalmonRunStatusView
                         }
-
                     }
-                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                     .frame(height: 240)
 
-                    scheduleView
 
+                    VStack(spacing:0){
+                        Text("home_schedule_title")
+                            .font(.splatoonFont(size: 22))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Picker(selection: $selectedScheduleType) {
+                            Text("home_picker_battle").tag(1)
+                            Text("home_picker_salmon_run").tag(2)
+                        } label: {
+                            Text("picker")
+                        }
+                        .pickerStyle(.segmented)
+                        .frame(width: 230)
+                        .padding(.vertical)
+
+                        if selectedScheduleType == 1{
+                            BattleScheduleView(scheduleGroups: viewModel.scheduleGroups)
+                        }else{
+                            SalmonRunScheduleView(salmonRunSchedules: viewModel.salmonRunSchedules)
+                        }
+                    }
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal)
@@ -103,32 +84,98 @@ struct HomePage: View {
             }
         }
     }
-    
-    var scheduleView: some View {
-        VStack(spacing: 0){
-            Text("home_schedule_title")
-                .font(.splatoonFont(size: 22))
-                .frame(maxWidth: .infinity, alignment: .leading)
 
-            Picker(selection: $selectedScheduleType) {
-                Text("home_picker_battle").tag(1)
-                Text("home_picker_salmon_run").tag(2)
-            } label: {
-                Text("picker")
+    var todaySalmonRunStatusView: some View{
+        VStack{
+            VStack(spacing: 10) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text("最近工况")
+                        .font(.splatoonFont(size: 22))
+                    Spacer()
+                }
+                if let salmonRunStatus = viewModel.salmonRunStatus{
+                    SalmonRunStatusView(status: salmonRunStatus)
+                }else{
+                    ProgressView()
+                }
             }
-            .pickerStyle(.segmented)
-            .frame(width: 230)
-            .padding(.vertical)
+            .padding(.top)
 
-//            TabView(selection: $selectedScheduleType) {
-//                ScrollView{BattleScheduleView(scheduleGroups: viewModel.scheduleGroups)}.tabItem { Text("Tab Label 1") }.tag(1)
-//                ScrollView{SalmonRunScheduleView(salmonRunSchedules: viewModel.salmonRunSchedules)}.tabItem { Text("Tab Label 2") }.tag(2)
-//            }
+            VStack(spacing: 0) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text("近期工况")
+                        .font(.splatoonFont(size: 22))
+                        .foregroundStyle(Color.appLabel)
 
-            if selectedScheduleType == 1{
-                BattleScheduleView(scheduleGroups: viewModel.scheduleGroups)
-            }else{
-                SalmonRunScheduleView(salmonRunSchedules: viewModel.salmonRunSchedules)
+                    Text("(\(NSLocalizedString("最近500场", comment: "")))")
+                        .font(.splatoonFont(size: 12))
+                        .foregroundStyle(.secondary)
+
+                    Spacer()
+                }
+
+                HStack {
+                    Spacer()
+                    Text("最近50场")
+                        .font(.splatoonFont(size: 8))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.2)
+                        .frame(width: vdChartLastBlockWidth)
+                }
+                .frame(height: 20)
+
+                VDGridView(data: viewModel.last500Coop, height: $vdChartViewHeight, lastBlockWidth: $vdChartLastBlockWidth)
+                    .frame(height: vdChartViewHeight)
+            }
+        }
+    }
+
+    var todayBattleStatusView: some View{
+        VStack{
+            VStack(spacing: 10) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text("最近战况")
+                        .font(.splatoonFont(size: 22))
+                    Text("\(viewModel.battleStatus?.lastPlayTime ?? Date())")
+                        .font(.splatoonFont(size: 10))
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+                if let status = viewModel.battleStatus{
+                    TodayBattleView(today: status)
+                }else{
+                    ProgressView()
+                }
+            }
+            .padding(.top)
+
+            VStack(spacing: 0) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text("近期战况")
+                        .font(.splatoonFont(size: 22))
+                        .foregroundStyle(Color.appLabel)
+
+                    Text("(\(NSLocalizedString("最近500场", comment: "")))")
+                        .font(.splatoonFont(size: 12))
+                        .foregroundStyle(.secondary)
+
+                    Spacer()
+                }
+
+                HStack {
+                    Spacer()
+                    Text("最近50场")
+                        .font(.splatoonFont(size: 8))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.2)
+                        .frame(width: vdChartLastBlockWidth)
+                }
+                .frame(height: 20)
+
+                VDGridView(data: viewModel.last500Battle, height: $vdChartViewHeight, lastBlockWidth: $vdChartLastBlockWidth)
+                    .frame(height: vdChartViewHeight)
             }
         }
     }

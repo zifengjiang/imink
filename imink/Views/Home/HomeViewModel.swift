@@ -16,6 +16,7 @@ class HomeViewModel: ObservableObject {
     @Published var schedules: [Schedule] = []
     @Published var lastCoopGroupId: Int?
     @Published var salmonRunStatus: CoopGroupStatus?
+    @Published var battleStatus: BattleGroupStatus?
 
     var scheduleGroups: [Date: [Schedule]] {
         Dictionary(grouping: schedules.filter { $0.mode != .salmonRun }, by: { $0.startTime })
@@ -64,6 +65,15 @@ class HomeViewModel: ObservableObject {
                 return Just<Int?>(nil)
             }
             .assign(to: \.lastCoopGroupId, on: self)
+            .store(in: &cancelBag)
+
+        
+        BattleGroupStatus.fetchOne(identifier: AppUserDefaults.shared.accountId)
+            .catch { error -> Just<BattleGroupStatus?> in
+                logError(error)
+                return Just<BattleGroupStatus?>(nil)
+            }
+            .assign(to: \.battleStatus, on: self)
             .store(in: &cancelBag)
 
         $totalCoop

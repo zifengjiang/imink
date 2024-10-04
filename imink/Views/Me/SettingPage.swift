@@ -1,5 +1,6 @@
 import SwiftUI
 import SplatDatabase
+import IndicatorsKit
 
 struct SettingPage: View {
     @Binding var showSettings: Bool
@@ -8,17 +9,47 @@ struct SettingPage: View {
     @EnvironmentObject var coopListViewModel: CoopListViewModel
     @State var showFilePicker = false
     @State private var isActivityPresented = false
+    @State var showLogoutAlert = false
+    @State var showCopySessionIdAlert = false
     @State private var item: Any = URL(fileURLWithPath: SplatDatabase.shared.dbQueue.path)
     var body: some View {
         NavigationStack{
             List{
-                Button {
-                    AppUserDefaults.shared.sessionToken = nil
-//                    mainViewModel.isLogin = false
-                } label: {
-                    Text("setting_button_logout")
-                }
+                Section(header: Text("账户")){
+                    Button(action: {
+                        showCopySessionIdAlert = true
 
+                    }) {
+                        Text("复制会话令牌")
+                    }
+                    .alert(isPresented: $showCopySessionIdAlert) {
+                        Alert(
+                            title: Text("复制会话令牌"),
+                            message: Text("复制会话令牌的不当传播会导致隐私泄露, 你确定要复制会话令牌吗?"),
+                            primaryButton: .destructive(Text("确认")) {
+                                UIPasteboard.general.string = AppUserDefaults.shared.sessionToken
+                            },
+                            secondaryButton: .cancel()
+                        )
+                    }
+
+                    Button {
+                        showLogoutAlert = true
+                    } label: {
+                        Text("setting_button_logout")
+                    }
+                    .alert(isPresented: $showLogoutAlert) {
+                        Alert(
+                            title: Text("退出登录"),
+                            message: Text("你确定要退出登录吗？"),
+                            primaryButton: .destructive(Text("确认")) {
+                                    // 当用户点击“Logout”按钮时，执行注销操作
+                                AppUserDefaults.shared.sessionToken = nil
+                            },
+                            secondaryButton: .cancel()
+                        )
+                    }
+                }
 
                 Section(header: Text("setting_section_user_data")){
                     Button {
@@ -35,11 +66,15 @@ struct SettingPage: View {
                     }
 
                     Button {
-                        //TODO: export user data
+                        self.isActivityPresented = true
                     } label: {
                         Text("setting_button_export_user_data")
                     }
+                    .background(ActivityView(isPresented: $isActivityPresented, item: $item))
 
+                }
+
+                Section(header: Text("关于Imink")){
                     Button{
                         Task{
                             showSettings = false
@@ -50,12 +85,14 @@ struct SettingPage: View {
                     }
 
                     Button {
-                        self.isActivityPresented = true
-                    } label: {
-                        Text("导出数据库")
-                    }
-                    .background(ActivityView(isPresented: $isActivityPresented, item: $item))
 
+                    } label: {
+                        HStack{
+                            Text("NSO版本")
+                            Spacer()
+                            Text("\(AppUserDefaults.shared.NSOVersion)").foregroundStyle(Color.secondary)
+                        }
+                    }
                 }
             }
             .navigationTitle("setting_page_title")

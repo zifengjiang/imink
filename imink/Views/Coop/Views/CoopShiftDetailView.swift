@@ -294,7 +294,7 @@ struct CoopShiftDetailView: View {
         HStack{
             let kingSorted = self.viewModel.coopEnemyStatus.filter{$0.nameId.order>=23}
             ForEach(kingSorted,id:\.nameId){king in
-                    VStack{
+                VStack{
                         Image(king.name)
                             .resizable()
                             .scaledToFit()

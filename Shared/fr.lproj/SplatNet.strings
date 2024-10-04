@@ -64,6 +64,7 @@
 "VnNTdGFnZS05" = "Lotissement Filament";
 "VnNTdGFnZS0xMA==" = "Pont Esturgeon";
 "VnNTdGFnZS0xNQ==" = "Supermarché Cétacé";
+"VnNTdGFnZS0yNQ==" = "Clabousse Arena";
 "VnNTdGFnZS0xNA==" = "Chantier Narval";
 "VnNTdGFnZS0xOA==" = "Manta Maria";
 "VnNTdGFnZS0xMQ==" = "Galeries Guppy";
@@ -81,6 +82,7 @@
 "Q29vcFN0YWdlLTEwMA==" = "Parc Carapince";
 "Q29vcFN0YWdlLTEwNg==" = "Banlieue Balibot";
 "Q29vcFN0YWdlLTEwNA==" = "Ruines Uma'mi";
+"Q29vcFN0YWdlLTEwNw==" = "Clabousse Arena";
 "Q29vcFN0YWdlLTEwNQ==" = "Halles de Port-merlu";
 "Q29vcFN0YWdlLTc=" = "Centrale Anguilla";
 "Q29vcFN0YWdlLTg=" = "Rocade Rémora";
@@ -391,6 +393,7 @@
 "TitleAdjective-1142" = "de festimatch";
 "TitleAdjective-1143" = "de match de festival";
 "TitleAdjective-1145" = "bourru";
+"TitleAdjective-1146" = "de Grand Festival";
 "TitleAdjective-2002" = "monochrome";
 "TitleAdjective-2003" = "à manches longues";
 "TitleAdjective-2004" = "auxiliaire";
@@ -1421,6 +1424,7 @@
 "TitleSubject-0194" = "Fan de Gold Bazookas/Fan de Gold Bazookas";
 "TitleSubject-0195" = "Fan de H2Whoa/Fan de H2Whoa";
 "TitleSubject-0196" = "Fan de Riot Act/Fan de Riot Act";
+"TitleSubject-0197" = "Fan de Now or Never Seven/Fan de Now or Never Seven";
 "TitleSubject-0220" = "Hippie/Hippie";
 "TitleSubject-0221" = "Coupe courte";
 "TitleSubject-0222" = "Double chignon";
@@ -2362,6 +2366,8 @@
 "5c0d044470979851394820f153b3d5fb410f10151c15c228482a1d50790b36d4" = "Masque des Hohojiro";
 "21e851a04a422a52e2ee4101b6973607650baa2fff7e08f85eaa797746812989" = "Masque des Onaga";
 "d98d30b94ac746d106955f5627001cc0644c8a22cc789521b04aaf2557716411" = "Masque des Manta";
+"82514be11d396401ca8a01e92e1a93ea23b2e3c28612d5c0621b54d9e5d9ce16" = "Couronne de tournée";
+"8224cd527b2c58e744ca30feecfd0536feea266f627fc435031cf83389b0b146" = "Casque de tournée";
 "f397b6fc8da9b9e8bdb42b1559101a003e3fca3b4ed4233def5080262e922de1" = "Casquette baseball";
 "730df11118d7a9ef367d5921003c012bfa7814477d1a6612ada6378b765fa4c1" = "Casquette légère";
 "437be7eb016cfeceaacf16059a1e6767eef01c6cf34f05685950c3c2a75cd320" = "Casquette filet Cubic";
@@ -2417,6 +2423,7 @@
 "1edf7e9e498e33dde607014cb23e96d402107c4e255dce2479b167ff1a562823" = "バイトヘルメット シルバー";
 "b16ab4e272d343794ba669a1f6ae5036a2848f377644b6f8e37fbc3035b33b29" = "バイトヘルメット ゴールド";
 "3eb5c2bf146dddf05cdb74ae8be245d5eee6f17669346a49c6ec1713880358e1" = "バイトヘルメット プリズム";
+"ff56ddb883837b6479c6dad12c83c7808de52fc2b56202e8556e93974453d5f7" = "バイトヘルメット ブロッカー";
 "49f7abbe2ab59926d8949ca7f3e9ed2adf83a732d90eb0f345915befdd01ba56" = "Casque à lampe";
 "b62ad406425191ea7056ab9625551b77edb6bd80b44bfe6822af1da8a94e84cb" = "Masque antipoussière";
 "00834818f4ffa69084b7887cacf6e40e1b4e065fcbbb50391a21a88ecb8935ec" = "Masque de soudeur";
@@ -2472,6 +2479,10 @@
 "9bbe96712d74138a3e0d48256266baeb057dca037b4a554a7a2599a70c596e33" = "Lunettes hipster";
 "a3a3b83ef8681592ffa765a3cc089c3359c7e64ecbf7893a8f9a422323805056" = "Masque de sommeil deluxe";
 "9970e78730016ca786353edf5de46e3f9c72f01ec1ac65bde2331f5b78eeb8c1" = "Bandeau blanc";
+"b59feea99b6680873ec4d343a323045820a6fe30a2db05de2f5f0da0fbcc2e16" = "Chapeau kyonshi";
+"262849a6f76010831c07d117a022bb78d4055a575574bfdaf1ba7d7a1d82a672" = "Cornes de diablotin";
+"499926f6d5eb015e5eb2b92222829f9699a56757c67636c2da1da3a6c3402d27" = "Masque de hockey";
+"da4152381ab1d9add8e3d892ac275cd763d13fe0e5cb0ec87d21eeab20585fbf" = "Masque de baudroie";
 "972fb0714de6d9d0c725831c1955646ebb38dbbc27135d00ff1a4c6f1a23c6ec" = "Masque de momie";
 "e0bddf71f785ed136c69968e8de4795fed19d77ec676216dba4d1faccd5e6c57" = "Tricorne pirate plancton";
 "0edfd019c468d92fe415ada10b0ce89ed49fe7616e5d5444f582e0120788dcbd" = "Terreur des sept calamers";
@@ -2490,6 +2501,13 @@
 "2541b650d8076454e10220abde20ebde59650a5c3ff91fa06513c7cf16e73272" = "Masque crabe-singe";
 "df7de6ce7852d6e95aa98aec459e946116051e67319b8bad9cc7265b24f44be8" = "Masque renard";
 "b00b7c0ce740f052340915b0228e1ea73b17b11e9cef8f1819bfee2494aaeafa" = "Masque cartoon";
+"cef74733ef8e3c558119c583de733da656b780290393fb99f06501688fedc480" = "Piques Now or Never";
+"c87843f459db81faba4526b7c1ee67afc933d30bb4bb19f9653b242dd53b2ef4" = "Couronne Now or Never";
+"c7ea2044d0ed09089d751c01660c67004b814a82076cc46437b2b27968b72cc5" = "Casquette Now or Never";
+"d7aa6d63806dad3322fa7269141a2c96ad2cfd6ce8a5deb3f5316260c57ffe68" = "Boucles Now or Never";
+"dc70c75c99cf2af2596f8f10b80a8d8f104d8a032a6730cae524db6ba90269ae" = "Barrette Now or Never";
+"447c97d91708c1d8349310c519b33b594b9d380f1671c2881a3f000040b7f7d9" = "Cornes Now or Never";
+"3444badd06ca9e1cd7f40085287472cced3a6ef9ac5627f4ef38fd7ae725a90b" = "Coiffe Now or Never";
 "57c3f4cbd331685cb9da4596f15a06cf47d42b2e8997f0b3496971238f7f6834" = "Chapeau de brousse";
 "576c31536aeb873d97afaf57be11dd55b2cce978f55e5c8df91b0c7ec311e0b3" = "Chapeau de safari";
 "771c835e4efee031009fd43e8fecb92031e607ad73149603a788043a02bcceff" = "Chapeau de camping";
@@ -2583,7 +2601,9 @@
 "74e9338c975f086296f8de71fd7c96f32f7f00cd08f56f617ac6a6069c405b0d" = "Hero Brain Lv3";
 "3c29879e7226542851d4f3dc5092dae50b9eeacc346c40f364d7bd9d89bc587e" = "Hero Brain ST";
 "7704d274fc197295815ac10fe20c88a0ebce800b59aecf60710f9ae9e9b9cd4d" = "Neurocasque héroïque (répl.)";
+"58a23573897d1d47b7156330d4404a8e47f5cb69885da3a8ee340f7b4baebda5" = "Attache héroïque (réplique)";
 "a52eb7b431cade8b25d916dc06f172a43a0a2c63f8e513df16f6336a152470d4" = "Legendary Cap";
+"eb95b912a8f170ad78494807ec088346f04cfeb4a7da15d04a50e7cfec216a2b" = "Casquette de l'amiral (réplique)";
 "d9f7d7dd09a3b8d7e7e9e7176a8573051992bf1a13bb66c3ca3eb100d80f223a" = "Bonnet à pompon";
 "028eb90b48ece34043bb201c167c3e6e1c285ac8ffc21d3902fb1a78553790df" = "Bonnet court";
 "8c3972c5530ba137ea960851ecc2f59891be24fc712bd757c1f9095c3788b14e" = "Bonnet à rayures";
@@ -2634,6 +2654,8 @@
 "7939f6dfe1e2b769b715274331a9e77f534e245981046d386a47052c61ee7e3b" = "Crop top des Hohojiro";
 "30faa981e64a7085cd0fb0fb81e22932911694633310fdf2dec5e126ddb9bdfb" = "Crop top des Onaga";
 "2dd2e0c96f26a6ad07af96f290ff7caa5be009cbea09e13eb5d622df4e61d57e" = "Veste des Manta";
+"9575d16fe8e3f973e55ebbad41750cc4aeebc92e975b689d4d7f12f886b6bfba" = "Veste bouffante de tournée";
+"87a6d6b50dad0ffa3041efcc4c91b2304b6a6ab2316c013580a226b100250fe8" = "Veste de tournée";
 "80c5fe2a622eef647d4cd2e717a9ef660b5c42654aff3378517535738bf0fbe1" = "Salopette orange";
 "8f03e316abab27e5402aad8c182d86a9430292c55366e74372652b34b6f812a5" = "Salopette verte";
 "2dfd25a793dd6ca2a219b9ab25d19c9aed7c06b325b75fa1167f82e46a2a769e" = "Salopette jaune";
@@ -2654,6 +2676,7 @@
 "4a64d6a30740d65ed71784b4a95c301a08086bd1c65b8eebda3907b875cb8ac0" = "Salopette argent";
 "982faa24fd42351e45eb6cac2229588ba76b19415fc43bf0b82cdd68e86bec2c" = "Salopette or";
 "a978c96f6dbe99e4b74c221ae5b30de2fa5aef0095280bfaa512b8b70e319ff2" = "Salopette irisée";
+"0b6ca8b46723ee60f9850914c88c8322926329a5df1340803c9a54d2e023a811" = "Combinaison robuste";
 "5f828579a28ee2133c9f842c389fc4c0a34cd7e13a8feb832391b223b13ce305" = "Polo rayé";
 "214c5b7c7a33f42a80bdbf5de70b314961294d6195188cd5817b72078930627a" = "Gilet de sauvetage";
 "9f9a2dc5b6594ade01a1d5f54c9428ed1b9285afbd2ecde7dcb2b57b264c753c" = "Blouson d'ingénieur pétrolier";
@@ -2745,7 +2768,9 @@
 "b541fcfc183aa3c3c060073d5cb8b019d86794861d48ee5ddb54cafd47a399f4" = "Hero Suit Lv3";
 "e0eed73a58ac472beb06bb20d37833e9ba0373e2a78f892c1f0d81a6c59346b6" = "Hero Suit ST";
 "dae43e544ec63b37f9ef2ff9906fcf2d6612f52fb697d9d09a222544252315a3" = "Panoplie héroïque (réplique)";
+"b35e9081a465a8221574767e7852fbdc418d92f36b9b2d5abbb1e03a8665ce7c" = "Tenue de survie (réplique)";
 "fda1b049a14da44fa480a7698097b26f8e6ec9c643c45b4bb21a883edbb7c3fc" = "Legendary Cape";
+"bf2f3b8d338dba81e4260c3154d52b524346c6950278ae7fe574558335ae517d" = "Poncho de l'amiral (réplique)";
 "76c7025ad3da0a54d6eb773c7a9abdadbbaebd496d79ed687fd7e245b7edfcc8" = "Polo rose crevette";
 "75930f47334ff2008db6bc51c368b7e7afce0551e9d9903744256cd0eeb17f0b" = "Haut rayé rugby";
 "2ffd044cb843ed50c8c1541bcafa82f3c1737090da68589a956ec590244d7110" = "Haut rayé tricolore";
@@ -3015,6 +3040,8 @@
 "f9c5b54bc437cdb61b88020d4aaa790cfdb9ab42958a763f19b3ab322ca821a3" = "Sabots des Hohojiro";
 "b12608c3cff30152fba417bbb09936e65daabbab67becbf807ae06f4c729cb78" = "Socquettes des Onaga";
 "a2469c041adf52dddbce499d73b0635e7ea075e65700306ae562e9f03fa791dc" = "Bottes des Manta";
+"ddaca5d605e342b0ff2948c0a055cce4aef1af28636e809aa91356f3b7cc1fa3" = "Bottes de tournée";
+"dd16afbe2fdbcc65f218fbf60771dc4f0441fe135458a8091c44e41783c6e3bf" = "Talons hauts de tournée";
 "6fbfef928ff7ebda7b69a9dffb02d6dcb8c25ce85ac2d9502a2cf12f42768abd" = "Bottes de moto";
 "554ef898693a3d1696a194521ddaa7e8b0e77ed3e86f9fa9d1bfff74d3d04a18" = "Bottes sécurité nubuck";
 "e989fed0d8cbb87f5476a0e131e64aa5599dae48405dce7d509bed3c122837ba" = "Bottes sécurité rouges";
@@ -3092,7 +3119,9 @@
 "396c277e83c5c7ac4213b3e0aa2ba506fdf413d4639690f6c52f7be0f293e64e" = "Hero Boots Lv3";
 "252c1860c2ff23b551980af4742a9e0d8b22412cebfe51f124cfc24c81a7be67" = "Hero Boots ST";
 "a45cb8e038e107cccc6f806bffd9ffb42ebdbb369ba76c85dfbce418befaf8ac" = "Boots héroïques (répliques)";
+"4f7897e73348dd7f7244e74b2d6886c59ad09a047ea82fce898f57491e4b0813" = "Protège-pieds de survie (répl.)";
 "c3bd8ffe20d6cfd10cb8cf7cee4d8b6a44327fa16a55fdb96a4b2823e8468e6d" = "Legendary Sandals";
+"b5084a9d24bf193c5c6a1288c707bc5fb687f056bad1e330cb0e01c41ba9a9b0" = "Tongs de l'amiral (répliques)";
 "64a885d3d257d26975c257401b17282b4ff59ac4b97cf481ac4b635c36570ab0" = "Sabots huître";
 "0f9140e98700713058a061ad624dc3e52eed3966a5b32752d8dc32e3ce9313dd" = "Sabots chocolat";
 "5da7cd547b9f5f00e86c722ce63bd246618f912836691e735de55d0de8f2c53b" = "Sandales fluo";
@@ -3355,3 +3384,4 @@
 "Q29vcFVuaWZvcm0tMTg=" = "Salopette argent";
 "Q29vcFVuaWZvcm0tMTk=" = "Salopette or";
 "Q29vcFVuaWZvcm0tMjA=" = "Salopette irisée";
+"Q29vcFVuaWZvcm0tMjE=" = "Combinaison robuste";

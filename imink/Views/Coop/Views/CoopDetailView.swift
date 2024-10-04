@@ -89,11 +89,29 @@ struct CoopDetailView: View {
 
     var enemyView: some View {
         VStack{
-            ForEach(viewModel.enemyResults.indices, id: \.self){ i in
-                if i != 0{
-                    Divider()
+            HStack{
+                ForEach(viewModel.enemyResults.indices, id: \.self){ i in
+                    if viewModel.enemyResults[i].isBoss{
+                        VStack{
+                            Image(viewModel.enemyResults[i].enemyImage ?? "DummyEnemy")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 50, height: 50)
+                            Text(viewModel.enemyResults[i].defeatCount == 1 ? "成功击倒！" : "未能击倒...")
+                                .font(.splatoonFont(size: 12))
+                            
+                        }
+                    }
                 }
-                makeEnemyView(result: viewModel.enemyResults[i])
+            }
+
+            ForEach(viewModel.enemyResults.indices, id: \.self){ i in
+                if !viewModel.enemyResults[i].isBoss{
+                    if i != 0{
+                        Divider()
+                    }
+                    makeEnemyView(result: viewModel.enemyResults[i])
+                }
             }
         }
         .padding(.all,10)

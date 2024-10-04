@@ -53,9 +53,11 @@
 		8B5276122BFC1DF100022D5B /* OverlayImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5276112BFC1DF100022D5B /* OverlayImage.swift */; };
 		8B5276142BFC228600022D5B /* SpecialWeaponImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5276132BFC228600022D5B /* SpecialWeaponImage.swift */; };
 		8B5276162BFC371300022D5B /* CoopListRowModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5276152BFC371300022D5B /* CoopListRowModel.swift */; };
+		8B65636E2CB00B050017F5D0 /* BattleGroupStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B65636D2CB00B050017F5D0 /* BattleGroupStatus.swift */; };
 		8B7059042C0B00510076F680 /* NameplateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7059032C0B00510076F680 /* NameplateView.swift */; };
 		8B7059062C0C25A90076F680 /* TouchDownAndTouchUpGestureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7059052C0C25A90076F680 /* TouchDownAndTouchUpGestureView.swift */; };
 		8B7059082C0C27980076F680 /* PopupModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7059072C0C27980076F680 /* PopupModifier.swift */; };
+		8B7AE6DF2CAED41B00E61735 /* TodayBattleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7AE6DE2CAED41B00E61735 /* TodayBattleView.swift */; };
 		8B7F292A2BF6E1B90010A525 /* iminkApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7F29292BF6E1B90010A525 /* iminkApp.swift */; };
 		8B7F292C2BF6E1B90010A525 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7F292B2BF6E1B90010A525 /* MainView.swift */; };
 		8B7F292E2BF6E1BB0010A525 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B7F292D2BF6E1BB0010A525 /* Assets.xcassets */; };
@@ -72,20 +74,22 @@
 		8B93C0C72C12EA8D00D7EFBC /* SplatNet3API in Frameworks */ = {isa = PBXBuildFile; productRef = 8B93C0C62C12EA8D00D7EFBC /* SplatNet3API */; };
 		8B93C0C92C12EA8D00D7EFBC /* SplatNet3Helper in Frameworks */ = {isa = PBXBuildFile; productRef = 8B93C0C82C12EA8D00D7EFBC /* SplatNet3Helper */; };
 		8B93C0CC2C12EB1A00D7EFBC /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 8B93C0CB2C12EB1A00D7EFBC /* GRDB */; };
-		8B93C0D02C12EBA300D7EFBC /* SplatDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 8B93C0CF2C12EBA300D7EFBC /* SplatDatabase */; };
 		8B93C0D32C12ED6E00D7EFBC /* IndicatorsKit in Frameworks */ = {isa = PBXBuildFile; productRef = 8B93C0D22C12ED6E00D7EFBC /* IndicatorsKit */; };
 		8BA017472C099F23001CFC72 /* Precomputable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA017462C099F23001CFC72 /* Precomputable.swift */; };
 		8BA017492C09A8CE001CFC72 /* FetchableFromDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA017482C09A8CE001CFC72 /* FetchableFromDatabase.swift */; };
+		8BA30B082CAED80E0020D489 /* Operator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA30B072CAED80E0020D489 /* Operator.swift */; };
 		8BAADA532C11BD77002D6370 /* Indicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAADA522C11BD77002D6370 /* Indicators.swift */; };
 		8BAADA552C11C382002D6370 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 8BAADA542C11C382002D6370 /* .swiftlint.yml */; };
 		8BAADA572C128DB6002D6370 /* RightCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAADA562C128DB6002D6370 /* RightCardView.swift */; };
 		8BB4A1F22BFDB49E008DB764 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB4A1F12BFDB49E008DB764 /* LoginView.swift */; };
 		8BB4A1F42BFDB4CE008DB764 /* FixVectorImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */; };
+		8BB719A72CAA2B54003C6909 /* ThreadSafeExecution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB719A62CAA2B54003C6909 /* ThreadSafeExecution.swift */; };
 		8BB99B372BF77B3B00470408 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB99B362BF77B3B00470408 /* Models.swift */; };
 		8BD8CD522C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD8CD512C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift */; };
 		8BD8CD542C0ADBC200FED66F /* WavePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD8CD532C0ADBC200FED66F /* WavePicker.swift */; };
 		8BDA845E2C0003D70038655C /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 8BDA845D2C0003D70038655C /* Algorithms */; };
 		8BDA84602C00A0290038655C /* NSOAccountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BDA845F2C00A0290038655C /* NSOAccountManager.swift */; };
+		8BDF9A252C9BEFC50019F7EC /* SplatDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 8BDF9A242C9BEFC50019F7EC /* SplatDatabase */; };
 		8BE0950D2C0315C40089705F /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE0950C2C0315C40089705F /* ActivityView.swift */; };
 		8BE095112C035B000089705F /* CoopShiftDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE095102C035B000089705F /* CoopShiftDetailView.swift */; };
 		8BE095132C035B280089705F /* CoopShiftDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE095122C035B280089705F /* CoopShiftDetailViewModel.swift */; };
@@ -171,9 +175,11 @@
 		8B5276112BFC1DF100022D5B /* OverlayImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayImage.swift; sourceTree = "<group>"; };
 		8B5276132BFC228600022D5B /* SpecialWeaponImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialWeaponImage.swift; sourceTree = "<group>"; };
 		8B5276152BFC371300022D5B /* CoopListRowModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopListRowModel.swift; sourceTree = "<group>"; };
+		8B65636D2CB00B050017F5D0 /* BattleGroupStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleGroupStatus.swift; sourceTree = "<group>"; };
 		8B7059032C0B00510076F680 /* NameplateView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NameplateView.swift; sourceTree = "<group>"; };
 		8B7059052C0C25A90076F680 /* TouchDownAndTouchUpGestureView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TouchDownAndTouchUpGestureView.swift; sourceTree = "<group>"; };
 		8B7059072C0C27980076F680 /* PopupModifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopupModifier.swift; sourceTree = "<group>"; };
+		8B7AE6DE2CAED41B00E61735 /* TodayBattleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayBattleView.swift; sourceTree = "<group>"; };
 		8B7F29262BF6E1B90010A525 /* imink.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = imink.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8B7F29292BF6E1B90010A525 /* iminkApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iminkApp.swift; sourceTree = "<group>"; };
 		8B7F292B2BF6E1B90010A525 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
@@ -202,11 +208,13 @@
 		8B8B286B2BF887D400790809 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		8BA017462C099F23001CFC72 /* Precomputable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Precomputable.swift; sourceTree = "<group>"; };
 		8BA017482C09A8CE001CFC72 /* FetchableFromDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchableFromDatabase.swift; sourceTree = "<group>"; };
+		8BA30B072CAED80E0020D489 /* Operator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Operator.swift; sourceTree = "<group>"; };
 		8BAADA522C11BD77002D6370 /* Indicators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Indicators.swift; sourceTree = "<group>"; };
 		8BAADA542C11C382002D6370 /* .swiftlint.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		8BAADA562C128DB6002D6370 /* RightCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightCardView.swift; sourceTree = "<group>"; };
 		8BB4A1F12BFDB49E008DB764 /* LoginView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FixVectorImage.swift; sourceTree = "<group>"; };
+		8BB719A62CAA2B54003C6909 /* ThreadSafeExecution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadSafeExecution.swift; sourceTree = "<group>"; };
 		8BB99B362BF77B3B00470408 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		8BD8CD512C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopShiftDetailWaveStatusView.swift; sourceTree = "<group>"; };
 		8BD8CD532C0ADBC200FED66F /* WavePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WavePicker.swift; sourceTree = "<group>"; };
@@ -228,7 +236,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8B93C0C72C12EA8D00D7EFBC /* SplatNet3API in Frameworks */,
-				8B93C0D02C12EBA300D7EFBC /* SplatDatabase in Frameworks */,
+				8BDF9A252C9BEFC50019F7EC /* SplatDatabase in Frameworks */,
 				8B93C0C92C12EA8D00D7EFBC /* SplatNet3Helper in Frameworks */,
 				8B93C0C52C12EA8D00D7EFBC /* SplatNet3 in Frameworks */,
 				8B93C0CC2C12EB1A00D7EFBC /* GRDB in Frameworks */,
@@ -385,6 +393,7 @@
 		8B7F29602BF6E5270010A525 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				8BA30B072CAED80E0020D489 /* Operator.swift */,
 				8B7059052C0C25A90076F680 /* TouchDownAndTouchUpGestureView.swift */,
 				8B0D14932BFAB57100B82AD1 /* Date+Ext.swift */,
 				8B0D14A32BFACD8E00B82AD1 /* StringInterpolation.swift */,
@@ -398,6 +407,7 @@
 				8B0D14982BFAB98E00B82AD1 /* Splatoon1.otf */,
 				8B5276112BFC1DF100022D5B /* OverlayImage.swift */,
 				8BAADA522C11BD77002D6370 /* Indicators.swift */,
+				8BB719A62CAA2B54003C6909 /* ThreadSafeExecution.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -468,6 +478,7 @@
 				8B0792082C1077DD0094EA57 /* BattleScheduleCardView.swift */,
 				8B07920A2C1078310094EA57 /* SalmonRunScheduleCardView.swift */,
 				8BAADA562C128DB6002D6370 /* RightCardView.swift */,
+				8B7AE6DE2CAED41B00E61735 /* TodayBattleView.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -519,6 +530,7 @@
 				8BFE91712C0D7CE000C12CBE /* Filter.swift */,
 				8BFE91752C0EFCEA00C12CBE /* Schedules.swift */,
 				8B0792062C0F435C0094EA57 /* TargetType+fetch.swift */,
+				8B65636D2CB00B050017F5D0 /* BattleGroupStatus.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -547,8 +559,8 @@
 				8B93C0C62C12EA8D00D7EFBC /* SplatNet3API */,
 				8B93C0C82C12EA8D00D7EFBC /* SplatNet3Helper */,
 				8B93C0CB2C12EB1A00D7EFBC /* GRDB */,
-				8B93C0CF2C12EBA300D7EFBC /* SplatDatabase */,
 				8B93C0D22C12ED6E00D7EFBC /* IndicatorsKit */,
+				8BDF9A242C9BEFC50019F7EC /* SplatDatabase */,
 			);
 			productName = imink;
 			productReference = 8B7F29262BF6E1B90010A525 /* imink.app */;
@@ -636,11 +648,11 @@
 				8B26364A2BFEAE9400F8964A /* XCRemoteSwiftPackageReference "Zip" */,
 				8B26364D2BFEB00700F8964A /* XCRemoteSwiftPackageReference "SPAlert" */,
 				8BDA845C2C0003D70038655C /* XCRemoteSwiftPackageReference "swift-algorithms" */,
-				8B93C0C22C12EA6900D7EFBC /* XCLocalSwiftPackageReference "../../SplatDatabase" */,
 				8B93C0C32C12EA8D00D7EFBC /* XCLocalSwiftPackageReference "../SplatNet3" */,
 				8B93C0CA2C12EB1A00D7EFBC /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 				8B93C0CD2C12EB4800D7EFBC /* XCRemoteSwiftPackageReference "SwiftyJSON" */,
 				8B93C0D12C12ED6E00D7EFBC /* XCLocalSwiftPackageReference "../IndicatorsKit" */,
+				8BDF9A232C9BEFC50019F7EC /* XCRemoteSwiftPackageReference "SplatDatabase" */,
 			);
 			productRefGroup = 8B7F29272BF6E1B90010A525 /* Products */;
 			projectDirPath = "";
@@ -706,6 +718,7 @@
 				8B0D14942BFAB57100B82AD1 /* Date+Ext.swift in Sources */,
 				8BE095132C035B280089705F /* CoopShiftDetailViewModel.swift in Sources */,
 				8B0D14A22BFAC98D00B82AD1 /* GrayscaleTextureView.swift in Sources */,
+				8BB719A72CAA2B54003C6909 /* ThreadSafeExecution.swift in Sources */,
 				8B50DBE22C01C1C20076AE6D /* Logger.swift in Sources */,
 				8BFF73E72C0939160048F2A6 /* CoopListRowView.swift in Sources */,
 				8B7F29622BF6E5310010A525 /* NSOHash.swift in Sources */,
@@ -723,6 +736,7 @@
 				8B7F292C2BF6E1B90010A525 /* MainView.swift in Sources */,
 				8B0851782BFB78D800AF22C5 /* CoopDetailWaveResultView.swift in Sources */,
 				8B50DBE02C01BED40076AE6D /* SN3Client.swift in Sources */,
+				8B7AE6DF2CAED41B00E61735 /* TodayBattleView.swift in Sources */,
 				8BAADA572C128DB6002D6370 /* RightCardView.swift in Sources */,
 				8B0D14822BF9B85700B82AD1 /* GameMode.swift in Sources */,
 				8B0D148F2BFA2EBE00B82AD1 /* CoopListDetailItemView.swift in Sources */,
@@ -745,6 +759,7 @@
 				8B7059082C0C27980076F680 /* PopupModifier.swift in Sources */,
 				8B0D146A2BF8BFF700B82AD1 /* VDGridView.swift in Sources */,
 				8B7F295F2BF6E4A80010A525 /* NSOAPI.swift in Sources */,
+				8B65636E2CB00B050017F5D0 /* BattleGroupStatus.swift in Sources */,
 				8B0851742BFB673000AF22C5 /* TextureBackGround.swift in Sources */,
 				8B0D14802BF9908800B82AD1 /* FilePickerView.swift in Sources */,
 				8B7F296C2BF711C40010A525 /* NSOAuthorization.swift in Sources */,
@@ -756,6 +771,7 @@
 				8B3591432BF892130066BCA3 /* HomePage.swift in Sources */,
 				8B0D14842BFA210700B82AD1 /* SessionManager.swift in Sources */,
 				8BAADA532C11BD77002D6370 /* Indicators.swift in Sources */,
+				8BA30B082CAED80E0020D489 /* Operator.swift in Sources */,
 				8BD8CD542C0ADBC200FED66F /* WavePicker.swift in Sources */,
 				8BB4A1F22BFDB49E008DB764 /* LoginView.swift in Sources */,
 			);
@@ -1144,10 +1160,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		8B93C0C22C12EA6900D7EFBC /* XCLocalSwiftPackageReference "../../SplatDatabase" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../SplatDatabase;
-		};
 		8B93C0C32C12EA8D00D7EFBC /* XCLocalSwiftPackageReference "../SplatNet3" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../SplatNet3;
@@ -1199,6 +1211,14 @@
 				minimumVersion = 1.2.0;
 			};
 		};
+		8BDF9A232C9BEFC50019F7EC /* XCRemoteSwiftPackageReference "SplatDatabase" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/zifengjiang/SplatDatabase.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1229,11 +1249,6 @@
 			package = 8B93C0CA2C12EB1A00D7EFBC /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
 		};
-		8B93C0CF2C12EBA300D7EFBC /* SplatDatabase */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8B93C0C22C12EA6900D7EFBC /* XCLocalSwiftPackageReference "../../SplatDatabase" */;
-			productName = SplatDatabase;
-		};
 		8B93C0D22C12ED6E00D7EFBC /* IndicatorsKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = IndicatorsKit;
@@ -1242,6 +1257,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8BDA845C2C0003D70038655C /* XCRemoteSwiftPackageReference "swift-algorithms" */;
 			productName = Algorithms;
+		};
+		8BDF9A242C9BEFC50019F7EC /* SplatDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8BDF9A232C9BEFC50019F7EC /* XCRemoteSwiftPackageReference "SplatDatabase" */;
+			productName = SplatDatabase;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
