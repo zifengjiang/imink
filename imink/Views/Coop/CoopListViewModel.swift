@@ -12,21 +12,33 @@ class CoopListViewModel: ObservableObject {
     @Published var filter: Filter = Filter()
     @Published var navigationTitle = "全部打工"
 
+    private var cancellables: Set<AnyCancellable> = []
+
     var groupId = 0
-    var isLogin: Bool = AppUserDefaults.shared.sessionToken != nil
+
     private var offset: Int = 0
     private var cancelBag = Set<AnyCancellable>()
 
     init() {
-        Task{
-            await loadCoops()
+        AppState.shared.$isLogin
+            .sink { [weak self] isLogin in
+                self?.handleLoginStateChange(isLogin: isLogin)
+            }
+            .store(in: &cancellables)
+    }
+
+    func handleLoginStateChange(isLogin:Bool) {
+        if isLogin{
+            Task{
+                await loadCoops()
+            }
+        }else{
+            self.rows = []
         }
     }
 
     func loadCoops(limit: Int = 50, offset: Int = 0, loadRecent:Bool = false) async{
         self.groupId = 0
-        print("load_coops")
-
         let rows = processCoops(await coops(filter: loadRecent ? Filter() : filter, limit: limit, offset))
         DispatchQueue.main.async {
             self.rows = rows
@@ -34,8 +46,8 @@ class CoopListViewModel: ObservableObject {
     }
 
     func fetchCoops() async {
+        guard AppState.shared.isLogin else { return }
         await SN3Client.shared.fetchCoops()
-//        await loadCoops()
     }
 
     func cancel() {
@@ -43,31 +55,19 @@ class CoopListViewModel: ObservableObject {
     }
 
     func loadMore() async{
-//        coops(filter:filter, limit: 10, offset)
-//            .catch { _ in Just<[CoopListItemInfo]>([]) }
-//            .map { [weak self] coops in
-//                self?.processCoops(coops) ?? []
-//            }
-//            .receive(on: DispatchQueue.main)
-//            .sink { [weak self] newRows in
-//                withAnimation {
-//                    self?.rows.append(contentsOf: newRows)
-//                }
-//            }
-//            .store(in: &cancelBag)
         let rows = processCoops(await coops(filter: filter, limit: 10, offset))
         DispatchQueue.main.async {
             self.rows.append(contentsOf: rows)
         }
     }
 
-    private func fetchCoopsFromDatabase(limit: Int, offset: Int) -> AnyPublisher<[CoopListItemInfo], Never> {
+    private func fetchCoopsFromDatabase(limit: Int, offset: Int) -> AnyPublisher<[CoopListRowInfo], Never> {
         return coops(limit: limit, offset)
-            .catch { _ in Just<[CoopListItemInfo]>([]) }
+            .catch { _ in Just<[CoopListRowInfo]>([]) }
             .eraseToAnyPublisher()
     }
 
-    private func processCoops(_ coops: [CoopListItemInfo]) -> [CoopListRowModel] {
+    private func processCoops(_ coops: [CoopListRowInfo]) -> [CoopListRowModel] {
         self.offset += coops.count
         var rows = [CoopListRowModel]()
         for coop in coops {

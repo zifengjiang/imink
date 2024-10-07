@@ -24,3 +24,15 @@
 "home_schedule_title" = "日程";
 "home_picker_battle" = "对战";
 "home_picker_salmon_run" = "鲑鱼跑";
+"Turf War" = "占地对战";
+"Splat Zones" = "真格区域";
+"Tower Control" = "真格塔楼";
+"Rainmaker" = "真格鱼虎";
+"Clam Blitz" = "真格蛤蜊";
+"Tri Color" = "三色夺宝对战";
+
+"REGULAR" = "一般比赛";
+"BANKARA" = "蛮颓比赛";
+"XMATCH" = "X比赛";
+"LEAGUE" = "活动比赛";
+"PRIVATE" = "私人比赛";

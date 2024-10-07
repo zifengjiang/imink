@@ -35,6 +35,7 @@ struct CoopListView: View {
                                                 Label("11", systemImage: "arrowtriangle.left.fill")
                                             }
                                         }
+
                                         ToolbarItem {
                                             Button{
                                                 // select next row if has one
@@ -61,7 +62,7 @@ struct CoopListView: View {
                 }
                 .scrollPosition(id: $activeID, anchor: .bottom)
                 .fixSafeareaBackground()
-                .modifier(LoginViewModifier(isLogin: viewModel.isLogin, iconName: "TabBarSalmonRun"))
+                .modifier(LoginViewModifier(isLogin: AppState.shared.isLogin, iconName: "TabBarSalmonRun"))
                 .navigationTitle(viewModel.navigationTitle)
                 .navigationBarTitleDisplayMode(.inline)
                 .onChange(of: activeID) { oldValue, newValue in
@@ -92,6 +93,7 @@ struct CoopListView: View {
                                 viewModel.filter.rules.insert(rule.rawValue)
                             }
                             viewModel.navigationTitle = rule.name
+                            guard AppState.shared.isLogin else { return }
                             Task{
                                 await viewModel.loadCoops()
                             }
@@ -107,14 +109,13 @@ struct CoopListView: View {
 
         }
         .refreshable {
+            guard AppState.shared.isLogin else { return }
             await SN3Client.shared.fetchCoops()
-        }
-        .onReceive(mainViewModel.$isLogin) { isLogin in
-            viewModel.isLogin = isLogin
         }
         .sheet(isPresented: $showFilterSheet){
             CoopFilterView(showFilterView: $showFilterSheet, filter: $viewModel.filter){
                 viewModel.cancel()
+                guard AppState.shared.isLogin else { return }
                 await viewModel.loadCoops()
             }
         }

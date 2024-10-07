@@ -10,8 +10,7 @@ import SwiftUI
 extension SN3Client {
     static let isFetchingCoops = TaskLocal<Bool>(wrappedValue: false)
     func fetchCoops() async {
-        if Self.isFetchingCoops.get() {
-            print("fetching")
+        if Self.isFetchingCoops.get(){
             return
         }
         await Self.isFetchingCoops.withValue(true) {

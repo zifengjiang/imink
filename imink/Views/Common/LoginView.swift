@@ -66,7 +66,7 @@ struct LoginView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(backgroundColor != nil ? backgroundColor : Color.listBackground)
+        .background(backgroundColor != nil ? backgroundColor : Color.listBackground.opacity(0.8))
     }
 
     

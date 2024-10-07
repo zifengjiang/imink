@@ -18,20 +18,21 @@ struct iminkApp: App {
             ZStack{
                 MainView()
                     .environmentObject(coopListViewModel)
+                    .environmentObject(BattleListViewModel())
             }
             .overlay(alignment: .top) {
                 IndicatorsOverlay(model: Indicators.shared)
             }
-            .onChange(of: scenePhase) { newPhase in
-                switch newPhase {
-                case .active:
-                    Task{
-                        await coopListViewModel.fetchCoops()
-                    }
-                default:
-                    break
-                }
-            }
+//            .onChange(of: scenePhase) { newPhase in
+//                switch newPhase {
+//                case .active:
+//                    Task{
+//                        await coopListViewModel.fetchCoops()
+//                    }
+//                default:
+//                    break
+//                }
+//            }
         }
     }
 }

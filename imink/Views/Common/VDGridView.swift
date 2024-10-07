@@ -9,6 +9,7 @@ struct VDGridView: View {
     }
 
     var data: [Bool?]
+    var isCoop: Bool
     @Binding var height: CGFloat
     @Binding var lastBlockWidth: CGFloat
 
@@ -62,7 +63,7 @@ struct VDGridView: View {
             drawRects(geo: geo, drawResult: .lose, itemSize: itemSize)
                 .foregroundColor(VDResult.lose.color)
             drawRects(geo: geo, drawResult: .win, itemSize: itemSize)
-                .foregroundColor(VDResult.win.color)
+                .foregroundColor(isCoop ? Color.waveDefeat : VDResult.win.color)
         }
     }
 
@@ -95,7 +96,7 @@ extension VDGridView.VDResult {
         case .win:
             return Color.pink.opacity(0.8)
         case .lose:
-            return Color.green.opacity(0.8)
+            return Color.waveClear
         case .disconnected:
             return Color.primary.opacity(0.15)
         }
@@ -109,7 +110,7 @@ struct VDGridView_Previews: PreviewProvider {
     @State static private var data: [Bool?] = Array(repeating: true, count: 23) + [false,nil,false] + Array(repeating: false, count: 250)
 
     static var previews: some View {
-        VDGridView(data: data, height: $height, lastBlockWidth: $lastBlockWidth)
+        VDGridView(data: data, isCoop:true, height: $height, lastBlockWidth: $lastBlockWidth)
             .frame(height: height)
             .previewLayout(.sizeThatFits)
             .padding()

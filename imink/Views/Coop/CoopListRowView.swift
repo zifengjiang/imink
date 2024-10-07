@@ -2,10 +2,10 @@ import SwiftUI
 
 struct CoopListRowView: View {
     let isCoop: Bool
-    var coop: CoopListItemInfo?
+    var coop: CoopListRowInfo?
     var card: CoopGroupStatus?
 
-    init(isCoop: Bool, coop: CoopListItemInfo? = nil, card: CoopGroupStatus? = nil) {
+    init(isCoop: Bool, coop: CoopListRowInfo? = nil, card: CoopGroupStatus? = nil) {
         self.isCoop = isCoop
         self.coop = coop
         self.card = card

@@ -2,7 +2,7 @@ import SwiftUI
 
 struct CoopListDetailItemView: View {
     
-    var coop: CoopListItemInfo
+    var coop: CoopListRowInfo
 
     var dangerRateText:String{
         let dangerRate = coop.dangerRate
@@ -138,7 +138,7 @@ struct CoopListDetailItemView: View {
 }
 
 #Preview {
-    CoopListDetailItemView(coop: CoopListItemInfo(id: 1, rule: .regular , grade: 8, gradePoint: 999, gradeDiff: .up, dangerRate: 3.33,enemyDefeatCount:21, specie:true, stage: "Q29vcFN0YWdlLTk=", boss: "Q29vcEVuZW15LTIz", haveBossDefeated: true, resultWave: 3, goldenEgg: 212, powerEgg: 5341, rescue: 1, rescued: 0, time: Date.init(timeInterval: -30000000, since: Date()),GroupId: 0))
+    CoopListDetailItemView(coop: CoopListRowInfo(id: 1, rule: .regular , grade: 8, gradePoint: 999, gradeDiff: .up, dangerRate: 3.33,enemyDefeatCount:21, specie:true, stage: "Q29vcFN0YWdlLTk=", boss: "Q29vcEVuZW15LTIz", haveBossDefeated: true, resultWave: 3, goldenEgg: 212, powerEgg: 5341, rescue: 1, rescued: 0, time: Date.init(timeInterval: -30000000, since: Date()),GroupId: 0))
         .padding(.top, 8)
         .padding([.leading, .trailing])
         .frame(width: 370)

@@ -20,7 +20,7 @@ class AppUserDefaults: ObservableObject {
     @AppStorage("session_token", store: .appGroup)
     var sessionToken: String? {
         didSet {
-            MainViewModel.shared.isLogin = sessionToken != nil
+            AppState.shared.isLogin = sessionToken != nil
         }
     }
 

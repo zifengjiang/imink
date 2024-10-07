@@ -15,11 +15,13 @@ struct MainView: View {
                 }
                 .tag(0)
 
-            Text("主页")
+            BattleListView()
+                .environmentObject(mainViewModel)
                 .tabItem {
                     Label("tab_battle", image: "TabBarBattle")
                 }
                 .tag(1)
+                
 
 
             CoopListView()

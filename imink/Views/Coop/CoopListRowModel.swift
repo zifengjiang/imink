@@ -6,7 +6,7 @@ import GRDB
 struct CoopListRowModel:Identifiable{
     
     let isCoop: Bool
-    var coop: CoopListItemInfo?
+    var coop: CoopListRowInfo?
     var card: CoopGroupStatus?
 
     var id: String {

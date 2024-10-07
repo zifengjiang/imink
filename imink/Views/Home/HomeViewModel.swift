@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import SplatNet3API
 import SplatDatabase
 import Combine
@@ -6,9 +7,8 @@ import GRDB
 import os
 import SwiftyJSON
 
-//@Observable
 class HomeViewModel: ObservableObject {
-    
+
     @Published var totalCoop: Int = 0
     @Published var totalBattle: Int = 0
     @Published var last500Battle: [Bool?] = []
@@ -28,12 +28,45 @@ class HomeViewModel: ObservableObject {
 
     private var cancelBag = Set<AnyCancellable>()
     private var scheduleCancelBag = Set<AnyCancellable>()
+    private var loginStateCancelBag = Set<AnyCancellable>()  // 用于监听登录状态
 
     init() {
-        updateStatus()
+            // 根据当前的登录状态进行处理
+        handleLoginStateChange(isLogin: AppState.shared.isLogin)
+
+            // 监听登录状态变化
+        AppState.shared.$isLogin
+            .sink { [weak self] isLogin in
+                self?.handleLoginStateChange(isLogin: isLogin)
+            }
+            .store(in: &loginStateCancelBag)
         loadSchedules()
     }
 
+        // 取消数据订阅，但不取消登录状态监听
+    func cancelSubscriptions() {
+        cancelBag.forEach { $0.cancel() }
+        cancelBag.removeAll()
+    }
+
+    func handleLoginStateChange(isLogin: Bool) {
+        if isLogin {
+                // 用户已登录，加载数据
+            updateStatus()
+        } else {
+                // 用户未登录，清空数据
+            clearData()
+            cancelSubscriptions()
+        }
+    }
+
+    func clearData() {
+        salmonRunStatus = nil
+        lastCoopGroupId = nil
+        last500Coop = []
+        last500Battle = []
+        battleStatus = nil
+    }
 
     func updateStatus() {
         cancelBag = Set<AnyCancellable>()
@@ -162,7 +195,7 @@ extension SplatDatabase {
         return ValueObservation
             .tracking(
                 Coop
-//                    .filter(sql: "accountId = ?", arguments: [0])
+                //                    .filter(sql: "accountId = ?", arguments: [0])
                     .fetchCount
             )
             .publisher(in: dbQueue, scheduling: .immediate)
@@ -173,7 +206,7 @@ extension SplatDatabase {
         return ValueObservation
             .tracking(
                 Battle
-//                    .filter(sql: "accountId = ?", arguments: [0])
+                //                    .filter(sql: "accountId = ?", arguments: [0])
                     .fetchCount
             )
             .publisher(in: dbQueue, scheduling: .immediate)

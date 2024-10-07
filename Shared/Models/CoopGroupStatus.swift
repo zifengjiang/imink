@@ -57,6 +57,10 @@ extension CoopGroupStatus:PreComputable{
     }
 }
 
+extension CoopGroupStatus{
+    static let defaultValue:CoopGroupStatus = .init(accountId: 1, groupId: 1, rule: "", suppliedWeapon: .init([0]), stageId: 0, startTime: Date(), endTime: Date(), avg_defeatEnemyCount: 0, avg_deliverCount: 0, avg_goldenAssistCount: 0, avg_goldenDeliverCount: 0, avg_rescueCount: 0, avg_rescuedCount: 0, goldScale: 0, silverScale: 0, bronzeScale: 0, clear: 0, disconnect: 0, highestEgg: 0, count: 0)
+}
+
 struct CoopPlayerStatus:FetchableRecord, Decodable{
     var name: String
     var byname: String
