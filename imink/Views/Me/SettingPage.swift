@@ -72,6 +72,16 @@ struct SettingPage: View {
                     }
                     .background(ActivityView(isPresented: $isActivityPresented, item: $item))
 
+                    Button{
+//                        try! SplatDatabase.shared.dbQueue.write{ db in
+//                            try db.execute(literal: "DROP TABLE IF EXISTS vsTeam;")
+//                            try db.execute(literal: "DROP TABLE if EXISTS battle;")
+//                        }
+                        try! SplatDatabase.shared.deleteAllBattles()
+                    } label: {
+                        Text("删除所有战斗数据")
+                    }
+
                 }
 
                 Section(header: Text("关于Imink")){

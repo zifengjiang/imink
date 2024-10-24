@@ -22,7 +22,7 @@ struct CoopDetailView: View {
     }
 
     var body: some View {
-        ScrollView{
+        ScrollView(.vertical){
             HStack {
                 Spacer()
                 VStack(spacing:20){
@@ -48,6 +48,7 @@ struct CoopDetailView: View {
             }
             .padding(.horizontal,8)
         }
+        .scrollClipDisabled()
         .frame(maxWidth: .infinity)
         .fixSafeareaBackground()
         .onAppear  {

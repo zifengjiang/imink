@@ -51,6 +51,15 @@ struct NameplateView: View {
         nameId = result.player!.nameId
     }
 
+    init (player: Player) {
+        name = player.name
+        background = player._nameplate!.background
+        byname = player.byname
+        textColor = player._nameplate!.textColor
+        badges = player._nameplate!.badges
+        nameId = player.nameId
+    }
+
     var body: some View {
         GeometryReader { geometry in
             let geometryHeight = geometry.size.height

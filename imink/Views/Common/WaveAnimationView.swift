@@ -1,9 +1,9 @@
-//
-//  WaveSinView.swift
-//  trafficStat
-//
-//  Created by Dolor•Sawalon•Zerlz on 2021/9/15.
-//
+    //
+    //  WaveSinView.swift
+    //  trafficStat
+    //
+    //  Created by Dolor•Sawalon•Zerlz on 2021/9/15.
+    //
 
 /*
  基础知识：
@@ -33,218 +33,218 @@ import SwiftUI
 
 public struct SineWaveShape: Shape {
 
-  public var animatableData: Double {
-    get { phase }
-    set { self.phase = newValue }
-  }
-  //波浪的高度相对于rect.height的百分比
-  var percent: Double
+    public var animatableData: Double {
+        get { phase }
+        set { self.phase = newValue }
+    }
+        //波浪的高度相对于rect.height的百分比
+    var percent: Double
 
-  //波浪振幅
-  var strength: Double
+        //波浪振幅
+    var strength: Double
 
-  // 频率
-  var frequency: Double
+        // 频率
+    var frequency: Double
 
-  // 波浪的相位
-  var phase: Double
+        // 波浪的相位
+    var phase: Double
 
-  var totalWidth: Double // 新增属性
+    var totalWidth: Double // 新增属性
 
-  public init(
-    percent: Double,
-    strength: Double,
-    frequency: Double,
-    phase: Double,
-    totalWidth: Double
+    public init(
+        percent: Double,
+        strength: Double,
+        frequency: Double,
+        phase: Double,
+        totalWidth: Double
 
-  ) {
-    self.percent = percent
-    self.strength = strength
-    self.frequency = frequency
-    self.phase = phase
-    self.totalWidth = totalWidth
-  }
-
-  public func path(in rect: CGRect) -> Path {
-    var path = Path()
-    let width = totalWidth
-    let height = Double(rect.height)
-    let midWidth = width / 2
-    let oneOverMidWidth = 1 / midWidth
-    let hWaveLength = height
-
-    //根据 波的相速度 / 频率 = 波长
-    let wavelength = width / frequency
-
-    //从左边的终点开始画
-    path.move(to: CGPoint(x: 0, y: height))
-
-
-    // 根据x轴,计算每个横向点对应的y位置
-    var first:Bool = true
-    for x in stride(from: 0, through: Double(rect.width), by: 1 ) {
-      //找到当前x相对于波长的位置
-      let relativeX = x / wavelength
-
-      //当前x距离中心位置多远
-      let distanceFromMidWidth = x - midWidth
-
-      // 波浪规则变化系数， 从-1 到 1的变化（让曲线不是一成不变的
-      let normalDistance = oneOverMidWidth * distanceFromMidWidth
-
-      let parabola = -(normalDistance * normalDistance) + 1
-
-
-      //计算那个位置的正弦，加上我们的相位偏移
-      let sine = sin(relativeX - phase)
-
-      //将计算出来的正弦乘以我们的波浪振幅然后再乘以规则变化系数以确定最终偏移量，然后将其向下移动到midHeight
-      let y = parabola * strength * sine + height * percent
-      if first{
-        first = false
-        for yy in stride(from: y, to: height, by: 1){
-          let relativeY = yy / hWaveLength
-          let distanceFromMidHeight = yy - height/2
-          let normalDistance = 2 / height * distanceFromMidHeight
-          let parabola = -(normalDistance * normalDistance) + 1
-          let sine = sin(relativeY + phase)
-          let xx = parabola * strength * sine
-          path.addLine(to: CGPoint(x: xx, y: yy))
-        }
-      }
-      // 画线
-      path.addLine(to: CGPoint(x: x, y: y))
+    ) {
+        self.percent = percent
+        self.strength = strength
+        self.frequency = frequency
+        self.phase = phase
+        self.totalWidth = totalWidth
     }
 
+    public func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let width = totalWidth
+        let height = Double(rect.height)
+        let midWidth = width / 2
+        let oneOverMidWidth = 1 / midWidth
+        let hWaveLength = height
 
-    path.addLine(to: CGPoint(x: rect.width, y: rect.height))
-    path.addLine(to: CGPoint(x: 0, y: rect.height))
-    //    path.closeSubpath()
-    return path
+            //根据 波的相速度 / 频率 = 波长
+        let wavelength = width / frequency
 
-  }
+            //从左边的终点开始画
+        path.move(to: CGPoint(x: 0, y: height))
+
+
+            // 根据x轴,计算每个横向点对应的y位置
+        var first:Bool = true
+        for x in stride(from: 0, through: Double(rect.width), by: 1 ) {
+                //找到当前x相对于波长的位置
+            let relativeX = x / wavelength
+
+                //当前x距离中心位置多远
+            let distanceFromMidWidth = x - midWidth
+
+                // 波浪规则变化系数， 从-1 到 1的变化（让曲线不是一成不变的
+            let normalDistance = oneOverMidWidth * distanceFromMidWidth
+
+            let parabola = -(normalDistance * normalDistance) + 1
+
+
+                //计算那个位置的正弦，加上我们的相位偏移
+            let sine = sin(relativeX - phase)
+
+                //将计算出来的正弦乘以我们的波浪振幅然后再乘以规则变化系数以确定最终偏移量，然后将其向下移动到midHeight
+            let y = parabola * strength * sine + height * percent
+            if first{
+                first = false
+                for yy in stride(from: y, to: height, by: 1){
+                    let relativeY = yy / hWaveLength
+                    let distanceFromMidHeight = yy - height/2
+                    let normalDistance = 2 / height * distanceFromMidHeight
+                    let parabola = -(normalDistance * normalDistance) + 1
+                    let sine = sin(relativeY + phase)
+                    let xx = parabola * strength * sine
+                    path.addLine(to: CGPoint(x: xx, y: yy))
+                }
+            }
+                // 画线
+            path.addLine(to: CGPoint(x: x, y: y))
+        }
+
+
+        path.addLine(to: CGPoint(x: rect.width, y: rect.height))
+        path.addLine(to: CGPoint(x: 0, y: rect.height))
+            //    path.closeSubpath()
+        return path
+
+    }
 }
 
 
 
 struct WaveBar:View {
-  let colors:[Color]
-  let proportion:[Int]
-  var body: some View {
-    GeometryReader{geo in
-      HStack(spacing:0){
+    let colors:[Color]
+    let proportion:[Int]
+    var body: some View {
+        GeometryReader{geo in
+            HStack(spacing:0){
 
-      }
+            }
+        }
     }
-  }
 }
 
 struct WaveBarView: View {
-  @State  var phase: Double = 0
-  @State  var percent: Double = 0.6
-  @State  var circleLineWidth: CGFloat = 1.0
-  @State  var strokeColor: Color = Color.blue
-  var rightColor:Color
-  var middleColor:Color? = nil
-  var middleRatio:Double? = nil
-  var leftColor:Color? = nil
-  var leftRatio:Double? = nil
-  var body: some View {
-    GeometryReader { geo in
-      ZStack(alignment: .leading) {
-        WaveBarUnit(
-          phase: $phase,
-          frequency: 12,
-          duration: 3,
-          strength: 15,
-          percent: $percent,
-          circleLineWidth: $circleLineWidth,
-          strokeColor: $strokeColor,
-          color1: .constant(rightColor), totalWidth: geo.size.width
-        )
-        .frame(width: geo.size.width, height: geo.size.height)
-        if let middleColor, let middleRatio,let leftRatio{
-          WaveBarUnit(
-            phase: $phase,
-            frequency: 12,
-            duration: 3,
-            strength: 15,
-            percent: $percent,
-            circleLineWidth: $circleLineWidth,
-            strokeColor: $strokeColor,
-            color1: .constant(middleColor), totalWidth: geo.size.width
-          )
-          .frame(width: geo.size.width*(leftRatio+middleRatio), height: geo.size.height)
-        }
-        if let leftColor, let leftRatio{
-          WaveBarUnit(
-            phase: $phase,
-            frequency: 12,
-            duration: 3,
-            strength: 15,
-            percent: $percent,
-            circleLineWidth: $circleLineWidth,
-            strokeColor: $strokeColor,
-            color1: .constant(leftColor), totalWidth: geo.size.width
-          )
-          .frame(width: geo.size.width*leftRatio, height: geo.size.height)
-        }
+    @State  var phase: Double = 0
+    @State  var percent: Double = 0.6
+    @State  var circleLineWidth: CGFloat = 1.0
+    @State  var strokeColor: Color = Color.blue
+    var rightColor:Color
+    var middleColor:Color? = nil
+    var middleRatio:Double? = nil
+    var leftColor:Color? = nil
+    var leftRatio:Double? = nil
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                WaveBarUnit(
+                    phase: $phase,
+                    frequency: 12,
+                    duration: 3,
+                    strength: 15,
+                    percent: $percent,
+                    circleLineWidth: $circleLineWidth,
+                    strokeColor: $strokeColor,
+                    color1: .constant(rightColor), totalWidth: geo.size.width
+                )
+                .frame(width: geo.size.width, height: geo.size.height)
+                if let middleColor, let middleRatio,let leftRatio{
+                    WaveBarUnit(
+                        phase: $phase,
+                        frequency: 12,
+                        duration: 3,
+                        strength: 15,
+                        percent: $percent,
+                        circleLineWidth: $circleLineWidth,
+                        strokeColor: $strokeColor,
+                        color1: .constant(middleColor), totalWidth: geo.size.width
+                    )
+                    .frame(width: geo.size.width*(leftRatio+middleRatio), height: geo.size.height)
+                }
+                if let leftColor, let leftRatio{
+                    WaveBarUnit(
+                        phase: $phase,
+                        frequency: 12,
+                        duration: 3,
+                        strength: 15,
+                        percent: $percent,
+                        circleLineWidth: $circleLineWidth,
+                        strokeColor: $strokeColor,
+                        color1: .constant(leftColor), totalWidth: geo.size.width
+                    )
+                    .frame(width: geo.size.width*leftRatio, height: geo.size.height)
+                }
 
-      }
-      .onAppear {
-        withAnimation(.linear(duration: 2).repeatForever(autoreverses: false)) {
-          phase = .pi * 2
+            }
+            .onAppear {
+                withAnimation(.linear(duration: 2).repeatForever(autoreverses: false)) {
+                    phase = .pi * 2
+                }
+            }
         }
-      }
     }
-  }
 }
 
 struct WaveBarUnit: View {
-  @Binding var phase: Double
-  let frequency: Double
-  let duration: Double
-  let strength: Double
-  @Binding var percent: Double
-  @Binding var circleLineWidth: CGFloat
-  @Binding var strokeColor: Color
-  @Binding var color1: Color
-  var totalWidth: CGFloat
+    @Binding var phase: Double
+    let frequency: Double
+    let duration: Double
+    let strength: Double
+    @Binding var percent: Double
+    @Binding var circleLineWidth: CGFloat
+    @Binding var strokeColor: Color
+    @Binding var color1: Color
+    var totalWidth: CGFloat
 
 
-  var body: some View {
-    VStack {
-      RoundedRectangle(cornerRadius: 0, style: .continuous)
-        .stroke(.clear, lineWidth: circleLineWidth)
-        .background(
-          ZStack {
-            Color(.clear)
-            SineWaveShape(percent: percent+0.1, strength: strength * 0.5, frequency: frequency + 2, phase: self.phase*(-1)+20, totalWidth: Double(totalWidth))
-              .fill(color1)
-              .offset(y: CGFloat(1) * 1)
-              .animation(Animation.linear(duration: duration).repeatForever(autoreverses: false), value: self.phase)
-            SineWaveShape(percent: percent+0.1, strength: strength * 0.5, frequency: frequency + 2, phase: self.phase, totalWidth: Double(totalWidth))
-              .fill(color1)
-              .offset(y: CGFloat(1) * 1)
-              .animation(Animation.linear(duration: duration).repeatForever(autoreverses: false), value: self.phase)
+    var body: some View {
+        VStack {
+            RoundedRectangle(cornerRadius: 0, style: .continuous)
+                .stroke(.clear, lineWidth: circleLineWidth)
+                .background(
+                    ZStack {
+                        Color(.clear)
+                        SineWaveShape(percent: percent+0.1, strength: strength * 0.5, frequency: frequency + 2, phase: self.phase*(-1)+20, totalWidth: Double(totalWidth))
+                            .fill(color1)
+                            .offset(y: CGFloat(1) * 1)
+                            .animation(Animation.linear(duration: duration).repeatForever(autoreverses: false), value: self.phase)
+                        SineWaveShape(percent: percent+0.1, strength: strength * 0.5, frequency: frequency + 2, phase: self.phase, totalWidth: Double(totalWidth))
+                            .fill(color1)
+                            .offset(y: CGFloat(1) * 1)
+                            .animation(Animation.linear(duration: duration).repeatForever(autoreverses: false), value: self.phase)
 
-            SineWaveShape(percent: percent, strength: strength * 0.6, frequency: frequency + 1, phase: self.phase*(-1), totalWidth: Double(totalWidth))
-              .fill(color1.opacity(0.5))
-              .offset(y: CGFloat(2) * 1)
-              .animation(Animation.linear(duration: duration).repeatForever(autoreverses: false), value: self.phase)
+                        SineWaveShape(percent: percent, strength: strength * 0.6, frequency: frequency + 1, phase: self.phase*(-1), totalWidth: Double(totalWidth))
+                            .fill(color1.opacity(0.5))
+                            .offset(y: CGFloat(2) * 1)
+                            .animation(Animation.linear(duration: duration).repeatForever(autoreverses: false), value: self.phase)
 
-          }
-            .clipShape(RoundedRectangle(cornerRadius: 0))
-
-        )
+                    }
+                        .clipShape(RoundedRectangle(cornerRadius: 0))
+                    
+                )
+        }
     }
-  }
 }
 
 struct ContentViews_Previews: PreviewProvider {
-  static var previews: some View {
-    WaveBarView(rightColor: .red, middleColor: .blue, middleRatio: 0.3, leftColor: .yellow, leftRatio: 0.4)
-      .frame(width: 366, height: 50)
-  }
+    static var previews: some View {
+        WaveBarView(rightColor: .red, middleColor: .blue, middleRatio: 0.3, leftColor: .yellow, leftRatio: 0.4)
+            .frame(width: 366, height: 50)
+    }
 }

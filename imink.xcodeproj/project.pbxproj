@@ -78,6 +78,7 @@
 		8B7F29622BF6E5310010A525 /* NSOHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7F29612BF6E5310010A525 /* NSOHash.swift */; };
 		8B7F29642BF6E7E90010A525 /* AppAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7F29632BF6E7E80010A525 /* AppAPI.swift */; };
 		8B7F296C2BF711C40010A525 /* NSOAuthorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7F296B2BF711C40010A525 /* NSOAuthorization.swift */; };
+		8B83F9D42CC9F624009B90FF /* CarouselView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B83F9D32CC9F624009B90FF /* CarouselView.swift */; };
 		8B8B285E2BF8581800790809 /* SplatNet.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8B8B285C2BF8581800790809 /* SplatNet.strings */; };
 		8B8B286D2BF887D400790809 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B8B286B2BF887D400790809 /* Preview Assets.xcassets */; };
 		8B93C0C52C12EA8D00D7EFBC /* SplatNet3 in Frameworks */ = {isa = PBXBuildFile; productRef = 8B93C0C42C12EA8D00D7EFBC /* SplatNet3 */; };
@@ -109,6 +110,7 @@
 		8BFE91762C0EFCEA00C12CBE /* Schedules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFE91752C0EFCEA00C12CBE /* Schedules.swift */; };
 		8BFF73E52C0938330048F2A6 /* CoopListDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF73E42C0938330048F2A6 /* CoopListDetailView.swift */; };
 		8BFF73E72C0939160048F2A6 /* CoopListRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF73E62C0939160048F2A6 /* CoopListRowView.swift */; };
+		8BFFDF692CB40F43004F2390 /* BattlePlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFFDF682CB40F43004F2390 /* BattlePlayerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -214,6 +216,7 @@
 		8B7F29612BF6E5310010A525 /* NSOHash.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSOHash.swift; sourceTree = "<group>"; };
 		8B7F29632BF6E7E80010A525 /* AppAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppAPI.swift; sourceTree = "<group>"; };
 		8B7F296B2BF711C40010A525 /* NSOAuthorization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSOAuthorization.swift; sourceTree = "<group>"; };
+		8B83F9D32CC9F624009B90FF /* CarouselView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarouselView.swift; sourceTree = "<group>"; };
 		8B8B285D2BF8581800790809 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/SplatNet.strings"; sourceTree = "<group>"; };
 		8B8B285F2BF8582200790809 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/SplatNet.strings"; sourceTree = "<group>"; };
 		8B8B28602BF8582300790809 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/SplatNet.strings; sourceTree = "<group>"; };
@@ -248,9 +251,11 @@
 		8BFE91752C0EFCEA00C12CBE /* Schedules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Schedules.swift; sourceTree = "<group>"; };
 		8BFF73E42C0938330048F2A6 /* CoopListDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopListDetailView.swift; sourceTree = "<group>"; };
 		8BFF73E62C0939160048F2A6 /* CoopListRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopListRowView.swift; sourceTree = "<group>"; };
+		8BFFDF682CB40F43004F2390 /* BattlePlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattlePlayerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		8B19CF932CB3BD4000EF4424 /* Views */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Views; sourceTree = "<group>"; };
 		8B65636F2CB15DC40017F5D0 /* App */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = App; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -487,6 +492,7 @@
 				8B19CF302CB2479B00EF4424 /* BattleListRowModel.swift */,
 				8B19CF322CB2486B00EF4424 /* BattleListDetailView.swift */,
 				8B19CF342CB2488200EF4424 /* BattleListRowView.swift */,
+				8B19CF932CB3BD4000EF4424 /* Views */,
 			);
 			path = Battle;
 			sourceTree = "<group>";
@@ -528,6 +534,8 @@
 				8B5276132BFC228600022D5B /* SpecialWeaponImage.swift */,
 				8BFE916F2C0C9F0D00C12CBE /* FilterView.swift */,
 				8BFE91732C0DEA3D00C12CBE /* RangeSlider.swift */,
+				8BFFDF682CB40F43004F2390 /* BattlePlayerView.swift */,
+				8B83F9D32CC9F624009B90FF /* CarouselView.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -552,16 +560,16 @@
 			isa = PBXGroup;
 			children = (
 				8B19CF892CB29BC500EF4424 /* BattleRule.swift */,
+				8B0851712BFB5FE100AF22C5 /* CoopRule.swift */,
 				8BB99B362BF77B3B00470408 /* Models.swift */,
 				8B0D14812BF9B85700B82AD1 /* GameMode.swift */,
-				8B0851712BFB5FE100AF22C5 /* CoopRule.swift */,
+				8B19CF872CB299F300EF4424 /* BattleMode.swift */,
 				8B50DBE12C01C1C20076AE6D /* Logger.swift */,
-				8B2DA5882C0409E500850BAC /* CoopGroupStatus.swift */,
 				8BFE91712C0D7CE000C12CBE /* Filter.swift */,
 				8BFE91752C0EFCEA00C12CBE /* Schedules.swift */,
 				8B0792062C0F435C0094EA57 /* TargetType+fetch.swift */,
+				8B2DA5882C0409E500850BAC /* CoopGroupStatus.swift */,
 				8B65636D2CB00B050017F5D0 /* BattleGroupStatus.swift */,
-				8B19CF872CB299F300EF4424 /* BattleMode.swift */,
 				8B0D148C2BFA2CEF00B82AD1 /* CoopListRowInfo.swift */,
 				8B19CF8B2CB2A02600EF4424 /* BattleListRowInfo.swift */,
 				8B19CF8D2CB2C9C400EF4424 /* Species.swift */,
@@ -586,6 +594,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				8B19CF932CB3BD4000EF4424 /* Views */,
 				8B65636F2CB15DC40017F5D0 /* App */,
 			);
 			name = imink;
@@ -791,6 +800,7 @@
 				8B0851722BFB5FE100AF22C5 /* CoopRule.swift in Sources */,
 				8B0D149E2BFAC56100B82AD1 /* CoopListShiftCardView.swift in Sources */,
 				8B08517A2BFB790700AF22C5 /* WaveShape.swift in Sources */,
+				8B83F9D42CC9F624009B90FF /* CarouselView.swift in Sources */,
 				8B0792092C1077DD0094EA57 /* BattleScheduleCardView.swift in Sources */,
 				8BD8CD522C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift in Sources */,
 				8BFE91742C0DEA3D00C12CBE /* RangeSlider.swift in Sources */,
@@ -801,6 +811,7 @@
 				8BA017492C09A8CE001CFC72 /* FetchableFromDatabase.swift in Sources */,
 				8B7059062C0C25A90076F680 /* TouchDownAndTouchUpGestureView.swift in Sources */,
 				8B7059082C0C27980076F680 /* PopupModifier.swift in Sources */,
+				8BFFDF692CB40F43004F2390 /* BattlePlayerView.swift in Sources */,
 				8B0D146A2BF8BFF700B82AD1 /* VDGridView.swift in Sources */,
 				8B7F295F2BF6E4A80010A525 /* NSOAPI.swift in Sources */,
 				8B65636E2CB00B050017F5D0 /* BattleGroupStatus.swift in Sources */,

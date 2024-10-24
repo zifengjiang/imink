@@ -1,4 +1,5 @@
 import SwiftUI
+import SplatNet3API
 
 struct MePage: View {
     
@@ -24,6 +25,9 @@ struct MePage: View {
         }
         .sheet(isPresented: $showSetting) {
             SettingPage(showSettings: $showSetting)
+        }
+        .refreshable{
+            await SN3Client.shared.fetchHistoryRecord()
         }
 
 

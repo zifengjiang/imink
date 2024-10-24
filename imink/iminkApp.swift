@@ -5,12 +5,17 @@ import IndicatorsKit
 @main
 struct iminkApp: App {
     @StateObject var coopListViewModel = CoopListViewModel.shared
+    @StateObject var battleListViewModel = BattleListViewModel()
     @Environment(\.scenePhase) var scenePhase
 
     init(){
         #if DEBUG
         print(SplatDatabase.shared.dbQueue.path)
         #endif
+        if #available(iOS 15.0, *) {
+            UITabBar.appearance().scrollEdgeAppearance = UITabBar.appearance().standardAppearance
+            UINavigationBar.appearance().scrollEdgeAppearance = UINavigationBar.appearance().standardAppearance
+        }
     }
 
     var body: some Scene {
@@ -18,21 +23,21 @@ struct iminkApp: App {
             ZStack{
                 MainView()
                     .environmentObject(coopListViewModel)
-                    .environmentObject(BattleListViewModel())
+                    .environmentObject(battleListViewModel)
             }
             .overlay(alignment: .top) {
                 IndicatorsOverlay(model: Indicators.shared)
             }
-//            .onChange(of: scenePhase) { newPhase in
-//                switch newPhase {
-//                case .active:
-//                    Task{
-//                        await coopListViewModel.fetchCoops()
-//                    }
-//                default:
-//                    break
-//                }
-//            }
+            .onChange(of: scenePhase) { oldValue, newPhase in
+                switch newPhase {
+                case .active:
+                    Task{
+                        await coopListViewModel.fetchCoops()
+                    }
+                default:
+                    break
+                }
+            }
         }
     }
 }

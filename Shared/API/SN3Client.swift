@@ -77,6 +77,16 @@ extension SN3Client {
             }
         }
     }
+
+    func fetchHistoryRecord() async {
+        do {
+            print("fetchHistoryRecord")
+            let historyRecord = try await JSON(data: self.graphQL(.historyRecord))
+            print(historyRecord)
+        }catch{
+            logError(error)
+        }
+    }
 }
 
 

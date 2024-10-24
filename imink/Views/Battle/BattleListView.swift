@@ -2,7 +2,7 @@ import SwiftUI
 
 struct BattleListView: View {
     @EnvironmentObject var viewModel: BattleListViewModel
-    @State var activeID:Int64?
+    @State var activeID:String?
     var body: some View {
         NavigationStack{
             ScrollViewReader{ proxy in
@@ -10,9 +10,9 @@ struct BattleListView: View {
                     LazyVStack{
                         ForEach(viewModel.rows,id: \.id){row in
                             NavigationLink{
-
+                                BattleDetailView(id: row.battle!.id)
                             } label: {
-                                BattleListRowView(detail: row)
+                                BattleListRowView(detail: row.battle!)
                                     .id(row.id)
                             }
                             .buttonStyle(PlainButtonStyle())
@@ -23,12 +23,31 @@ struct BattleListView: View {
                 .scrollPosition(id: $activeID, anchor: .bottom)
                 .fixSafeareaBackground()
                 .modifier(LoginViewModifier(isLogin: AppState.shared.isLogin, iconName: "TabBarBattle"))
-                .navigationTitle("对战")
+                .navigationTitle(viewModel.navigationTitle)
                 .navigationBarTitleDisplayMode(.inline)
                 .onChange(of: activeID) { oldValue, newValue in
                     if newValue == viewModel.rows.last?.id {
                         Task{
                             await viewModel.loadMore()
+                        }
+                    }
+                }
+                .toolbarTitleMenu {
+                    ForEach(BattleMode.allCases,id: \.rawValue){ mode in
+                        Button{
+                            viewModel.filter.modes.removeAll()
+                            if mode != .all {
+                                viewModel.filter.modes.insert(mode.rawValue)
+                            }
+                            viewModel.navigationTitle = mode.name
+                            Task{
+                                await viewModel.loadBattles()
+                            }
+                        } label: {
+                            Label(
+                                title: { Text("\(mode.name)") },
+                                icon: { mode.icon }
+                            )
                         }
                     }
                 }

@@ -55,8 +55,7 @@ extension BattleRule {
     case .towerControl: "Tower Control".localized
     case .rainmaker: "Rainmaker".localized
     case .clamBlitz: "Clam Blitz".localized
-    case .triColor:
-      "Tri Color".localized
+    case .triColor: "Tri Color".localized
     }
   }
 

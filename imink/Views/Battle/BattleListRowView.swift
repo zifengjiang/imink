@@ -179,10 +179,12 @@ struct BattleListRowView: View {
 
 
             VStack {
-                Image(detail.weapon)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 40, height: 40)
+                if let weapon = detail._weapon{
+                    Image(weapon.mainWeapon.name)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 40, height: 40)
+                }
                 Spacer()
             }
             .padding(.top, 6.5)

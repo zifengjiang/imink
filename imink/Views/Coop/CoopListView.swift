@@ -7,7 +7,7 @@ struct CoopListView: View {
     @EnvironmentObject var viewModel: CoopListViewModel
     @State var activeID:String?
     @State var showFilterSheet = false
-    @State var selectedRow:String = ""
+    @State var selectedRow:String?
 
     var body: some View {
         NavigationStack {
@@ -122,11 +122,13 @@ struct CoopListView: View {
     }
 
     struct DetailTabView:View {
-        @Binding var selectedRow: String
+        @Binding var selectedRow: String?
         @Binding var rows:[CoopListRowModel]
+        
         var body: some View {
 
             TabView(selection: $selectedRow) {
+
                 ForEach(rows, id:\.id){ row in
                     CoopListDetailView(isCoop: row.isCoop, coopId: row.coop?.id, shiftId: row.card?.groupId)
                         .tag(row.id)

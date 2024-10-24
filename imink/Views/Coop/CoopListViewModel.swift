@@ -19,7 +19,7 @@ class CoopListViewModel: ObservableObject {
     private var offset: Int = 0
     private var cancelBag = Set<AnyCancellable>()
 
-    init() {
+    private init() {
         AppState.shared.$isLogin
             .sink { [weak self] isLogin in
                 self?.handleLoginStateChange(isLogin: isLogin)
@@ -39,7 +39,12 @@ class CoopListViewModel: ObservableObject {
 
     func loadCoops(limit: Int = 50, offset: Int = 0, loadRecent:Bool = false) async{
         self.groupId = 0
-        let rows = processCoops(await coops(filter: loadRecent ? Filter() : filter, limit: limit, offset))
+        let coopss:[CoopListRowInfo] = await measureTime(title: "loadCoops") {
+            await coops(filter: loadRecent ? Filter() : filter, limit: limit, offset)
+        }
+        let rows = measureTime(title: "processCoops") {
+            processCoops(coopss)
+        }
         DispatchQueue.main.async {
             self.rows = rows
         }
@@ -61,11 +66,7 @@ class CoopListViewModel: ObservableObject {
         }
     }
 
-    private func fetchCoopsFromDatabase(limit: Int, offset: Int) -> AnyPublisher<[CoopListRowInfo], Never> {
-        return coops(limit: limit, offset)
-            .catch { _ in Just<[CoopListRowInfo]>([]) }
-            .eraseToAnyPublisher()
-    }
+
 
     private func processCoops(_ coops: [CoopListRowInfo]) -> [CoopListRowModel] {
         self.offset += coops.count

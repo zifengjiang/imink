@@ -12,7 +12,7 @@ struct HomePage: View {
     @State private var mode: GameMode = .regular
 
     @AppStorage("home_page_selectedScheduleType")
-    var selectedScheduleType = 1
+    var selectedScheduleType = 0
 
     var timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -22,12 +22,12 @@ struct HomePage: View {
             ScrollView{
                 VStack{
 
-                    VStack{
-                        if selectedScheduleType == 1{
+                    CarouselView(activeIndex: $selectedScheduleType, autoScrollDuration: 15){
+//                        if selectedScheduleType == 1{
                             todayBattleStatusView
-                        }else{
+////                        }else{
                             todaySalmonRunStatusView
-                        }
+//                        }
                     }
                     .modifier(LoginViewModifier(isLogin: AppState.shared.isLogin, iconName: "TabBarHome"))
                     .frame(height: 240)
@@ -40,8 +40,8 @@ struct HomePage: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
 
                         Picker(selection: $selectedScheduleType) {
-                            Text("home_picker_battle").tag(1)
-                            Text("home_picker_salmon_run").tag(2)
+                            Text("home_picker_battle").tag(0)
+                            Text("home_picker_salmon_run").tag(1)
                         } label: {
                             Text("picker")
                         }
@@ -49,7 +49,8 @@ struct HomePage: View {
                         .frame(width: 230)
                         .padding(.vertical)
 
-                        if selectedScheduleType == 1{
+                        
+                        if selectedScheduleType == 0{
                             BattleScheduleView(scheduleGroups: viewModel.scheduleGroups)
                         }else{
                             SalmonRunScheduleView(salmonRunSchedules: viewModel.salmonRunSchedules)

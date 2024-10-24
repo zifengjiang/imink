@@ -16,7 +16,7 @@ struct BattleListRowInfo:Codable, FetchableRecord, PersistableRecord{
     var rule:BattleRule
     var judgement:Judgement
     var stage:String
-    var weapon:String
+    var weapon:PackableNumbers
     var kill:Int
     var assist:Int
     var death:Int
@@ -32,6 +32,7 @@ struct BattleListRowInfo:Codable, FetchableRecord, PersistableRecord{
     var ratios:[Double] = []
     var colors:[PackableNumbers] = []
     var scores:[Int64] = []
+    var _weapon:Player.Weapon? = nil
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -56,7 +57,7 @@ extension BattleListRowInfo: PreComputable{
 
     static func create(from db: Database, identifier: (Int,Filter,Int,Int)) throws ->[BattleListRowInfo]{
         let (accountId,filter, limit, offset) = identifier
-        var rows = try Row.fetchAll(db, filter.buildBattleQuery(limit:limit, offset:offset))
+        let rows = try Row.fetchAll(db, filter.buildBattleQuery(limit:limit, offset:offset))
         return rows.compactMap{ row in
             var info = try! BattleListRowInfo(row: row)
             let computed = try! Row.fetchAll(db, sql: """
@@ -81,6 +82,8 @@ extension BattleListRowInfo: PreComputable{
             info.scores = computed.compactMap{
                 $0["score"] as? Int64
             }
+
+            info._weapon = Player.Weapon(with: info.weapon, db: db)
 
             return info
         }
@@ -109,7 +112,12 @@ extension Filter {
         var conditions: [String] = []
         var arguments: [DatabaseValueConvertible] = []
 
-        
+        if !modes.isEmpty{
+            let array = Array(modes)
+            let rulePlaceholders = array.map { _ in "?" }.joined(separator: ", ")
+            conditions.append("battle.mode IN (\(rulePlaceholders))")
+            arguments.append(contentsOf: array)
+        }
 
         let whereClause = conditions.isEmpty ? "1" : conditions.joined(separator: " AND ")
         let sql = """
@@ -120,7 +128,7 @@ extension Filter {
                     battle.judgement,
                     battle.udemae,
                     stage.nameId AS stage,
-                    weapon.name AS weapon,
+                    player.weapon AS weapon,
                     COALESCE(player.kill,0) as `kill`,
                     COALESCE(player.assist,0) as assist,
                     COALESCE(player.death,0) as death,
@@ -137,8 +145,6 @@ extension Filter {
                     player ON vsTeam.id = player.vsTeamId -- 假设 battle 和 player 通过 vsTeamId 关联
                 JOIN 
                     imageMap AS stage ON battle.stageId = stage.id
-                JOIN 
-                    imageMap AS weapon ON player.weaponId = weapon.id
                 WHERE 
                     \(whereClause) and battle.accountId = \(accountId) and player.isMyself = 1 -- 过滤当前用户的 accountId
                 ORDER BY battle.playedTime DESC
