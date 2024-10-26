@@ -314,7 +314,7 @@ extension DataBackup {
                 Indicators.shared.display(.init(id: UUID().uuidString, icon: .systemImage("xmark.circle.fill"), title: "导入失败",subtitle: error.localizedDescription, dismissType: .after(5),style: .error))
             } else if progress.value == 1 {
                 Indicators.shared.dismiss(with: progressIndicatorId)
-                Indicators.shared.display(.init(id: UUID().uuidString, icon: .systemImage("checkmark.circle.fill"), title: "导入成功",subtitle: "成功导入\(progress.count)个记录", dismissType: .manual))
+                Indicators.shared.display(.init(id: UUID().uuidString, icon: .systemImage("checkmark.circle.fill"), title: "导入成功",subtitle: "成功导入\(progress.count)个记录", dismissType: .after(10)))
             }
         }
     }

@@ -32,6 +32,12 @@ class AppUserDefaults: ObservableObject {
 
     @AppStorage("gameServiceTokenRefreshTime", store: .appGroup)
     var gameServiceTokenRefreshTime: Int = 0
+
+    @AppStorage("coopsRefreshTime", store: .appGroup)
+    var coopsRefreshTime: Int = 0
+
+    @AppStorage("battlesRefreshTime", store: .appGroup)
+    var battlesRefreshTime: Int = 0
 }
 
 

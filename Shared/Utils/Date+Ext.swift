@@ -20,7 +20,7 @@ extension Date {
       formatter.dateFormat = "yyyy MM/dd HH:mm"
     }
     if full{
-      formatter.dateFormat = "yyyy MM/dd HH:mm"
+      formatter.dateFormat = "yyyy MM/dd HH:mm:ss"
     }
     return formatter.string(from: self)
   }

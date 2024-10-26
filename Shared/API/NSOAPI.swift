@@ -89,31 +89,30 @@ extension NSOAPI: TargetType {
              .token:
             return [
                 "Accept": "application/json",
-                "User-Agent" : "OnlineLounge/\(NSOAPI.clientVersion) NASDKAPI iOS"
+                "User-Agent" : "Dalvik/2.1.0 (Linux; U; Android 11; sdk_gphone_arm64 Build/RSR1.210722.013.A6)"
             ]
         case .me(let accessToken):
             return [
                 "Accept": "application/json",
-                "User-Agent": "OnlineLounge/\(NSOAPI.clientVersion) NASDKAPI iOS",
+                "User-Agent": "NASDKAPI; Android",
                 "Authorization": "Bearer \(accessToken)",
                 "Accept-Encoding": "gzip, deflate, br"
             ]
         case .login:
             return [
                 "Accept": "application/json",
-                "User-Agent": "com.nintendo.znca/\(NSOAPI.clientVersion) (iOS/14.2)",
-                "Authorization": "Bearer",
+                "User-Agent": "com.nintendo.znca/\(NSOAPI.clientVersion)(Android/11)",
                 "X-Platform": "Android",
                 "X-ProductVersion": NSOAPI.clientVersion,
-                "Accept-Encoding": "gzip, deflate, br"
+                "Accept-Encoding": "gzip"
             ]
         case .getWebServiceToken(let webApiServerToken, _):
             return [
-                "User-Agent": "com.nintendo.znca/\(NSOAPI.clientVersion) (iOS/14.2)",
+                "User-Agent": "com.nintendo.znca/\(NSOAPI.clientVersion)(Android/11)",
                 "Authorization": "Bearer \(webApiServerToken)",
                 "x-platform": "Android",
                 "X-ProductVersion": NSOAPI.clientVersion,
-                "Accept-Encoding": "gzip, deflate, br"
+                "Accept-Encoding": "gzip"
             ]
         }
     }

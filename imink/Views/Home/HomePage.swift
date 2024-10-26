@@ -127,6 +127,7 @@ struct HomePage: View {
 
                 VDGridView(data: viewModel.last500Coop, isCoop: true, height: $vdChartViewHeight, lastBlockWidth: $vdChartLastBlockWidth)
                     .frame(height: vdChartViewHeight)
+                    .frame(maxWidth: .infinity)
             }
         }
     }

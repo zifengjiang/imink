@@ -1,4 +1,5 @@
 import Foundation
+import SplatNet3API
 import Combine
 
 class BattleListViewModel: ObservableObject {
@@ -49,6 +50,12 @@ class BattleListViewModel: ObservableObject {
         self.offset += rows.count
         DispatchQueue.main.async {
             self.rows.append(contentsOf: rows)
+        }
+    }
+
+    func fetchBattles(){
+        Task{
+            await SN3Client.shared.fetchBattles()
         }
     }
 }

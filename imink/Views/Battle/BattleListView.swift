@@ -1,5 +1,6 @@
 import SwiftUI
 
+
 struct BattleListView: View {
     @EnvironmentObject var viewModel: BattleListViewModel
     @State var activeID:String?
@@ -19,6 +20,9 @@ struct BattleListView: View {
                         }
                     }
                     .scrollTargetLayout()
+                }
+                .refreshable {
+                    viewModel.fetchBattles()
                 }
                 .scrollPosition(id: $activeID, anchor: .bottom)
                 .fixSafeareaBackground()

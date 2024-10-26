@@ -71,3 +71,39 @@ extension AppAPI: TargetType {
         Data()
     }
 }
+
+
+func getNsoVersion(completion: @escaping (String?) -> Void) {
+    let urlString = "https://raw.githubusercontent.com/nintendoapis/nintendo-app-versions/main/data/coral-google-play.json".trimmingCharacters(in: .whitespacesAndNewlines)
+    guard let url = URL(string: urlString) else {
+        completion(nil)
+        return
+    }
+
+    let task = URLSession.shared.dataTask(with: url) { data, response, error in
+        if let error = error {
+            print("Error: \(error.localizedDescription)")
+            completion(nil)
+            return
+        }
+
+        guard let data = data else {
+            completion(nil)
+            return
+        }
+
+        do {
+            if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+               let version = json["version"] as? String {
+                completion(version)
+            } else {
+                completion(nil)
+            }
+        } catch {
+            print("JSON parsing error: \(error.localizedDescription)")
+            completion(nil)
+        }
+    }
+
+    task.resume()
+}

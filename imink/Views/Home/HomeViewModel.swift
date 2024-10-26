@@ -167,7 +167,7 @@ class HomeViewModel: ObservableObject {
 
 }
 
-extension Schedule: Identifiable {
+extension Schedule: @retroactive Identifiable {
     public var id:String{
         UUID().uuidString
     }

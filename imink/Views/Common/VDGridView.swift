@@ -13,6 +13,11 @@ struct VDGridView: View {
     @Binding var height: CGFloat
     @Binding var lastBlockWidth: CGFloat
 
+    @State private var isLoading: Bool = true
+    @State private var drawnPathWin: Path?
+    @State private var drawnPathLose: Path?
+    @State private var drawnDisconnected: Path?
+
     private var dataSource: [VDResult] {
         let data = Array(self.data.reversed())
         let haveResultStartIndex = Int(count) - data.count
@@ -45,7 +50,65 @@ struct VDGridView: View {
 
     var body: some View {
         GeometryReader { geo in
-            makeGrid(geo: geo)
+            ZStack {
+                if isLoading {
+                    VStack(alignment: .center){
+                        Spacer()
+                        Image(.squidLoading)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30, height: 30)
+                        Text("Loading...")
+                            .font(.splatoonFont(size: 8))
+                        Spacer()
+                    }
+                    .frame(width: 361,alignment: .center)
+                } else if let pathWin = drawnPathWin, let pathLose = drawnPathLose, let pathDisconnected = drawnDisconnected {
+                    pathDisconnected
+                        .foregroundColor(VDResult.disconnected.color)
+                    pathLose
+                        .foregroundColor(VDResult.lose.color)
+                    pathWin
+                        .foregroundColor(isCoop ? Color.waveDefeat : VDResult.win.color)
+                }
+            }
+            .onAppear {
+                    // 计算需要的数据并传递
+                let width:CGFloat = geo.size.width
+                let itemSize = (width - CGFloat(columnCount - 1) - CGFloat(blockCount - 1) * blockMargin) / CGFloat(columnCount)
+                self.height = itemSize * CGFloat(rowCount) + CGFloat((rowCount - 1))
+
+                let numberOfRectanglesInEachBlock = CGFloat(count / rowCount / blockCount)
+                self.lastBlockWidth = itemSize * numberOfRectanglesInEachBlock + (numberOfRectanglesInEachBlock - 1)
+
+                    // 在后台加载绘制路径
+                loadGridAsync(itemSize: itemSize)
+            }
+            .onChange(of: geo.size.width) { oldValue, newValue in
+                let width:CGFloat = geo.size.width
+                let itemSize = (width - CGFloat(columnCount - 1) - CGFloat(blockCount - 1) * blockMargin) / CGFloat(columnCount)
+                self.height = itemSize * CGFloat(rowCount) + CGFloat((rowCount - 1))
+
+                let numberOfRectanglesInEachBlock = CGFloat(count / rowCount / blockCount)
+                self.lastBlockWidth = itemSize * numberOfRectanglesInEachBlock + (numberOfRectanglesInEachBlock - 1)
+
+                    // 在后台加载绘制路径
+                loadGridAsync(itemSize: itemSize)
+            }
+        }
+    }
+
+    private func loadGridAsync(itemSize: CGFloat) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let pathWin = drawRects(drawResult: .win, itemSize: itemSize)
+            let pathLose = drawRects(drawResult: .lose, itemSize: itemSize)
+            let pathDisconnected = drawRects(drawResult: .disconnected, itemSize: itemSize)
+            DispatchQueue.main.async {
+                self.drawnPathWin = pathWin
+                self.drawnPathLose = pathLose
+                self.drawnDisconnected = pathDisconnected
+                self.isLoading = false
+            }
         }
     }
 
@@ -58,16 +121,16 @@ struct VDGridView: View {
         self.lastBlockWidth = itemSize * numberOfRectanglesInEachBlock + (numberOfRectanglesInEachBlock - 1)
 
         return ZStack {
-            drawRects(geo: geo, drawResult: .disconnected, itemSize: itemSize)
+            drawRects(drawResult: .disconnected, itemSize: itemSize)
                 .foregroundColor(VDResult.disconnected.color)
-            drawRects(geo: geo, drawResult: .lose, itemSize: itemSize)
+            drawRects(drawResult: .lose, itemSize: itemSize)
                 .foregroundColor(VDResult.lose.color)
-            drawRects(geo: geo, drawResult: .win, itemSize: itemSize)
+            drawRects(drawResult: .win, itemSize: itemSize)
                 .foregroundColor(isCoop ? Color.waveDefeat : VDResult.win.color)
         }
     }
 
-    private func drawRects(geo: GeometryProxy, drawResult: VDResult, itemSize: CGFloat) -> Path {
+    private func drawRects(drawResult: VDResult, itemSize: CGFloat) -> Path {
         Path { path in
             var itemIndex = 0
             for column in 0..<columnCount {

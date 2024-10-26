@@ -66,11 +66,18 @@ struct BattleListRowView: View {
         ZStack {
             VStack(spacing:0){
                 HStack(spacing:6){
-                    mode.icon
-                        .resizable()
-                        .frame(width: 16, height: 16)
-                        .padding(.top, -0.5)
-                        .padding(.bottom, -1.5)
+                    if mode == .fest{
+                        FestIcon()
+                            .frame(width: 16, height: 16)
+                            .padding(.top, -0.5)
+                            .padding(.bottom, -1.5)
+                    }else{
+                        mode.icon
+                            .resizable()
+                            .frame(width: 16, height: 16)
+                            .padding(.top, -0.5)
+                            .padding(.bottom, -1.5)
+                    }
 
                     Text(rule.name)
                         .font(.splatoonFont(size: 12))
@@ -101,7 +108,7 @@ struct BattleListRowView: View {
                             .font(.splatoonFont(size: 14))
                             .foregroundStyle(.spYellow)
                     }else if rule != .turfWar && rule != .triColor{
-                        Text("\(detail.point ?? 0)计数")
+                        Text("\(detail.point)计数")
                             .font(.splatoonFont(size: 14))
                             .foregroundStyle(detail.judgement == .LOSE ? Color.secondary : .spGreen)
                     }else {
@@ -117,9 +124,9 @@ struct BattleListRowView: View {
                                 .frame(width: 14, height: 14)
                                 .foregroundColor(.gray)
                             HStack(alignment: .firstTextBaseline, spacing: 0){
-                                Text("\((detail.kill ?? 0) + (detail.assist ?? 0))")
+                                Text("\((detail.kill) + (detail.assist))")
                                     .font(.splatoonFont(size: 10))
-                                Text("(\(detail.assist ?? 0))")
+                                Text("(\(detail.assist))")
                                     .font(.splatoonFont(size: 7))
                             }
                         }
@@ -129,7 +136,7 @@ struct BattleListRowView: View {
                                 .resizable()
                                 .frame(width: 14, height: 14)
                                 .foregroundColor(.gray)
-                            Text("\(detail.death ?? 0)")
+                            Text("\(detail.death)")
                                 .font(.splatoonFont(size: 10))
                         }
 
@@ -138,8 +145,8 @@ struct BattleListRowView: View {
                                 .resizable()
                                 .frame(width: 14, height: 14)
                                 .foregroundColor(.gray)
-                            let death = detail.death ?? 1
-                            Text("\(Double(detail.kill ?? 0) -/ Double(death == 0 ? 1 : death), places: 1)")
+                            let death = detail.death
+                            Text("\(Double(detail.kill) -/ Double(death == 0 ? 1 : death), places: 1)")
                                 .font(.splatoonFont(size: 10))
                         }
                     }

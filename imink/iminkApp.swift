@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 import SplatDatabase
 import IndicatorsKit
 
@@ -27,6 +28,13 @@ struct iminkApp: App {
             }
             .overlay(alignment: .top) {
                 IndicatorsOverlay(model: Indicators.shared)
+            }
+            .onAppear{
+                getNsoVersion { version in
+                    if let _ = version{
+                        AppUserDefaults.shared.NSOVersion = "2.10.1"
+                    }
+                }
             }
             .onChange(of: scenePhase) { oldValue, newPhase in
                 switch newPhase {

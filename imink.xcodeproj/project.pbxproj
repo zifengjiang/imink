@@ -55,6 +55,7 @@
 		8B26364C2BFEAE9400F8964A /* Zip in Frameworks */ = {isa = PBXBuildFile; productRef = 8B26364B2BFEAE9400F8964A /* Zip */; };
 		8B26364F2BFEB00700F8964A /* AlertKit in Frameworks */ = {isa = PBXBuildFile; productRef = 8B26364E2BFEB00700F8964A /* AlertKit */; };
 		8B2DA5892C0409E500850BAC /* CoopGroupStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B2DA5882C0409E500850BAC /* CoopGroupStatus.swift */; };
+		8B3136982CCCEB3B0085220E /* FestIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3136972CCCEB3B0085220E /* FestIcon.swift */; };
 		8B3591432BF892130066BCA3 /* HomePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3591422BF892130066BCA3 /* HomePage.swift */; };
 		8B3591452BF893D60066BCA3 /* MePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3591442BF893D60066BCA3 /* MePage.swift */; };
 		8B4E4F962C01F69900818D31 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4E4F952C01F69900818D31 /* LoginViewModel.swift */; };
@@ -79,6 +80,7 @@
 		8B7F29642BF6E7E90010A525 /* AppAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7F29632BF6E7E80010A525 /* AppAPI.swift */; };
 		8B7F296C2BF711C40010A525 /* NSOAuthorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7F296B2BF711C40010A525 /* NSOAuthorization.swift */; };
 		8B83F9D42CC9F624009B90FF /* CarouselView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B83F9D32CC9F624009B90FF /* CarouselView.swift */; };
+		8B83F9E42CCA35C6009B90FF /* UniversalOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B83F9E32CCA35C6009B90FF /* UniversalOverlay.swift */; };
 		8B8B285E2BF8581800790809 /* SplatNet.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8B8B285C2BF8581800790809 /* SplatNet.strings */; };
 		8B8B286D2BF887D400790809 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B8B286B2BF887D400790809 /* Preview Assets.xcassets */; };
 		8B93C0C52C12EA8D00D7EFBC /* SplatNet3 in Frameworks */ = {isa = PBXBuildFile; productRef = 8B93C0C42C12EA8D00D7EFBC /* SplatNet3 */; };
@@ -88,6 +90,8 @@
 		8B93C0D32C12ED6E00D7EFBC /* IndicatorsKit in Frameworks */ = {isa = PBXBuildFile; productRef = 8B93C0D22C12ED6E00D7EFBC /* IndicatorsKit */; };
 		8BA017472C099F23001CFC72 /* Precomputable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA017462C099F23001CFC72 /* Precomputable.swift */; };
 		8BA017492C09A8CE001CFC72 /* FetchableFromDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA017482C09A8CE001CFC72 /* FetchableFromDatabase.swift */; };
+		8BA089322CCB8A6000BA7176 /* SalmonRunStatsPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA089312CCB8A6000BA7176 /* SalmonRunStatsPage.swift */; };
+		8BA089342CCB8AB000BA7176 /* CoopRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA089332CCB8AB000BA7176 /* CoopRecord.swift */; };
 		8BA30B082CAED80E0020D489 /* Operator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA30B072CAED80E0020D489 /* Operator.swift */; };
 		8BAADA532C11BD77002D6370 /* Indicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAADA522C11BD77002D6370 /* Indicators.swift */; };
 		8BAADA552C11C382002D6370 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 8BAADA542C11C382002D6370 /* .swiftlint.yml */; };
@@ -189,6 +193,7 @@
 		8B19CF8F2CB2CB0200EF4424 /* Judgement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Judgement.swift; sourceTree = "<group>"; };
 		8B2636482BFEAE1500F8964A /* DataBackup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataBackup.swift; sourceTree = "<group>"; };
 		8B2DA5882C0409E500850BAC /* CoopGroupStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopGroupStatus.swift; sourceTree = "<group>"; };
+		8B3136972CCCEB3B0085220E /* FestIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FestIcon.swift; sourceTree = "<group>"; };
 		8B3591422BF892130066BCA3 /* HomePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePage.swift; sourceTree = "<group>"; };
 		8B3591442BF893D60066BCA3 /* MePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MePage.swift; sourceTree = "<group>"; };
 		8B4E4F952C01F69900818D31 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
@@ -217,6 +222,7 @@
 		8B7F29632BF6E7E80010A525 /* AppAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppAPI.swift; sourceTree = "<group>"; };
 		8B7F296B2BF711C40010A525 /* NSOAuthorization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSOAuthorization.swift; sourceTree = "<group>"; };
 		8B83F9D32CC9F624009B90FF /* CarouselView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarouselView.swift; sourceTree = "<group>"; };
+		8B83F9E32CCA35C6009B90FF /* UniversalOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniversalOverlay.swift; sourceTree = "<group>"; };
 		8B8B285D2BF8581800790809 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/SplatNet.strings"; sourceTree = "<group>"; };
 		8B8B285F2BF8582200790809 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/SplatNet.strings"; sourceTree = "<group>"; };
 		8B8B28602BF8582300790809 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/SplatNet.strings; sourceTree = "<group>"; };
@@ -231,6 +237,8 @@
 		8B8B286B2BF887D400790809 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		8BA017462C099F23001CFC72 /* Precomputable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Precomputable.swift; sourceTree = "<group>"; };
 		8BA017482C09A8CE001CFC72 /* FetchableFromDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchableFromDatabase.swift; sourceTree = "<group>"; };
+		8BA089312CCB8A6000BA7176 /* SalmonRunStatsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SalmonRunStatsPage.swift; sourceTree = "<group>"; };
+		8BA089332CCB8AB000BA7176 /* CoopRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopRecord.swift; sourceTree = "<group>"; };
 		8BA30B072CAED80E0020D489 /* Operator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Operator.swift; sourceTree = "<group>"; };
 		8BAADA522C11BD77002D6370 /* Indicators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Indicators.swift; sourceTree = "<group>"; };
 		8BAADA542C11C382002D6370 /* .swiftlint.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
@@ -502,6 +510,7 @@
 			children = (
 				8B3591442BF893D60066BCA3 /* MePage.swift */,
 				8B0D14702BF9898100B82AD1 /* SettingPage.swift */,
+				8BA089312CCB8A6000BA7176 /* SalmonRunStatsPage.swift */,
 			);
 			path = Me;
 			sourceTree = "<group>";
@@ -525,6 +534,7 @@
 				8B7059032C0B00510076F680 /* NameplateView.swift */,
 				8BE0950C2C0315C40089705F /* ActivityView.swift */,
 				8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */,
+				8B3136972CCCEB3B0085220E /* FestIcon.swift */,
 				8BB4A1F12BFDB49E008DB764 /* LoginView.swift */,
 				8B0851792BFB790700AF22C5 /* WaveShape.swift */,
 				8B0D14692BF8BFF700B82AD1 /* VDGridView.swift */,
@@ -533,6 +543,7 @@
 				8B0D14A12BFAC98D00B82AD1 /* GrayscaleTextureView.swift */,
 				8B5276132BFC228600022D5B /* SpecialWeaponImage.swift */,
 				8BFE916F2C0C9F0D00C12CBE /* FilterView.swift */,
+				8B83F9E32CCA35C6009B90FF /* UniversalOverlay.swift */,
 				8BFE91732C0DEA3D00C12CBE /* RangeSlider.swift */,
 				8BFFDF682CB40F43004F2390 /* BattlePlayerView.swift */,
 				8B83F9D32CC9F624009B90FF /* CarouselView.swift */,
@@ -559,6 +570,7 @@
 		8BB99B352BF77B1900470408 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				8BA089332CCB8AB000BA7176 /* CoopRecord.swift */,
 				8B19CF892CB29BC500EF4424 /* BattleRule.swift */,
 				8B0851712BFB5FE100AF22C5 /* CoopRule.swift */,
 				8BB99B362BF77B3B00470408 /* Models.swift */,
@@ -798,8 +810,10 @@
 				8B5276142BFC228600022D5B /* SpecialWeaponImage.swift in Sources */,
 				8B4E4F962C01F69900818D31 /* LoginViewModel.swift in Sources */,
 				8B0851722BFB5FE100AF22C5 /* CoopRule.swift in Sources */,
+				8B3136982CCCEB3B0085220E /* FestIcon.swift in Sources */,
 				8B0D149E2BFAC56100B82AD1 /* CoopListShiftCardView.swift in Sources */,
 				8B08517A2BFB790700AF22C5 /* WaveShape.swift in Sources */,
+				8B83F9E42CCA35C6009B90FF /* UniversalOverlay.swift in Sources */,
 				8B83F9D42CC9F624009B90FF /* CarouselView.swift in Sources */,
 				8B0792092C1077DD0094EA57 /* BattleScheduleCardView.swift in Sources */,
 				8BD8CD522C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift in Sources */,
@@ -808,6 +822,7 @@
 				8B7F292A2BF6E1B90010A525 /* iminkApp.swift in Sources */,
 				8B0D14A62BFAD93A00B82AD1 /* CoopDetailView.swift in Sources */,
 				8B0D14A82BFAD9F200B82AD1 /* FixSafeareaBackgroundModifier.swift in Sources */,
+				8BA089322CCB8A6000BA7176 /* SalmonRunStatsPage.swift in Sources */,
 				8BA017492C09A8CE001CFC72 /* FetchableFromDatabase.swift in Sources */,
 				8B7059062C0C25A90076F680 /* TouchDownAndTouchUpGestureView.swift in Sources */,
 				8B7059082C0C27980076F680 /* PopupModifier.swift in Sources */,
@@ -816,6 +831,7 @@
 				8B7F295F2BF6E4A80010A525 /* NSOAPI.swift in Sources */,
 				8B65636E2CB00B050017F5D0 /* BattleGroupStatus.swift in Sources */,
 				8B0851742BFB673000AF22C5 /* TextureBackGround.swift in Sources */,
+				8BA089342CCB8AB000BA7176 /* CoopRecord.swift in Sources */,
 				8B0D14802BF9908800B82AD1 /* FilePickerView.swift in Sources */,
 				8B19CF312CB2479B00EF4424 /* BattleListRowModel.swift in Sources */,
 				8B19CF352CB2488200EF4424 /* BattleListRowView.swift in Sources */,

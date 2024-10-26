@@ -72,6 +72,18 @@ struct SettingPage: View {
                     }
                     .background(ActivityView(isPresented: $isActivityPresented, item: $item))
 
+                    Button {
+
+                    } label: {
+                        Text("鲑鱼跑记录总数：\(AppState.shared.salmonRunRecordsCount)")
+                    }
+
+                    Button {
+
+                    } label: {
+                        Text("战斗记录总数：\(AppState.shared.battleRecordsCount)")
+                    }
+
                     Button{
 //                        try! SplatDatabase.shared.dbQueue.write{ db in
 //                            try db.execute(literal: "DROP TABLE IF EXISTS vsTeam;")
@@ -86,6 +98,18 @@ struct SettingPage: View {
 
                 Section(header: Text("关于Imink")){
                     Button{
+
+                    } label: {
+                        Text("鲑鱼跑记录刷新时间： \(Date(timeIntervalSince1970: TimeInterval(AppUserDefaults.shared.coopsRefreshTime)).toPlayedTimeString(full: true))")
+                    }
+
+                    Button{
+
+                    } label: {
+                        Text("战斗记录刷新时间： \(Date(timeIntervalSince1970: TimeInterval(AppUserDefaults.shared.battlesRefreshTime)).toPlayedTimeString(full: true))")
+                    }
+
+                    Button{
                         Task{
                             showSettings = false
                             await fetchHistorySchedules()
@@ -95,7 +119,11 @@ struct SettingPage: View {
                     }
 
                     Button {
-
+                        getNsoVersion { version in
+                            if let version = version{
+                                AppUserDefaults.shared.NSOVersion = version
+                            }
+                        }
                     } label: {
                         HStack{
                             Text("NSO版本")

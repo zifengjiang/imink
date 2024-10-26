@@ -21,3 +21,15 @@ extension String {
         return Data(self.utf8).base64EncodedString()
     }
 }
+
+extension Array where Element == String {
+        /// 返回一个去除重复元素的新数组，保持原有顺序
+    func removingDuplicates() -> [String] {
+        var seen = Set<String>()
+        return self.filter { element in
+            guard !seen.contains(element) else { return false }
+            seen.insert(element)
+            return true
+        }
+    }
+}

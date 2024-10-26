@@ -60,6 +60,10 @@ struct CoopListView: View {
                     }
                     .scrollTargetLayout()
                 }
+                .refreshable {
+                    guard AppState.shared.isLogin else { return }
+                    await SN3Client.shared.fetchCoops()
+                }
                 .scrollPosition(id: $activeID, anchor: .bottom)
                 .fixSafeareaBackground()
                 .modifier(LoginViewModifier(isLogin: AppState.shared.isLogin, iconName: "TabBarSalmonRun"))
@@ -108,10 +112,7 @@ struct CoopListView: View {
             }
 
         }
-        .refreshable {
-            guard AppState.shared.isLogin else { return }
-            await SN3Client.shared.fetchCoops()
-        }
+
         .sheet(isPresented: $showFilterSheet){
             CoopFilterView(showFilterView: $showFilterSheet, filter: $viewModel.filter){
                 viewModel.cancel()
