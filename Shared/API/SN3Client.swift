@@ -10,7 +10,11 @@ extension SplatDatabase {
     public func insertBattles(jsons:[JSON]) async throws {
         try await self.dbQueue.write { db in
             for json in jsons{
-                try self.insertBattle(json: json, db: db)
+                do{
+                    try self.insertBattle(json: json, db: db)
+                }catch{
+                    logError(error)
+                }
             }
         }
     }

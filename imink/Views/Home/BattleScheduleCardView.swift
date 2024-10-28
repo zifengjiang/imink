@@ -59,10 +59,15 @@ struct BattleScheduleCardView: View {
         var body: some View {
             VStack(alignment: .center, spacing: 8){
                 HStack(spacing:2){
-                    mode.icon
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 12, height: 12)
+                    if mode == .fest{
+                        FestIcon()
+                            .frame(width: 12, height: 12)
+                    }else{
+                        mode.icon
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 12, height: 12)
+                    }
 
                     if mode == .bankara || mode == .x || mode == .event{
                         rule.icon

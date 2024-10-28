@@ -16,40 +16,7 @@ struct CoopListView: View {
                     LazyVStack{
                         ForEach(viewModel.rows, id:\.id){ row in
                             NavigationLink {
-                                DetailTabView(selectedRow: $selectedRow, rows: $viewModel.rows)
-                                    .onAppear {
-                                        selectedRow = row.id
-                                    }
-                                    .toolbar {
-                                        ToolbarItem {
-                                            Button{
-                                                // select previous row if has one
-                                                if viewModel.rows.firstIndex(where: {$0.id == selectedRow})! > 0{
-                                                    withAnimation{
-                                                        selectedRow = viewModel.rows[viewModel.rows.firstIndex(where: {$0.id == selectedRow})! - 1].id
-                                                    }
-                                                }
-
-                                            } label: {
-                                                    /// Filter
-                                                Label("11", systemImage: "arrowtriangle.left.fill")
-                                            }
-                                        }
-
-                                        ToolbarItem {
-                                            Button{
-                                                // select next row if has one
-                                                if viewModel.rows.firstIndex(where: {$0.id == selectedRow})! < viewModel.rows.count - 1{
-                                                    withAnimation{
-                                                        selectedRow = viewModel.rows[viewModel.rows.firstIndex(where: {$0.id == selectedRow})! + 1].id
-                                                    }
-                                                }
-                                            } label: {
-                                                    /// Filter
-                                                Label("11", systemImage: "arrowtriangle.right.fill")
-                                            }
-                                        }
-                                    }
+                                CoopListDetailView(isCoop: row.isCoop, coopId: row.coop?.id, shiftId: row.card?.groupId)
                             } label: {
                                 CoopListRowView(isCoop: row.isCoop, coop: row.coop, card: row.card)
                                     .id(row.id)
@@ -112,7 +79,6 @@ struct CoopListView: View {
             }
 
         }
-
         .sheet(isPresented: $showFilterSheet){
             CoopFilterView(showFilterView: $showFilterSheet, filter: $viewModel.filter){
                 viewModel.cancel()
@@ -122,24 +88,6 @@ struct CoopListView: View {
         }
     }
 
-    struct DetailTabView:View {
-        @Binding var selectedRow: String?
-        @Binding var rows:[CoopListRowModel]
-        
-        var body: some View {
-
-            TabView(selection: $selectedRow) {
-
-                ForEach(rows, id:\.id){ row in
-                    CoopListDetailView(isCoop: row.isCoop, coopId: row.coop?.id, shiftId: row.card?.groupId)
-                        .tag(row.id)
-                }
-            }
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-            .edgesIgnoringSafeArea(.vertical)
-            .fixSafeareaBackground()
-        }
-    }
 
 }
 

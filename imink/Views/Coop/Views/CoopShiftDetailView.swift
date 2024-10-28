@@ -224,8 +224,8 @@ struct CoopShiftDetailView: View {
 //                }
 //            }
 //            .labelsHidden()
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack{
+//            ScrollView(.horizontal, showsIndicators: false) {
+            CarouselView(activeIndex: .constant(1), autoScrollDuration: 20){
                     ForEach(viewModel.coopWaveStatus.indices, id: \.self){ index in
                         HStack{
                             ForEach(viewModel.coopWaveStatus[index], id: \.waterLevel){ wave in
@@ -234,7 +234,8 @@ struct CoopShiftDetailView: View {
                         }
                     }
                 }
-            }
+//            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+//            }
             .frame(height: 120)
         }
 

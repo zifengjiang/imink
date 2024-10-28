@@ -1,4 +1,5 @@
 import SwiftUI
+import SplatNet3API
 import SplatDatabase
 import IndicatorsKit
 
@@ -73,7 +74,9 @@ struct SettingPage: View {
                     .background(ActivityView(isPresented: $isActivityPresented, item: $item))
 
                     Button {
-
+                        Task{
+                            await NSOAccountManager.shared.refreshGameServiceTokenManual()
+                        }
                     } label: {
                         Text("鲑鱼跑记录总数：\(AppState.shared.salmonRunRecordsCount)")
                     }

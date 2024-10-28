@@ -74,6 +74,7 @@ struct SalmonRunStatsPage: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 100, height: 100)
+                        .foregroundStyle(.gray)
                     Text("Loading...")
                         .font(.splatoonFont(size: 25))
                     Spacer()

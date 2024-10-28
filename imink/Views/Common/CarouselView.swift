@@ -119,8 +119,6 @@ struct CarouselView<Content: View>: View {
                 scrollPosition = 0
             }
         }
-
-
     }
 
 }

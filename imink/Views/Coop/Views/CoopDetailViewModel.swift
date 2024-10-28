@@ -18,6 +18,8 @@ class CoopDetailViewModel: ObservableObject {
     }
 
     func load() {
+        cancelBag = Set<AnyCancellable>()
+        initialized = false
 
         CoopWaveResult.fetchAll(identifier: id)
             .catch { error -> Just<[CoopWaveResult]> in
