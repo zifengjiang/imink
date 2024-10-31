@@ -22,7 +22,7 @@ struct BattleDetailView: View {
     }
 
     var loseTeam:[VsTeam]{
-        viewModel.battle?.teams.filter{$0.judgement == "LOSE" || $0.order != 1} ?? []
+        viewModel.battle?.teams.filter{$0.judgement == "LOSE"} ?? []
     }
 
     var body: some View {
@@ -177,7 +177,10 @@ struct BattleDetailView: View {
                                 }
                             } touchUpCallBack: {
                                 if hoveredMember {
-                                    showPlayerSkill = true
+                                    withAnimation {
+                                        showPlayerSkill = true
+                                    }
+
                                     hoveredMember = false
                                 }
                             }
@@ -259,6 +262,7 @@ struct BattleDetailView: View {
     struct PlayerRow:View {
         let player:Player
         let color:Color
+        @StateObject var viewModel = ViewModel()
         var body: some View {
             HStack{
                 if let weapon = player._weapon{
@@ -270,7 +274,7 @@ struct BattleDetailView: View {
                         .clipShape(RoundedRectangle(cornerRadius: .infinity, style: .continuous))
                 }
                 VStack(alignment: .leading, spacing: 4){
-                    Text(player.byname)
+                    Text(viewModel.formattedByname ?? player.byname)
                         .font(.splatoonFont(size: 9))
                         .foregroundStyle(.secondary)
                     Text(player.name)
@@ -284,6 +288,32 @@ struct BattleDetailView: View {
                     .padding(.vertical, 3)
                     .background(.listBackground)
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            }
+            .task {
+                await viewModel._formatByname(byname: player.byname)
+            }
+        }
+
+        class ViewModel:ObservableObject{
+            @Published var formattedByname: String?
+
+            func _formatByname(byname:String) async{
+                let formatted = await formatByname(byname)
+                DispatchQueue.main.async {
+                    if let adjective = formatted?.adjective, let subjective = formatted?.subject{
+                        if let male = formatted?.male{
+                            if male, let sub = subjective.localizedFromSplatNet.split(separator: "/").first{
+                                self.formattedByname = adjective.localizedFromSplatNet + sub
+                            }else{
+                                self.formattedByname = adjective.localizedFromSplatNet + subjective.localizedFromSplatNet.split(separator: "/").last!
+                            }
+                        }else{
+                            self.formattedByname = adjective.localizedFromSplatNet + subjective.localizedFromSplatNet
+                        }
+                    }else{
+                        self.formattedByname = byname
+                    }
+                }
             }
         }
 

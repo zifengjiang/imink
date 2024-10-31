@@ -1,7 +1,7 @@
 import SwiftUI
 import SplatNet3API
 
-struct SalmonRunStatsPage: View {
+struct CoopRecordView: View {
     @StateObject var model = SalmonRunStatsViewModel()
     var body: some View {
         VStack {

@@ -17,11 +17,13 @@ struct CoopShiftDetailView: View {
                 VStack(spacing:20){
                     if viewModel.initialized{
                         cardView
+                            .padding(.top)
                         waveView
                         weaponView
                         playerView
                         kingView
                         enemyView
+                            .padding(.bottom)
                     }else{
                         Spacer()
                         Image(.squidLoading)
@@ -225,7 +227,7 @@ struct CoopShiftDetailView: View {
 //            }
 //            .labelsHidden()
 //            ScrollView(.horizontal, showsIndicators: false) {
-            CarouselView(activeIndex: .constant(1), autoScrollDuration: 20){
+            CarouselView(activeIndex: .constant(1), autoScrollDuration: 5){
                     ForEach(viewModel.coopWaveStatus.indices, id: \.self){ index in
                         HStack{
                             ForEach(viewModel.coopWaveStatus[index], id: \.waterLevel){ wave in

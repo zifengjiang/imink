@@ -19,6 +19,8 @@ class AppState: ObservableObject {
 
     @Published var battleRecordsCount: Int = 0
 
+    var viewModelDict: [Int64:CoopDetailViewModel] = [:]
+
     var cancelBag = Set<AnyCancellable>()
 
     init() {

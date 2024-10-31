@@ -179,23 +179,40 @@ extension SN3Client {
         }
     }
 
-    func fetchHistoryRecord() async {
+    func fetchHistoryRecord() async -> HistoryRecord? {
         do {
             print("fetchHistoryRecord")
+            guard let gameServiceToken = AppUserDefaults.shared.gameServiceToken else {return nil}
+            try await SN3Client.shared.setToken(gameServiceToken)
             let historyRecord = try await JSON(data: self.graphQL(.historyRecord))
-            print(historyRecord)
+            return HistoryRecord(json: historyRecord)
         }catch{
             logError(error)
+            return nil
         }
     }
 
     func fetchCoopRecord() async -> CoopRecord? {
         do {
+            guard let gameServiceToken = AppUserDefaults.shared.gameServiceToken else {return nil}
+            try await SN3Client.shared.setToken(gameServiceToken)
             let record = try await JSON(data: self.graphQL(.coopRecord))
             return CoopRecord(json: record)
         }catch{
             logError(error)
             return nil
+        }
+    }
+
+    func fetchStageRecord() async -> [StageRecord] {
+        do {
+            guard let gameServiceToken = AppUserDefaults.shared.gameServiceToken else {return []}
+            try await SN3Client.shared.setToken(gameServiceToken)
+            let record = try await JSON(data: self.graphQL(.stageRecord))
+            return record["data"]["stageRecords"]["nodes"].arrayValue.map{StageRecord(json: $0)}
+        }catch{
+            logError(error)
+            return []
         }
     }
 }

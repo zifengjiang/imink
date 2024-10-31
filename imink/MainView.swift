@@ -39,6 +39,12 @@ struct MainView: View {
                 }
                 .tag(3)
         }
+        .onChange(of: tabSelection){ _, newValue in
+            Haptics.generateIfEnabled(.selectionChanged)
+            if newValue != 2{
+                AppState.shared.viewModelDict.removeAll()
+            }
+        }
         .task {
             MainViewModel.shared.isLogin = AppUserDefaults.shared.sessionToken != nil
 

@@ -4,7 +4,7 @@ import SplatDatabase
 struct BattlePlayerView: View {
     let player:Player?
     var body: some View {
-        VStack{
+        VStack(alignment: .center){
             if let player = player{
                 NameplateView(player: player)
                 if let weapon = player._weapon{
@@ -20,65 +20,25 @@ struct BattlePlayerView: View {
                     }
                 }
                 HStack{
-                    VStack{
-                        if let headGear = player._headGear{
-                            Image(headGear.gear)
-                                .resizable()
-                                .frame(width: 50, height: 50)
-                            HStack{
-                                Image(headGear.primaryPower)
-                                    .resizable()
-                                    .frame(width: 20, height: 20)
-                                ForEach(headGear.additionalPowers.indices, id: \.self){ index in
-                                    Image(headGear.additionalPowers[index])
-                                        .resizable()
-                                        .frame(width: 20, height: 20)
-                                }
-                            }
+                    if let headGear = player._headGear{
+                        GearView(gear: headGear)
+                    }
 
-                        }
+                    if let clothes = player._clothingGear{
+                        GearView(gear: clothes)
                     }
-                    VStack{
-                        if let clothes = player._clothingGear{
-                            Image(clothes.gear)
-                                .resizable()
-                                .frame(width: 50, height: 50)
-                            HStack{
-                                Image(clothes.primaryPower)
-                                    .resizable()
-                                    .frame(width: 20, height: 20)
-                                ForEach(clothes.additionalPowers.indices, id: \.self){ index in
-                                    Image(clothes.additionalPowers[index])
-                                        .resizable()
-                                        .frame(width: 20, height: 20)
-                                }
-                            }
-                        }
-                    }
-                    VStack{
-                        if let shoes = player._shoesGear{
-                            Image(shoes.gear)
-                                .resizable()
-                                .frame(width: 50, height: 50)
-                            HStack{
-                                Image(shoes.primaryPower)
-                                    .resizable()
-                                    .frame(width: 20, height: 20)
-                                ForEach(shoes.additionalPowers.indices, id: \.self){ index in
-                                    Image(shoes.additionalPowers[index])
-                                        .resizable()
-                                        .frame(width: 20, height: 20)
-                                }
-                            }
-                        }
+
+                    if let shoes = player._shoesGear{
+                        GearView(gear: shoes)
                     }
                 }
             }
 
         }
-        .frame(width: 200, height: 350)
+        .frame(width: 200, height: 180)
         .padding()
-        .background(Color.gray)
+        .background(.gray)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }
 

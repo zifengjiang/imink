@@ -23,12 +23,17 @@ struct CoopListRowInfo:Identifiable {
     var rescued: Int
     var time:Date
     var GroupId: Int64
+    var enemyKindCount: Int
 
     var gradeName:String?{
         if let grade = grade {
             return "CoopGrade-\(grade)".base64EncodedString
         }
         return nil
+    }
+
+    var height:CGFloat{
+        CGFloat(610 + (self.resultWave != -2 ? 160 : 0) + self.enemyKindCount*60)
     }
 }
 
@@ -202,7 +207,10 @@ extension Filter{
             coopPlayerResult.rescueCount AS rescue,
             coopPlayerResult.rescuedCount AS rescued,
             coop.playedTime AS time,
-            coop.GroupID
+            coop.GroupID,
+            (SELECT COUNT(*) 
+            FROM coopEnemyResult 
+            WHERE coopEnemyResult.coopId = coop.id) AS enemyKindCount
             FROM
             coop_view AS coop
             JOIN coopPlayerResult ON coopPlayerResult.coopId = coop.id

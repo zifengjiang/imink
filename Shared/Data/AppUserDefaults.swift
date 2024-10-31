@@ -24,6 +24,9 @@ class AppUserDefaults: ObservableObject {
         }
     }
 
+    @AppStorage("history_record", store: .appGroup)
+    var historyRecord: String?
+
     @AppStorage("accountId", store: .appGroup)
     var accountId: Int = 1
 

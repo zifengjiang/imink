@@ -33,3 +33,9 @@ extension Array where Element == String {
         }
     }
 }
+
+func utcToDate(date: String) -> Date? {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+    return formatter.date(from: date)
+}

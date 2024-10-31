@@ -126,21 +126,34 @@ struct CoopListDetailItemView: View {
             .foregroundColor(Color(.systemGray2))
             .padding(.top, 1)
         }
+
         .padding(.top, 7.5)
         .padding(.bottom, 7)
         .padding([.leading, .trailing], 8)
         .background(Color(.listItemBackground))
         .frame(height: 85)
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .contextMenu{
+            Button{
+                let image = CoopListDetailView(isCoop: true, coopId: coop.id, shiftId: nil).asUIImage(size: CGSize(width: 400, height: coop.height))
+                let activityController = UIActivityViewController(
+                    activityItems: [image], applicationActivities: nil)
+                let vc = UIApplication.shared.windows.first!.rootViewController
+                vc?.present(activityController, animated: true)
+            } label: {
+                Label("保存至相册", systemImage: "photo.on.rectangle")
+            }
+        }
         .padding([.leading, .trailing])
         .padding(.top,3)
     }
+
 }
 
-#Preview {
-    CoopListDetailItemView(coop: CoopListRowInfo(id: 1, rule: .regular , grade: 8, gradePoint: 999, gradeDiff: .up, dangerRate: 3.33,enemyDefeatCount:21, specie:true, stage: "Q29vcFN0YWdlLTk=", boss: "Q29vcEVuZW15LTIz", haveBossDefeated: true, resultWave: 3, goldenEgg: 212, powerEgg: 5341, rescue: 1, rescued: 0, time: Date.init(timeInterval: -30000000, since: Date()),GroupId: 0))
-        .padding(.top, 8)
-        .padding([.leading, .trailing])
-        .frame(width: 370)
-        .previewLayout(.sizeThatFits)
-}
+//#Preview {
+//    CoopListDetailItemView(coop: CoopListRowInfo(id: 1, rule: .regular , grade: 8, gradePoint: 999, gradeDiff: .up, dangerRate: 3.33,enemyDefeatCount:21, specie:true, stage: "Q29vcFN0YWdlLTk=", boss: "Q29vcEVuZW15LTIz", haveBossDefeated: true, resultWave: 3, goldenEgg: 212, powerEgg: 5341, rescue: 1, rescued: 0, time: Date.init(timeInterval: -30000000, since: Date()),GroupId: 0))
+//        .padding(.top, 8)
+//        .padding([.leading, .trailing])
+//        .frame(width: 370)
+//        .previewLayout(.sizeThatFits)
+//}

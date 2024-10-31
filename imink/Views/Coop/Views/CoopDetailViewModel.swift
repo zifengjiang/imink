@@ -54,7 +54,6 @@ class CoopDetailViewModel: ObservableObject {
             .assign(to: \.initialized, on: self)
             .store(in: &cancelBag)
     }
-
 }
 
 func measureTime<T>(title: String, block: () async -> T) async -> T {

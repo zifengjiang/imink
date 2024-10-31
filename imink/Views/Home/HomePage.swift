@@ -65,6 +65,7 @@ struct HomePage: View {
             .navigationBarTitle("tab_home", displayMode: .inline)
             .toolbar{
                 Button {
+                    Haptics.generateIfEnabled(.medium)
                     Task{
                         await viewModel.fetchSchedules()
                     }

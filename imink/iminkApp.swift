@@ -13,10 +13,19 @@ struct iminkApp: App {
         #if DEBUG
         print(SplatDatabase.shared.dbQueue.path)
         #endif
+        // Fix the problem that NavgationView and TabBar has no background when Stack style.
         if #available(iOS 15.0, *) {
-            UITabBar.appearance().scrollEdgeAppearance = UITabBar.appearance().standardAppearance
-            UINavigationBar.appearance().scrollEdgeAppearance = UINavigationBar.appearance().standardAppearance
+            let navigationBarAppearance = UINavigationBarAppearance()
+            let defaultAppearance = UINavigationBar.appearance()
+            defaultAppearance.standardAppearance = navigationBarAppearance
+            defaultAppearance.scrollEdgeAppearance = navigationBarAppearance
+
+            let tabBarAppearance = UITabBarAppearance()
+            let appAppearance = UITabBar.appearance()
+            appAppearance.standardAppearance = tabBarAppearance
+            appAppearance.scrollEdgeAppearance = tabBarAppearance
         }
+
     }
 
     var body: some Scene {

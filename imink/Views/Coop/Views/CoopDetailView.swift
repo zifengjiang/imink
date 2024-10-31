@@ -5,10 +5,17 @@ struct CoopDetailView: View {
 
     @State var phase:Double = 0
     @StateObject var viewModel: CoopDetailViewModel
+    @State private var contentHeight: CGFloat = 0
+
     var id: Int64
     init(id: Int64){
         self.id = id
-        _viewModel = StateObject(wrappedValue: CoopDetailViewModel(id: id))
+        if let model = AppState.shared.viewModelDict[id]{
+            _viewModel = StateObject(wrappedValue: model)
+        }else{
+            let model = CoopDetailViewModel(id: id)
+            _viewModel = StateObject(wrappedValue: model)
+        }
     }
 
     var dangerRateText:String{
@@ -22,41 +29,62 @@ struct CoopDetailView: View {
     }
 
     var body: some View {
-        ScrollView(.vertical){
-            HStack {
-                Spacer()
-                VStack(spacing:20){
-                    if viewModel.initialized{
-                        cardView
-                            .padding(.top,10)
-                        waveView
-                        memberView
-                        enemyView
-                    }else{
-                        Spacer()
-                        Image(.squidLoading)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 100, height: 100)
-                            .rotationEffect(.degrees(phase))
-                        Text("Loading...")
-                            .font(.splatoonFont(size: 20))
-                        Spacer()
+            ScrollView(.vertical){
+                HStack {
+                    Spacer()
+                    VStack(spacing:20){
+                        if viewModel.initialized{
+                            cardView
+                                .padding(.top)
+                            waveView
+                            memberView
+                            enemyView
+                                .padding(.bottom)
+                        }else{
+                            Spacer()
+                            Image(.squidLoading)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                                .rotationEffect(.degrees(phase))
+                            Text("Loading...")
+                                .font(.splatoonFont(size: 20))
+                            Spacer()
+                        }
                     }
+                    Spacer()
                 }
-                Spacer()
+                .padding(.horizontal,8)
+                .background(
+                    GeometryReader { geometry in
+                        Color.clear
+                            .onAppear {
+                                contentHeight = geometry.size.height // 获取内容高度
+                            }
+                            .onChange(of: geometry.size.height) { _, newValue in
+                                contentHeight = newValue
+                                print("ScrollView 内容高度: \(contentHeight)")
+                            }
+                    }
+                )
             }
-            .padding(.horizontal,8)
-        }
-        .scrollClipDisabled()
-        .frame(maxWidth: .infinity)
-        .fixSafeareaBackground()
-        .onAppear  {
-            print("load Coop \(self.id)")
-            viewModel.load()
+            .scrollClipDisabled()
+            .frame(maxWidth: .infinity)
+            .fixSafeareaBackground()
+            .onAppear  {
+
+                AppState.shared.viewModelDict[self.id] = viewModel
+
+                if !viewModel.initialized{
+                    print("load Coop \(self.id)")
+                    viewModel.load()
+                }
+            }
+            .onDisappear {
+                AppState.shared.viewModelDict.removeValue(forKey: self.id)
+            }
         }
 
-    }
 
     var cardView:some View {
         makeCardView()
@@ -150,6 +178,7 @@ extension CoopDetailView {
                         Text(coop.clear ? "Clear!!" : "Failure")
                             .font(.splatoonFont1(size: 30))
                             .foregroundStyle(coop.clear ? Color.waveClear : Color.waveDefeat)
+                            .offset(y:10)
                         Spacer()
                         VStack{
                             VStack(spacing:5) {
@@ -335,7 +364,7 @@ extension CoopDetailView {
                             .colorMultiply(.black)
                     }
 
-                    .offset(x:20,y:-40)
+                    .offset(x:20,y:-30)
             }
         }
         .padding([.leading, .trailing], 12)
@@ -468,7 +497,7 @@ extension CoopDetailView {
     }
 
     private func waveResultsView(range: Range<Int>) -> some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: 7) {
             ForEach(range, id: \.self) { waveIndex in
                 let waveResult = viewModel.waveResults[waveIndex]
                 CoopDetailWaveResultView(result: waveResult, pass: isWavePassed(waveResult), bossName: viewModel.coop?.bossName)

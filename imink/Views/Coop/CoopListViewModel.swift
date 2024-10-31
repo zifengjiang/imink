@@ -11,6 +11,8 @@ class CoopListViewModel: ObservableObject {
     @Published var rows: [CoopListRowModel] = []
     @Published var filter: Filter = Filter()
     @Published var navigationTitle = "全部打工"
+    @Published var detailViewModel:CoopDetailViewModel? = nil
+    @Published var detailId:Int64? = nil
 
     private var cancellables: Set<AnyCancellable> = []
 

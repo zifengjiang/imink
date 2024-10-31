@@ -16,5 +16,7 @@
 		<string>processing</string>
 		<string>remote-notification</string>
 	</array>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string></string>
 </dict>
 </plist>
