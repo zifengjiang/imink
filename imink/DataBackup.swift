@@ -259,7 +259,7 @@ extension DataBackup {
 
 import UIKit
 import SplatDatabase
-import IndicatorsKit
+
 
 struct ProgressTracker {
     var startTime: Date?

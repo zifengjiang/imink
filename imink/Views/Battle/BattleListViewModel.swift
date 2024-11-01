@@ -1,5 +1,4 @@
 import Foundation
-import SplatNet3API
 import Combine
 
 class BattleListViewModel: ObservableObject {

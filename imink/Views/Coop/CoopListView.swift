@@ -1,6 +1,5 @@
 import SwiftUI
-import SplatNet3API
-import IndicatorsKit
+
 
 struct CoopListView: View {
     @EnvironmentObject var mainViewModel: MainViewModel
@@ -34,46 +33,47 @@ struct CoopListView: View {
                                     selectedRow = row.id
                                 }
                                 .toolbar {
-                                    ToolbarItem {
-                                        Button{
+
+                                    HStack(alignment: .center, spacing: 10){
+                                        Button {
                                             moveToPreviousRow()
-                                            if self.isFirstRow{
-                                                Haptics.generateIfEnabled(.error)
-                                            }else{
-                                                Haptics.generateIfEnabled(.light)
-                                            }
+                                            Haptics.generateIfEnabled(self.isFirstRow ? .error : .light)
                                         } label: {
-                                            Label {
-
-                                            } icon: {
-                                                Image(systemName: "arrowtriangle.left" + (isFirstRow ? "" : ".fill"))
-
-                                            }
-
+                                            Image("KEEP")
+                                                .resizable()
+                                                .scaledToFill()
+                                                .rotationEffect(.degrees(180))
+                                                .overlay(self.isFirstRow ? Color(.gray) : Color(.accent))
+                                                .mask{
+                                                    Image("KEEP")
+                                                        .resizable()
+                                                        .scaledToFit()
+                                                        .rotationEffect(.degrees(180))
+                                                }
+                                                .frame(width: 20*1.2, height: 10*1.2)
                                         }
-                                    }
 
 
-                                    ToolbarItem {
-                                        Button{
+                                        Button {
                                             moveToNextRow()
                                             Haptics.generateIfEnabled(.light)
                                         } label: {
-                                            Label {
-
-                                            } icon: {
-                                                Image(systemName: "arrowtriangle.right.fill")
-                                            }
-
+                                            Image("KEEP")
+                                                .resizable()
+                                                .scaledToFill()
+                                                .overlay(Color(.accent))
+                                                .mask{
+                                                    Image("KEEP")
+                                                        .resizable()
+                                                        .scaledToFit()
+                                                }
+                                                .frame(width: 20*1.2, height: 10*1.2)
                                         }
-                                    }
 
-                                    ToolbarItem{
                                         Button{
+                                            Haptics.generateIfEnabled(.medium)
                                             if let rowId = selectedRow, let coop = viewModel.rows.first(where: {$0.id == rowId})?.coop{
-
-                                                print(AppState.shared.viewModelDict[coop.id]?.id)
-                                                var image = CoopDetailView(id: coop.id).asUIImage(size: CGSize(width: 400, height: coop.height))
+                                                let image = CoopDetailView(id: coop.id).asUIImage(size: CGSize(width: 400, height: coop.height))
                                                 let activityController = UIActivityViewController(
                                                     activityItems: [image], applicationActivities: nil)
                                                 let vc = UIApplication.shared.windows.first!.rootViewController
@@ -81,12 +81,21 @@ struct CoopListView: View {
                                                 AppState.shared.viewModelDict[coop.id] = nil
                                             }
                                         }label:{
-                                            Image(systemName: "square.and.arrow.up")
+                                            Image("share")
+                                                .resizable()
+                                                .scaledToFit()
+                                                .overlay(Color(.accent))
+                                                .mask{
+                                                    Image("share")
+                                                        .resizable()
+                                                        .scaledToFit()
+                                                }
+                                                .frame(width: 20*1.2)
+                                                .offset(y:-4)
                                         }
+
                                     }
-
                                 }
-
                             } label: {
                                 CoopListRowView(isCoop: row.isCoop, coop: row.coop, card: row.card)
                                     .id(row.id)

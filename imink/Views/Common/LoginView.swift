@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SplatNet3API
 import SwiftyJSON
 
 struct LoginViewModifier: ViewModifier {

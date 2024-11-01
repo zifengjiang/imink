@@ -1,0 +1,13 @@
+
+<svg width="337.57821px" height="358.285317px" viewBox="0 0 337.57821 358.285317" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="矩形" fill="#D8D8D8" x="0" y="118.285317" width="30" height="240"></rect>
+        <rect id="矩形" fill="#D8D8D8" x="29" y="328.285317" width="211" height="30"></rect>
+        <rect id="矩形" fill="#D8D8D8" x="210" y="238.285317" width="30" height="91"></rect>
+        <rect id="矩形" fill="#D8D8D8" x="29" y="118.285317" width="46" height="30"></rect>
+        <g id="编组" transform="translate(189.5858, 147.9924) rotate(45) translate(-189.5858, -147.9924)translate(99.5858, 28.6995)" fill="#D8D8D8">
+            <path d="M127.414214,89.5857864 L127.414214,238.585786 L112.414214,238.585786 L112.414214,194.585786 L97.4142136,194.585786 L97.4142136,238.585786 L82.4142136,238.585786 L82.4142136,194.585786 L67.4142136,194.585786 L67.4142136,238.585786 L52.4142136,238.585786 L52.4142136,89.5857864 L127.414214,89.5857864 Z" id="形状结合"></path>
+            <polygon id="三角形" points="90 0 180 90 0 90"></polygon>
+        </g>
+    </g>
+</svg>

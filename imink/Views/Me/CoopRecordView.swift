@@ -1,5 +1,4 @@
 import SwiftUI
-import SplatNet3API
 
 struct CoopRecordView: View {
     @StateObject var model = SalmonRunStatsViewModel()
@@ -68,18 +67,7 @@ struct CoopRecordView: View {
                 .frame(maxWidth: .infinity)
                 .fixSafeareaBackground()
             } else {
-                VStack(alignment: .center){
-                    Spacer()
-                    Image(.squidLoading)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 100, height: 100)
-                        .foregroundStyle(.gray)
-                    Text("Loading...")
-                        .font(.splatoonFont(size: 25))
-                    Spacer()
-                }
-
+                LoadingView(size: 100)
             }
         }
     }

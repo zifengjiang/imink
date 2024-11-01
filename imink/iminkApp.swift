@@ -1,7 +1,7 @@
 import SwiftUI
 import Combine
 import SplatDatabase
-import IndicatorsKit
+
 
 @main
 struct iminkApp: App {

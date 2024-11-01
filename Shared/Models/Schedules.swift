@@ -2,8 +2,7 @@ import Foundation
 import SwiftUI
 import SplatDatabase
 import SwiftyJSON
-import SplatNet3API
-import IndicatorsKit
+
 
 
 func performTaskEveryHourSince(startDate: Date, task: @escaping (Date) async throws -> Void, progress: @escaping (Double) -> Void) async {

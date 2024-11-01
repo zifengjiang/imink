@@ -1,10 +1,9 @@
 import Foundation
 import SwiftyJSON
-import SplatNet3API
 import Combine
 import SplatDatabase
 import GRDB
-import IndicatorsKit
+
 
 class LoginViewModel:ObservableObject{
     enum Status {

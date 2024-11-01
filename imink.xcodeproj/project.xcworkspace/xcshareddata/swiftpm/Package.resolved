@@ -1,5 +1,5 @@
 {
-  "originHash" : "8c8d39542be59a33e381da8934acc041ae3295a0b8df41b34de27a087e12291d",
+  "originHash" : "444d05af6040723e631531c1c7840235efa55a4cd5c4b7765f957f5a7a60b482",
   "pins" : [
     {
       "identity" : "grdb.swift",
@@ -8,15 +8,6 @@
       "state" : {
         "branch" : "master",
         "revision" : "2cf6c756e1e5ef6901ebae16576a7e4e4b834622"
-      }
-    },
-    {
-      "identity" : "inkmoya",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/imink-app/InkMoya.git",
-      "state" : {
-        "revision" : "c610f403fa9d0fe718716526d91560438e459fad",
-        "version" : "0.1.1"
       }
     },
     {
@@ -47,39 +38,12 @@
       }
     },
     {
-      "identity" : "swift-argument-parser",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-argument-parser",
-      "state" : {
-        "revision" : "0fbc8848e389af3bb55c182bc19ca9d5dc2f255b",
-        "version" : "1.4.0"
-      }
-    },
-    {
-      "identity" : "swift-log",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-log.git",
-      "state" : {
-        "revision" : "e97a6fcb1ab07462881ac165fdbb37f067e205d5",
-        "version" : "1.5.4"
-      }
-    },
-    {
       "identity" : "swift-numerics",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-numerics.git",
       "state" : {
         "revision" : "0a5bc04095a675662cf24757cc0640aa2204253b",
         "version" : "1.0.2"
-      }
-    },
-    {
-      "identity" : "swiftsoup",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/scinfu/SwiftSoup.git",
-      "state" : {
-        "revision" : "028487d4a8a291b2fe1b4392b5425b6172056148",
-        "version" : "2.7.2"
       }
     },
     {

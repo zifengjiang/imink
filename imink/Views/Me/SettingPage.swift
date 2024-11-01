@@ -1,7 +1,6 @@
 import SwiftUI
-import SplatNet3API
 import SplatDatabase
-import IndicatorsKit
+
 
 struct SettingPage: View {
     @Binding var showSettings: Bool

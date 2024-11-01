@@ -43,5 +43,14 @@ struct StageRecord:Codable{
                 return nil
             }
         }
+
+        init(winRateCl:Double?,winRateLf:Double?,winRateTw:Double?,winRateGl:Double?,winRateAr:Double?){
+            self.winRateAr = winRateAr
+            self.winRateTw = winRateTw
+            self.winRateGl = winRateGl
+            self.winRateLf = winRateGl
+            self.winRateCl = winRateCl
+            self.lastPlayedTime = Date()
+        }
     }
 }

@@ -22,12 +22,6 @@ struct CoopRecord:Codable{
     }
 }
 
-struct CoopRecordQuery:Codable{
-    struct Data:Codable{
-        let coopRecord:CoopRecord
-    }
-    let data:Data
-}
 
 struct DefeatEnemyRecord:Codable{
     let enemy:String

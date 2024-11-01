@@ -52,16 +52,7 @@ struct VDGridView: View {
         GeometryReader { geo in
             ZStack {
                 if isLoading {
-                    VStack(alignment: .center){
-                        Spacer()
-                        Image(.squidLoading)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 30, height: 30)
-                        Text("Loading...")
-                            .font(.splatoonFont(size: 8))
-                        Spacer()
-                    }
+                    LoadingView(size: 40)
                     .frame(width: 361,alignment: .center)
                 } else if let pathWin = drawnPathWin, let pathLose = drawnPathLose, let pathDisconnected = drawnDisconnected {
                     pathDisconnected

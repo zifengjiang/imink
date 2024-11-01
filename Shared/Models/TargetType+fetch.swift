@@ -1,5 +1,4 @@
 import Foundation
-import InkMoya
 import SwiftyJSON
 
 extension TargetType{

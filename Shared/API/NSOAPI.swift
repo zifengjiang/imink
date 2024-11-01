@@ -7,7 +7,6 @@
 
 import Foundation
 import CryptoKit
-import InkMoya
 
 enum NSOAPI {
     case authorize(codeVerifier: String)

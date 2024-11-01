@@ -61,7 +61,7 @@
 		8B3591432BF892130066BCA3 /* HomePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3591422BF892130066BCA3 /* HomePage.swift */; };
 		8B3591452BF893D60066BCA3 /* MePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3591442BF893D60066BCA3 /* MePage.swift */; };
 		8B4E4F962C01F69900818D31 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4E4F952C01F69900818D31 /* LoginViewModel.swift */; };
-		8B50DBE02C01BED40076AE6D /* SN3Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50DBDF2C01BED30076AE6D /* SN3Client.swift */; };
+		8B50DBE02C01BED40076AE6D /* SN3Client+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50DBDF2C01BED30076AE6D /* SN3Client+Ext.swift */; };
 		8B50DBE22C01C1C20076AE6D /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50DBE12C01C1C20076AE6D /* Logger.swift */; };
 		8B5276122BFC1DF100022D5B /* OverlayImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5276112BFC1DF100022D5B /* OverlayImage.swift */; };
 		8B5276142BFC228600022D5B /* SpecialWeaponImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5276132BFC228600022D5B /* SpecialWeaponImage.swift */; };
@@ -89,11 +89,7 @@
 		8B83F9E42CCA35C6009B90FF /* UniversalOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B83F9E32CCA35C6009B90FF /* UniversalOverlay.swift */; };
 		8B8B285E2BF8581800790809 /* SplatNet.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8B8B285C2BF8581800790809 /* SplatNet.strings */; };
 		8B8B286D2BF887D400790809 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B8B286B2BF887D400790809 /* Preview Assets.xcassets */; };
-		8B93C0C52C12EA8D00D7EFBC /* SplatNet3 in Frameworks */ = {isa = PBXBuildFile; productRef = 8B93C0C42C12EA8D00D7EFBC /* SplatNet3 */; };
-		8B93C0C72C12EA8D00D7EFBC /* SplatNet3API in Frameworks */ = {isa = PBXBuildFile; productRef = 8B93C0C62C12EA8D00D7EFBC /* SplatNet3API */; };
-		8B93C0C92C12EA8D00D7EFBC /* SplatNet3Helper in Frameworks */ = {isa = PBXBuildFile; productRef = 8B93C0C82C12EA8D00D7EFBC /* SplatNet3Helper */; };
 		8B93C0CC2C12EB1A00D7EFBC /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 8B93C0CB2C12EB1A00D7EFBC /* GRDB */; };
-		8B93C0D32C12ED6E00D7EFBC /* IndicatorsKit in Frameworks */ = {isa = PBXBuildFile; productRef = 8B93C0D22C12ED6E00D7EFBC /* IndicatorsKit */; };
 		8BA017472C099F23001CFC72 /* Precomputable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA017462C099F23001CFC72 /* Precomputable.swift */; };
 		8BA017492C09A8CE001CFC72 /* FetchableFromDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA017482C09A8CE001CFC72 /* FetchableFromDatabase.swift */; };
 		8BA089322CCB8A6000BA7176 /* CoopRecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA089312CCB8A6000BA7176 /* CoopRecordView.swift */; };
@@ -103,8 +99,8 @@
 		8BA1F3F52CD313EE00E733EA /* Haptics+AppKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA1F3ED2CD313EE00E733EA /* Haptics+AppKit.swift */; };
 		8BA1F3F62CD313EE00E733EA /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA1F3F12CD313EE00E733EA /* Haptics.swift */; };
 		8BA1F3FA2CD3382D00E733EA /* CommonUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA1F3F92CD3382D00E733EA /* CommonUtils.swift */; };
+		8BA1F3FC2CD45B2200E733EA /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA1F3FB2CD45B2200E733EA /* LoadingView.swift */; };
 		8BA30B082CAED80E0020D489 /* Operator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA30B072CAED80E0020D489 /* Operator.swift */; };
-		8BAADA532C11BD77002D6370 /* Indicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAADA522C11BD77002D6370 /* Indicators.swift */; };
 		8BAADA552C11C382002D6370 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 8BAADA542C11C382002D6370 /* .swiftlint.yml */; };
 		8BAADA572C128DB6002D6370 /* RightCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAADA562C128DB6002D6370 /* RightCardView.swift */; };
 		8BB4A1F22BFDB49E008DB764 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB4A1F12BFDB49E008DB764 /* LoginView.swift */; };
@@ -119,6 +115,36 @@
 		8BE0950D2C0315C40089705F /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE0950C2C0315C40089705F /* ActivityView.swift */; };
 		8BE095112C035B000089705F /* CoopShiftDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE095102C035B000089705F /* CoopShiftDetailView.swift */; };
 		8BE095132C035B280089705F /* CoopShiftDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE095122C035B280089705F /* CoopShiftDetailViewModel.swift */; };
+		8BF3CB462CD4B29300B0FCA9 /* IndicatorsOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB432CD4B29300B0FCA9 /* IndicatorsOverlay.swift */; };
+		8BF3CB472CD4B29300B0FCA9 /* Indicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB422CD4B29300B0FCA9 /* Indicators.swift */; };
+		8BF3CB482CD4B29300B0FCA9 /* EnvironmentValues+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB3E2CD4B29300B0FCA9 /* EnvironmentValues+.swift */; };
+		8BF3CB492CD4B29300B0FCA9 /* IndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB442CD4B29300B0FCA9 /* IndicatorView.swift */; };
+		8BF3CB4A2CD4B29300B0FCA9 /* Indicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB412CD4B29300B0FCA9 /* Indicator.swift */; };
+		8BF3CB4B2CD4B29300B0FCA9 /* View+indicatorOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB3F2CD4B29300B0FCA9 /* View+indicatorOverlay.swift */; };
+		8BF3CB5D2CD4B61900B0FCA9 /* GraphQLPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB532CD4B61900B0FCA9 /* GraphQLPlugin.swift */; };
+		8BF3CB5E2CD4B61900B0FCA9 /* SN3AuthorizationStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB4F2CD4B61900B0FCA9 /* SN3AuthorizationStorage.swift */; };
+		8BF3CB5F2CD4B61900B0FCA9 /* SN3GameServiceToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB502CD4B61900B0FCA9 /* SN3GameServiceToken.swift */; };
+		8BF3CB602CD4B61900B0FCA9 /* WebVersionPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB542CD4B61900B0FCA9 /* WebVersionPlugin.swift */; };
+		8BF3CB612CD4B61900B0FCA9 /* SN3PersistedQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB5B2CD4B61900B0FCA9 /* SN3PersistedQuery.swift */; };
+		8BF3CB622CD4B61900B0FCA9 /* AuthorizationMemoryStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB582CD4B61900B0FCA9 /* AuthorizationMemoryStorage.swift */; };
+		8BF3CB632CD4B61900B0FCA9 /* BulletTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB4D2CD4B61900B0FCA9 /* BulletTokens.swift */; };
+		8BF3CB642CD4B61900B0FCA9 /* GraphQLRequestBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB4E2CD4B61900B0FCA9 /* GraphQLRequestBody.swift */; };
+		8BF3CB652CD4B61900B0FCA9 /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB562CD4B61900B0FCA9 /* Logging.swift */; };
+		8BF3CB662CD4B61900B0FCA9 /* SN3Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB5A2CD4B61900B0FCA9 /* SN3Client.swift */; };
+		8BF3CB672CD4B61900B0FCA9 /* BulletTokenPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB522CD4B61900B0FCA9 /* BulletTokenPlugin.swift */; };
+		8BF3CB682CD4B61900B0FCA9 /* Splatoon3InkAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB5C2CD4B61900B0FCA9 /* Splatoon3InkAPI.swift */; };
+		8BF3CB692CD4B61900B0FCA9 /* SN3API.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB592CD4B61900B0FCA9 /* SN3API.swift */; };
+		8BF3CB712CD4B62700B0FCA9 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB6D2CD4B62700B0FCA9 /* Shared.swift */; };
+		8BF3CB762CD4B62700B0FCA9 /* SplatNet3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB6F2CD4B62700B0FCA9 /* SplatNet3.swift */; };
+		8BF3CB792CD4B76400B0FCA9 /* splatnet3_webview_data.json in Resources */ = {isa = PBXBuildFile; fileRef = 8BF3CB782CD4B76400B0FCA9 /* splatnet3_webview_data.json */; };
+		8BF3CB7C2CD4B9D800B0FCA9 /* TargetType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB7B2CD4B9D800B0FCA9 /* TargetType.swift */; };
+		8BF3CB7E2CD4B9F700B0FCA9 /* PluginType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB7D2CD4B9F700B0FCA9 /* PluginType.swift */; };
+		8BF3CB802CD4BA7100B0FCA9 /* IMSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB7F2CD4BA7100B0FCA9 /* IMSession.swift */; };
+		8BF3CB822CD4BA9B00B0FCA9 /* URLSession+Polyfill.swift .swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB812CD4BA9B00B0FCA9 /* URLSession+Polyfill.swift .swift */; };
+		8BF3CB852CD4BAEF00B0FCA9 /* MediaType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB832CD4BAEF00B0FCA9 /* MediaType.swift */; };
+		8BF3CB862CD4BAEF00B0FCA9 /* RequestMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB842CD4BAEF00B0FCA9 /* RequestMethod.swift */; };
+		8BF3CB882CD4BB3A00B0FCA9 /* SN3WebViewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB872CD4BB3A00B0FCA9 /* SN3WebViewData.swift */; };
+		8BF3CB8A2CD4BE4700B0FCA9 /* RotationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB892CD4BE4700B0FCA9 /* RotationView.swift */; };
 		8BFE91702C0C9F0D00C12CBE /* FilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFE916F2C0C9F0D00C12CBE /* FilterView.swift */; };
 		8BFE91722C0D7CE000C12CBE /* Filter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFE91712C0D7CE000C12CBE /* Filter.swift */; };
 		8BFE91742C0DEA3D00C12CBE /* RangeSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFE91732C0DEA3D00C12CBE /* RangeSlider.swift */; };
@@ -210,7 +236,7 @@
 		8B3591422BF892130066BCA3 /* HomePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePage.swift; sourceTree = "<group>"; };
 		8B3591442BF893D60066BCA3 /* MePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MePage.swift; sourceTree = "<group>"; };
 		8B4E4F952C01F69900818D31 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
-		8B50DBDF2C01BED30076AE6D /* SN3Client.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SN3Client.swift; sourceTree = "<group>"; };
+		8B50DBDF2C01BED30076AE6D /* SN3Client+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SN3Client+Ext.swift"; sourceTree = "<group>"; };
 		8B50DBE12C01C1C20076AE6D /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		8B5276112BFC1DF100022D5B /* OverlayImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayImage.swift; sourceTree = "<group>"; };
 		8B5276132BFC228600022D5B /* SpecialWeaponImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialWeaponImage.swift; sourceTree = "<group>"; };
@@ -261,8 +287,8 @@
 		8BA1F3EF2CD313EE00E733EA /* Haptics+WatchKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Haptics+WatchKit.swift"; sourceTree = "<group>"; };
 		8BA1F3F12CD313EE00E733EA /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
 		8BA1F3F92CD3382D00E733EA /* CommonUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonUtils.swift; sourceTree = "<group>"; };
+		8BA1F3FB2CD45B2200E733EA /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		8BA30B072CAED80E0020D489 /* Operator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Operator.swift; sourceTree = "<group>"; };
-		8BAADA522C11BD77002D6370 /* Indicators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Indicators.swift; sourceTree = "<group>"; };
 		8BAADA542C11C382002D6370 /* .swiftlint.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		8BAADA562C128DB6002D6370 /* RightCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightCardView.swift; sourceTree = "<group>"; };
 		8BB4A1F12BFDB49E008DB764 /* LoginView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
@@ -275,6 +301,37 @@
 		8BE0950C2C0315C40089705F /* ActivityView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
 		8BE095102C035B000089705F /* CoopShiftDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopShiftDetailView.swift; sourceTree = "<group>"; };
 		8BE095122C035B280089705F /* CoopShiftDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopShiftDetailViewModel.swift; sourceTree = "<group>"; };
+		8BF3CB3D2CD4B26500B0FCA9 /* festIcon.svg */ = {isa = PBXFileReference; lastKnownFileType = text; path = festIcon.svg; sourceTree = "<group>"; };
+		8BF3CB3E2CD4B29300B0FCA9 /* EnvironmentValues+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EnvironmentValues+.swift"; sourceTree = "<group>"; };
+		8BF3CB3F2CD4B29300B0FCA9 /* View+indicatorOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+indicatorOverlay.swift"; sourceTree = "<group>"; };
+		8BF3CB412CD4B29300B0FCA9 /* Indicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Indicator.swift; sourceTree = "<group>"; };
+		8BF3CB422CD4B29300B0FCA9 /* Indicators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Indicators.swift; sourceTree = "<group>"; };
+		8BF3CB432CD4B29300B0FCA9 /* IndicatorsOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndicatorsOverlay.swift; sourceTree = "<group>"; };
+		8BF3CB442CD4B29300B0FCA9 /* IndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndicatorView.swift; sourceTree = "<group>"; };
+		8BF3CB4D2CD4B61900B0FCA9 /* BulletTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulletTokens.swift; sourceTree = "<group>"; };
+		8BF3CB4E2CD4B61900B0FCA9 /* GraphQLRequestBody.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphQLRequestBody.swift; sourceTree = "<group>"; };
+		8BF3CB4F2CD4B61900B0FCA9 /* SN3AuthorizationStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SN3AuthorizationStorage.swift; sourceTree = "<group>"; };
+		8BF3CB502CD4B61900B0FCA9 /* SN3GameServiceToken.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SN3GameServiceToken.swift; sourceTree = "<group>"; };
+		8BF3CB522CD4B61900B0FCA9 /* BulletTokenPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulletTokenPlugin.swift; sourceTree = "<group>"; };
+		8BF3CB532CD4B61900B0FCA9 /* GraphQLPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphQLPlugin.swift; sourceTree = "<group>"; };
+		8BF3CB542CD4B61900B0FCA9 /* WebVersionPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebVersionPlugin.swift; sourceTree = "<group>"; };
+		8BF3CB562CD4B61900B0FCA9 /* Logging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
+		8BF3CB582CD4B61900B0FCA9 /* AuthorizationMemoryStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizationMemoryStorage.swift; sourceTree = "<group>"; };
+		8BF3CB592CD4B61900B0FCA9 /* SN3API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SN3API.swift; sourceTree = "<group>"; };
+		8BF3CB5A2CD4B61900B0FCA9 /* SN3Client.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SN3Client.swift; sourceTree = "<group>"; };
+		8BF3CB5B2CD4B61900B0FCA9 /* SN3PersistedQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SN3PersistedQuery.swift; sourceTree = "<group>"; };
+		8BF3CB5C2CD4B61900B0FCA9 /* Splatoon3InkAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Splatoon3InkAPI.swift; sourceTree = "<group>"; };
+		8BF3CB6D2CD4B62700B0FCA9 /* Shared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
+		8BF3CB6F2CD4B62700B0FCA9 /* SplatNet3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplatNet3.swift; sourceTree = "<group>"; };
+		8BF3CB782CD4B76400B0FCA9 /* splatnet3_webview_data.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = splatnet3_webview_data.json; sourceTree = "<group>"; };
+		8BF3CB7B2CD4B9D800B0FCA9 /* TargetType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TargetType.swift; sourceTree = "<group>"; };
+		8BF3CB7D2CD4B9F700B0FCA9 /* PluginType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginType.swift; sourceTree = "<group>"; };
+		8BF3CB7F2CD4BA7100B0FCA9 /* IMSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IMSession.swift; sourceTree = "<group>"; };
+		8BF3CB812CD4BA9B00B0FCA9 /* URLSession+Polyfill.swift .swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URLSession+Polyfill.swift .swift"; sourceTree = "<group>"; };
+		8BF3CB832CD4BAEF00B0FCA9 /* MediaType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaType.swift; sourceTree = "<group>"; };
+		8BF3CB842CD4BAEF00B0FCA9 /* RequestMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestMethod.swift; sourceTree = "<group>"; };
+		8BF3CB872CD4BB3A00B0FCA9 /* SN3WebViewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SN3WebViewData.swift; sourceTree = "<group>"; };
+		8BF3CB892CD4BE4700B0FCA9 /* RotationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotationView.swift; sourceTree = "<group>"; };
 		8BFE916F2C0C9F0D00C12CBE /* FilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterView.swift; sourceTree = "<group>"; };
 		8BFE91712C0D7CE000C12CBE /* Filter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Filter.swift; sourceTree = "<group>"; };
 		8BFE91732C0DEA3D00C12CBE /* RangeSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RangeSlider.swift; sourceTree = "<group>"; };
@@ -294,13 +351,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8B93C0C72C12EA8D00D7EFBC /* SplatNet3API in Frameworks */,
 				8BDF9A252C9BEFC50019F7EC /* SplatDatabase in Frameworks */,
-				8B93C0C92C12EA8D00D7EFBC /* SplatNet3Helper in Frameworks */,
-				8B93C0C52C12EA8D00D7EFBC /* SplatNet3 in Frameworks */,
 				8B93C0CC2C12EB1A00D7EFBC /* GRDB in Frameworks */,
 				8BDA845E2C0003D70038655C /* Algorithms in Frameworks */,
-				8B93C0D32C12ED6E00D7EFBC /* IndicatorsKit in Frameworks */,
 				8B26364F2BFEB00700F8964A /* AlertKit in Frameworks */,
 				8B26364C2BFEAE9400F8964A /* Zip in Frameworks */,
 			);
@@ -425,6 +478,9 @@
 		8B7F295B2BF6E2CF0010A525 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				8BF3CB7A2CD4B9C900B0FCA9 /* InkMoya */,
+				8BF3CB4C2CD4B5FE00B0FCA9 /* SplatNet3 */,
+				8BF3CB452CD4B29300B0FCA9 /* IndicatorsKit */,
 				8BA1F3F22CD313EE00E733EA /* Haptics */,
 				8B65636F2CB15DC40017F5D0 /* App */,
 				8BA017452C099F0B001CFC72 /* Protocol */,
@@ -443,7 +499,7 @@
 		8B7F295D2BF6E49D0010A525 /* API */ = {
 			isa = PBXGroup;
 			children = (
-				8B50DBDF2C01BED30076AE6D /* SN3Client.swift */,
+				8B50DBDF2C01BED30076AE6D /* SN3Client+Ext.swift */,
 				8B7F29632BF6E7E80010A525 /* AppAPI.swift */,
 				8B7F295E2BF6E4A80010A525 /* NSOAPI.swift */,
 				8B7F296B2BF711C40010A525 /* NSOAuthorization.swift */,
@@ -467,10 +523,10 @@
 				8B0792102C112D370094EA57 /* KoreanERIN-M.ttf */,
 				8B0D14982BFAB98E00B82AD1 /* Splatoon1.otf */,
 				8B5276112BFC1DF100022D5B /* OverlayImage.swift */,
-				8BAADA522C11BD77002D6370 /* Indicators.swift */,
 				8BB719A62CAA2B54003C6909 /* ThreadSafeExecution.swift */,
 				8B5B7B1C2CCFAC5D0088069C /* Dictionary+Ext.swift */,
 				8BA1F3F92CD3382D00E733EA /* CommonUtils.swift */,
+				8BF3CB812CD4BA9B00B0FCA9 /* URLSession+Polyfill.swift .swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -561,6 +617,7 @@
 				8B7059032C0B00510076F680 /* NameplateView.swift */,
 				8BE0950C2C0315C40089705F /* ActivityView.swift */,
 				8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */,
+				8BF3CB3D2CD4B26500B0FCA9 /* festIcon.svg */,
 				8B3136972CCCEB3B0085220E /* FestIcon.swift */,
 				8BB4A1F12BFDB49E008DB764 /* LoginView.swift */,
 				8B0851792BFB790700AF22C5 /* WaveShape.swift */,
@@ -575,6 +632,8 @@
 				8BFFDF682CB40F43004F2390 /* BattlePlayerView.swift */,
 				8B83F9D32CC9F624009B90FF /* CarouselView.swift */,
 				8B5B7B1E2CCFBE450088069C /* GearView.swift */,
+				8BA1F3FB2CD45B2200E733EA /* LoadingView.swift */,
+				8BF3CB892CD4BE4700B0FCA9 /* RotationView.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -639,6 +698,87 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		8BF3CB402CD4B29300B0FCA9 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				8BF3CB3E2CD4B29300B0FCA9 /* EnvironmentValues+.swift */,
+				8BF3CB3F2CD4B29300B0FCA9 /* View+indicatorOverlay.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		8BF3CB452CD4B29300B0FCA9 /* IndicatorsKit */ = {
+			isa = PBXGroup;
+			children = (
+				8BF3CB402CD4B29300B0FCA9 /* Extensions */,
+				8BF3CB412CD4B29300B0FCA9 /* Indicator.swift */,
+				8BF3CB422CD4B29300B0FCA9 /* Indicators.swift */,
+				8BF3CB432CD4B29300B0FCA9 /* IndicatorsOverlay.swift */,
+				8BF3CB442CD4B29300B0FCA9 /* IndicatorView.swift */,
+			);
+			path = IndicatorsKit;
+			sourceTree = "<group>";
+		};
+		8BF3CB4C2CD4B5FE00B0FCA9 /* SplatNet3 */ = {
+			isa = PBXGroup;
+			children = (
+				8BF3CB512CD4B61900B0FCA9 /* Model */,
+				8BF3CB552CD4B61900B0FCA9 /* Plugins */,
+				8BF3CB572CD4B61900B0FCA9 /* Utils */,
+				8BF3CB582CD4B61900B0FCA9 /* AuthorizationMemoryStorage.swift */,
+				8BF3CB592CD4B61900B0FCA9 /* SN3API.swift */,
+				8BF3CB782CD4B76400B0FCA9 /* splatnet3_webview_data.json */,
+				8BF3CB5A2CD4B61900B0FCA9 /* SN3Client.swift */,
+				8BF3CB5B2CD4B61900B0FCA9 /* SN3PersistedQuery.swift */,
+				8BF3CB5C2CD4B61900B0FCA9 /* Splatoon3InkAPI.swift */,
+				8BF3CB872CD4BB3A00B0FCA9 /* SN3WebViewData.swift */,
+				8BF3CB6D2CD4B62700B0FCA9 /* Shared.swift */,
+				8BF3CB6F2CD4B62700B0FCA9 /* SplatNet3.swift */,
+			);
+			path = SplatNet3;
+			sourceTree = "<group>";
+		};
+		8BF3CB512CD4B61900B0FCA9 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				8BF3CB4D2CD4B61900B0FCA9 /* BulletTokens.swift */,
+				8BF3CB4E2CD4B61900B0FCA9 /* GraphQLRequestBody.swift */,
+				8BF3CB4F2CD4B61900B0FCA9 /* SN3AuthorizationStorage.swift */,
+				8BF3CB502CD4B61900B0FCA9 /* SN3GameServiceToken.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		8BF3CB552CD4B61900B0FCA9 /* Plugins */ = {
+			isa = PBXGroup;
+			children = (
+				8BF3CB522CD4B61900B0FCA9 /* BulletTokenPlugin.swift */,
+				8BF3CB532CD4B61900B0FCA9 /* GraphQLPlugin.swift */,
+				8BF3CB542CD4B61900B0FCA9 /* WebVersionPlugin.swift */,
+			);
+			path = Plugins;
+			sourceTree = "<group>";
+		};
+		8BF3CB572CD4B61900B0FCA9 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				8BF3CB562CD4B61900B0FCA9 /* Logging.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		8BF3CB7A2CD4B9C900B0FCA9 /* InkMoya */ = {
+			isa = PBXGroup;
+			children = (
+				8BF3CB7B2CD4B9D800B0FCA9 /* TargetType.swift */,
+				8BF3CB7D2CD4B9F700B0FCA9 /* PluginType.swift */,
+				8BF3CB832CD4BAEF00B0FCA9 /* MediaType.swift */,
+				8BF3CB842CD4BAEF00B0FCA9 /* RequestMethod.swift */,
+				8BF3CB7F2CD4BA7100B0FCA9 /* IMSession.swift */,
+			);
+			path = InkMoya;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -663,11 +803,7 @@
 				8B26364B2BFEAE9400F8964A /* Zip */,
 				8B26364E2BFEB00700F8964A /* AlertKit */,
 				8BDA845D2C0003D70038655C /* Algorithms */,
-				8B93C0C42C12EA8D00D7EFBC /* SplatNet3 */,
-				8B93C0C62C12EA8D00D7EFBC /* SplatNet3API */,
-				8B93C0C82C12EA8D00D7EFBC /* SplatNet3Helper */,
 				8B93C0CB2C12EB1A00D7EFBC /* GRDB */,
-				8B93C0D22C12ED6E00D7EFBC /* IndicatorsKit */,
 				8BDF9A242C9BEFC50019F7EC /* SplatDatabase */,
 			);
 			productName = imink;
@@ -756,10 +892,8 @@
 				8B26364A2BFEAE9400F8964A /* XCRemoteSwiftPackageReference "Zip" */,
 				8B26364D2BFEB00700F8964A /* XCRemoteSwiftPackageReference "SPAlert" */,
 				8BDA845C2C0003D70038655C /* XCRemoteSwiftPackageReference "swift-algorithms" */,
-				8B93C0C32C12EA8D00D7EFBC /* XCLocalSwiftPackageReference "../SplatNet3" */,
 				8B93C0CA2C12EB1A00D7EFBC /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 				8B93C0CD2C12EB4800D7EFBC /* XCRemoteSwiftPackageReference "SwiftyJSON" */,
-				8B93C0D12C12ED6E00D7EFBC /* XCLocalSwiftPackageReference "../IndicatorsKit" */,
 				8BDF9A232C9BEFC50019F7EC /* XCRemoteSwiftPackageReference "SplatDatabase" */,
 			);
 			productRefGroup = 8B7F29272BF6E1B90010A525 /* Products */;
@@ -780,6 +914,7 @@
 			files = (
 				8BAADA552C11C382002D6370 /* .swiftlint.yml in Resources */,
 				8B8B285E2BF8581800790809 /* SplatNet.strings in Resources */,
+				8BF3CB792CD4B76400B0FCA9 /* splatnet3_webview_data.json in Resources */,
 				8B0792112C112D370094EA57 /* KoreanERIN-M.ttf in Resources */,
 				8B0D14742BF98B4E00B82AD1 /* Localizable.strings in Resources */,
 				8B8B286D2BF887D400790809 /* Preview Assets.xcassets in Resources */,
@@ -826,16 +961,34 @@
 				8B0D14942BFAB57100B82AD1 /* Date+Ext.swift in Sources */,
 				8BE095132C035B280089705F /* CoopShiftDetailViewModel.swift in Sources */,
 				8B0D14A22BFAC98D00B82AD1 /* GrayscaleTextureView.swift in Sources */,
+				8BF3CB5D2CD4B61900B0FCA9 /* GraphQLPlugin.swift in Sources */,
+				8BF3CB5E2CD4B61900B0FCA9 /* SN3AuthorizationStorage.swift in Sources */,
+				8BF3CB5F2CD4B61900B0FCA9 /* SN3GameServiceToken.swift in Sources */,
+				8BF3CB7E2CD4B9F700B0FCA9 /* PluginType.swift in Sources */,
+				8BF3CB602CD4B61900B0FCA9 /* WebVersionPlugin.swift in Sources */,
+				8BF3CB612CD4B61900B0FCA9 /* SN3PersistedQuery.swift in Sources */,
+				8BF3CB622CD4B61900B0FCA9 /* AuthorizationMemoryStorage.swift in Sources */,
+				8BF3CB632CD4B61900B0FCA9 /* BulletTokens.swift in Sources */,
+				8BF3CB642CD4B61900B0FCA9 /* GraphQLRequestBody.swift in Sources */,
+				8BF3CB652CD4B61900B0FCA9 /* Logging.swift in Sources */,
+				8BF3CB662CD4B61900B0FCA9 /* SN3Client.swift in Sources */,
+				8BF3CB672CD4B61900B0FCA9 /* BulletTokenPlugin.swift in Sources */,
+				8BF3CB682CD4B61900B0FCA9 /* Splatoon3InkAPI.swift in Sources */,
+				8BF3CB692CD4B61900B0FCA9 /* SN3API.swift in Sources */,
 				8B19CF8E2CB2C9C400EF4424 /* Species.swift in Sources */,
 				8BB719A72CAA2B54003C6909 /* ThreadSafeExecution.swift in Sources */,
 				8BA1F3F32CD313EE00E733EA /* Haptics+UIKit.swift in Sources */,
 				8BA1F3F42CD313EE00E733EA /* Haptics+WatchKit.swift in Sources */,
 				8BA1F3F52CD313EE00E733EA /* Haptics+AppKit.swift in Sources */,
+				8BF3CB852CD4BAEF00B0FCA9 /* MediaType.swift in Sources */,
+				8BF3CB862CD4BAEF00B0FCA9 /* RequestMethod.swift in Sources */,
 				8BA1F3F62CD313EE00E733EA /* Haptics.swift in Sources */,
+				8BF3CB8A2CD4BE4700B0FCA9 /* RotationView.swift in Sources */,
 				8B19CF8A2CB29BC500EF4424 /* BattleRule.swift in Sources */,
 				8B50DBE22C01C1C20076AE6D /* Logger.swift in Sources */,
 				8BFF73E72C0939160048F2A6 /* CoopListRowView.swift in Sources */,
 				8B23C0FE2CD09E2500FB5934 /* StageRecord.swift in Sources */,
+				8BA1F3FC2CD45B2200E733EA /* LoadingView.swift in Sources */,
 				8B7F29622BF6E5310010A525 /* NSOHash.swift in Sources */,
 				8B0D14A42BFACD8E00B82AD1 /* StringInterpolation.swift in Sources */,
 				8BA1F3FA2CD3382D00E733EA /* CommonUtils.swift in Sources */,
@@ -855,16 +1008,20 @@
 				8B19CF902CB2CB0200EF4424 /* Judgement.swift in Sources */,
 				8B19CF2D2CB2464F00EF4424 /* BattleListView.swift in Sources */,
 				8B0851782BFB78D800AF22C5 /* CoopDetailWaveResultView.swift in Sources */,
-				8B50DBE02C01BED40076AE6D /* SN3Client.swift in Sources */,
+				8B50DBE02C01BED40076AE6D /* SN3Client+Ext.swift in Sources */,
 				8B7AE6DF2CAED41B00E61735 /* BattleStatusView.swift in Sources */,
 				8BAADA572C128DB6002D6370 /* RightCardView.swift in Sources */,
 				8B0D14822BF9B85700B82AD1 /* GameMode.swift in Sources */,
+				8BF3CB712CD4B62700B0FCA9 /* Shared.swift in Sources */,
+				8BF3CB762CD4B62700B0FCA9 /* SplatNet3.swift in Sources */,
 				8B0D148F2BFA2EBE00B82AD1 /* CoopListDetailItemView.swift in Sources */,
+				8BF3CB882CD4BB3A00B0FCA9 /* SN3WebViewData.swift in Sources */,
 				8B0851762BFB6DB400AF22C5 /* WaveAnimationView.swift in Sources */,
 				8B0792072C0F435C0094EA57 /* TargetType+fetch.swift in Sources */,
 				8B19CF882CB299F300EF4424 /* BattleMode.swift in Sources */,
 				8B5276142BFC228600022D5B /* SpecialWeaponImage.swift in Sources */,
 				8B4E4F962C01F69900818D31 /* LoginViewModel.swift in Sources */,
+				8BF3CB7C2CD4B9D800B0FCA9 /* TargetType.swift in Sources */,
 				8B5B7B1D2CCFAC5D0088069C /* Dictionary+Ext.swift in Sources */,
 				8B0851722BFB5FE100AF22C5 /* CoopRule.swift in Sources */,
 				8B3136982CCCEB3B0085220E /* FestIcon.swift in Sources */,
@@ -874,6 +1031,12 @@
 				8B83F9D42CC9F624009B90FF /* CarouselView.swift in Sources */,
 				8B0792092C1077DD0094EA57 /* BattleScheduleCardView.swift in Sources */,
 				8BD8CD522C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift in Sources */,
+				8BF3CB462CD4B29300B0FCA9 /* IndicatorsOverlay.swift in Sources */,
+				8BF3CB472CD4B29300B0FCA9 /* Indicators.swift in Sources */,
+				8BF3CB482CD4B29300B0FCA9 /* EnvironmentValues+.swift in Sources */,
+				8BF3CB492CD4B29300B0FCA9 /* IndicatorView.swift in Sources */,
+				8BF3CB4A2CD4B29300B0FCA9 /* Indicator.swift in Sources */,
+				8BF3CB4B2CD4B29300B0FCA9 /* View+indicatorOverlay.swift in Sources */,
 				8BFE91742C0DEA3D00C12CBE /* RangeSlider.swift in Sources */,
 				8BE095112C035B000089705F /* CoopShiftDetailView.swift in Sources */,
 				8B7F292A2BF6E1B90010A525 /* iminkApp.swift in Sources */,
@@ -893,6 +1056,7 @@
 				8B19CF312CB2479B00EF4424 /* BattleListRowModel.swift in Sources */,
 				8B19CF352CB2488200EF4424 /* BattleListRowView.swift in Sources */,
 				8B5B7B1B2CCF9CE20088069C /* HistoryRecord.swift in Sources */,
+				8BF3CB802CD4BA7100B0FCA9 /* IMSession.swift in Sources */,
 				8B19CF332CB2486B00EF4424 /* BattleListDetailView.swift in Sources */,
 				8B7F296C2BF711C40010A525 /* NSOAuthorization.swift in Sources */,
 				8B5276162BFC371300022D5B /* CoopListRowModel.swift in Sources */,
@@ -900,10 +1064,10 @@
 				8B0D14962BFAB8C100B82AD1 /* Font+Ext.swift in Sources */,
 				8BB4A1F42BFDB4CE008DB764 /* FixVectorImage.swift in Sources */,
 				8BB99B372BF77B3B00470408 /* Models.swift in Sources */,
+				8BF3CB822CD4BA9B00B0FCA9 /* URLSession+Polyfill.swift .swift in Sources */,
 				8BFE91702C0C9F0D00C12CBE /* FilterView.swift in Sources */,
 				8B3591432BF892130066BCA3 /* HomePage.swift in Sources */,
 				8B0D14842BFA210700B82AD1 /* SessionManager.swift in Sources */,
-				8BAADA532C11BD77002D6370 /* Indicators.swift in Sources */,
 				8BA30B082CAED80E0020D489 /* Operator.swift in Sources */,
 				8BD8CD542C0ADBC200FED66F /* WavePicker.swift in Sources */,
 				8B19CF8C2CB2A02600EF4424 /* BattleListRowInfo.swift in Sources */,
@@ -1294,17 +1458,6 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		8B93C0C32C12EA8D00D7EFBC /* XCLocalSwiftPackageReference "../SplatNet3" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../SplatNet3;
-		};
-		8B93C0D12C12ED6E00D7EFBC /* XCLocalSwiftPackageReference "../IndicatorsKit" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../IndicatorsKit;
-		};
-/* End XCLocalSwiftPackageReference section */
-
 /* Begin XCRemoteSwiftPackageReference section */
 		8B26364A2BFEAE9400F8964A /* XCRemoteSwiftPackageReference "Zip" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -1367,26 +1520,10 @@
 			package = 8B26364D2BFEB00700F8964A /* XCRemoteSwiftPackageReference "SPAlert" */;
 			productName = AlertKit;
 		};
-		8B93C0C42C12EA8D00D7EFBC /* SplatNet3 */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = SplatNet3;
-		};
-		8B93C0C62C12EA8D00D7EFBC /* SplatNet3API */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = SplatNet3API;
-		};
-		8B93C0C82C12EA8D00D7EFBC /* SplatNet3Helper */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = SplatNet3Helper;
-		};
 		8B93C0CB2C12EB1A00D7EFBC /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 8B93C0CA2C12EB1A00D7EFBC /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
-		};
-		8B93C0D22C12ED6E00D7EFBC /* IndicatorsKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = IndicatorsKit;
 		};
 		8BDA845D2C0003D70038655C /* Algorithms */ = {
 			isa = XCSwiftPackageProductDependency;

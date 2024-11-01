@@ -1,4 +1,3 @@
-import InkMoya
 import Foundation
 
 enum AppAPI {

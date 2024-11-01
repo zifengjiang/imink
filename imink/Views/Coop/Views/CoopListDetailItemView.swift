@@ -32,6 +32,22 @@ struct CoopListDetailItemView: View {
                         )
                         .frame(width: 13, height:13)
                         .padding([.top, .bottom], 0.5)
+                }else{
+                    Text("-")
+                        .font(.splatoonFont(size: 12))
+                        .foregroundStyle(Color(.clear))
+
+                    Text("-")
+                        .font(.splatoonFont1(size: 12))
+                        .foregroundStyle(Color(.clear))
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .overlay(
+                            coop.gradeDiff?.image,
+                            alignment: .leading
+                        )
+                        .frame(width: 13, height:13)
+                        .padding([.top, .bottom], 0.5)
                 }
                 Spacer()
 
@@ -126,7 +142,6 @@ struct CoopListDetailItemView: View {
             .foregroundColor(Color(.systemGray2))
             .padding(.top, 1)
         }
-
         .padding(.top, 7.5)
         .padding(.bottom, 7)
         .padding([.leading, .trailing], 8)

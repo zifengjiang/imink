@@ -23,16 +23,11 @@ struct HomePage: View {
                 VStack{
 
                     CarouselView(activeIndex: $selectedScheduleType, autoScrollDuration: 15){
-//                        if selectedScheduleType == 1{
                             todayBattleStatusView
-////                        }else{
                             todaySalmonRunStatusView
-//                        }
                     }
                     .modifier(LoginViewModifier(isLogin: AppState.shared.isLogin, iconName: "TabBarHome"))
                     .frame(height: 240)
-
-
 
                     VStack(spacing:0){
                         Text("home_schedule_title")
@@ -64,20 +59,23 @@ struct HomePage: View {
             .fixSafeareaBackground()
             .navigationBarTitle("tab_home", displayMode: .inline)
             .toolbar{
-                Button {
+//                Button {
+//                    Haptics.generateIfEnabled(.medium)
+//                    Task{
+//                        await viewModel.fetchSchedules()
+//                    }
+//                } label: {
+//                    HStack{
+//                        LoadingView
+//                    }
+//                }
+                LoadingView {
                     Haptics.generateIfEnabled(.medium)
-                    Task{
-                        await viewModel.fetchSchedules()
-                    }
-                } label: {
-                    Image(systemName: "arrow.triangle.2.circlepath")
-                        .frame(width: 22, height: 22)
+                    await viewModel.fetchSchedules()
                 }
-
             }
             .task {
                 await viewModel.fetchSchedules()
-//                await viewModel.loadLastSalmonRunStatus()
             }
             .onReceive(timer) { currentTime in
                 if let endTime = viewModel.schedules.filter({$0.mode != .salmonRun}).first?.endTime, currentTime > endTime{
@@ -88,6 +86,38 @@ struct HomePage: View {
             }
         }
     }
+
+    struct LoadingView: View {
+        @State private var isAnimating = false
+        @State private var rotationAngle: Double = 0
+        let size:CGFloat = 30
+        let task: () async -> ()
+        var body: some View {
+            // 加载状态的图标，带有旋转效果
+            Image("TabBarHome")
+                .resizable()
+                .scaledToFit()
+                .foregroundStyle(.accent)
+                .frame(width: size, height: size)
+                .rotationEffect(.degrees(rotationAngle))
+                .animation(isAnimating ? .linear(duration: 2) : nil, value: rotationAngle)
+//                .symbolEffect(.rotate.clockwise, value: isAnimating)
+                .onTapGesture {
+                    Task {
+                        isAnimating = true
+                        rotationAngle = 720
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            isAnimating = false
+                            rotationAngle = 0
+                        }
+                        await self.task()
+
+                    }
+                }
+        }
+
+    }
+
 
     var todaySalmonRunStatusView: some View{
         VStack{

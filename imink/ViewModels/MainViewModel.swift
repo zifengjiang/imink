@@ -1,7 +1,6 @@
 import Foundation
 import SplatDatabase
 import Combine
-import SplatNet3API
 import SwiftyJSON
 
 

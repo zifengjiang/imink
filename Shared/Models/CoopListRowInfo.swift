@@ -33,7 +33,7 @@ struct CoopListRowInfo:Identifiable {
     }
 
     var height:CGFloat{
-        CGFloat(610 + (self.resultWave != -2 ? 160 : 0) + self.enemyKindCount*60)
+        CGFloat(610 + (self.resultWave != -2 ? 160 : 0) + self.enemyKindCount*60) + (self.rule == .teamContest && resultWave > 3 ? 160 : 0)
     }
 }
 

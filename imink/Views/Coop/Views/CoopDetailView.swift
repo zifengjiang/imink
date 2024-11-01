@@ -41,15 +41,7 @@ struct CoopDetailView: View {
                             enemyView
                                 .padding(.bottom)
                         }else{
-                            Spacer()
-                            Image(.squidLoading)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 100, height: 100)
-                                .rotationEffect(.degrees(phase))
-                            Text("Loading...")
-                                .font(.splatoonFont(size: 20))
-                            Spacer()
+                            LoadingView(size: 100)
                         }
                     }
                     Spacer()

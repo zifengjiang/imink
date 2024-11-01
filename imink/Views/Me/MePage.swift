@@ -1,5 +1,4 @@
 import SwiftUI
-import SplatNet3API
 
 struct MePage: View {
     
@@ -23,7 +22,16 @@ struct MePage: View {
                     Button(action: {
                         showSetting = true
                     }) {
-                        Image(systemName: "gear")
+                        Image("setting")
+                            .resizable()
+                            .scaledToFit()
+                            .overlay(Color(.accent))
+                            .mask{
+                                Image("setting")
+                                    .resizable()
+                                    .scaledToFit()
+                            }
+                            .frame(width: 20*1.2)
                     }
                 }
             }

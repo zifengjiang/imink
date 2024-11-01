@@ -1,5 +1,4 @@
 import SwiftUI
-import SplatNet3API
 
 struct AccountReviewView: View {
     @StateObject var viewModel = AccountReviewViewModel()

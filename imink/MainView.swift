@@ -1,5 +1,4 @@
 import SwiftUI
-import SplatNet3API
 import os
 
 struct MainView: View {
@@ -9,6 +8,7 @@ struct MainView: View {
     @StateObject var mainViewModel = MainViewModel.shared
     var body: some View {
         TabView(selection:$tabSelection){
+            
             HomePage(viewModel: HomeViewModel())
                 .tabItem {
                     Label("tab_home", image: "TabBarHome")
@@ -21,8 +21,6 @@ struct MainView: View {
                     Label("tab_battle", image: "TabBarBattle")
                 }
                 .tag(1)
-                
-
 
             CoopListView()
                 .environmentObject(mainViewModel)
@@ -30,7 +28,6 @@ struct MainView: View {
                     Label("tab_salmon_run", image: "TabBarSalmonRun")
                 }
                 .tag(2)
-
 
             MePage()
                 .environmentObject(mainViewModel)
@@ -41,13 +38,13 @@ struct MainView: View {
         }
         .onChange(of: tabSelection){ _, newValue in
             Haptics.generateIfEnabled(.selectionChanged)
+            // remove all coopDetailViewModelDetail in case of memory leak
             if newValue != 2{
                 AppState.shared.viewModelDict.removeAll()
             }
         }
         .task {
             MainViewModel.shared.isLogin = AppUserDefaults.shared.sessionToken != nil
-
             await NSOAccountManager.shared.refreshGameServiceTokenIfNeeded()
         }
     }
