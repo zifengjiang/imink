@@ -11,26 +11,30 @@ struct CoopShiftDetailView: View {
     }
 
     var body: some View {
-        ScrollView{
-            HStack {
-                Spacer()
-                VStack(spacing:20){
-                    if viewModel.initialized{
-                        cardView
-                            .padding(.top)
-                        waveView
-                        weaponView
-                        playerView
-                        kingView
-                        enemyView
-                            .padding(.bottom)
-                    }else{
-                        LoadingView(size: 100)
+        VStack{
+            if viewModel.initialized{
+                ScrollView{
+                    HStack {
+                        Spacer()
+                        VStack(spacing:20){
+                            
+                            cardView
+                                .padding(.top)
+                            waveView
+                            weaponView
+                            playerView
+                            kingView
+                            enemyView
+                                .padding(.bottom)
+                            
+                        }
+                        Spacer()
                     }
+                    .padding(.horizontal,8)
                 }
-                Spacer()
+            }else{
+                LoadingView(size: 100)
             }
-            .padding(.horizontal,8)
         }
         .frame(maxWidth: .infinity)
         .fixSafeareaBackground()

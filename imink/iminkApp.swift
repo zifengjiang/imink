@@ -40,8 +40,8 @@ struct iminkApp: App {
             }
             .onAppear{
                 getNsoVersion { version in
-                    if let _ = version{
-                        AppUserDefaults.shared.NSOVersion = "2.10.1"
+                    if let version = version{
+                        AppUserDefaults.shared.NSOVersion = version
                     }
                 }
             }

@@ -24,6 +24,9 @@ class AppUserDefaults: ObservableObject {
         }
     }
 
+    @AppStorage("coopSummary", store: .appGroup)
+    var coopSummary: String?
+
     @AppStorage("history_record", store: .appGroup)
     var historyRecord: String?
 

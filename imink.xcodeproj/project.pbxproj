@@ -51,6 +51,8 @@
 		8B19CF8C2CB2A02600EF4424 /* BattleListRowInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B19CF8B2CB2A02600EF4424 /* BattleListRowInfo.swift */; };
 		8B19CF8E2CB2C9C400EF4424 /* Species.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B19CF8D2CB2C9C400EF4424 /* Species.swift */; };
 		8B19CF902CB2CB0200EF4424 /* Judgement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B19CF8F2CB2CB0200EF4424 /* Judgement.swift */; };
+		8B1F74612CDB034D00BBC8E9 /* WeaponRecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1F74602CDB034D00BBC8E9 /* WeaponRecordView.swift */; };
+		8B1F74632CDB039D00BBC8E9 /* WeaponRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1F74622CDB039D00BBC8E9 /* WeaponRecord.swift */; };
 		8B23C0FE2CD09E2500FB5934 /* StageRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B23C0FD2CD09E2500FB5934 /* StageRecord.swift */; };
 		8B23C1002CD0A1F600FB5934 /* StageRecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B23C0FF2CD0A1F600FB5934 /* StageRecordView.swift */; };
 		8B2636492BFEAE1500F8964A /* DataBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B2636482BFEAE1500F8964A /* DataBackup.swift */; };
@@ -60,12 +62,15 @@
 		8B3136982CCCEB3B0085220E /* FestIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3136972CCCEB3B0085220E /* FestIcon.swift */; };
 		8B3591432BF892130066BCA3 /* HomePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3591422BF892130066BCA3 /* HomePage.swift */; };
 		8B3591452BF893D60066BCA3 /* MePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3591442BF893D60066BCA3 /* MePage.swift */; };
+		8B401C252CD65729008B05DE /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8B401C242CD65729008B05DE /* Launch Screen.storyboard */; };
 		8B4E4F962C01F69900818D31 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4E4F952C01F69900818D31 /* LoginViewModel.swift */; };
 		8B50DBE02C01BED40076AE6D /* SN3Client+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50DBDF2C01BED30076AE6D /* SN3Client+Ext.swift */; };
 		8B50DBE22C01C1C20076AE6D /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50DBE12C01C1C20076AE6D /* Logger.swift */; };
 		8B5276122BFC1DF100022D5B /* OverlayImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5276112BFC1DF100022D5B /* OverlayImage.swift */; };
 		8B5276142BFC228600022D5B /* SpecialWeaponImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5276132BFC228600022D5B /* SpecialWeaponImage.swift */; };
 		8B5276162BFC371300022D5B /* CoopListRowModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5276152BFC371300022D5B /* CoopListRowModel.swift */; };
+		8B5A77ED2CFDACEA00B34BDC /* CoopSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5A77EC2CFDACEA00B34BDC /* CoopSummary.swift */; };
+		8B5A77EF2CFDAD5700B34BDC /* SwiftyJSONDecodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5A77EE2CFDAD5700B34BDC /* SwiftyJSONDecodable.swift */; };
 		8B5B7B192CCF9C6B0088069C /* AccountReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5B7B182CCF9C6B0088069C /* AccountReviewView.swift */; };
 		8B5B7B1B2CCF9CE20088069C /* HistoryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5B7B1A2CCF9CE20088069C /* HistoryRecord.swift */; };
 		8B5B7B1D2CCFAC5D0088069C /* Dictionary+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5B7B1C2CCFAC5D0088069C /* Dictionary+Ext.swift */; };
@@ -90,6 +95,7 @@
 		8B8B285E2BF8581800790809 /* SplatNet.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8B8B285C2BF8581800790809 /* SplatNet.strings */; };
 		8B8B286D2BF887D400790809 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B8B286B2BF887D400790809 /* Preview Assets.xcassets */; };
 		8B93C0CC2C12EB1A00D7EFBC /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 8B93C0CB2C12EB1A00D7EFBC /* GRDB */; };
+		8B9B606D2CD74522001D5C7D /* MultiSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9B606C2CD74522001D5C7D /* MultiSelectionView.swift */; };
 		8BA017472C099F23001CFC72 /* Precomputable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA017462C099F23001CFC72 /* Precomputable.swift */; };
 		8BA017492C09A8CE001CFC72 /* FetchableFromDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA017482C09A8CE001CFC72 /* FetchableFromDatabase.swift */; };
 		8BA089322CCB8A6000BA7176 /* CoopRecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA089312CCB8A6000BA7176 /* CoopRecordView.swift */; };
@@ -171,6 +177,19 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		8B56712A2CD51130000CE6EE /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		8B0792062C0F435C0094EA57 /* TargetType+fetch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TargetType+fetch.swift"; sourceTree = "<group>"; };
 		8B0792082C1077DD0094EA57 /* BattleScheduleCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleScheduleCardView.swift; sourceTree = "<group>"; };
@@ -228,6 +247,8 @@
 		8B19CF8B2CB2A02600EF4424 /* BattleListRowInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleListRowInfo.swift; sourceTree = "<group>"; };
 		8B19CF8D2CB2C9C400EF4424 /* Species.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Species.swift; sourceTree = "<group>"; };
 		8B19CF8F2CB2CB0200EF4424 /* Judgement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Judgement.swift; sourceTree = "<group>"; };
+		8B1F74602CDB034D00BBC8E9 /* WeaponRecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaponRecordView.swift; sourceTree = "<group>"; };
+		8B1F74622CDB039D00BBC8E9 /* WeaponRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaponRecord.swift; sourceTree = "<group>"; };
 		8B23C0FD2CD09E2500FB5934 /* StageRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StageRecord.swift; sourceTree = "<group>"; };
 		8B23C0FF2CD0A1F600FB5934 /* StageRecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StageRecordView.swift; sourceTree = "<group>"; };
 		8B2636482BFEAE1500F8964A /* DataBackup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataBackup.swift; sourceTree = "<group>"; };
@@ -235,12 +256,15 @@
 		8B3136972CCCEB3B0085220E /* FestIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FestIcon.swift; sourceTree = "<group>"; };
 		8B3591422BF892130066BCA3 /* HomePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePage.swift; sourceTree = "<group>"; };
 		8B3591442BF893D60066BCA3 /* MePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MePage.swift; sourceTree = "<group>"; };
+		8B401C242CD65729008B05DE /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		8B4E4F952C01F69900818D31 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		8B50DBDF2C01BED30076AE6D /* SN3Client+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SN3Client+Ext.swift"; sourceTree = "<group>"; };
 		8B50DBE12C01C1C20076AE6D /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		8B5276112BFC1DF100022D5B /* OverlayImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayImage.swift; sourceTree = "<group>"; };
 		8B5276132BFC228600022D5B /* SpecialWeaponImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialWeaponImage.swift; sourceTree = "<group>"; };
 		8B5276152BFC371300022D5B /* CoopListRowModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopListRowModel.swift; sourceTree = "<group>"; };
+		8B5A77EC2CFDACEA00B34BDC /* CoopSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopSummary.swift; sourceTree = "<group>"; };
+		8B5A77EE2CFDAD5700B34BDC /* SwiftyJSONDecodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftyJSONDecodable.swift; sourceTree = "<group>"; };
 		8B5B7B182CCF9C6B0088069C /* AccountReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountReviewView.swift; sourceTree = "<group>"; };
 		8B5B7B1A2CCF9CE20088069C /* HistoryRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryRecord.swift; sourceTree = "<group>"; };
 		8B5B7B1C2CCFAC5D0088069C /* Dictionary+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Dictionary+Ext.swift"; sourceTree = "<group>"; };
@@ -278,6 +302,7 @@
 		8B8B28672BF8582D00790809 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/SplatNet.strings; sourceTree = "<group>"; };
 		8B8B28682BF8582E00790809 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/SplatNet.strings; sourceTree = "<group>"; };
 		8B8B286B2BF887D400790809 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		8B9B606C2CD74522001D5C7D /* MultiSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiSelectionView.swift; sourceTree = "<group>"; };
 		8BA017462C099F23001CFC72 /* Precomputable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Precomputable.swift; sourceTree = "<group>"; };
 		8BA017482C09A8CE001CFC72 /* FetchableFromDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchableFromDatabase.swift; sourceTree = "<group>"; };
 		8BA089312CCB8A6000BA7176 /* CoopRecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopRecordView.swift; sourceTree = "<group>"; };
@@ -343,6 +368,9 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8B19CF932CB3BD4000EF4424 /* Views */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Views; sourceTree = "<group>"; };
+		8B5671042CD5112E000CE6EE /* Imink Watch App */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Imink Watch App"; sourceTree = "<group>"; };
+		8B5671152CD51130000CE6EE /* Imink Watch AppTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Imink Watch AppTests"; sourceTree = "<group>"; };
+		8B56711F2CD51130000CE6EE /* Imink Watch AppUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Imink Watch AppUITests"; sourceTree = "<group>"; };
 		8B65636F2CB15DC40017F5D0 /* App */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = App; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -427,6 +455,9 @@
 				8B7F29282BF6E1B90010A525 /* imink */,
 				8B7F29392BF6E1BB0010A525 /* iminkTests */,
 				8B7F29432BF6E1BB0010A525 /* iminkUITests */,
+				8B5671042CD5112E000CE6EE /* Imink Watch App */,
+				8B5671152CD51130000CE6EE /* Imink Watch AppTests */,
+				8B56711F2CD51130000CE6EE /* Imink Watch AppUITests */,
 				8B7F29272BF6E1B90010A525 /* Products */,
 				8B93C0CE2C12EBA300D7EFBC /* Frameworks */,
 			);
@@ -594,6 +625,7 @@
 				8BA089312CCB8A6000BA7176 /* CoopRecordView.swift */,
 				8B23C0FF2CD0A1F600FB5934 /* StageRecordView.swift */,
 				8B5B7B182CCF9C6B0088069C /* AccountReviewView.swift */,
+				8B1F74602CDB034D00BBC8E9 /* WeaponRecordView.swift */,
 			);
 			path = Me;
 			sourceTree = "<group>";
@@ -634,6 +666,8 @@
 				8B5B7B1E2CCFBE450088069C /* GearView.swift */,
 				8BA1F3FB2CD45B2200E733EA /* LoadingView.swift */,
 				8BF3CB892CD4BE4700B0FCA9 /* RotationView.swift */,
+				8B401C242CD65729008B05DE /* Launch Screen.storyboard */,
+				8B9B606C2CD74522001D5C7D /* MultiSelectionView.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -650,6 +684,7 @@
 			children = (
 				8BA017462C099F23001CFC72 /* Precomputable.swift */,
 				8BA017482C09A8CE001CFC72 /* FetchableFromDatabase.swift */,
+				8B5A77EE2CFDAD5700B34BDC /* SwiftyJSONDecodable.swift */,
 			);
 			path = Protocol;
 			sourceTree = "<group>";
@@ -677,6 +712,7 @@
 			isa = PBXGroup;
 			children = (
 				8BA089332CCB8AB000BA7176 /* CoopRecord.swift */,
+				8B1F74622CDB039D00BBC8E9 /* WeaponRecord.swift */,
 				8B5B7B1A2CCF9CE20088069C /* HistoryRecord.swift */,
 				8B23C0FD2CD09E2500FB5934 /* StageRecord.swift */,
 				8B19CF892CB29BC500EF4424 /* BattleRule.swift */,
@@ -694,6 +730,7 @@
 				8B19CF8B2CB2A02600EF4424 /* BattleListRowInfo.swift */,
 				8B19CF8D2CB2C9C400EF4424 /* Species.swift */,
 				8B19CF8F2CB2CB0200EF4424 /* Judgement.swift */,
+				8B5A77EC2CFDACEA00B34BDC /* CoopSummary.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -789,6 +826,7 @@
 				8B7F29222BF6E1B90010A525 /* Sources */,
 				8B7F29232BF6E1B90010A525 /* Frameworks */,
 				8B7F29242BF6E1B90010A525 /* Resources */,
+				8B56712A2CD51130000CE6EE /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
@@ -853,7 +891,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1540;
+				LastSwiftUpdateCheck = 1610;
 				LastUpgradeCheck = 1540;
 				TargetAttributes = {
 					8B7F29252BF6E1B90010A525 = {
@@ -918,6 +956,7 @@
 				8B0792112C112D370094EA57 /* KoreanERIN-M.ttf in Resources */,
 				8B0D14742BF98B4E00B82AD1 /* Localizable.strings in Resources */,
 				8B8B286D2BF887D400790809 /* Preview Assets.xcassets in Resources */,
+				8B401C252CD65729008B05DE /* Launch Screen.storyboard in Resources */,
 				8B0792142C1131590094EA57 /* DFPZongYiW7-GB.ttf in Resources */,
 				8B0D149B2BFAB98E00B82AD1 /* Splatoon1.otf in Resources */,
 				8B07920F2C112D310094EA57 /* KurokaneStd-EB.ttf in Resources */,
@@ -969,6 +1008,7 @@
 				8BF3CB612CD4B61900B0FCA9 /* SN3PersistedQuery.swift in Sources */,
 				8BF3CB622CD4B61900B0FCA9 /* AuthorizationMemoryStorage.swift in Sources */,
 				8BF3CB632CD4B61900B0FCA9 /* BulletTokens.swift in Sources */,
+				8B5A77ED2CFDACEA00B34BDC /* CoopSummary.swift in Sources */,
 				8BF3CB642CD4B61900B0FCA9 /* GraphQLRequestBody.swift in Sources */,
 				8BF3CB652CD4B61900B0FCA9 /* Logging.swift in Sources */,
 				8BF3CB662CD4B61900B0FCA9 /* SN3Client.swift in Sources */,
@@ -980,11 +1020,14 @@
 				8BA1F3F32CD313EE00E733EA /* Haptics+UIKit.swift in Sources */,
 				8BA1F3F42CD313EE00E733EA /* Haptics+WatchKit.swift in Sources */,
 				8BA1F3F52CD313EE00E733EA /* Haptics+AppKit.swift in Sources */,
+				8B1F74632CDB039D00BBC8E9 /* WeaponRecord.swift in Sources */,
 				8BF3CB852CD4BAEF00B0FCA9 /* MediaType.swift in Sources */,
 				8BF3CB862CD4BAEF00B0FCA9 /* RequestMethod.swift in Sources */,
 				8BA1F3F62CD313EE00E733EA /* Haptics.swift in Sources */,
+				8B1F74612CDB034D00BBC8E9 /* WeaponRecordView.swift in Sources */,
 				8BF3CB8A2CD4BE4700B0FCA9 /* RotationView.swift in Sources */,
 				8B19CF8A2CB29BC500EF4424 /* BattleRule.swift in Sources */,
+				8B9B606D2CD74522001D5C7D /* MultiSelectionView.swift in Sources */,
 				8B50DBE22C01C1C20076AE6D /* Logger.swift in Sources */,
 				8BFF73E72C0939160048F2A6 /* CoopListRowView.swift in Sources */,
 				8B23C0FE2CD09E2500FB5934 /* StageRecord.swift in Sources */,
@@ -1001,6 +1044,7 @@
 				8B0D146F2BF9789200B82AD1 /* MainViewModel.swift in Sources */,
 				8B0D148B2BFA298A00B82AD1 /* CoopListViewModel.swift in Sources */,
 				8B0D14892BFA28F100B82AD1 /* CoopListView.swift in Sources */,
+				8B5A77EF2CFDAD5700B34BDC /* SwiftyJSONDecodable.swift in Sources */,
 				8BA017472C099F23001CFC72 /* Precomputable.swift in Sources */,
 				8B19CF2F2CB2466400EF4424 /* BattleListViewModel.swift in Sources */,
 				8BFF73E52C0938330048F2A6 /* CoopListDetailView.swift in Sources */,
@@ -1281,9 +1325,9 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = imink/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
@@ -1318,9 +1362,9 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = imink/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;

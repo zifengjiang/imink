@@ -3,7 +3,7 @@ import SwiftUICore
 import SplatDatabase
 import SwiftyJSON
 
-struct HistoryRecord:Codable{
+struct HistoryRecord:Codable, SwiftyJSONDecodable{
 
     let account: Account
     let nameplate:Nameplate

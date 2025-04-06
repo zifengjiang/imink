@@ -15,6 +15,4 @@ struct Filter {
     var weaponIds: Set<Int> = []
     var start: Date = getCoopEarliestPlayedTime()
     var end: Date = Date()
-
-    
 }

@@ -16,7 +16,12 @@
 		<string>processing</string>
 		<string>remote-notification</string>
 	</array>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string></string>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>white</string>
+		<key>UIImageName</key>
+		<string>launchlogo</string>
+	</dict>
 </dict>
 </plist>

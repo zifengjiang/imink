@@ -24,7 +24,7 @@ class CoopShiftDetailViewModel: ObservableObject {
                 let db = try dbResult.get()
                 let identifier = (self.id, AppUserDefaults.shared.accountId)
 
-                let coopGroupStatus = try CoopGroupStatus.create(from: db, identifier: identifier)
+                let coopGroupStatus:CoopGroupStatus? = try CoopGroupStatus.create(from: db, identifier: identifier)
                 let coopWaveStatus: [CoopWaveStatus] = try CoopWaveStatus.create(from: db, identifier: identifier)
                 let coopWaveStatusGrouped = Array(coopWaveStatus.grouped(by: { $0.eventWaveGroup ?? "nil" }).values.sorted {
                     guard let l = $0.first?.eventWaveGroup?.order, let r = $1.first?.eventWaveGroup?.order else {

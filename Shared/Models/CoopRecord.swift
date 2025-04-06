@@ -2,7 +2,7 @@ import Foundation
 import SwiftyJSON
 import SplatDatabase
 
-struct CoopRecord:Codable{
+struct CoopRecord:Codable,SwiftyJSONDecodable{
     let teamContestRecord:TeamContestRecord
     let defeatBossRecords:[DefeatEnemyRecord]
     let defeatEnemyRecords:[DefeatEnemyRecord]

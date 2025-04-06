@@ -150,6 +150,17 @@ struct IndicatorView: View {
 //								.transition(.symbolEffect(.appear))
 								.onAppear { isIconVisible = true }
 								.onDisappear { isIconVisible = false }
+                        case .success:
+                            Image(.checkmark)
+                                .resizable()
+                                .scaledToFit()
+                                .overlay(Color(.accent))
+                                .mask{
+                                    Image(.checkmark)
+                                        .resizable()
+                                        .scaledToFit()
+                                }
+                                .frame(width: 20, height: 20)
                         case .progressIndicator, .progressBar:
                             Image("TabBarHome")
                                 .resizable()

@@ -19,22 +19,29 @@ extension SplatDatabase {
 }
 
 extension TaskLocal where Value == Bool{
-    static let isFetchingCoops = TaskLocal<Bool>(wrappedValue: false)
+    static let isFetchingCoops: TaskLocal<Bool> = TaskLocal<Bool>(wrappedValue: false)
     static let isFetchingBattles = TaskLocal<Bool>(wrappedValue: false)
 }
 
 extension SN3Client {
     static let isFetchingCoops = TaskLocal<Bool>(wrappedValue: false)
+    
+    func _fetchCoops() async {
+        
+    }
+    
     func fetchCoops() async {
-        await abstractFetch(isFetching: .isFetchingCoops, refreshInterval: 300, lastRefreshTime: &AppUserDefaults.shared.coopsRefreshTime,icon: .salmonRun) {
+        await fetchRecords(isFetching: .isFetchingCoops, refreshInterval: 300, lastRefreshTime: &AppUserDefaults.shared.coopsRefreshTime,icon: .salmonRun) {
             let coopHistory = try await JSON(data: self.graphQL(.coopHistory))
             let ids = coopHistory["data"]["coopResult"]["historyGroups"]["nodes"].arrayValue.flatMap { nodeJSON in
                 return nodeJSON["historyDetails"]["nodes"].arrayValue.map { detailJSON in
                     return detailJSON["id"].stringValue
                 }
             }
+            let summary:CoopSummary = CoopSummary(json: coopHistory["data"]["coopResult"])
+            CoopSummary.save(summary)
             let validIds = try SplatDatabase.shared.filterNotExists(in:.coop, ids: ids)
-
+            
             return validIds
         } fetchDetails: { validIds in
             return await withTaskGroup(of: JSON?.self) { group in
@@ -64,38 +71,29 @@ extension SN3Client {
                 }
                 return jsonResults.count
             }
-
+            
         }
     }
-
+    
     func fetchBattles() async {
-        await abstractFetch(isFetching: .isFetchingBattles, refreshInterval: 10, lastRefreshTime: &AppUserDefaults.shared.battlesRefreshTime,icon: .regularBattle) {
+        await fetchRecords(isFetching: .isFetchingBattles, refreshInterval: 10, lastRefreshTime: &AppUserDefaults.shared.battlesRefreshTime,icon: .regularBattle) {
             try await withThrowingTaskGroup(of: JSON?.self) { group in
                 var ids: [String] = []
-                group.addTask {
-                    return try JSON(data:await self.graphQL(.latestBattleHistories))
+                let queries:[any SN3PersistedQuery] = [
+                    .latestBattleHistories,
+                    .regularBattleHistories,
+                    .bankaraBattleHistories,
+                    .privateBattleHistories,
+                    .eventBattleHistories,
+                    .xBattleHistories
+                ]
+                
+                queries.forEach { query in
+                    group.addTask {
+                        return try JSON(data:await self.graphQL(query))
+                    }
                 }
-
-                group.addTask {
-                    return try JSON(data:await self.graphQL(.regularBattleHistories))
-                }
-
-                group.addTask {
-                    return try JSON(data:await self.graphQL(.bankaraBattleHistories))
-                }
-
-                group.addTask {
-                    return try JSON(data:await self.graphQL(.privateBattleHistories))
-                }
-
-                group.addTask {
-                    return try JSON(data:await self.graphQL(.eventBattleHistories))
-                }
-
-                group.addTask {
-                    return try JSON(data:await self.graphQL(.xBattleHistories))
-                }
-
+                
                 for try await result in group {
                     if let detailJSON = result, let key = detailJSON["data"].dictionary?.keys.first as String? {
                         ids.append(contentsOf: detailJSON["data"][key]["historyGroups"]["nodes"].arrayValue.flatMap{ ele in
@@ -105,10 +103,10 @@ extension SN3Client {
                         })
                     }
                 }
-
+                
                 return try SplatDatabase.shared.filterNotExists(in:.battle, ids: ids.removingDuplicates())
             }
-
+            
         } fetchDetails: { validIds in
             return await withTaskGroup(of: JSON?.self) { group in
                 var jsonResults: [JSON] = []
@@ -138,81 +136,145 @@ extension SN3Client {
                 return jsonResults.count
             }
         }
-
+        
     }
-
-    func abstractFetch(isFetching: TaskLocal<Bool>,
-                       refreshInterval: Int,
-                       lastRefreshTime: inout Int,
-                       icon: ImageResource,
-                       fetchValidIds: () async throws -> [String],
-                       fetchDetails: ([String]) async throws -> Int
+    
+    func fetchRecords(isFetching: TaskLocal<Bool>,
+                      refreshInterval: Int,
+                      lastRefreshTime: inout Int,
+                      icon: ImageResource,
+                      fetchValidIds: () async throws -> [String],
+                      fetchDetails: ([String]) async throws -> Int
     ) async {
-        if isFetching.get() || lastRefreshTime + refreshInterval > Int(Date().timeIntervalSince1970){
+        guard !isFetching.get() && 
+              lastRefreshTime + refreshInterval <= Int(Date().timeIntervalSince1970) else {
             return
         }
-
+        
         await isFetching.withValue(true) {
-            do{
-                let indicatorId = UUID().uuidString
-                await NSOAccountManager.shared.refreshGameServiceTokenIfNeeded()
-                guard let gameServiceToken = AppUserDefaults.shared.gameServiceToken else{ return }
-                try await SN3Client.shared.setToken(gameServiceToken)
-                let validIds = try await fetchValidIds()
-                if validIds.isEmpty {
-                    Indicators.shared.display(.init(id: indicatorId, icon: .image(Image(icon)),title: "无新纪录", dismissType: .after(2)))
+            let maxRetries = 3
+            var retryCount = 0
+            
+            while retryCount < maxRetries {
+                do {
+                    try await setToken()
+                    let validIds = try await fetchValidIds()
+                    
+                    guard !validIds.isEmpty else {
+                        Indicators.shared.display(.init(icon: .image(Image(icon)),
+                                                      title: "无新纪录",
+                                                      dismissType: .after(2)))
+                        lastRefreshTime = Int(Date().timeIntervalSince1970)
+                        return
+                    }
+                    
+                    let progress = Progress(totalUnitCount: Int64(validIds.count))
+                    Indicators.shared.display(.init(icon: .progressIndicator,
+                                                  title: "加载\(validIds.count)项纪录",
+                                                  dismissType: .after(5)))
+                    
+                    let recordCount = try await fetchDetails(validIds)
+                    
                     lastRefreshTime = Int(Date().timeIntervalSince1970)
+                    Indicators.shared.display(.init(icon: .success,
+                                                  title: "已加载\(recordCount)项纪录",
+                                                  dismissType: .after(3)))
                     return
+                    
+                } catch SN3Client.Error.invalidGameServiceToken {
+                    await NSOAccountManager.shared.refreshGameServiceTokenManual()
+                    retryCount += 1
+                } catch {
+                    let errorMessage = "第\(retryCount + 1)次尝试失败: \(error.localizedDescription)"
+                    Indicators.shared.display(.init(icon: .systemImage("xmark.seal"),
+                                                  title: "加载失败",
+                                                  expandedText: errorMessage,
+                                                  dismissType: .automatic,
+                                                  style: .error))
+                    logError(error)
+                    retryCount += 1
                 }
-                Indicators.shared.display(.init(id: indicatorId, icon: .progressIndicator,title: "加载\(validIds.count)项纪录",dismissType: .after(5)))
-                let recordCount = try await fetchDetails(validIds)
-                Indicators.shared.display(.init(id: "成功加载", icon: .systemImage("checkmark.seal"),title: "已加载\(recordCount)项纪录", dismissType: .after(3)))
-                lastRefreshTime = Int(Date().timeIntervalSince1970)
-            }catch SN3Client.Error.invalidGameServiceToken{
-                await NSOAccountManager.shared.refreshGameServiceTokenManual()
-            } catch{
-                Indicators.shared.display(.init(id: UUID().uuidString, icon: .systemImage("xmark.seal"),title: "加载失败",expandedText: error.localizedDescription, dismissType: .automatic, style: .error))
-                logError(error)
+            }
+            
+            if retryCount >= maxRetries {
+                Indicators.shared.display(.init(icon: .systemImage("xmark.seal"),
+                                              title: "达到最大重试次数",
+                                              expandedText: "请稍后再试",
+                                              dismissType: .automatic,
+                                              style: .error))
             }
         }
     }
-
-    func fetchHistoryRecord() async -> HistoryRecord? {
-        do {
-            print("fetchHistoryRecord")
-            guard let gameServiceToken = AppUserDefaults.shared.gameServiceToken else {return nil}
-            try await SN3Client.shared.setToken(gameServiceToken)
-            let historyRecord = try await JSON(data: self.graphQL(.historyRecord))
-            return HistoryRecord(json: historyRecord)
-        }catch{
-            logError(error)
-            return nil
-        }
+    
+    func setToken() async throws {
+        await NSOAccountManager.shared.refreshGameServiceTokenIfNeeded()
+        guard let gameServiceToken = AppUserDefaults.shared.gameServiceToken else{ return }
+        try await setToken(gameServiceToken)
     }
-
+    
+    func fetchHistoryRecord() async -> HistoryRecord? {
+        return await fetchRecord(.historyRecord, resultType: HistoryRecord.self)
+    }
+    
     func fetchCoopRecord() async -> CoopRecord? {
-        do {
-            guard let gameServiceToken = AppUserDefaults.shared.gameServiceToken else {return nil}
-            try await SN3Client.shared.setToken(gameServiceToken)
-            let record = try await JSON(data: self.graphQL(.coopRecord))
-            return CoopRecord(json: record)
-        }catch{
-            logError(error)
-            return nil
-        }
+        return await fetchRecord(.coopRecord, resultType: CoopRecord.self)
+    }
+    
+    func fetchWeaponRecords() async -> WeaponRecords? {
+        return await fetchRecord(.weaponRecord, resultType: WeaponRecords.self)
     }
 
     func fetchStageRecord() async -> [StageRecord] {
-        do {
-            guard let gameServiceToken = AppUserDefaults.shared.gameServiceToken else {return []}
-            try await SN3Client.shared.setToken(gameServiceToken)
-            let record = try await JSON(data: self.graphQL(.stageRecord))
-            return record["data"]["stageRecords"]["nodes"].arrayValue.map{StageRecord(json: $0)}
-        }catch{
-            logError(error)
-            return []
+        return await fetchRecord(.stageRecord, resultType: [StageRecord].self) ?? []
+    }
+
+    func fetchRecord<T: SwiftyJSONDecodable>(_ queryType: any SN3PersistedQuery,
+                                            resultType: T.Type,
+                                            maxRetries: Int = 3) async -> T? {
+        var retryCount = 0
+        
+        while retryCount < maxRetries {
+            do {
+                try await setToken()
+                let data = try await JSON(data: self.graphQL(queryType))
+                
+                if retryCount > 0 {
+                    Indicators.shared.display(.init(icon: .success,
+                                                  title: "重试成功",
+                                                  dismissType: .after(3)))
+                }
+                
+                return T(json: data)
+                
+            } catch SN3Client.Error.invalidGameServiceToken {
+                await NSOAccountManager.shared.refreshGameServiceTokenManual()
+                retryCount += 1
+            } catch {
+                logError(error)
+                retryCount += 1
+                
+                if retryCount < maxRetries {
+                    Indicators.shared.display(.init(icon: .systemImage("arrow.clockwise"),
+                                                  title: "重试中...",
+                                                  expandedText: "第\(retryCount)次重试",
+                                                  dismissType: .after(2)))
+                    try? await Task.sleep(nanoseconds: UInt64(1 * Double(NSEC_PER_SEC)))
+                }
+            }
         }
+        
+        Indicators.shared.display(.init(icon: .systemImage("xmark.seal"),
+                                      title: "获取数据失败",
+                                      expandedText: "请稍后再试",
+                                      dismissType: .automatic,
+                                      style: .error))
+        return nil
     }
 }
 
+extension Array:SwiftyJSONDecodable where Element == StageRecord {
+    init(json: JSON) {
+        self = json["data"]["stageRecords"]["nodes"].arrayValue.map { StageRecord(json: $0) }
+    }
+}
 

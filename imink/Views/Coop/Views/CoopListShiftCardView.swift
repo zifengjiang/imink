@@ -6,6 +6,10 @@ struct CoopListShiftCardView: View {
     var timeSpanText:String {
         let formatter = DateFormatter()
         formatter.dateFormat = "MM/dd HH:mm"
+        // if status.startTime is not this year, show year
+        if Calendar.current.component(.year, from: status.startTime) != Calendar.current.component(.year, from: Date()){
+            formatter.dateFormat = "yyyy MM/dd HH:mm"
+        }
         return "\(formatter.string(from: status.startTime)) - \(formatter.string(from: status.endTime))"
     }
 

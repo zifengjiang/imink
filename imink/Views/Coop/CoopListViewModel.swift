@@ -85,4 +85,31 @@ class CoopListViewModel: ObservableObject {
         }
         return rows
     }
+
+    func loadMoreCards() async  {
+        do{
+            let cards:[CoopGroupStatus] = try await SplatDatabase.shared.dbQueue.read { db in
+                try CoopGroupStatus.create(from: db, identifier: (AppUserDefaults.shared.accountId, self.rows.count))
+            }
+            DispatchQueue.main.async {
+                self.rows.append(contentsOf: cards.map { CoopListRowModel(isCoop: false, card: $0) })
+            }
+        }catch{
+            logError(error)
+        }
+    }
+
+    func loadCards(limit: Int = 50, offset:Int = 0) async {
+        do{
+            let cards:[CoopGroupStatus] = try await SplatDatabase.shared.dbQueue.read { db in
+                try CoopGroupStatus.create(from: db, identifier: (AppUserDefaults.shared.accountId, offset))
+            }
+            DispatchQueue.main.async {
+                self.rows = cards.map { CoopListRowModel(isCoop: false, card: $0) }
+            }
+        }catch{
+            logError(error)
+        }
+    }
+
 }

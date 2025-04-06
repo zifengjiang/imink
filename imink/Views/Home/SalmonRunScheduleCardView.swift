@@ -46,7 +46,7 @@ struct SalmonRunScheduleCardView: View {
 
                     HStack{
 
-                        if let _boss = schedule._boss{
+                        if let _boss = schedule._boss, schedule.rule1 != .teamContest{
                             Image(_boss.name)
                                 .resizable()
                                 .scaledToFit()

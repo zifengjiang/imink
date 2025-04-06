@@ -76,7 +76,7 @@ struct VDGridView: View {
                 loadGridAsync(itemSize: itemSize)
             }
             .onChange(of: geo.size.width) { oldValue, newValue in
-                let width:CGFloat = geo.size.width
+                let width:CGFloat = geo.size.width < 300 ? 361 : geo.size.width
                 let itemSize = (width - CGFloat(columnCount - 1) - CGFloat(blockCount - 1) * blockMargin) / CGFloat(columnCount)
                 self.height = itemSize * CGFloat(rowCount) + CGFloat((rowCount - 1))
 

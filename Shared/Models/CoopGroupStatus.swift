@@ -55,6 +55,21 @@ extension CoopGroupStatus:PreComputable{
         }
         return nil
     }
+
+    static func create(from db: Database, identifier: (Int, Int)) throws -> [CoopGroupStatus] {
+        let (accountId, offset) = identifier
+        var rows = try CoopGroupStatus.fetchAll(db, sql: "SELECT * FROM coop_group_status_view WHERE accountId = ? ORDER BY GroupID DESC LIMIT 10 OFFSET ?", arguments: [accountId, offset])
+        for index in rows.indices {
+            rows[index]._suppliedWeapon = try Array(0..<4).compactMap { try ImageMap.fetchOne(db, key: rows[index].suppliedWeapon[$0])}
+            rows[index]._stage = try ImageMap.fetchOne(db, key: rows[index].stageId)
+            let rule:Schedule.Rule = rows[index].rule == "REGULAR" ? .salmonRun : (rows[index].rule == "TEAM_CONTEST" ?  .teamContest : .bigRun)
+            if let schedule = try Schedule.fetchOne(db, sql: "SELECT * FROM schedule WHERE ? BETWEEN startTime AND endTime AND mode = ? AND rule1 = ?", arguments: [rows[index].startTime, Schedule.Mode.salmonRun.rawValue, rule.rawValue]){
+                rows[index].startTime = schedule.startTime
+                rows[index].endTime = schedule.endTime
+            }
+        }
+        return rows
+    }
 }
 
 extension CoopGroupStatus{

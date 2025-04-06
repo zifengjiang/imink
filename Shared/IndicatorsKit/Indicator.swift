@@ -23,7 +23,7 @@ public struct Indicator {
     public var isUserDismissible: Bool // 新增的属性
 
 	public init(
-		id: String,
+        id: String = UUID().uuidString,
 		icon: Icon? = nil,
 		title: String,
 		subtitle: String? = nil,
@@ -102,6 +102,7 @@ public extension Indicator {
 		case systemImage(String)
 		case progressIndicator
         case progressBar
+        case success
 	}
 
 	struct Style {

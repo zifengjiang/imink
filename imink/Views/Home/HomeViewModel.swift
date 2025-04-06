@@ -22,7 +22,7 @@ class HomeViewModel: ObservableObject {
     }
 
     var salmonRunSchedules: [Schedule] {
-        schedules.filter { $0.mode == .salmonRun }/*.sorted { $0.rule1.rawValue > $1.rule1.rawValue }*/
+        schedules.filter { $0.mode == .salmonRun }.sorted { $0.rule1.rawValue > $1.rule1.rawValue }
     }
 
     private var cancelBag = Set<AnyCancellable>()

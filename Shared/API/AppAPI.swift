@@ -42,7 +42,17 @@ extension AppAPI: TargetType {
     }
 
     var headers: [String : String]? {
-        return nil
+        switch self{
+        case .nxapiZnca_f:
+            return [
+                "User-Agent": "Imink/1.0.0 (iOS)",
+                "x-znca-client-version": AppUserDefaults.shared.NSOVersion,
+                "X-znca-platform": "Android",
+                "x-znca-version": AppUserDefaults.shared.NSOVersion,
+            ]
+        default:
+            return nil
+        }
     }
 
     var querys: [(String, String?)]? {

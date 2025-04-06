@@ -117,6 +117,10 @@ struct CoopListView: View {
                 .onChange(of: activeID) { oldValue, newValue in
                     if newValue == viewModel.rows.last?.id {
                         Task{
+                            if viewModel.navigationTitle == "打工卡片"{
+                                await viewModel.loadMoreCards()
+                                return
+                            }
                             await viewModel.loadMore()
                         }
                     }
@@ -126,6 +130,10 @@ struct CoopListView: View {
                     self.isFirstRow = newValue == viewModel.rows.first?.id
                     if newValue == viewModel.rows.last?.id {
                         Task{
+                            if viewModel.navigationTitle == "打工卡片"{
+                                await viewModel.loadMoreCards()
+                                return
+                            }
                             await viewModel.loadMore()
                         }
                     }
@@ -158,6 +166,20 @@ struct CoopListView: View {
                                 icon: { rule.icon }
                             )
                         }
+                    }
+
+                    Button{
+                        viewModel.filter.rules.removeAll()
+                        viewModel.navigationTitle = "打工卡片"
+                        guard AppState.shared.isLogin else { return }
+                        Task{
+                            await viewModel.loadCards()
+                        }
+                    } label: {
+                        Label(
+                            title: { Text("打工卡片") },
+                            icon: { Image(systemName: "creditcard") }
+                        )
                     }
                 }
             }

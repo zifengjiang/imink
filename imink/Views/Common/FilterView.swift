@@ -48,7 +48,7 @@ struct CoopFilterView:View {
                 VStack{
                     DatePicker("开始时间", selection: $filter.start, displayedComponents: [.date,.hourAndMinute])
                     DatePicker("结束时间", selection: $filter.end, displayedComponents: [.date,.hourAndMinute])
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 8)) {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4)) {
                         ForEach(viewModel.weapons, id: \.hash){ weapon in
                             Button {
                                 if filter.weaponIds.contains(Int(weapon.id!)){
@@ -93,4 +93,13 @@ struct CoopFilterView:View {
     }
 }
 
+extension CoopFilterViewModel {
 
+    static let preview = CoopFilterViewModel()
+}
+
+#Preview {
+    CoopFilterView(viewModel: .preview, showFilterView: .constant(true), filter: .constant(Filter())) {
+
+    }
+}

@@ -12,7 +12,7 @@ struct MePage: View {
                     NavigationLink("打工记录", destination: CoopRecordView())
                     NavigationLink("祭典记录", destination: CoopRecordView())
                     NavigationLink("场地记录", destination: StageRecordView())
-                    NavigationLink("武器记录", destination: CoopRecordView())
+                    NavigationLink("武器记录", destination: WeaponRecordView())
                 }
             }
             .navigationTitle("tab_me")
@@ -21,6 +21,7 @@ struct MePage: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
                         showSetting = true
+                        Haptics.generateIfEnabled(.light)
                     }) {
                         Image("setting")
                             .resizable()
@@ -40,11 +41,6 @@ struct MePage: View {
         .sheet(isPresented: $showSetting) {
             SettingPage(showSettings: $showSetting)
         }
-        .refreshable{
-            await SN3Client.shared.fetchHistoryRecord()
-        }
-
-
     }
 }
 

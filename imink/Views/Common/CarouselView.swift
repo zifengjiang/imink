@@ -35,7 +35,7 @@ struct CarouselView<Content: View>: View {
             let size = $0.size
             Group(subviews: content) { collection in
                 ScrollView(.horizontal){
-                    LazyHStack(spacing: 0){
+                    HStack(spacing: 0){
 
                         if let lastItem = collection.last {
                             lastItem

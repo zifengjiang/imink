@@ -151,6 +151,16 @@ extension SN3PersistedQuery where Self == StageRecordQuery {
     public static var stageRecord: StageRecordQuery { .init() }
 }
 
+// MARK: WeaponRecordQuery
+
+public struct WeaponRecordQuery: SN3PersistedQuery{
+    public static let name = "WeaponRecordQuery"
+}
+
+extension SN3PersistedQuery where Self == WeaponRecordQuery {
+    public static var weaponRecord: WeaponRecordQuery { .init() }
+}
+
 // MARK: VSHistoryDetailQuery
 
 public struct VSHistoryDetailQuery: SN3PersistedQuery {

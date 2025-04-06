@@ -35,6 +35,7 @@ struct BattleDetailView: View {
                             .padding(.top,10)
                         winTeamView
                         loseTeamView
+                            .padding(.bottom, 10)
 
                     }else{
                         LoadingView(size: 100)
