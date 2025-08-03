@@ -60,7 +60,7 @@ extension NSOAPI: TargetType {
         case .login:
             return "/v3/Account/Login"
         case .getWebServiceToken:
-            return "/v2/Game/GetWebServiceToken"
+            return "/v4/Game/GetWebServiceToken"
         }
     }
     

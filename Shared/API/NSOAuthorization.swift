@@ -2,6 +2,12 @@ import Foundation
 import AuthenticationServices
 import SwiftyJSON
 
+// 导入EncryptTokenRequest结构体
+struct EncryptTokenRequest: Codable {
+    let url: String
+    let parameter: [String: String]
+}
+
 
 class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding {
     static let shared = NSOAuthorization()
@@ -120,6 +126,68 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
         return webServiceToken
     }
 
+    // 新增 nxapi-znca 相关方法
+    func nxapiZncaAuthToken() async throws -> String {
+        let authAPI = AppAPI.nxapiZnca_auth_token
+        let (data, response) = try await URLSession.shared.data(for: authAPI.request)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw NSOAuthError.invalidSessionToken
+        }
+        
+        let json = JSON(data)
+        let accessToken = json["access_token"].stringValue
+        guard !accessToken.isEmpty else {
+            throw NSOAuthError.invalidSessionToken
+        }
+        return accessToken
+    }
+    
+    func nxapiZncaDecrypt(accessToken: String, data: Data) async throws -> Data {
+        let decryptAPI = AppAPI.nxapiZnca_decrypt(accessToken: accessToken, data: data)
+        let (responseData, response) = try await URLSession.shared.data(for: decryptAPI.request)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw NSOAuthError.invalidSessionToken
+        }
+        return responseData
+    }
+    
+    func nxapiZncaConfig() async throws -> [String: Any] {
+        let configAPI = AppAPI.nxapiZnca_config
+        let (data, response) = try await URLSession.shared.data(for: configAPI.request)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw NSOAuthError.invalidSessionToken
+        }
+        
+        let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+        return json ?? [:]
+    }
+    
+    func nxapiZncaFAdvanced(accessToken: String, step: Int, idToken: String, encryptTokenRequest: EncryptTokenRequest, naId: String, coralUserId: String?) async throws -> (version: String, encryptedTokenRequest: Data) {
+        let fAPI = AppAPI.nxapiZnca_f_advanced(
+            accessToken: accessToken,
+            step: step,
+            idToken: idToken,
+            encryptTokenRequest: encryptTokenRequest,
+            naId: naId,
+            coralUserId: coralUserId
+        )
+        let (data, response) = try await URLSession.shared.data(for: fAPI.request)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw NSOAuthError.invalidSessionToken
+        }
+        
+        let json = JSON(data)
+        let encryptedTokenRequestString = json["encrypted_token_request"].stringValue
+        guard !encryptedTokenRequestString.isEmpty,
+              let encryptedTokenRequestData = Data(base64Encoded: encryptedTokenRequestString) else {
+            throw NSOAuthError.invalidSessionToken
+        }
+        
+        // 这里需要从配置中获取版本，或者从其他地方获取
+        let version = AppUserDefaults.shared.NSOVersion
+        return (version: version, encryptedTokenRequest: encryptedTokenRequestData)
+    }
+
 }
 
 extension NSOAuthorization {
@@ -128,6 +196,7 @@ extension NSOAuthorization {
         case invalidSessionToken
         case invalidLoginToken
         case responseError(code: Int, url: URL? = nil, body: String? = nil)
+        case nxapiError(message: String)
     }
 }
 
