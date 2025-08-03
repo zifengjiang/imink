@@ -13,16 +13,12 @@ enum NSOAPI {
     case sessionToken(codeVerifier: String, sessionTokenCode: String)
     case token(sessionToken: String)
     case me(accessToken: String)
-    case login(requestId: String,
-               naIdToken: String,
-               naBirthday: String,
-               naCountry: String,
-               language: String,
-               timestamp: Int64,
-               f: String)
+    case login(encryptedTokenRequest: Data)
     case getWebServiceToken(
             webApiServerToken: String,
             f: NSOAuthorization.F)
+    // 新增方法，支持加密的token request
+    case getWebServiceTokenEncrypted(encryptedTokenRequest: Data, accessToken: String)
 }
 
 extension NSOAPI: TargetType {
@@ -42,7 +38,7 @@ extension NSOAPI: TargetType {
             return URL(string: "https://accounts.nintendo.com/connect/1.0.0")!
         case .me:
             return URL(string: "https://api.accounts.nintendo.com/2.0.0")!
-        case .login, .getWebServiceToken:
+        case .login, .getWebServiceToken, .getWebServiceTokenEncrypted:
             return URL(string: "https://api-lp1.znc.srv.nintendo.net")!
         }
     }
@@ -59,7 +55,7 @@ extension NSOAPI: TargetType {
             return "/users/me"
         case .login:
             return "/v3/Account/Login"
-        case .getWebServiceToken:
+        case .getWebServiceToken, .getWebServiceTokenEncrypted:
             return "/v4/Game/GetWebServiceToken"
         }
     }
@@ -72,7 +68,7 @@ extension NSOAPI: TargetType {
         case .sessionToken,
              .token,
              .login,
-             .getWebServiceToken:
+             .getWebServiceToken, .getWebServiceTokenEncrypted:
             return .post
         }
     }
@@ -109,6 +105,14 @@ extension NSOAPI: TargetType {
             return [
                 "User-Agent": "com.nintendo.znca/\(NSOAPI.clientVersion)(Android/11)",
                 "Authorization": "Bearer \(webApiServerToken)",
+                "x-platform": "Android",
+                "X-ProductVersion": NSOAPI.clientVersion,
+                "Accept-Encoding": "gzip"
+            ]
+        case .getWebServiceTokenEncrypted(_, let accessToken):
+            return [
+                "User-Agent": "com.nintendo.znca/\(NSOAPI.clientVersion)(Android/11)",
+                "Authorization": "Bearer \(accessToken)",
                 "x-platform": "Android",
                 "X-ProductVersion": NSOAPI.clientVersion,
                 "Accept-Encoding": "gzip"
@@ -160,26 +164,8 @@ extension NSOAPI: TargetType {
                 "session_token": sessionToken,
                 "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer-session-token"
             ])
-        case .login(let requestId,
-                    let naIdToken,
-                    let naBirthday,
-                    let naCountry,
-                    let language,
-                    let timestamp,
-                    let f):
-            return .jsonData(
-                AccountLoginBody(
-                    parameter: AccountLoginParamemter(
-                        requestId: requestId,
-                        naIdToken: naIdToken,
-                        naBirthday: naBirthday,
-                        naCountry: naCountry,
-                        timestamp: timestamp,
-                        language: language,
-                        f: f
-                    )
-                )
-            )
+        case .login(let encryptedTokenRequest):
+            return .data(encryptedTokenRequest)
         case .getWebServiceToken(_, let f):
             return .jsonData(
                 WebServiceTokenBody(
@@ -191,9 +177,12 @@ extension NSOAPI: TargetType {
                         f: f.f)
                 )
             )
+        case .getWebServiceTokenEncrypted(let encryptedTokenRequest, _):
+            return .data(encryptedTokenRequest)
         default:
             return nil
         }
+        
     }
 
     var sampleData: Data {

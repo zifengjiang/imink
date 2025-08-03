@@ -52,6 +52,11 @@ extension TargetType {
                 var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: true)!
                 urlComponents.queryItems = queryItems
                 request.httpBody = urlComponents.query?.data(using: .utf8)
+            case .data(let data):
+                request.addValue(
+                    "application/octet-stream", forHTTPHeaderField: "Content-Type")
+                request.addValue(data.count.description, forHTTPHeaderField: "Content-Length")
+                request.httpBody = data
             }
         }
 

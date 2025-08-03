@@ -11,8 +11,8 @@ enum AppAPI {
     case nxapiZnca_auth_token
     case nxapiZnca_decrypt(accessToken: String, data: Data)
     case nxapiZnca_config
-    case nxapiZnca_f_advanced(accessToken: String, step: Int, idToken: String, encryptTokenRequest: EncryptTokenRequest, naId: String, coralUserId: String?)
-    
+    case nxapiZnca_f_advanced(accessToken: String, step: HashMethod, idToken: String, encryptTokenRequest: EncryptTokenRequest, naId: String, coralUserId: String?)
+
     internal enum HashMethod: String {
         case hash1 = "1", hash2 = "2"
     }
@@ -72,37 +72,34 @@ extension AppAPI: TargetType {
         switch self{
         case .nxapiZnca_f:
             return [
-                "User-Agent": "Imink/1.0.0 (iOS)",
+                "User-Agent": "ConchBay/2.2.0",
                 "x-znca-client-version": AppUserDefaults.shared.NSOVersion,
                 "X-znca-platform": "Android",
                 "x-znca-version": AppUserDefaults.shared.NSOVersion,
             ]
         case .nxapiZnca_auth_token:
             return [
-                "User-Agent": "Imink/1.0.0 (iOS)",
-                "Content-Type": "application/x-www-form-urlencoded"
+                "User-Agent": "ConchBay/2.2.0"
             ]
         case .nxapiZnca_decrypt(let accessToken, _):
             return [
                 "Authorization": "Bearer \(accessToken)",
-                "Content-Type": "application/json; charset=utf-8",
-                "User-Agent": "Imink/1.0.0 (iOS)",
-                "X-znca-Client-Version": AppUserDefaults.shared.NSOVersion,
-                "X-znca-Platform": "Android",
-                "X-znca-Version": AppUserDefaults.shared.NSOVersion,
+                "User-Agent": "ConchBay/2.2.0",
+                "x-znca-client-version": AppUserDefaults.shared.NSOVersion,
+                "x-znca-platform": "Android",
+                "x-znca-version": AppUserDefaults.shared.NSOVersion,
             ]
         case .nxapiZnca_config:
             return [
-                "User-Agent": "Imink/1.0.0 (iOS)"
+                "User-Agent": "ConchBay/2.2.0"
             ]
         case .nxapiZnca_f_advanced(let accessToken, _, _, _, _, _):
             return [
                 "Authorization": "Bearer \(accessToken)",
-                "Content-Type": "application/json; charset=utf-8",
-                "User-Agent": "Imink/1.0.0 (iOS)",
-                "X-znca-Client-Version": AppUserDefaults.shared.NSOVersion,
-                "X-znca-Platform": "Android",
-                "X-znca-Version": AppUserDefaults.shared.NSOVersion,
+                "User-Agent": "ConchBay/2.2.0",
+                "x-znca-client-version": AppUserDefaults.shared.NSOVersion,
+                "x-znca-platform": "Android",
+                "x-znca-version": AppUserDefaults.shared.NSOVersion,
             ]
         default:
             return nil
@@ -137,7 +134,7 @@ extension AppAPI: TargetType {
             return .jsonData(decryptBody)
         case .nxapiZnca_f_advanced(_, let step, let idToken, let encryptTokenRequest, let naId, let coralUserId):
             let body = NxapiZncaFAdvancedBody(
-                hashMethod: step,
+                hashMethod: step.rawValue == "1" ? 1 : 2,
                 token: idToken,
                 encryptTokenRequest: encryptTokenRequest,
                 naId: naId,
@@ -196,6 +193,74 @@ struct NxapiZncaDecryptBody: Codable {
     let data: String
 }
 
+struct EncryptTokenRequest: Codable {
+    let url: String
+    let parameter: [String: JSONValue]
+    
+    init(url: String, parameter: [String: Any]) {
+        self.url = url
+        self.parameter = parameter.mapValues { JSONValue.from($0) }
+    }
+}
+
+// 支持混合类型的JSON值
+enum JSONValue: Codable {
+    case string(String)
+    case int(Int)
+    case double(Double)
+    case bool(Bool)
+    case null
+    
+    static func from(_ value: Any) -> JSONValue {
+        switch value {
+        case let string as String:
+            return .string(string)
+        case let int as Int:
+            return .int(int)
+        case let double as Double:
+            return .double(double)
+        case let bool as Bool:
+            return .bool(bool)
+        default:
+            return .null
+        }
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        
+        if container.decodeNil() {
+            self = .null
+        } else if let string = try? container.decode(String.self) {
+            self = .string(string)
+        } else if let int = try? container.decode(Int.self) {
+            self = .int(int)
+        } else if let double = try? container.decode(Double.self) {
+            self = .double(double)
+        } else if let bool = try? container.decode(Bool.self) {
+            self = .bool(bool)
+        } else {
+            throw DecodingError.typeMismatch(JSONValue.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Invalid JSON value"))
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        
+        switch self {
+        case .string(let string):
+            try container.encode(string)
+        case .int(let int):
+            try container.encode(int)
+        case .double(let double):
+            try container.encode(double)
+        case .bool(let bool):
+            try container.encode(bool)
+        case .null:
+            try container.encodeNil()
+        }
+    }
+}
 
 struct NxapiZncaFAdvancedBody: Codable {
     let hashMethod: Int

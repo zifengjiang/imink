@@ -2,11 +2,6 @@ import Foundation
 import AuthenticationServices
 import SwiftyJSON
 
-// 导入EncryptTokenRequest结构体
-struct EncryptTokenRequest: Codable {
-    let url: String
-    let parameter: [String: String]
-}
 
 
 class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding {
@@ -14,10 +9,89 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
 
     let decoder = snakeCaseDecoder()
 
+    // 新增成员变量，用于在多个流程中传递
+    var nxapiZncaApiAccessToken: String = ""
+    var nsoVersion: String = ""
+    var coralUserId: String = ""
+
     static private func snakeCaseDecoder() -> JSONDecoder {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         return decoder
+    }
+
+    // MARK: - 重构后的登录流程
+    
+    /// 完整的登录流程，参考api.ts的getWebServiceToken实现
+    func loginFlow() async throws -> LoginFlowResult {
+        // 1. 获取sessionToken
+        let sessionToken = try await login()
+        
+        // 2. 获取登录token
+        let loginToken = try await requestLoginToken(sessionToken: sessionToken)
+        
+        // 3. 获取用户信息
+        let naUser = try await requestUserInfo(accessToken: loginToken.accessToken)
+        
+        // 4. 获取nxapi-znca认证token
+        nxapiZncaApiAccessToken = try await nxapiZncaAuthToken()
+        
+        // 5. 获取NSO版本（如果还没有的话）
+        if nsoVersion.isEmpty {
+            let config = try await nxapiZncaConfig()
+            if let version = config["nso_version"] as? String {
+                nsoVersion = version
+                updateNSOVersion(version)
+            }
+        }
+        
+        // 6. 生成登录f值
+        let (_, encryptedTokenRequest) = try await nxapiZncaFAdvanced(
+            accessToken: nxapiZncaApiAccessToken,
+            step: 1,
+            idToken: loginToken.idToken,
+            encryptTokenRequest: EncryptTokenRequest(url: "https://api-lp1.znc.srv.nintendo.net/v3/Account/Login", parameter: [
+                "f":"",
+                "language": naUser.language,
+                "naBirthday": naUser.birthday,
+                "naCountry": naUser.country,
+                "naIdToken": loginToken.idToken,
+                "requestId": "",
+                "timestamp": 0,
+            ]),
+            naId: naUser.id,
+            coralUserId: nil
+        )
+        
+        // 7. 获取登录结果
+        let loginResult = try await requestLogin(encryptedTokenRequest: encryptedTokenRequest)
+        
+        // 8. 生成web service f值
+        let (_, encryptedTokenRequest2) = try await nxapiZncaFAdvanced(
+            accessToken: nxapiZncaApiAccessToken,
+            step: 2,
+            idToken: loginResult.result.webApiServerCredential.accessToken,
+            encryptTokenRequest: EncryptTokenRequest(url: "https://api-lp1.znc.srv.nintendo.net/v4/Game/GetWebServiceToken", parameter: [
+                "f":"",
+                "registrationToken": "",
+                "id": "4834290508791808",
+                "requestId": "",
+                "timestamp": 0,
+            ]),
+            naId: naUser.id,
+            coralUserId: coralUserId
+        )
+        
+        // 9. 获取web service token
+        let webServiceToken = try await requestWebServiceToken(encryptedTokenRequest: encryptedTokenRequest2, accessToken: loginResult.result.webApiServerCredential.accessToken)
+        
+        return LoginFlowResult(
+            sessionToken: sessionToken,
+            loginToken: loginToken,
+            naUser: naUser,
+            loginResult: loginResult,
+            webServiceToken: webServiceToken
+        )
     }
 
     func login() async throws -> String{
@@ -96,6 +170,44 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
         return try decoder.decode(LoginToken.self, from: data)
     }
     
+    // MARK: - 重构后的方法
+    
+    /// 请求登录（使用加密的token request）
+    func requestLogin(encryptedTokenRequest: Data) async throws -> LoginResult {
+        let loginAPI = NSOAPI.login(encryptedTokenRequest: encryptedTokenRequest)
+        let (data, response) = try await URLSession.shared.data(for: loginAPI.request)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw NSOAuthError.invalidSessionToken
+        }
+        
+        // 解密响应
+        let decryptedData = try await nxapiZncaDecrypt(accessToken: nxapiZncaApiAccessToken, data: data)
+        let json = JSON(decryptedData)
+        
+        // 提取coralUserId
+        if let userId = json["result"]["user"]["id"].int64 {
+            coralUserId = String(userId)
+        }
+        
+        return LoginResult(json: json)
+    }
+    
+    /// 请求web service token（使用加密的token request）
+    func requestWebServiceToken(encryptedTokenRequest: Data, accessToken: String) async throws -> WebServiceToken {
+        let webServiceTokenAPI = NSOAPI.getWebServiceTokenEncrypted(encryptedTokenRequest: encryptedTokenRequest, accessToken: accessToken)
+        let (data, response) = try await URLSession.shared.data(for: webServiceTokenAPI.request)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw NSOAuthError.invalidSessionToken
+        }
+        
+        // 解密响应
+        let decryptedData = try await nxapiZncaDecrypt(accessToken: nxapiZncaApiAccessToken, data: data)
+        let json = JSON(decryptedData)
+        
+        return WebServiceToken(json: json)
+    }
+    
+    // 保留原有方法以兼容性
     func requestWebServiceToken(webApiServerToken: String,
                                 accessToken: String,
                                 naUser: NAUser) async throws -> WebServiceToken {
@@ -108,9 +220,26 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
         return try decoder.decode(WebServiceToken.self, from: data)
     }
 
-    func requestLogin(accessToken:String, naUser:NAUser) async throws -> LoginResult {
-        let f = try await requestF(naId:naUser.id, accessToken: accessToken, hashMethod: .hash1)
-        let loginAPI = NSOAPI.login(requestId: f.requestId, naIdToken: accessToken, naBirthday: naUser.birthday, naCountry: naUser.country, language: naUser.language, timestamp: f.timestamp, f: f.f)
+    // 保留原有方法以兼容性
+    func requestLogin(accessToken:String, naUser:NAUser, idToken: String) async throws -> LoginResult {
+        self.nxapiZncaApiAccessToken = try await nxapiZncaAuthToken()
+        let (version, encryptedTokenRequest) = try await nxapiZncaFAdvanced(
+            accessToken: nxapiZncaApiAccessToken,
+            step: 1,
+            idToken: idToken,
+            encryptTokenRequest: EncryptTokenRequest(url: "https://api-lp1.znc.srv.nintendo.net/v3/Account/Login", parameter: [
+                "f":"",
+                "language": naUser.language,
+                "naBirthday": naUser.birthday,
+                "naCountry": naUser.country,
+                "naIdToken": idToken,
+                "requestId": "",
+                "timestamp": 0,
+            ]),
+            naId: naUser.id,
+            coralUserId: nil
+        )
+        let loginAPI = NSOAPI.login(encryptedTokenRequest: encryptedTokenRequest)
         let (data, response) = try await URLSession.shared.data(for: loginAPI.request)
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             throw NSOAuthError.invalidSessionToken
@@ -118,37 +247,66 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
         return LoginResult(json: try JSON(data: data))
     }
 
+    // 保留原有方法以兼容性
     func requestWebServiceToken(sessionToken:String) async throws -> WebServiceToken {
         let apiToken = try await requestLoginToken(sessionToken: sessionToken)
         let naUser = try await requestUserInfo(accessToken: apiToken.accessToken)
-        let loginResult = try await requestLogin(accessToken: apiToken.accessToken, naUser: naUser)
+        let loginResult = try await requestLogin(accessToken: apiToken.accessToken, naUser: naUser, idToken: apiToken.idToken)
         let webServiceToken = try await requestWebServiceToken(webApiServerToken: loginResult.result.webApiServerCredential.accessToken, accessToken: apiToken.accessToken, naUser: naUser)
         return webServiceToken
     }
 
     // 新增 nxapi-znca 相关方法
     func nxapiZncaAuthToken() async throws -> String {
-        let authAPI = AppAPI.nxapiZnca_auth_token
-        let (data, response) = try await URLSession.shared.data(for: authAPI.request)
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            throw NSOAuthError.invalidSessionToken
-        }
+        let maxRetries = 2
+        var retryCount = 0
         
-        let json = JSON(data)
-        let accessToken = json["access_token"].stringValue
-        guard !accessToken.isEmpty else {
-            throw NSOAuthError.invalidSessionToken
+        while retryCount < maxRetries {
+            do {
+                let authAPI = AppAPI.nxapiZnca_auth_token
+                let (data, response) = try await URLSession.shared.data(for: authAPI.request)
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                    throw NSOAuthError.invalidSessionToken
+                }
+                
+                let json = JSON(data)
+                let accessToken = json["access_token"].stringValue
+                guard !accessToken.isEmpty else {
+                    throw NSOAuthError.invalidSessionToken
+                }
+                return accessToken
+            } catch {
+                retryCount += 1
+                if retryCount >= maxRetries {
+                    throw NSOAuthError.nxapiError(message: "Failed to get auth token after \(maxRetries) attempts: \(error.localizedDescription)")
+                }
+                try? await Task.sleep(nanoseconds: UInt64(1 * Double(NSEC_PER_SEC)))
+            }
         }
-        return accessToken
+        throw NSOAuthError.nxapiError(message: "Unexpected error in auth token request")
     }
     
     func nxapiZncaDecrypt(accessToken: String, data: Data) async throws -> Data {
-        let decryptAPI = AppAPI.nxapiZnca_decrypt(accessToken: accessToken, data: data)
-        let (responseData, response) = try await URLSession.shared.data(for: decryptAPI.request)
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            throw NSOAuthError.invalidSessionToken
+        let maxRetries = 2
+        var retryCount = 0
+        
+        while retryCount < maxRetries {
+            do {
+                let decryptAPI = AppAPI.nxapiZnca_decrypt(accessToken: accessToken, data: data)
+                let (responseData, response) = try await URLSession.shared.data(for: decryptAPI.request)
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                    throw NSOAuthError.invalidSessionToken
+                }
+                return responseData
+            } catch {
+                retryCount += 1
+                if retryCount >= maxRetries {
+                    throw NSOAuthError.nxapiError(message: "Failed to decrypt response after \(maxRetries) attempts: \(error.localizedDescription)")
+                }
+                try? await Task.sleep(nanoseconds: UInt64(1 * Double(NSEC_PER_SEC)))
+            }
         }
-        return responseData
+        throw NSOAuthError.nxapiError(message: "Unexpected error in decrypt request")
     }
     
     func nxapiZncaConfig() async throws -> [String: Any] {
@@ -163,31 +321,70 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
     }
     
     func nxapiZncaFAdvanced(accessToken: String, step: Int, idToken: String, encryptTokenRequest: EncryptTokenRequest, naId: String, coralUserId: String?) async throws -> (version: String, encryptedTokenRequest: Data) {
-        let fAPI = AppAPI.nxapiZnca_f_advanced(
-            accessToken: accessToken,
-            step: step,
-            idToken: idToken,
-            encryptTokenRequest: encryptTokenRequest,
-            naId: naId,
-            coralUserId: coralUserId
-        )
-        let (data, response) = try await URLSession.shared.data(for: fAPI.request)
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            throw NSOAuthError.invalidSessionToken
-        }
+        let maxRetries = 2
+        var retryCount = 0
         
-        let json = JSON(data)
-        let encryptedTokenRequestString = json["encrypted_token_request"].stringValue
-        guard !encryptedTokenRequestString.isEmpty,
-              let encryptedTokenRequestData = Data(base64Encoded: encryptedTokenRequestString) else {
-            throw NSOAuthError.invalidSessionToken
+        while retryCount < maxRetries {
+            do {
+                // 首先获取NSO版本（如果还没有的话）
+                if nsoVersion.isEmpty {
+                    let config = try await nxapiZncaConfig()
+                    if let version = config["nso_version"] as? String {
+                        nsoVersion = version
+                        updateNSOVersion(version)
+                    }
+                }
+                
+                let fAPI = AppAPI.nxapiZnca_f_advanced(
+                    accessToken: accessToken,
+                    step: step == 1 ? .hash1 : .hash2,
+                    idToken: idToken,
+                    encryptTokenRequest: encryptTokenRequest,
+                    naId: naId,
+                    coralUserId: coralUserId
+                )
+                let (data, response) = try await URLSession.shared.data(for: fAPI.request)
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                    throw NSOAuthError.invalidSessionToken
+                }
+                
+                let json = JSON(data)
+                let encryptedTokenRequestString = json["encrypted_token_request"].stringValue
+                guard !encryptedTokenRequestString.isEmpty,
+                      let encryptedTokenRequestData = Data(base64Encoded: encryptedTokenRequestString) else {
+                    throw NSOAuthError.nxapiError(message: "Failed to get encrypted_token_request from response")
+                }
+                
+                return (version: nsoVersion, encryptedTokenRequest: encryptedTokenRequestData)
+            } catch {
+                retryCount += 1
+                if retryCount >= maxRetries {
+                    throw NSOAuthError.nxapiError(message: "Failed to get f value after \(maxRetries) attempts: \(error.localizedDescription)")
+                }
+                try? await Task.sleep(nanoseconds: UInt64(1 * Double(NSEC_PER_SEC)))
+            }
         }
-        
-        // 这里需要从配置中获取版本，或者从其他地方获取
-        let version = AppUserDefaults.shared.NSOVersion
-        return (version: version, encryptedTokenRequest: encryptedTokenRequestData)
+        throw NSOAuthError.nxapiError(message: "Unexpected error in f request")
+    }
+    
+    private func updateNSOVersion(_ version: String) {
+        // 更新AppUserDefaults中的NSO版本
+        AppUserDefaults.shared.NSOVersion = version
+        print("NSO Version updated to: \(version)")
     }
 
+}
+
+// MARK: - 新增数据结构
+
+extension NSOAuthorization {
+    struct LoginFlowResult {
+        let sessionToken: String
+        let loginToken: LoginToken
+        let naUser: NAUser
+        let loginResult: LoginResult
+        let webServiceToken: WebServiceToken
+    }
 }
 
 extension NSOAuthorization {
