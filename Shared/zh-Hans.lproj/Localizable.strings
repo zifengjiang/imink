@@ -4,6 +4,10 @@
 "tab_me" = "我";
 "setting_page_title" = "设置";
 "setting_page_done" = "完成";
+"setting_section_user_data" = "用户数据";
+"setting_button_import_user_data" = "导入用户数据";
+"setting_button_export_user_data" = "导出用户数据";
+"setting_button_logout" = "退出登录";
 "low_tide" = "干潮";
 "normal" = "普通";
 "high_tide" = "满潮";
@@ -13,3 +17,25 @@
 "pay_grade" = "评价等级";
 "clear_bonus" = "通关奖励";
 "your_points" = "获得点数";
+"Import Failed" = "导入失败";
+"Import Success" = "导入成功";
+"Log in to sync your data" = "立即登录同步数据";
+"Log in with Nintendo Account" = "任天堂账号登录";
+"home_schedule_title" = "日程";
+"home_picker_battle" = "对战";
+"home_picker_salmon_run" = "鲑鱼跑";
+"Turf War" = "占地对战";
+"Splat Zones" = "真格区域";
+"Tower Control" = "真格塔楼";
+"Rainmaker" = "真格鱼虎";
+"Clam Blitz" = "真格蛤蜊";
+"Tri Color" = "三色夺宝对战";
+
+"REGULAR" = "一般比赛";
+"BANKARA" = "蛮颓比赛";
+"XMATCH" = "X比赛";
+"LEAGUE" = "活动比赛";
+"PRIVATE" = "私人比赛";
+"FEST" = "祭典比赛";
+"ALL" = "全部对战";
+"Log in with Nintendo Account" = "任天堂账号登录";
