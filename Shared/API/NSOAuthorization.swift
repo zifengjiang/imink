@@ -279,7 +279,6 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
         // 6. 获取登录结果
         let loginResult = try await requestLogin(encryptedTokenRequest: encryptedTokenRequest)
 
-        AppUserDefaults.shared.coralUserId = String(loginResult.result.user.id)
 
 
         // 7. 生成web service f值
@@ -295,15 +294,12 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
                 "timestamp": 0,
             ]),
             naId: naUser.id,
-            coralUserId: AppUserDefaults.shared.coralUserId
+            coralUserId: String(loginResult.result.user.id)
         )
         
         // 8. 获取web service token
         let webServiceToken = try await requestWebServiceToken(encryptedTokenRequest: encryptedTokenRequest2, accessToken: loginResult.result.webApiServerCredential.accessToken)
-        
-        // 9. 更新存储的信息
-        AppUserDefaults.shared.coralUserId = coralUserId
-        AppUserDefaults.shared.nxapiZncaApiAccessToken = nxapiZncaApiAccessToken
+
         
         return webServiceToken
     }
