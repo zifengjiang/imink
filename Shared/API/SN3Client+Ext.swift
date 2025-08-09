@@ -152,7 +152,7 @@ extension SN3Client {
         }
         
         await isFetching.withValue(true) {
-            let maxRetries = 3
+            let maxRetries = 1
             var retryCount = 0
             
             while retryCount < maxRetries {
