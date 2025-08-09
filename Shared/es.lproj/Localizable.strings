@@ -1,1 +1,15 @@
-
+"tab_home" = "Inicio";
+"tab_battle" = "Batallas";
+"tab_salmon_run" = "Pesca del Salmón";
+"tab_me" = "Yo";
+"setting_page_title" = "Configuración";
+"setting_page_done" = "Hecho";
+"low_tide" = "Marea Baja";
+"normal" = "Normal";
+"high_tide" = "Marea Alta";
+"appearances_number" = "Apariciones";
+"boss_salmonids" = "Salmonidos Jefe";
+"job_score" = "Puntuación del Trabajo";
+"pay_grade" = "Grado de Pago";
+"clear_bonus" = "Bonificación de Limpieza";
+"your_points" = "Tus Puntos";

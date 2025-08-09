@@ -1,1 +1,15 @@
-
+"tab_home" = "ホーム";
+"tab_battle" = "バトル";
+"tab_salmon_run" = "サーモンラン";
+"tab_me" = "マイページ";
+"setting_page_title" = "設定";
+"setting_page_done" = "完了";
+"low_tide" = "干潮";
+"normal" = "普通";
+"high_tide" = "満潮";
+"appearances_number" = "出現数";
+"boss_salmonids" = "巨大サーモン";
+"job_score" = "バイトスコア";
+"pay_grade" = "評価等級";
+"clear_bonus" = "クリアボーナス";
+"your_points" = "獲得ポイント";

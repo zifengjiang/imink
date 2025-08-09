@@ -1,1 +1,15 @@
-
+"tab_home" = "Startseite";
+"tab_battle" = "Kämpfe";
+"tab_salmon_run" = "Salmoniden-Run";
+"tab_me" = "Ich";
+"setting_page_title" = "Einstellungen";
+"setting_page_done" = "Fertig";
+"low_tide" = "Niedrigwasser";
+"normal" = "Normal";
+"high_tide" = "Hochwasser";
+"appearances_number" = "Erscheinungen";
+"boss_salmonids" = "Boss-Salmoniden";
+"job_score" = "Job-Punktzahl";
+"pay_grade" = "Bezahlungsgrad";
+"clear_bonus" = "Clear-Bonus";
+"your_points" = "Deine Punkte";

@@ -1,1 +1,15 @@
-
+"tab_home" = "Accueil";
+"tab_battle" = "Batailles";
+"tab_salmon_run" = "Mission Saumon";
+"tab_me" = "Moi";
+"setting_page_title" = "Paramètres";
+"setting_page_done" = "Terminé";
+"low_tide" = "Marée Basse";
+"normal" = "Normal";
+"high_tide" = "Marée Haute";
+"appearances_number" = "Apparitions";
+"boss_salmonids" = "Saumonides Boss";
+"job_score" = "Score du Travail";
+"pay_grade" = "Niveau de Rémunération";
+"clear_bonus" = "Bonus de Nettoyage";
+"your_points" = "Tes Points";

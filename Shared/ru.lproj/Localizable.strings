@@ -1,1 +1,15 @@
-
+"tab_home" = "Главная";
+"tab_battle" = "Битвы";
+"tab_salmon_run" = "Лососевый Забег";
+"tab_me" = "Я";
+"setting_page_title" = "Настройки";
+"setting_page_done" = "Готово";
+"low_tide" = "Отлив";
+"normal" = "Обычный";
+"high_tide" = "Прилив";
+"appearances_number" = "Появления";
+"boss_salmonids" = "Босс-Лососи";
+"job_score" = "Оценка Работы";
+"pay_grade" = "Уровень Оплаты";
+"clear_bonus" = "Бонус Очистки";
+"your_points" = "Твои Очки";
