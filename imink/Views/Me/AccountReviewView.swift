@@ -175,7 +175,7 @@ class AccountReviewViewModel:ObservableObject{
 
 
     func loadHistoryRecord() async {
-        let historyRecord = await inkNet.fetchHistoryRecord()
+        let historyRecord:HistoryRecord?  = await inkNet.fetchRecord(.historyRecord)
         if let data = try? JSONEncoder().encode(historyRecord),
            let jsonString = String(data: data, encoding: .utf8) {
             AppUserDefaults.shared.historyRecord = jsonString

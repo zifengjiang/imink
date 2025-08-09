@@ -221,7 +221,7 @@ class StageRecordViewModel: ObservableObject {
     }
 
     func fetchStageRecords() async {
-        let records = await SN3Client.shared.fetchStageRecord()
+        let records:[StageRecord] = await SN3Client.shared.fetchRecord(.stageRecord) ?? []
         DispatchQueue.main.async {
             self.stageRecords = records
             self.sort()

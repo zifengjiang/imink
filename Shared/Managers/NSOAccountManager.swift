@@ -12,10 +12,18 @@ class NSOAccountManager:ObservableObject {
 
     func refreshGameServiceTokenIfNeeded() async {
         if let sessionToken = AppUserDefaults.shared.sessionToken, AppUserDefaults.shared.gameServiceTokenRefreshTime + 1800 < Int(Date().timeIntervalSince1970){
+            let IndicatorId = UUID().uuidString
             do{
+                Indicators.shared.display(Indicator(id: IndicatorId, icon: .progressIndicator, title: "刷新游戏服务令牌", subtitle: "请稍候...", dismissType: .manual, isUserDismissible: false))
                 try await refreshGameServiceToken(sessionToken: sessionToken)
+                Indicators.shared.updateSubtitle(for: IndicatorId, subtitle: "刷新成功")
+
             }catch{
                 logError(error)
+                Indicators.shared.updateSubtitle(for: IndicatorId, subtitle: "刷新失败，请稍后重试")
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                Indicators.shared.dismiss(with: IndicatorId)
             }
         }
     }

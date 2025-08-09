@@ -146,7 +146,7 @@ class SalmonRunStatsViewModel:ObservableObject{
 
     @MainActor
     func loadCoopRecord() async {
-        self.coopRecord = await SN3Client.shared.fetchCoopRecord()
+        self.coopRecord = await SN3Client.shared.fetchRecord(.coopRecord)
     }
 }
 

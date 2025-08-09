@@ -156,7 +156,7 @@ class WeaponRecordViewModel: ObservableObject {
     
     @MainActor
     func load() async {
-        self.weaponRecords = await SN3Client.shared.fetchWeaponRecords()
+        self.weaponRecords = await SN3Client.shared.fetchRecord(.weaponRecord)
     }
 }
 import SwiftyJSON

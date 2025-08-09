@@ -151,16 +151,25 @@ class HomeViewModel: ObservableObject {
     }
 
     func fetchSchedules() async {
+        let IndicatorId = UUID().uuidString
         do{
             print("fetchSchedules")
+            Indicators.shared.display(Indicator(id: IndicatorId, icon: .progressIndicator, title: "获取赛程中", dismissType: .manual, isUserDismissible: false))
             let json = try await Splatoon3InkAPI.schedule.GetJSON()
             try await SplatDatabase.shared.dbQueue.write { db in
                 try insertSchedules(json: json, db: db)
             }
             loadSchedules()
+            Indicators.shared.updateTitle(for: IndicatorId, title: "获取赛程成功")
+            Indicators.shared.updateIcon(for: IndicatorId, icon: .success)
         }catch{
             loadSchedules()
             logError(error)
+            Indicators.shared.updateTitle(for: IndicatorId, title: "获取赛程失败")
+            Indicators.shared.updateIcon(for: IndicatorId, icon: .image(Image(systemName: "xmark.icloud")))
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            Indicators.shared.dismiss(with: IndicatorId)
         }
     }
 
