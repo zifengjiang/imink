@@ -3,6 +3,7 @@ import SplatDatabase
 import SwiftyJSON
 import Combine
 import GRDB
+import SwiftUI
 
 class NSOAccountManager:ObservableObject {
     static let shared = NSOAccountManager()
@@ -14,13 +15,15 @@ class NSOAccountManager:ObservableObject {
         if let sessionToken = AppUserDefaults.shared.sessionToken, AppUserDefaults.shared.gameServiceTokenRefreshTime + 1800 < Int(Date().timeIntervalSince1970){
             let IndicatorId = UUID().uuidString
             do{
-                Indicators.shared.display(Indicator(id: IndicatorId, icon: .progressIndicator, title: "刷新游戏服务令牌", subtitle: "请稍候...", dismissType: .manual, isUserDismissible: false))
-                try await refreshGameServiceToken(sessionToken: sessionToken)
-                Indicators.shared.updateSubtitle(for: IndicatorId, subtitle: "刷新成功")
+                Indicators.shared.display(Indicator(id: IndicatorId, icon: .progressIndicator, title: "刷新游戏服务令牌", dismissType: .manual, isUserDismissible: false))
+                try await refreshGameServiceToken(sessionToken: sessionToken, indicatorId: IndicatorId)
+                Indicators.shared.updateTitle(for: IndicatorId, title: "刷新游戏服务令牌成功")
+                Indicators.shared.updateIcon(for: IndicatorId, icon: .success)
 
             }catch{
                 logError(error)
-                Indicators.shared.updateSubtitle(for: IndicatorId, subtitle: "刷新失败，请稍后重试")
+                Indicators.shared.updateTitle(for: IndicatorId, title: "刷新游戏服务令牌失败")
+                Indicators.shared.updateIcon(for: IndicatorId, icon: .image(Image(systemName: "xmark.icloud")))
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                 Indicators.shared.dismiss(with: IndicatorId)
@@ -38,8 +41,8 @@ class NSOAccountManager:ObservableObject {
         }
     }
 
-    private func refreshGameServiceToken(sessionToken: String) async throws {
-        let gameServiceToken = try await NSOAuthorization.shared.requestWebServiceToken(sessionToken:sessionToken).result.accessToken
+    private func refreshGameServiceToken(sessionToken: String, indicatorId: String? = nil) async throws {
+        let gameServiceToken = try await NSOAuthorization.shared.requestWebServiceToken(sessionToken:sessionToken, indicatorID: indicatorId).result.accessToken
         AppUserDefaults.shared.gameServiceToken = gameServiceToken
         AppUserDefaults.shared.gameServiceTokenRefreshTime = Int(Date().timeIntervalSince1970)
     }

@@ -10,27 +10,6 @@ private func logError(_ error: any Error, _ message: StaticString = "❌ Error")
     os_log(message, type: .error, String(describing: error))
 }
 
-    // MARK: - DB batch inserts
-extension SplatDatabase {
-    public func insertBattles(jsons: [JSON]) async throws {
-        try await dbQueue.write { db in
-            for json in jsons {
-                do { try self.insertBattle(json: json, db: db) }
-                catch { logError(error) }
-            }
-        }
-    }
-
-    public func insertCoops(jsons: [JSON]) async throws {
-        try await dbQueue.write { db in
-            for json in jsons {
-                do { try self.insertCoop(json: json, db: db) }
-                catch { logError(error) }
-            }
-        }
-    }
-}
-
     // MARK: - Task-local flags (fetch guards)
 extension TaskLocal where Value == Bool {
     static let isFetchingCoops = TaskLocal<Bool>(wrappedValue: false)

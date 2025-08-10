@@ -65,8 +65,8 @@ public final class Indicators {
         }
     }
 
-    public func updateTitle(for id: String, title: String) {
-        if let index = indicators.firstIndex(where: { $0.id == id }) {
+    public func updateTitle(for id: String?, title: String) {
+        if let id = id, let index = indicators.firstIndex(where: { $0.id == id }) {
             withAnimation {
                 indicators[index].title = title
             }
