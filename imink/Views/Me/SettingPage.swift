@@ -3,7 +3,7 @@ import SplatDatabase
 
 
 struct SettingPage: View {
-    @Binding var showSettings: Bool
+    @Environment(\.dismiss) private var dismiss
     
     @EnvironmentObject var mainViewModel: MainViewModel
     @EnvironmentObject var coopListViewModel: CoopListViewModel
@@ -43,7 +43,7 @@ struct SettingPage: View {
                             title: Text("退出登录"),
                             message: Text("你确定要退出登录吗？"),
                             primaryButton: .destructive(Text("确认")) {
-                                    // 当用户点击“Logout”按钮时，执行注销操作
+                                    // 当用户点击"Logout"按钮时，执行注销操作
                                 AppUserDefaults.shared.sessionToken = nil
                             },
                             secondaryButton: .cancel()
@@ -59,7 +59,7 @@ struct SettingPage: View {
                     }
                     .sheet(isPresented: $showFilePicker) {
                         FilePickerView(fileType: .zip) { url in
-                            showSettings = false
+                            dismiss()
                             coopListViewModel.cancel()
                             DataBackup.import(url: url)
                         }
@@ -113,7 +113,7 @@ struct SettingPage: View {
 
                     Button{
                         Task{
-                            showSettings = false
+                            dismiss()
                             await fetchHistorySchedules()
                         }
                     } label: {
@@ -140,7 +140,7 @@ struct SettingPage: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
-                        showSettings = false
+                        dismiss()
                     }) {
                         Text("setting_page_done")
                             .foregroundStyle(.accent)
@@ -192,5 +192,5 @@ struct SettingPage: View {
 
 
 #Preview {
-    SettingPage(showSettings: .constant(false))
+    SettingPage()
 }

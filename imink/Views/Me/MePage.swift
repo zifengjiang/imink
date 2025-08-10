@@ -2,8 +2,6 @@ import SwiftUI
 
 struct MePage: View {
     
-    @State var showSetting:Bool = false
-
     var body: some View {
         NavigationStack{
             List {
@@ -19,10 +17,7 @@ struct MePage: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        showSetting = true
-                        Haptics.generateIfEnabled(.light)
-                    }) {
+                    NavigationLink(destination: SettingPage()) {
                         Image("setting")
                             .resizable()
                             .scaledToFit()
@@ -34,12 +29,11 @@ struct MePage: View {
                             }
                             .frame(width: 20*1.2)
                     }
+                    .onTapGesture {
+                        Haptics.generateIfEnabled(.light)
+                    }
                 }
             }
-
-        }
-        .sheet(isPresented: $showSetting) {
-            SettingPage(showSettings: $showSetting)
         }
     }
 }
