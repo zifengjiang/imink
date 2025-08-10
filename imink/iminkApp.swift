@@ -7,7 +7,6 @@ import SplatDatabase
 struct iminkApp: App {
     @StateObject var coopListViewModel = CoopListViewModel.shared
     @StateObject var battleListViewModel = BattleListViewModel()
-    @Environment(\.scenePhase) var scenePhase
 
     init(){
         #if DEBUG
@@ -45,16 +44,7 @@ struct iminkApp: App {
                     }
                 }
             }
-            .onChange(of: scenePhase) { oldValue, newPhase in
-                switch newPhase {
-                case .active:
-                    Task{
-                        await coopListViewModel.fetchCoops()
-                    }
-                default:
-                    break
-                }
-            }
+            
         }
     }
 }

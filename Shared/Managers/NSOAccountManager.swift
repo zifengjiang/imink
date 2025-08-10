@@ -14,6 +14,11 @@ class NSOAccountManager:ObservableObject {
     func refreshGameServiceTokenIfNeeded() async {
         if let sessionToken = AppUserDefaults.shared.sessionToken, AppUserDefaults.shared.gameServiceTokenRefreshTime + 1800 < Int(Date().timeIntervalSince1970){
             let IndicatorId = UUID().uuidString
+            defer{
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    Indicators.shared.dismiss(with: IndicatorId)
+                }
+            }
             do{
                 Indicators.shared.display(Indicator(id: IndicatorId, icon: .progressIndicator, title: "刷新游戏服务令牌", dismissType: .manual, isUserDismissible: false))
                 try await refreshGameServiceToken(sessionToken: sessionToken, indicatorId: IndicatorId)
@@ -24,9 +29,6 @@ class NSOAccountManager:ObservableObject {
                 logError(error)
                 Indicators.shared.updateTitle(for: IndicatorId, title: "刷新游戏服务令牌失败")
                 Indicators.shared.updateIcon(for: IndicatorId, icon: .image(Image(systemName: "xmark.icloud")))
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                Indicators.shared.dismiss(with: IndicatorId)
             }
         }
     }

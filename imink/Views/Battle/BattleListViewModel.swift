@@ -52,9 +52,8 @@ class BattleListViewModel: ObservableObject {
         }
     }
 
-    func fetchBattles(){
-        Task{
-            await SN3Client.shared.fetchBattles()
-        }
+    func fetchBattles() async{
+        guard AppState.shared.isLogin else { return }
+        await SN3Client.shared.fetchBattles()
     }
 }

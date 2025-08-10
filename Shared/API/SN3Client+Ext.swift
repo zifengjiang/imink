@@ -23,29 +23,6 @@ private enum Gate {
     }
 }
 
-private struct ProgressUI {
-    static func noNewRecords(icon: ImageResource) {
-        Indicators.shared.display(.init(icon: .image(Image(icon)), title: "无新纪录", dismissType: .after(2)))
-    }
-    static func startingBatch(count: Int) {
-        Indicators.shared.display(.init(icon: .progressIndicator, title: "加载\(count)项纪录", dismissType: .after(5)))
-    }
-    static func finishedBatch(count: Int) {
-        Indicators.shared.display(.init(icon: .success, title: "已加载\(count)项纪录", dismissType: .after(3)))
-    }
-    static func retrying(_ n: Int) {
-        Indicators.shared.display(.init(icon: .systemImage("arrow.clockwise"), title: "重试中...", expandedText: "第\(n)次重试", dismissType: .after(2)))
-    }
-    static func failOnce(message: String) {
-        Indicators.shared.display(.init(icon: .systemImage("xmark.seal"), title: "加载失败", expandedText: message, dismissType: .automatic, style: .error))
-    }
-    static func failMax() {
-        Indicators.shared.display(.init(icon: .systemImage("xmark.seal"), title: "达到最大重试次数", expandedText: "请稍后再试", dismissType: .automatic, style: .error))
-    }
-    static func retrySucceeded() {
-        Indicators.shared.display(.init(icon: .success, title: "重试成功", dismissType: .after(3)))
-    }
-}
 
     // MARK: - SN3Client token helper
 extension SN3Client {
@@ -68,39 +45,58 @@ extension SN3Client {
         fetchAndStoreDetails: @escaping ([String]) async throws -> Int
     ) async {
         guard !flag.get(), Gate.shouldProceed(last: lastRefreshTime, interval: refreshInterval) else { return }
+        let IndicatorID = UUID().uuidString
+        defer {
+
+        }
+        Indicators.shared.display(.init(id: IndicatorID, icon: .progressIndicator, title: "正在加载...", dismissType: .manual, isUserDismissible: false))
 
         await flag.withValue(true) {
             let maxRetries = 2
             var attempt = 0
+            defer {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    Indicators.shared.dismiss(with: IndicatorID)
+                }
+            }
             while attempt < maxRetries {
                 do {
+                    try Task.checkCancellation()
                     try await ensureToken()
                     let ids = try await getValidIDs()
+                    try Task.checkCancellation()
                     guard !ids.isEmpty else {
-                        ProgressUI.noNewRecords(icon: icon)
+                        Indicators.shared.updateTitle(for: IndicatorID, title: "没有新纪录")
+                        Indicators.shared.updateIcon(for: IndicatorID, icon: .success)
                         lastRefreshTime = Int(Date().timeIntervalSince1970)
                         return
                     }
-                    ProgressUI.startingBatch(count: ids.count)
+                    Indicators.shared.updateTitle(for: IndicatorID, title: "加载\(ids.count)项新纪录")
                     let saved = try await fetchAndStoreDetails(ids)
                     lastRefreshTime = Int(Date().timeIntervalSince1970)
-                    ProgressUI.finishedBatch(count: saved)
+                    Indicators.shared.updateTitle(for: IndicatorID, title: "加载了\(saved)个新纪录")
+                    Indicators.shared.updateIcon(for: IndicatorID, icon: .success)
+                    return
+                } catch is CancellationError{
+                    Indicators.shared.dismiss(with: IndicatorID)
                     return
                 } catch SN3Client.Error.invalidGameServiceToken {
+                    if attempt < maxRetries { Indicators.shared.updateTitle(for: IndicatorID, title: "令牌已过期，重新获取...") }
+                    else { Indicators.shared.updateTitle(for: IndicatorID, title: "令牌已过期，重试获取失败")}
                     await NSOAccountManager.shared.refreshGameServiceTokenManual()
                     attempt += 1
-                    if attempt < maxRetries { ProgressUI.retrying(attempt) }
-                } catch {
+                }catch {
                     logError(error)
                     attempt += 1
-                    ProgressUI.failOnce(message: "第\(attempt)次尝试失败: \(error.localizedDescription)")
+                    Indicators.shared.updateTitle(for: IndicatorID, title: "第\(attempt)次重试中...")
                     if attempt < maxRetries {
-                        ProgressUI.retrying(attempt)
                         try? await Task.sleep(nanoseconds: 1_000_000_000)
                     }
                 }
             }
-            ProgressUI.failMax()
+            Indicators.shared.updateTitle(for: IndicatorID, title: "加载失败")
+            Indicators.shared.updateIcon(for: IndicatorID, icon: .image(Image(systemName: "xmark.icloud")))
+
         }
     }
 }
@@ -206,25 +202,37 @@ extension SN3Client {
 
     func fetchRecord<T: SwiftyJSONDecodable>(_ queryType: any SN3PersistedQuery,  maxRetries: Int = 3) async -> T? {
         var retryCount = 0
+        let IndicatorID = UUID().uuidString
+        defer {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                Indicators.shared.dismiss(with: IndicatorID)
+            }
+        }
+        Indicators.shared.display(.init(id: IndicatorID, icon: .progressIndicator, title: "正在加载...", dismissType: .manual, isUserDismissible: false))
         while retryCount < maxRetries {
             do {
                 try await ensureToken()
                 let data = try await JSON(data: self.graphQL(queryType))
-                if retryCount > 0 { ProgressUI.retrySucceeded() }
+                if retryCount > 0 {
+                    Indicators.shared.updateTitle(for: IndicatorID, title: "加载成功")
+                }
                 return T(json: data)
             } catch SN3Client.Error.invalidGameServiceToken {
                 await NSOAccountManager.shared.refreshGameServiceTokenManual()
                 retryCount += 1
+            } catch is CancellationError {
+                Indicators.shared.dismiss(with: IndicatorID)
+                return nil
             } catch {
                 logError(error)
                 retryCount += 1
                 if retryCount < maxRetries {
-                    ProgressUI.retrying(retryCount)
+                    Indicators.shared.updateTitle(for: IndicatorID, title: "第\(retryCount)次重试中...")
                     try? await Task.sleep(nanoseconds: 1_000_000_000)
                 }
             }
         }
-        ProgressUI.failMax()
+        Indicators.shared.updateTitle(for: IndicatorID, title: "加载失败")
         return nil
     }
 }

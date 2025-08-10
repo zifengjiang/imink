@@ -4,6 +4,7 @@ import SplatDatabase
 import GRDB
 import SwiftUI
 
+@MainActor
 class CoopListViewModel: ObservableObject {
     static let shared = CoopListViewModel()
     
@@ -86,15 +87,20 @@ class CoopListViewModel: ObservableObject {
         return rows
     }
 
-    func loadMoreCards() async  {
-        do{
-            let cards:[CoopGroupStatus] = try await SplatDatabase.shared.dbQueue.read { db in
-                try CoopGroupStatus.create(from: db, identifier: (AppUserDefaults.shared.accountId, self.rows.count))
+    func loadMoreCards() async {
+        do {
+                // 1) 在主 actor 上读取需要的状态
+            let offset = self.rows.count
+            let accountId = AppUserDefaults.shared.accountId
+
+                // 2) 传入纯值，read 闭包里不引用 self/rows
+            let cards: [CoopGroupStatus] = try await SplatDatabase.shared.dbQueue.read { db in
+                try CoopGroupStatus.create(from: db, identifier: (accountId, offset))
             }
-            DispatchQueue.main.async {
-                self.rows.append(contentsOf: cards.map { CoopListRowModel(isCoop: false, card: $0) })
-            }
-        }catch{
+
+                // 3) 回到主 actor（方法本身已在 MainActor），直接更新 UI 状态
+            self.rows.append(contentsOf: cards.map { CoopListRowModel(isCoop: false, card: $0) })
+        } catch {
             logError(error)
         }
     }

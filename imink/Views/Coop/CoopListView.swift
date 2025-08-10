@@ -4,6 +4,7 @@ import SwiftUI
 struct CoopListView: View {
     @EnvironmentObject var mainViewModel: MainViewModel
     @EnvironmentObject var viewModel: CoopListViewModel
+    @Environment(\.scenePhase) var scenePhase
     @State var activeID:String?
     @State var showFilterSheet = false
     @State var selectedRow:String?
@@ -106,8 +107,9 @@ struct CoopListView: View {
                     .scrollTargetLayout()
                 }
                 .refreshable {
-                    guard AppState.shared.isLogin else { return }
-                    await SN3Client.shared.fetchCoops()
+                    TaskManager.shared.start(named: String(describing: Self.self)) {
+                        await viewModel.fetchCoops()
+                    }
                 }
                 .scrollPosition(id: $activeID, anchor: .bottom)
                 .fixSafeareaBackground()
@@ -181,6 +183,24 @@ struct CoopListView: View {
                             icon: { Image(systemName: "creditcard") }
                         )
                     }
+                }
+                .onChange(of: scenePhase) { oldValue, newPhase in
+                    switch newPhase {
+                    case .active:
+                        TaskManager.shared.start(named: String(describing: Self.self)) {
+                            await viewModel.fetchCoops()
+                        }
+                    default:
+                        break
+                    }
+                }
+                .onAppear {
+                    TaskManager.shared.startLoop(name: String(describing: Self.self), interval: .seconds(300)) {
+                        await viewModel.fetchCoops()
+                    }
+                }
+                .onDisappear {
+                    TaskManager.shared.cancel(name: String(describing: Self.self))
                 }
             }
 

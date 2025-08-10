@@ -3,6 +3,7 @@ import SwiftUI
 
 struct BattleListView: View {
     @EnvironmentObject var viewModel: BattleListViewModel
+    @Environment(\.scenePhase) var scenePhase
     @State var activeID:String?
     var body: some View {
         NavigationStack{
@@ -22,7 +23,9 @@ struct BattleListView: View {
                     .scrollTargetLayout()
                 }
                 .refreshable {
-                    viewModel.fetchBattles()
+                    TaskManager.shared.start(named: String(describing: Self.self)) {
+                        await viewModel.fetchBattles()
+                    }
                 }
                 .scrollPosition(id: $activeID, anchor: .bottom)
                 .fixSafeareaBackground()
@@ -54,6 +57,24 @@ struct BattleListView: View {
                             )
                         }
                     }
+                }
+                .onChange(of: scenePhase) { oldValue, newPhase in
+                    switch newPhase {
+                    case .active:
+                        TaskManager.shared.start(named: String(describing: Self.self)) {
+                            await viewModel.fetchBattles()
+                        }
+                    default:
+                        break
+                    }
+                }
+                .onAppear {
+                    TaskManager.shared.startLoop(name: String(describing: Self.self), interval: .seconds(300)) {
+                        await viewModel.fetchBattles()
+                    }
+                }
+                .onDisappear {
+                    TaskManager.shared.cancel(name: String(describing: Self.self))
                 }
             }
         }
