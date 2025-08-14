@@ -16,6 +16,9 @@ enum DataBackupError: Error {
     case unknownError
     case databaseWriteError
     case invalidDirectoryStructure
+    case databaseImportError
+    case databaseNotFound
+    case databaseAccessError
 }
 
 extension DataBackupError: LocalizedError {
@@ -27,6 +30,12 @@ extension DataBackupError: LocalizedError {
             return "Database write error"
         case .invalidDirectoryStructure:
             return "Invalid directory structure"
+        case .databaseImportError:
+            return "Database import error"
+        case .databaseNotFound:
+            return "Database file not found"
+        case .databaseAccessError:
+            return "Cannot access database file"
         }
     }
 }
@@ -36,6 +45,14 @@ struct DataBackupProgress {
     let loadFilesProgressScale = 0.8
     var importBattlesProgressScale = 0.15
     var importJobsProgressScale = 0.05
+    
+    // 数据库导入相关
+    var importDatabaseProgressScale = 1.0
+    var importDatabaseProgress: Double = 0
+    var importDatabaseTotalCount: Int = 0
+    var importDatabaseCurrentCount: Int = 0
+    var importDatabaseCoopCount: Int = 0
+    var importDatabaseBattleCount: Int = 0
 
     var unzipProgress: Double = 0
     var loadFilesProgress: Double = 0
@@ -45,12 +62,20 @@ struct DataBackupProgress {
     var importJobsCount: Int = 0
 
     var value: Double {
-        unzipProgress * unzipProgressScale +
+        // 如果是数据库导入，使用数据库导入进度
+        if importDatabaseTotalCount > 0 {
+            return importDatabaseProgress * importDatabaseProgressScale
+        }
+        // 否则使用原有的ZIP导入进度
+        return unzipProgress * unzipProgressScale +
         loadFilesProgress * loadFilesProgressScale
     }
 
     var count: Int {
-        importBattlesCount + importJobsCount
+        if importDatabaseTotalCount > 0 {
+            return importDatabaseCurrentCount
+        }
+        return importBattlesCount + importJobsCount
     }
 }
 
@@ -116,11 +141,15 @@ extension DataBackup {
             }
 
         DispatchQueue(label: "import", attributes: .concurrent).async {
-            self.importData(url: url)
+            if url.pathExtension == "zip"{
+                self.importDataFromZIP(url: url)
+            } else if url.pathExtension == "sqlite" || url.pathExtension == "db" {
+                self.importDataFromDatabase(url: url)
+            }
         }
     }
 
-    private func importData(url: URL) {
+    private func importDataFromZIP(url: URL) {
         let fileManager = FileManager()
         let temporaryPath = fileManager.temporaryDirectory
         let importPath = temporaryPath.appendingPathComponent("import")
@@ -136,8 +165,17 @@ extension DataBackup {
                 self?.importProgress.unzipProgress = value
             })
             
+            // 检查解压后的文件是否包含数据库文件
+            let databaseFiles = findDatabaseFiles(in: importPath)
+            if !databaseFiles.isEmpty {
+                // 如果找到数据库文件，使用数据库导入逻辑
+                if let firstDatabaseFile = databaseFiles.first {
+                    self.importDataFromDatabase(url: firstDatabaseFile)
+                }
+                return
+            }
 
-            let battlePath = importPath.appendingPathComponent("battle")
+            let battlePath = importPath.appendingPathComponent("battles")
             let battleFilePaths = try fileManager.contentsOfDirectory(
                 at: battlePath,
                 includingPropertiesForKeys: nil,
@@ -145,7 +183,7 @@ extension DataBackup {
                 .filter { $0.pathExtension == "json" }
             importProgress.importBattlesCount = battleFilePaths.count
 
-            let salmonRunPath = importPath.appendingPathComponent("salmon_run")
+            let salmonRunPath = importPath.appendingPathComponent("coops")
             let salmonRunFilePaths = try fileManager.contentsOfDirectory(
                 at: salmonRunPath,
                 includingPropertiesForKeys: nil,
@@ -233,6 +271,55 @@ extension DataBackup {
             }
         }
     }
+    
+    private func importDataFromDatabase(url: URL) {
+        do {
+            // 检查文件是否存在
+            guard FileManager.default.fileExists(atPath: url.path) else {
+                self.importError = .databaseNotFound
+                return
+            }
+            
+            // 尝试访问数据库文件
+            guard FileManager.default.isReadableFile(atPath: url.path) else {
+                self.importError = .databaseAccessError
+                return
+            }
+            
+            // 初始化数据库导入进度
+            self.importProgress.importDatabaseTotalCount = 1
+            self.importProgress.importDatabaseCurrentCount = 0
+            self.importProgress.importDatabaseCoopCount = 0
+            self.importProgress.importDatabaseBattleCount = 0
+            
+//            // 使用SplatDatabase的导入功能
+//            try SplatDatabase.shared.importFromDatabaseWithConstraints(
+//                sourceDbPath: url.path,
+//                progress: { [weak self] progress in
+//                    self?.importProgress.importDatabaseProgress = progress
+//                },
+//                preserveIds: false // 不保留原始ID，使用新的自增ID
+//            )
+
+            try SplatDatabase.shared.replaceDatabaseWithSource(sourceDbPath: url.path){ progress in
+                self.importProgress.importDatabaseProgress = progress
+            }
+
+            // 获取导入的记录数量
+            try SplatDatabase.shared.dbQueue.read { db in
+                self.importProgress.importDatabaseCoopCount = try Coop.fetchCount(db)
+                self.importProgress.importDatabaseBattleCount = try Battle.fetchCount(db)
+            }
+            
+            // 标记导入完成
+            self.importProgress.importDatabaseCurrentCount = 1
+            self.importProgress.importDatabaseProgress = 1.0
+            
+        } catch {
+            os_log("Database Import Error: \(error.localizedDescription)")
+            self.importError = .databaseImportError
+        }
+    }
 }
 
 extension DataBackup {
@@ -255,10 +342,44 @@ extension DataBackup {
             try fileManager.removeItem(at: zipPath)
         }
     }
+    
+    /// 递归查找目录中的数据库文件
+    private func findDatabaseFiles(in directory: URL) -> [URL] {
+        let fileManager = FileManager.default
+        var databaseFiles: [URL] = []
+        
+        do {
+            let contents = try fileManager.contentsOfDirectory(
+                at: directory,
+                includingPropertiesForKeys: [.isDirectoryKey],
+                options: [.skipsHiddenFiles]
+            )
+            
+            for item in contents {
+                let isDirectory = (try? item.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false
+                
+                if isDirectory {
+                    // 递归搜索子目录
+                    databaseFiles.append(contentsOf: findDatabaseFiles(in: item))
+                } else {
+                    // 检查文件扩展名
+                    let pathExtension = item.pathExtension.lowercased()
+                    if pathExtension == "sqlite" || pathExtension == "db" {
+                        databaseFiles.append(item)
+                    }
+                }
+            }
+        } catch {
+            print("Error searching for database files: \(error)")
+        }
+        
+        return databaseFiles
+    }
 }
 
 import UIKit
 import SplatDatabase
+import GRDB
 
 
 struct ProgressTracker {
@@ -305,7 +426,14 @@ extension DataBackup {
                 let remainingTimeString = formatTimeInterval(remainingTime)
                 Indicators.shared.updateProgress(for: progressIndicatorId, progress: progress.value)
                 Indicators.shared.updateSubtitle(for: progressIndicatorId, subtitle: "预计剩余时间: \(remainingTimeString)")
-                Indicators.shared.updateExpandedText(for: progressIndicatorId, expandedText: "已导入\(Int(progress.importJobsProgress))个打工记录，\(Int(progress.importBattlesProgress))个对战记录")
+                // 根据导入类型显示不同的信息
+                if progress.importDatabaseTotalCount > 0 {
+                    // 数据库导入
+                    Indicators.shared.updateExpandedText(for: progressIndicatorId, expandedText: "已导入\(Int(progress.importDatabaseCoopCount))个打工记录，\(Int(progress.importDatabaseBattleCount))个对战记录")
+                } else {
+                    // ZIP导入
+                    Indicators.shared.updateExpandedText(for: progressIndicatorId, expandedText: "已导入\(Int(progress.importJobsProgress))个打工记录，\(Int(progress.importBattlesProgress))个对战记录")
+                }
             } else {
                 Indicators.shared.updateProgress(for: progressIndicatorId, progress: progress.value)
             }
