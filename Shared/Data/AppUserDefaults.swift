@@ -44,6 +44,9 @@ class AppUserDefaults: ObservableObject {
 
     @AppStorage("battlesRefreshTime", store: .appGroup)
     var battlesRefreshTime: Int = 0
+
+    @AppStorage("scheduleRefreshTime", store: .appGroup)
+    var scheduleRefreshTime: Int = 0
 }
 
 

@@ -12,7 +12,7 @@ class NSOAccountManager:ObservableObject {
     @Published var accountId:Int? = AppUserDefaults.shared.accountId
 
     func refreshGameServiceTokenIfNeeded() async {
-        if let sessionToken = AppUserDefaults.shared.sessionToken, AppUserDefaults.shared.gameServiceTokenRefreshTime + 1800 < Int(Date().timeIntervalSince1970){
+        if let sessionToken = AppUserDefaults.shared.sessionToken, AppUserDefaults.shared.gameServiceTokenRefreshTime + 3600 < Int(Date().timeIntervalSince1970){
             let IndicatorId = UUID().uuidString
             defer{
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {

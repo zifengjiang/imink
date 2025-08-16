@@ -147,7 +147,7 @@ extension SN3Client {
     func fetchBattles() async {
         await runPipeline(
             flag: .isFetchingBattles,
-            refreshInterval: 10,
+            refreshInterval: 300,
             lastRefreshTime: &AppUserDefaults.shared.battlesRefreshTime,
             icon: .regularBattle,
             getValidIDs: { [weak self] in
