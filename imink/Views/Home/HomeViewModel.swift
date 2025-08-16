@@ -14,6 +14,7 @@ class HomeViewModel: ObservableObject {
     @Published var last500Coop: [Bool?] = []
     @Published var schedules: [Schedule] = []
     @Published var lastCoopGroupId: Int?
+    @Published var lastBattleGroupId: Int?
     @Published var salmonRunStatus: CoopGroupStatus?
     @Published var battleStatus: BattleGroupStatus?
 
@@ -62,6 +63,7 @@ class HomeViewModel: ObservableObject {
     func clearData() {
         salmonRunStatus = nil
         lastCoopGroupId = nil
+        lastBattleGroupId = nil
         last500Coop = []
         last500Battle = []
         battleStatus = nil
@@ -99,14 +101,20 @@ class HomeViewModel: ObservableObject {
             .assign(to: \.lastCoopGroupId, on: self)
             .store(in: &cancelBag)
 
-        
-        BattleGroupStatus.fetchOne(identifier: AppUserDefaults.shared.accountId)
-            .catch { error -> Just<BattleGroupStatus?> in
-                logError(error)
-                return Just<BattleGroupStatus?>(nil)
+        ValueObservation
+            .tracking { db in
+                try Int.fetchOne(db, sql: "SELECT MAX(GroupId) FROM battle_group_status_view WHERE accountId = ?", arguments: [AppUserDefaults.shared.accountId])
             }
-            .assign(to: \.battleStatus, on: self)
+            .publisher(in: SplatDatabase.shared.dbQueue, scheduling: .immediate)
+            .eraseToAnyPublisher()
+            .catch { error -> Just<Int?> in
+                logError(error)
+                return Just<Int?>(nil)
+            }
+            .assign(to: \.lastBattleGroupId, on: self)
             .store(in: &cancelBag)
+
+
 
         $totalCoop
             .map{ _ in SplatDatabase.shared.fetchLast500(isCoop:true) }
@@ -131,6 +139,20 @@ class HomeViewModel: ObservableObject {
                 }
             }
             .store(in: &cancelBag)
+
+        $lastBattleGroupId
+            .sink{ _ in
+                if let lastBattleGroupId = self.lastBattleGroupId{
+                    BattleGroupStatus.fetchOne(identifier: (lastBattleGroupId, AppUserDefaults.shared.accountId))
+                        .catch { error -> Just<BattleGroupStatus?> in
+                            logError(error)
+                            return Just<BattleGroupStatus?>(nil)
+                        }
+                        .assign(to: \.battleStatus, on: self)
+                        .store(in: &self.cancelBag)
+                }
+            }
+            .store(in: &cancelBag)
     }
 
 
@@ -151,6 +173,8 @@ class HomeViewModel: ObservableObject {
     }
 
     func fetchSchedules() async {
+        // 5分钟内不重复获取
+        guard AppUserDefaults.shared.scheduleRefreshTime + 300 <= Int(Date().timeIntervalSince1970 ) else{ return }
         let IndicatorId = UUID().uuidString
         do{
             print("fetchSchedules")
@@ -162,6 +186,7 @@ class HomeViewModel: ObservableObject {
             loadSchedules()
             Indicators.shared.updateTitle(for: IndicatorId, title: "获取赛程成功")
             Indicators.shared.updateIcon(for: IndicatorId, icon: .success)
+            AppUserDefaults.shared.scheduleRefreshTime = Int(Date().timeIntervalSince1970)
         }catch{
             loadSchedules()
             logError(error)

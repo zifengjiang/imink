@@ -22,7 +22,7 @@ struct HomePage: View {
             ScrollView{
                 VStack{
 
-                    CarouselView(activeIndex: $selectedScheduleType, autoScrollDuration: 1500){
+                    CarouselView(activeIndex: $selectedScheduleType, autoScrollDuration: 15){
                             todayBattleStatusView
                             todaySalmonRunStatusView
                     }
@@ -158,7 +158,7 @@ struct HomePage: View {
                 HStack(alignment: .firstTextBaseline) {
                     Text("最近战况")
                         .font(.splatoonFont(size: 22))
-                    if let lastPlayTime = viewModel.battleStatus?.lastPlayTime{
+                    if let lastPlayTime = viewModel.battleStatus?.endTime{
                         Text("更新于: \(lastPlayTime.toPlayedTimeString())")
                             .font(.splatoonFont(size: 10))
                             .foregroundStyle(.secondary)
@@ -514,11 +514,11 @@ struct BattleStatusView: View {
                 HStack {
 
                     Chart {
-                        SectorMark(angle: .value("1", today.disconnect))
+                        SectorMark(angle: .value("1", today.disconnectCount))
                             .foregroundStyle(Color.gray)
-                        SectorMark(angle: .value("2", today.defeat))
+                        SectorMark(angle: .value("2", today.loseCount))
                             .foregroundStyle(Color.waveDefeat)
-                        SectorMark(angle: .value("3", today.victory))
+                        SectorMark(angle: .value("3", today.winCount))
                             .foregroundStyle(Color.waveClear)
                     }
                     .opacity(0.9)
@@ -545,7 +545,7 @@ struct BattleStatusView: View {
                             .font(.splatoonFont(size: 10))
                             .foregroundStyle(.secondary)
 
-                        Text("\(today.victory)")
+                        Text("\(today.winCount)")
                             .font(.splatoonFont(size: 24))
                             .foregroundStyle(.waveClear)
                             .minimumScaleFactor(0.5)
@@ -557,16 +557,47 @@ struct BattleStatusView: View {
 
                     VStack(spacing: 4) {
 
-                        Text("失利")
+                        Text("失败")
                             .font(.splatoonFont(size: 10))
                             .foregroundStyle(.secondary)
 
-                        Text("\(today.defeat)")
+                        Text("\(today.loseCount)")
                             .font(.splatoonFont(size: 24))
                             .foregroundStyle(Color.pink.opacity(0.8))
                             .minimumScaleFactor(0.5)
 
                     }
+
+                    Spacer()
+
+                    VStack(spacing: 4) {
+
+                        Text("平局")
+                            .font(.splatoonFont(size: 10))
+                            .foregroundStyle(.secondary)
+
+                        Text("\(today.drawCount)")
+                            .font(.splatoonFont(size: 24))
+                            .foregroundStyle(Color.pink.opacity(0.8))
+                            .minimumScaleFactor(0.5)
+
+                    }
+
+                    Spacer()
+
+                    VStack(spacing: 4) {
+
+                        Text("掉线")
+                            .font(.splatoonFont(size: 10))
+                            .foregroundStyle(.secondary)
+
+                        Text("\(today.disconnectCount)")
+                            .font(.splatoonFont(size: 24))
+                            .foregroundStyle(Color.pink.opacity(0.8))
+                            .minimumScaleFactor(0.5)
+
+                    }
+
 
                     Spacer()
 
