@@ -1,34 +1,29 @@
 import SwiftUI
 
 struct CoopListRowView: View {
-    let isCoop: Bool
-    var coop: CoopListRowInfo?
-    var card: CoopGroupStatus?
+    let row: CoopListRowModel
 
-    init(isCoop: Bool, coop: CoopListRowInfo? = nil, card: CoopGroupStatus? = nil) {
-        self.isCoop = isCoop
-        self.coop = coop
-        self.card = card
-    }
 
     var body: some View {
-        if isCoop {
-            CoopListDetailItemView(coop: coop!)
+        if row.isCoop, let coop = row.coop {
+            CoopListDetailItemView(coop: coop)
+        } else if let card = row.card{
+            CoopListShiftCardView(status: card)
         } else {
-            CoopListShiftCardView(status: card!)
+            EmptyView()
         }
     }
 }
 
 extension CoopListRowView:Equatable {
     static func == (lhs: CoopListRowView, rhs: CoopListRowView) -> Bool {
-        if lhs.isCoop != rhs.isCoop {
+        if lhs.row.isCoop != rhs.row.isCoop {
             return false
         }
-        if lhs.isCoop {
-            return lhs.coop?.id == rhs.coop?.id
+        if lhs.row.isCoop {
+            return lhs.row.coop?.id == rhs.row.coop?.id
         } else {
-            return lhs.card?.startTime == rhs.card?.startTime
+            return lhs.row.card?.startTime == rhs.row.card?.startTime
         }
     }
 }

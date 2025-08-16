@@ -98,7 +98,7 @@ struct CoopListView: View {
                                     }
                                 }
                             } label: {
-                                CoopListRowView(isCoop: row.isCoop, coop: row.coop, card: row.card)
+                                CoopListRowView(row: row)
                                     .id(row.id)
                             }
                             .buttonStyle(PlainButtonStyle())
