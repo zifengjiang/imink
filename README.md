@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![imink Logo](https://via.placeholder.com/200x200/FF6B35/FFFFFF?text=imink)
+![imink Logo](./resource/logo.png)
 
 **为《喷射战士3》玩家打造的iOS数据助手应用**
 
