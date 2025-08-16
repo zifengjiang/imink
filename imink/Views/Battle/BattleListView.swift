@@ -11,13 +11,18 @@ struct BattleListView: View {
                 ScrollView{
                     LazyVStack{
                         ForEach(viewModel.rows,id: \.id){row in
-                            NavigationLink{
-                                BattleDetailView(id: row.battle!.id)
-                            } label: {
-                                BattleListRowView(detail: row.battle!)
+                            if row.isBattle, let battle = row.battle {
+                                NavigationLink{
+                                    BattleDetailView(id: battle.id)
+                                } label: {
+                                    BattleListRowView(row: row)
+                                        .id(row.id)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            } else {
+                                BattleListRowView(row: row)
                                     .id(row.id)
                             }
-                            .buttonStyle(PlainButtonStyle())
                         }
                     }
                     .scrollTargetLayout()

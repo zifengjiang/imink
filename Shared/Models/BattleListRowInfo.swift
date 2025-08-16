@@ -26,6 +26,7 @@ struct BattleListRowInfo:Codable, FetchableRecord, PersistableRecord{
     var earnedUdemaePoint:Int?
     var species:Bool
     var knockout:JudgementKnockout?
+    var GroupId: Int64
 
 
     // MARK: computed
@@ -50,6 +51,7 @@ struct BattleListRowInfo:Codable, FetchableRecord, PersistableRecord{
         case earnedUdemaePoint
         case species
         case knockout
+        case GroupId
     }
 }
 
@@ -91,18 +93,19 @@ extension BattleListRowInfo: PreComputable{
 
     }
 
-
-}
-
-func battles(filter:Filter = Filter(), limit:Int = 30, _ offset: Int = 0) async -> [BattleListRowInfo] {
-    return try! await SplatDatabase.shared.dbQueue.read { db in
-//        try Row.fetchAll(db, filter.buildBattleQuery(limit:limit, offset:offset))
-//            .compactMap { row in
-//                try! BattleListRowInfo(row: row)
-//            }
-        try BattleListRowInfo.create(from: db, identifier: (AppUserDefaults.shared.accountId, filter, limit, offset))
+    static func battles(filter:Filter = Filter(), limit:Int = 30, _ offset: Int = 0) async -> [BattleListRowInfo] {
+        return try! await SplatDatabase.shared.dbQueue.read { db in
+                //        try Row.fetchAll(db, filter.buildBattleQuery(limit:limit, offset:offset))
+                //            .compactMap { row in
+                //                try! BattleListRowInfo(row: row)
+                //            }
+            try BattleListRowInfo.create(from: db, identifier: (AppUserDefaults.shared.accountId, filter, limit, offset))
+        }
     }
+
 }
+
+
 
 
 
@@ -136,9 +139,10 @@ extension Filter {
                     battle.playedTime as playedTime,
                     battle.earnedUdemaePoint,
                     battle.knockout,
-                    player.species
+                    player.species,
+                    battle.GroupId
                 FROM 
-                    battle
+                    battle_view battle
                 LEFT JOIN 
                     vsTeam ON vsTeam.battleId = battle.id -- 获取团队涂装比率和颜色信息
                 JOIN 

@@ -10,7 +10,7 @@ import Foundation
 struct BattleListRowModel:Identifiable {
     let isBattle: Bool
     var battle: BattleListRowInfo?
-    var card: CoopGroupStatus?
+    var card: BattleGroupStatus?
 
     var id: String {
         if isBattle {
