@@ -20,14 +20,16 @@ class NSOAccountManager:ObservableObject {
                 }
             }
             do{
-                Indicators.shared.display(Indicator(id: IndicatorId, icon: .progressIndicator, title: "刷新游戏服务令牌", dismissType: .manual, isUserDismissible: false))
+                Indicators.shared.display(Indicator(id: IndicatorId, icon: .progressIndicator, title: "刷新游戏服务令牌", progress: 0, isUserDismissible: false))
                 try await refreshGameServiceToken(sessionToken: sessionToken, indicatorId: IndicatorId)
                 Indicators.shared.updateTitle(for: IndicatorId, title: "刷新游戏服务令牌成功")
+                Indicators.shared.updateProgress(for: IndicatorId, progress: 1.0)
                 Indicators.shared.updateIcon(for: IndicatorId, icon: .success)
 
             }catch{
                 logError(error)
                 Indicators.shared.updateTitle(for: IndicatorId, title: "刷新游戏服务令牌失败")
+                Indicators.shared.updateProgress(for: IndicatorId, progress: 0)
                 Indicators.shared.updateIcon(for: IndicatorId, icon: .image(Image(systemName: "xmark.icloud")))
             }
         }
