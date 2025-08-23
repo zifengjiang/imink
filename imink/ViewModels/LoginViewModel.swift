@@ -4,7 +4,7 @@ import Combine
 import SplatDatabase
 import GRDB
 
-
+@MainActor
 class LoginViewModel:ObservableObject{
     enum Status {
         case none
@@ -46,7 +46,7 @@ class LoginViewModel:ObservableObject{
                 AppUserDefaults.shared.gameServiceToken = loginFlowResult.webServiceToken.result.accessToken
                 AppUserDefaults.shared.gameServiceTokenRefreshTime = Int(Date().timeIntervalSince1970)
             }
-            await Indicators.shared.dismiss(loginIndicator)
+            Indicators.shared.dismiss(loginIndicator)
         }catch{
             logError(error)
         }

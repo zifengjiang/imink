@@ -48,6 +48,13 @@ struct LoginView: View {
                 .padding(.top, 4)
                 .padding(.bottom, 7)
             
+            Text("Note: Data will be sent to a third-party API (nxapi-znca-api) for authentication with Nintendo's Coral API")
+                .font(.system(size: 12))
+                .foregroundColor(Color.appLabel.opacity(0.7))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 10)
+            
             HStack {
                 Text("Log in with Nintendo Account")
                     .font(.system(size: 13, weight: .semibold))

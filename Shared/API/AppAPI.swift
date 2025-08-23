@@ -72,31 +72,31 @@ extension AppAPI: TargetType {
         switch self{
         case .nxapiZnca_f:
             return [
-                "User-Agent": "ConchBay/2.2.0",
+                "User-Agent": "imink/1.0.0",
                 "x-znca-client-version": AppUserDefaults.shared.NSOVersion,
                 "X-znca-platform": "Android",
                 "x-znca-version": AppUserDefaults.shared.NSOVersion,
             ]
         case .nxapiZnca_auth_token:
             return [
-                "User-Agent": "ConchBay/2.2.0"
+                "User-Agent": "imink/1.0.0"
             ]
         case .nxapiZnca_decrypt(let accessToken, _):
             return [
                 "Authorization": "Bearer \(accessToken)",
-                "User-Agent": "ConchBay/2.2.0",
+                "User-Agent": "imink/1.0.0",
                 "x-znca-client-version": AppUserDefaults.shared.NSOVersion,
                 "x-znca-platform": "Android",
                 "x-znca-version": AppUserDefaults.shared.NSOVersion,
             ]
         case .nxapiZnca_config:
             return [
-                "User-Agent": "ConchBay/2.2.0"
+                "User-Agent": "imink/1.0.0"
             ]
         case .nxapiZnca_f_advanced(let accessToken, _, _, _, _, _):
             return [
                 "Authorization": "Bearer \(accessToken)",
-                "User-Agent": "ConchBay/2.2.0",
+                "User-Agent": "imink/1.0.0",
                 "x-znca-client-version": AppUserDefaults.shared.NSOVersion,
                 "x-znca-platform": "Android",
                 "x-znca-version": AppUserDefaults.shared.NSOVersion,
@@ -124,7 +124,7 @@ extension AppAPI: TargetType {
             ])
         case .nxapiZnca_auth_token:
             let params = [
-                ("client_id", "dzZNtWfQxWR_xNFcVijXPQ"),
+                ("client_id", "imink_client"),
                 ("grant_type", "client_credentials"),
                 ("scope", "ca:gf ca:er ca:dr")
             ]

@@ -74,7 +74,7 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
             encryptTokenRequest: EncryptTokenRequest(url: "https://api-lp1.znc.srv.nintendo.net/v4/Game/GetWebServiceToken", parameter: [
                 "f":"",
                 "registrationToken": "",
-                "id": "4834290508791808",
+                "id": 4834290508791808,
                 "requestId": "",
                 "timestamp": 0,
             ]),
@@ -211,7 +211,7 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
     // 保留原有方法以兼容性
     func requestLogin(accessToken:String, naUser:NAUser, idToken: String) async throws -> LoginResult {
         self.nxapiZncaApiAccessToken = try await nxapiZncaAuthToken()
-        let (version, encryptedTokenRequest) = try await nxapiZncaFAdvanced(
+        let (_, encryptedTokenRequest) = try await nxapiZncaFAdvanced(
             accessToken: nxapiZncaApiAccessToken,
             step: 1,
             idToken: idToken,
@@ -295,7 +295,7 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
             encryptTokenRequest: EncryptTokenRequest(url: "https://api-lp1.znc.srv.nintendo.net/v4/Game/GetWebServiceToken", parameter: [
                 "f":"",
                 "registrationToken": "",
-                "id": "4834290508791808",
+                "id": 4834290508791808,
                 "requestId": "",
                 "timestamp": 0,
             ]),
@@ -325,6 +325,16 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
                 }
                 
                 let json = JSON(data)
+                
+                // 检查API警告信息
+                if let warnings = json["warnings"].array {
+                    for warning in warnings {
+                        if let warningString = warning.string {
+                            print("API Warning: \(warningString)")
+                        }
+                    }
+                }
+                
                 let accessToken = json["access_token"].stringValue
                 guard !accessToken.isEmpty else {
                     throw NSOAuthError.invalidSessionToken
@@ -372,6 +382,14 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
         }
         
         let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+        
+        // 检查API警告信息
+        if let jsonDict = json, let warnings = jsonDict["warnings"] as? [String] {
+            for warning in warnings {
+                print("API Warning: \(warning)")
+            }
+        }
+        
         return json ?? [:]
     }
     
@@ -404,6 +422,16 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
                 }
                 
                 let json = JSON(data)
+                
+                // 检查API警告信息
+                if let warnings = json["warnings"].array {
+                    for warning in warnings {
+                        if let warningString = warning.string {
+                            print("API Warning: \(warningString)")
+                        }
+                    }
+                }
+                
                 let encryptedTokenRequestString = json["encrypted_token_request"].stringValue
                 guard !encryptedTokenRequestString.isEmpty,
                       let encryptedTokenRequestData = Data(base64Encoded: encryptedTokenRequestString) else {
