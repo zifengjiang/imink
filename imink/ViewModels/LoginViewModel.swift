@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUICore
 import SwiftyJSON
 import Combine
 import SplatDatabase
@@ -20,24 +21,42 @@ class LoginViewModel:ObservableObject{
         DispatchQueue.main.async {
             self.status = .loading
         }
-        do{
-            let loginIndicator = Indicator(id: UUID().uuidString, icon: .progressIndicator, title: "登录中", subtitle: "获取sessionToken",dismissType: .manual,isUserDismissible: false)
-            Indicators.shared.display(loginIndicator)
+        
+        let loginIndicatorId = UUID().uuidString
+        defer {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                Indicators.shared.dismiss(with: loginIndicatorId)
+            }
+        }
+        
+        do {
+            Indicators.shared.display(Indicator(id: loginIndicatorId, icon: .progressIndicator, title: "登录中", subtitle: "获取sessionToken", dismissType: .manual, isUserDismissible: false))
             
             // 使用新的loginFlow方法，参考api.ts的实现
-            let loginFlowResult = try await NSOAuthorization.shared.loginFlow()
+            let loginFlowResult = try await NSOAuthorization.shared.loginFlow(indicatorId: loginIndicatorId)
             
-            Indicators.shared.updateSubtitle(for: loginIndicator.id, subtitle: "获取accountId")
+            Indicators.shared.updateSubtitle(for: loginIndicatorId, subtitle: "设置游戏服务令牌")
             try await SN3Client.shared.setToken(loginFlowResult.webServiceToken.result.accessToken)
+            
+            Indicators.shared.updateSubtitle(for: loginIndicatorId, subtitle: "获取账户ID")
             let sp3PrincipalId = try await getAccountId()?.extractUserId()
+            
+            Indicators.shared.updateSubtitle(for: loginIndicatorId, subtitle: "下载头像")
             let avatar = loginFlowResult.loginResult.result.user.imageUri
             let avatarData = try await downLoadImageData(url: URL(string: avatar)!)
+            
+            Indicators.shared.updateSubtitle(for: loginIndicatorId, subtitle: "保存账户信息")
             let account = Account(sp3Id: sp3PrincipalId, avatar: avatarData, name: loginFlowResult.loginResult.result.user.name, code: loginFlowResult.loginResult.result.user.friendCode, sessionToken: loginFlowResult.sessionToken, lastRefresh: Date())
             try updateORInsertAccount(account)
+            
             let accountId = (try await SplatDatabase.shared.dbQueue.read { db in
                 return try Account.filter(Column("sp3Id") == sp3PrincipalId).fetchOne(db)?.id
             })!
-            Indicators.shared.updateSubtitle(for: loginIndicator.id, subtitle: "登录成功")
+            
+            Indicators.shared.updateTitle(for: loginIndicatorId, title: "登录成功")
+            Indicators.shared.updateSubtitle(for: loginIndicatorId, subtitle: "正在完成登录...")
+            Indicators.shared.updateIcon(for: loginIndicatorId, icon: .success)
+            
             DispatchQueue.main.async {
                 self.status = .loginSuccess
                 MainViewModel.shared.isLogin = true
@@ -46,9 +65,11 @@ class LoginViewModel:ObservableObject{
                 AppUserDefaults.shared.gameServiceToken = loginFlowResult.webServiceToken.result.accessToken
                 AppUserDefaults.shared.gameServiceTokenRefreshTime = Int(Date().timeIntervalSince1970)
             }
-            Indicators.shared.dismiss(loginIndicator)
-        }catch{
+        } catch {
             logError(error)
+            Indicators.shared.updateTitle(for: loginIndicatorId, title: "登录失败")
+            Indicators.shared.updateSubtitle(for: loginIndicatorId, subtitle: "请检查网络连接或重试")
+            Indicators.shared.updateIcon(for: loginIndicatorId, icon: .image(Image(systemName: "xmark.icloud")))
         }
     }
 

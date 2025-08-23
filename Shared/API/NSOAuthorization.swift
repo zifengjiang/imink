@@ -1,6 +1,7 @@
 import Foundation
 import AuthenticationServices
 import SwiftyJSON
+import SwiftUI
 
 
 
@@ -23,75 +24,96 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
     // MARK: - 重构后的登录流程
     
     /// 完整的登录流程，参考api.ts的getWebServiceToken实现
-    func loginFlow() async throws -> LoginFlowResult {
-        // 1. 获取sessionToken
-        let sessionToken = try await login()
+    func loginFlow(indicatorId: String) async throws -> LoginFlowResult {
         
-        // 2. 获取登录token
-        let loginToken = try await requestLoginToken(sessionToken: sessionToken)
-        
-        // 3. 获取用户信息
-        let naUser = try await requestUserInfo(accessToken: loginToken.accessToken)
-        
-        // 4. 获取nxapi-znca认证token
-        nxapiZncaApiAccessToken = try await nxapiZncaAuthToken()
-        
-        // 5. 获取NSO版本（如果还没有的话）
-        if nsoVersion.isEmpty {
-            let config = try await nxapiZncaConfig()
-            if let version = config["nso_version"] as? String {
-                nsoVersion = version
-                updateNSOVersion(version)
+        do {
+            // 1. 获取sessionToken
+            Indicators.shared.updateSubtitle(for: indicatorId, subtitle: "获取sessionToken")
+            let sessionToken = try await login()
+            
+            // 2. 获取登录token
+            Indicators.shared.updateSubtitle(for: indicatorId, subtitle: "获取登录token")
+            let loginToken = try await requestLoginToken(sessionToken: sessionToken)
+            
+            // 3. 获取用户信息
+            Indicators.shared.updateSubtitle(for: indicatorId, subtitle: "获取用户信息")
+            let naUser = try await requestUserInfo(accessToken: loginToken.accessToken)
+            
+            // 4. 获取nxapi-znca认证token
+            Indicators.shared.updateSubtitle(for: indicatorId, subtitle: "获取认证token")
+            nxapiZncaApiAccessToken = try await nxapiZncaAuthToken()
+            
+            // 5. 获取NSO版本（如果还没有的话）
+            if nsoVersion.isEmpty {
+                Indicators.shared.updateSubtitle(for: indicatorId, subtitle: "获取NSO版本")
+                let config = try await nxapiZncaConfig()
+                if let version = config["nso_version"] as? String {
+                    nsoVersion = version
+                    updateNSOVersion(version)
+                }
             }
+            
+            // 6. 生成登录f值
+            Indicators.shared.updateSubtitle(for: indicatorId, subtitle: "生成登录f值")
+            let (_, encryptedTokenRequest) = try await nxapiZncaFAdvanced(
+                accessToken: nxapiZncaApiAccessToken,
+                step: 1,
+                idToken: loginToken.idToken,
+                encryptTokenRequest: EncryptTokenRequest(url: "https://api-lp1.znc.srv.nintendo.net/v3/Account/Login", parameter: [
+                    "f":"",
+                    "language": naUser.language,
+                    "naBirthday": naUser.birthday,
+                    "naCountry": naUser.country,
+                    "naIdToken": loginToken.idToken,
+                    "requestId": "",
+                    "timestamp": 0,
+                ]),
+                naId: naUser.id,
+                coralUserId: nil
+            )
+            
+            // 7. 获取登录结果
+            Indicators.shared.updateSubtitle(for: indicatorId, subtitle: "获取登录结果")
+            let loginResult = try await requestLogin(encryptedTokenRequest: encryptedTokenRequest)
+            
+            // 8. 生成web service f值
+            Indicators.shared.updateSubtitle(for: indicatorId, subtitle: "生成web service f值")
+            let (_, encryptedTokenRequest2) = try await nxapiZncaFAdvanced(
+                accessToken: nxapiZncaApiAccessToken,
+                step: 2,
+                idToken: loginResult.result.webApiServerCredential.accessToken,
+                encryptTokenRequest: EncryptTokenRequest(url: "https://api-lp1.znc.srv.nintendo.net/v4/Game/GetWebServiceToken", parameter: [
+                    "f":"",
+                    "registrationToken": "",
+                    "id": 4834290508791808,
+                    "requestId": "",
+                    "timestamp": 0,
+                ]),
+                naId: naUser.id,
+                coralUserId: coralUserId
+            )
+            
+            // 9. 获取web service token
+            Indicators.shared.updateSubtitle(for: indicatorId, subtitle: "获取web service token")
+            let webServiceToken = try await requestWebServiceToken(encryptedTokenRequest: encryptedTokenRequest2, accessToken: loginResult.result.webApiServerCredential.accessToken)
+            
+            Indicators.shared.updateTitle(for: indicatorId, title: "登录流程完成")
+            Indicators.shared.updateSubtitle(for: indicatorId, subtitle: "正在返回结果...")
+            Indicators.shared.updateIcon(for: indicatorId, icon: .success)
+            
+            return LoginFlowResult(
+                sessionToken: sessionToken,
+                loginToken: loginToken,
+                naUser: naUser,
+                loginResult: loginResult,
+                webServiceToken: webServiceToken
+            )
+        } catch {
+            Indicators.shared.updateTitle(for: indicatorId, title: "登录流程失败")
+            Indicators.shared.updateSubtitle(for: indicatorId, subtitle: "请检查网络连接或重试")
+            Indicators.shared.updateIcon(for: indicatorId, icon: .image(Image(systemName: "xmark.icloud")))
+            throw error
         }
-        
-        // 6. 生成登录f值
-        let (_, encryptedTokenRequest) = try await nxapiZncaFAdvanced(
-            accessToken: nxapiZncaApiAccessToken,
-            step: 1,
-            idToken: loginToken.idToken,
-            encryptTokenRequest: EncryptTokenRequest(url: "https://api-lp1.znc.srv.nintendo.net/v3/Account/Login", parameter: [
-                "f":"",
-                "language": naUser.language,
-                "naBirthday": naUser.birthday,
-                "naCountry": naUser.country,
-                "naIdToken": loginToken.idToken,
-                "requestId": "",
-                "timestamp": 0,
-            ]),
-            naId: naUser.id,
-            coralUserId: nil
-        )
-        
-        // 7. 获取登录结果
-        let loginResult = try await requestLogin(encryptedTokenRequest: encryptedTokenRequest)
-        
-        // 8. 生成web service f值
-        let (_, encryptedTokenRequest2) = try await nxapiZncaFAdvanced(
-            accessToken: nxapiZncaApiAccessToken,
-            step: 2,
-            idToken: loginResult.result.webApiServerCredential.accessToken,
-            encryptTokenRequest: EncryptTokenRequest(url: "https://api-lp1.znc.srv.nintendo.net/v4/Game/GetWebServiceToken", parameter: [
-                "f":"",
-                "registrationToken": "",
-                "id": 4834290508791808,
-                "requestId": "",
-                "timestamp": 0,
-            ]),
-            naId: naUser.id,
-            coralUserId: coralUserId
-        )
-        
-        // 9. 获取web service token
-        let webServiceToken = try await requestWebServiceToken(encryptedTokenRequest: encryptedTokenRequest2, accessToken: loginResult.result.webApiServerCredential.accessToken)
-        
-        return LoginFlowResult(
-            sessionToken: sessionToken,
-            loginToken: loginToken,
-            naUser: naUser,
-            loginResult: loginResult,
-            webServiceToken: webServiceToken
-        )
     }
 
     func login() async throws -> String{
