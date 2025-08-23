@@ -64,6 +64,7 @@
 		8B3591432BF892130066BCA3 /* HomePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3591422BF892130066BCA3 /* HomePage.swift */; };
 		8B3591452BF893D60066BCA3 /* MePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3591442BF893D60066BCA3 /* MePage.swift */; };
 		8B401C252CD65729008B05DE /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8B401C242CD65729008B05DE /* Launch Screen.storyboard */; };
+		8B4BF1FC2E59E9EC007A8B05 /* SplatDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 8B4BF1FB2E59E9EC007A8B05 /* SplatDatabase */; };
 		8B4E4F962C01F69900818D31 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4E4F952C01F69900818D31 /* LoginViewModel.swift */; };
 		8B50DBE02C01BED40076AE6D /* SN3Client+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50DBDF2C01BED30076AE6D /* SN3Client+Ext.swift */; };
 		8B50DBE22C01C1C20076AE6D /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50DBE12C01C1C20076AE6D /* Logger.swift */; };
@@ -114,11 +115,12 @@
 		8BB4A1F42BFDB4CE008DB764 /* FixVectorImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */; };
 		8BB719A72CAA2B54003C6909 /* ThreadSafeExecution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB719A62CAA2B54003C6909 /* ThreadSafeExecution.swift */; };
 		8BB99B372BF77B3B00470408 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB99B362BF77B3B00470408 /* Models.swift */; };
+		8BD548DD2E483C69005B8F27 /* TaskManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD548DC2E483C69005B8F27 /* TaskManager.swift */; };
+		8BD548E22E4AC53E005B8F27 /* SplatDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 8BD548E12E4AC53E005B8F27 /* SplatDatabase */; };
 		8BD8CD522C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD8CD512C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift */; };
 		8BD8CD542C0ADBC200FED66F /* WavePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD8CD532C0ADBC200FED66F /* WavePicker.swift */; };
 		8BDA845E2C0003D70038655C /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 8BDA845D2C0003D70038655C /* Algorithms */; };
 		8BDA84602C00A0290038655C /* NSOAccountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BDA845F2C00A0290038655C /* NSOAccountManager.swift */; };
-		8BDF9A252C9BEFC50019F7EC /* SplatDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 8BDF9A242C9BEFC50019F7EC /* SplatDatabase */; };
 		8BE0950D2C0315C40089705F /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE0950C2C0315C40089705F /* ActivityView.swift */; };
 		8BE095112C035B000089705F /* CoopShiftDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE095102C035B000089705F /* CoopShiftDetailView.swift */; };
 		8BE095132C035B280089705F /* CoopShiftDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE095122C035B280089705F /* CoopShiftDetailViewModel.swift */; };
@@ -321,6 +323,7 @@
 		8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FixVectorImage.swift; sourceTree = "<group>"; };
 		8BB719A62CAA2B54003C6909 /* ThreadSafeExecution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadSafeExecution.swift; sourceTree = "<group>"; };
 		8BB99B362BF77B3B00470408 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		8BD548DC2E483C69005B8F27 /* TaskManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskManager.swift; sourceTree = "<group>"; };
 		8BD8CD512C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopShiftDetailWaveStatusView.swift; sourceTree = "<group>"; };
 		8BD8CD532C0ADBC200FED66F /* WavePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WavePicker.swift; sourceTree = "<group>"; };
 		8BDA845F2C00A0290038655C /* NSOAccountManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSOAccountManager.swift; sourceTree = "<group>"; };
@@ -376,11 +379,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8BDF9A252C9BEFC50019F7EC /* SplatDatabase in Frameworks */,
 				8B93C0CC2C12EB1A00D7EFBC /* GRDB in Frameworks */,
 				8BDA845E2C0003D70038655C /* Algorithms in Frameworks */,
 				8B26364F2BFEB00700F8964A /* AlertKit in Frameworks */,
 				8B26364C2BFEAE9400F8964A /* Zip in Frameworks */,
+				8B4BF1FC2E59E9EC007A8B05 /* SplatDatabase in Frameworks */,
+				8BD548E22E4AC53E005B8F27 /* SplatDatabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -412,6 +416,7 @@
 		8B0D14852BFA212400B82AD1 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				8BD548DC2E483C69005B8F27 /* TaskManager.swift */,
 				8BDA845F2C00A0290038655C /* NSOAccountManager.swift */,
 				8B0D14832BFA210600B82AD1 /* SessionManager.swift */,
 			);
@@ -454,7 +459,6 @@
 				8B7F29392BF6E1BB0010A525 /* iminkTests */,
 				8B7F29432BF6E1BB0010A525 /* iminkUITests */,
 				8B7F29272BF6E1B90010A525 /* Products */,
-				8B93C0CE2C12EBA300D7EFBC /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -666,13 +670,6 @@
 			path = Common;
 			sourceTree = "<group>";
 		};
-		8B93C0CE2C12EBA300D7EFBC /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 		8BA017452C099F0B001CFC72 /* Protocol */ = {
 			isa = PBXGroup;
 			children = (
@@ -836,7 +833,8 @@
 				8B26364E2BFEB00700F8964A /* AlertKit */,
 				8BDA845D2C0003D70038655C /* Algorithms */,
 				8B93C0CB2C12EB1A00D7EFBC /* GRDB */,
-				8BDF9A242C9BEFC50019F7EC /* SplatDatabase */,
+				8BD548E12E4AC53E005B8F27 /* SplatDatabase */,
+				8B4BF1FB2E59E9EC007A8B05 /* SplatDatabase */,
 			);
 			productName = imink;
 			productReference = 8B7F29262BF6E1B90010A525 /* imink.app */;
@@ -926,7 +924,7 @@
 				8BDA845C2C0003D70038655C /* XCRemoteSwiftPackageReference "swift-algorithms" */,
 				8B93C0CA2C12EB1A00D7EFBC /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 				8B93C0CD2C12EB4800D7EFBC /* XCRemoteSwiftPackageReference "SwiftyJSON" */,
-				8BDF9A232C9BEFC50019F7EC /* XCRemoteSwiftPackageReference "SplatDatabase" */,
+				8B4BF1FA2E59E9EC007A8B05 /* XCRemoteSwiftPackageReference "SplatDatabase" */,
 			);
 			productRefGroup = 8B7F29272BF6E1B90010A525 /* Products */;
 			projectDirPath = "";
@@ -982,6 +980,7 @@
 				8B3591452BF893D60066BCA3 /* MePage.swift in Sources */,
 				8BFE91722C0D7CE000C12CBE /* Filter.swift in Sources */,
 				8B0D148D2BFA2CEF00B82AD1 /* CoopListRowInfo.swift in Sources */,
+				8BD548DD2E483C69005B8F27 /* TaskManager.swift in Sources */,
 				8B7059042C0B00510076F680 /* NameplateView.swift in Sources */,
 				8B0D14712BF9898100B82AD1 /* SettingPage.swift in Sources */,
 				8B0D14AB2BFADDD200B82AD1 /* CoopDetailViewModel.swift in Sources */,
@@ -1314,7 +1313,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"imink/Preview Content\"";
-				DEVELOPMENT_TEAM = 2ST3TQ6FXT;
+				DEVELOPMENT_TEAM = 8F7JZ68NZS;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = imink/Info.plist;
@@ -1330,7 +1329,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = jiangfeng.imink;
+				PRODUCT_BUNDLE_IDENTIFIER = jeffjiang.imink;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -1351,7 +1350,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"imink/Preview Content\"";
-				DEVELOPMENT_TEAM = 2ST3TQ6FXT;
+				DEVELOPMENT_TEAM = 8F7JZ68NZS;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = imink/Info.plist;
@@ -1367,7 +1366,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = jiangfeng.imink;
+				PRODUCT_BUNDLE_IDENTIFIER = jeffjiang.imink;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -1513,6 +1512,14 @@
 				minimumVersion = 5.1.9;
 			};
 		};
+		8B4BF1FA2E59E9EC007A8B05 /* XCRemoteSwiftPackageReference "SplatDatabase" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/zifengjiang/SplatDatabase.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		8B93C0CA2C12EB1A00D7EFBC /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
@@ -1537,14 +1544,6 @@
 				minimumVersion = 1.2.0;
 			};
 		};
-		8BDF9A232C9BEFC50019F7EC /* XCRemoteSwiftPackageReference "SplatDatabase" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/zifengjiang/SplatDatabase.git";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1558,20 +1557,24 @@
 			package = 8B26364D2BFEB00700F8964A /* XCRemoteSwiftPackageReference "SPAlert" */;
 			productName = AlertKit;
 		};
+		8B4BF1FB2E59E9EC007A8B05 /* SplatDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8B4BF1FA2E59E9EC007A8B05 /* XCRemoteSwiftPackageReference "SplatDatabase" */;
+			productName = SplatDatabase;
+		};
 		8B93C0CB2C12EB1A00D7EFBC /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 8B93C0CA2C12EB1A00D7EFBC /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
 		};
+		8BD548E12E4AC53E005B8F27 /* SplatDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SplatDatabase;
+		};
 		8BDA845D2C0003D70038655C /* Algorithms */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 8BDA845C2C0003D70038655C /* XCRemoteSwiftPackageReference "swift-algorithms" */;
 			productName = Algorithms;
-		};
-		8BDF9A242C9BEFC50019F7EC /* SplatDatabase */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8BDF9A232C9BEFC50019F7EC /* XCRemoteSwiftPackageReference "SplatDatabase" */;
-			productName = SplatDatabase;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -1,5 +1,5 @@
 {
-  "originHash" : "444d05af6040723e631531c1c7840235efa55a4cd5c4b7765f957f5a7a60b482",
+  "originHash" : "9d096f6d3cbf91ed9d5a333dfd83c077dc51b80a842507314987f40e42134196",
   "pins" : [
     {
       "identity" : "grdb.swift",
@@ -25,7 +25,7 @@
       "location" : "https://github.com/zifengjiang/SplatDatabase.git",
       "state" : {
         "branch" : "main",
-        "revision" : "ad239c04bd0aa1747a2f0d8c6b1933402b9d8149"
+        "revision" : "35cf842e6aba3c2ce6f7936272880418c1bcae32"
       }
     },
     {
