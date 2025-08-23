@@ -15,6 +15,11 @@
 		<string>fetch</string>
 		<string>processing</string>
 		<string>remote-notification</string>
+		<string>background-app-refresh</string>
+	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.zjoker.imink.refresh</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict>

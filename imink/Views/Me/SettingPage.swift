@@ -7,6 +7,8 @@ struct SettingPage: View {
     
     @EnvironmentObject var mainViewModel: MainViewModel
     @EnvironmentObject var coopListViewModel: CoopListViewModel
+    @EnvironmentObject var backgroundTaskManager: BackgroundTaskManager
+    @EnvironmentObject var notificationManager: NotificationManager
     @State var showFilePicker = false
     @State private var isActivityPresented = false
     @State var showLogoutAlert = false
@@ -98,6 +100,55 @@ struct SettingPage: View {
 
                 }
 
+                Section(header: Text("后台刷新和通知")){
+                    HStack {
+                        Text("通知权限状态")
+                        Spacer()
+                        Text(notificationManager.isAuthorized ? "已授权" : "未授权")
+                            .foregroundStyle(notificationManager.isAuthorized ? .green : .red)
+                    }
+                    
+                    Button {
+                        Task {
+                            await notificationManager.requestNotificationPermission()
+                        }
+                    } label: {
+                        Text("请求通知权限")
+                    }
+                    .disabled(notificationManager.isAuthorized)
+                    
+                    HStack {
+                        Text("未查看的数据数量")
+                        Spacer()
+                        Text("\(backgroundTaskManager.unviewedDataCount)")
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    Button {
+                        backgroundTaskManager.markDataAsViewed()
+                        notificationManager.clearDataUpdateNotifications()
+                    } label: {
+                        Text("清除所有通知")
+                    }
+                    
+                    Button {
+                        Task {
+                            // 手动触发后台刷新测试
+                            await NSOAccountManager.shared.refreshGameServiceTokenIfNeeded()
+                            await SN3Client.shared.fetchBattles()
+                            await SN3Client.shared.fetchCoops()
+                        }
+                    } label: {
+                        Text("手动刷新数据（测试）")
+                    }
+                    
+                    Button {
+                        backgroundTaskManager.scheduleBackgroundRefresh()
+                    } label: {
+                        Text("调度后台刷新任务")
+                    }
+                }
+
                 Section(header: Text("关于Imink")){
                     Button{
 
@@ -146,6 +197,11 @@ struct SettingPage: View {
                             .foregroundStyle(.accent)
                             .frame(height: 40)
                     }
+                }
+            }
+            .onAppear {
+                Task {
+                    await notificationManager.checkNotificationPermission()
                 }
             }
         }

@@ -65,6 +65,8 @@
 		8B3591452BF893D60066BCA3 /* MePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3591442BF893D60066BCA3 /* MePage.swift */; };
 		8B401C252CD65729008B05DE /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8B401C242CD65729008B05DE /* Launch Screen.storyboard */; };
 		8B4BF1FC2E59E9EC007A8B05 /* SplatDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 8B4BF1FB2E59E9EC007A8B05 /* SplatDatabase */; };
+		8B4BF1FE2E59ECB6007A8B05 /* BackgroundTaskManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4BF1FD2E59ECB6007A8B05 /* BackgroundTaskManager.swift */; };
+		8B4BF2002E59ECDF007A8B05 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4BF1FF2E59ECDF007A8B05 /* NotificationManager.swift */; };
 		8B4E4F962C01F69900818D31 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4E4F952C01F69900818D31 /* LoginViewModel.swift */; };
 		8B50DBE02C01BED40076AE6D /* SN3Client+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50DBDF2C01BED30076AE6D /* SN3Client+Ext.swift */; };
 		8B50DBE22C01C1C20076AE6D /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50DBE12C01C1C20076AE6D /* Logger.swift */; };
@@ -260,6 +262,8 @@
 		8B3591422BF892130066BCA3 /* HomePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePage.swift; sourceTree = "<group>"; };
 		8B3591442BF893D60066BCA3 /* MePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MePage.swift; sourceTree = "<group>"; };
 		8B401C242CD65729008B05DE /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		8B4BF1FD2E59ECB6007A8B05 /* BackgroundTaskManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundTaskManager.swift; sourceTree = "<group>"; };
+		8B4BF1FF2E59ECDF007A8B05 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		8B4E4F952C01F69900818D31 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		8B50DBDF2C01BED30076AE6D /* SN3Client+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SN3Client+Ext.swift"; sourceTree = "<group>"; };
 		8B50DBE12C01C1C20076AE6D /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
@@ -417,6 +421,8 @@
 			isa = PBXGroup;
 			children = (
 				8BD548DC2E483C69005B8F27 /* TaskManager.swift */,
+				8B4BF1FF2E59ECDF007A8B05 /* NotificationManager.swift */,
+				8B4BF1FD2E59ECB6007A8B05 /* BackgroundTaskManager.swift */,
 				8BDA845F2C00A0290038655C /* NSOAccountManager.swift */,
 				8B0D14832BFA210600B82AD1 /* SessionManager.swift */,
 			);
@@ -1017,6 +1023,7 @@
 				8BF3CB852CD4BAEF00B0FCA9 /* MediaType.swift in Sources */,
 				8BF3CB862CD4BAEF00B0FCA9 /* RequestMethod.swift in Sources */,
 				8BA1F3F62CD313EE00E733EA /* Haptics.swift in Sources */,
+				8B4BF2002E59ECDF007A8B05 /* NotificationManager.swift in Sources */,
 				8B1F74612CDB034D00BBC8E9 /* WeaponRecordView.swift in Sources */,
 				8BF3CB8A2CD4BE4700B0FCA9 /* RotationView.swift in Sources */,
 				8B19CF8A2CB29BC500EF4424 /* BattleRule.swift in Sources */,
@@ -1035,6 +1042,7 @@
 				8B5276122BFC1DF100022D5B /* OverlayImage.swift in Sources */,
 				8B0D14922BFA31D000B82AD1 /* String+LocalizedString.swift in Sources */,
 				8B0D146F2BF9789200B82AD1 /* MainViewModel.swift in Sources */,
+				8B4BF1FE2E59ECB6007A8B05 /* BackgroundTaskManager.swift in Sources */,
 				8B0D148B2BFA298A00B82AD1 /* CoopListViewModel.swift in Sources */,
 				8B0D14892BFA28F100B82AD1 /* CoopListView.swift in Sources */,
 				8B5A77EF2CFDAD5700B34BDC /* SwiftyJSONDecodable.swift in Sources */,
