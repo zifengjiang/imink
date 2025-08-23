@@ -67,6 +67,8 @@
 		8B4BF1FC2E59E9EC007A8B05 /* SplatDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 8B4BF1FB2E59E9EC007A8B05 /* SplatDatabase */; };
 		8B4BF1FE2E59ECB6007A8B05 /* BackgroundTaskManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4BF1FD2E59ECB6007A8B05 /* BackgroundTaskManager.swift */; };
 		8B4BF2002E59ECDF007A8B05 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4BF1FF2E59ECDF007A8B05 /* NotificationManager.swift */; };
+		8B4BF2022E59F167007A8B05 /* ScheduleSubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4BF2012E59F167007A8B05 /* ScheduleSubscription.swift */; };
+		8B4BF2042E59F17C007A8B05 /* ScheduleSubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4BF2032E59F17C007A8B05 /* ScheduleSubscriptionManager.swift */; };
 		8B4E4F962C01F69900818D31 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4E4F952C01F69900818D31 /* LoginViewModel.swift */; };
 		8B50DBE02C01BED40076AE6D /* SN3Client+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50DBDF2C01BED30076AE6D /* SN3Client+Ext.swift */; };
 		8B50DBE22C01C1C20076AE6D /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50DBE12C01C1C20076AE6D /* Logger.swift */; };
@@ -264,6 +266,8 @@
 		8B401C242CD65729008B05DE /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		8B4BF1FD2E59ECB6007A8B05 /* BackgroundTaskManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundTaskManager.swift; sourceTree = "<group>"; };
 		8B4BF1FF2E59ECDF007A8B05 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		8B4BF2012E59F167007A8B05 /* ScheduleSubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleSubscription.swift; sourceTree = "<group>"; };
+		8B4BF2032E59F17C007A8B05 /* ScheduleSubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleSubscriptionManager.swift; sourceTree = "<group>"; };
 		8B4E4F952C01F69900818D31 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		8B50DBDF2C01BED30076AE6D /* SN3Client+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SN3Client+Ext.swift"; sourceTree = "<group>"; };
 		8B50DBE12C01C1C20076AE6D /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
@@ -422,6 +426,7 @@
 			children = (
 				8BD548DC2E483C69005B8F27 /* TaskManager.swift */,
 				8B4BF1FF2E59ECDF007A8B05 /* NotificationManager.swift */,
+				8B4BF2032E59F17C007A8B05 /* ScheduleSubscriptionManager.swift */,
 				8B4BF1FD2E59ECB6007A8B05 /* BackgroundTaskManager.swift */,
 				8BDA845F2C00A0290038655C /* NSOAccountManager.swift */,
 				8B0D14832BFA210600B82AD1 /* SessionManager.swift */,
@@ -715,6 +720,7 @@
 				8B19CF892CB29BC500EF4424 /* BattleRule.swift */,
 				8B0851712BFB5FE100AF22C5 /* CoopRule.swift */,
 				8BB99B362BF77B3B00470408 /* Models.swift */,
+				8B4BF2012E59F167007A8B05 /* ScheduleSubscription.swift */,
 				8B0D14812BF9B85700B82AD1 /* GameMode.swift */,
 				8B19CF872CB299F300EF4424 /* BattleMode.swift */,
 				8B50DBE12C01C1C20076AE6D /* Logger.swift */,
@@ -1050,6 +1056,7 @@
 				8B19CF2F2CB2466400EF4424 /* BattleListViewModel.swift in Sources */,
 				8BFF73E52C0938330048F2A6 /* CoopListDetailView.swift in Sources */,
 				8B7F292C2BF6E1B90010A525 /* MainView.swift in Sources */,
+				8B4BF2042E59F17C007A8B05 /* ScheduleSubscriptionManager.swift in Sources */,
 				8B19CF902CB2CB0200EF4424 /* Judgement.swift in Sources */,
 				8B19CF2D2CB2464F00EF4424 /* BattleListView.swift in Sources */,
 				8B0851782BFB78D800AF22C5 /* CoopDetailWaveResultView.swift in Sources */,
@@ -1112,6 +1119,7 @@
 				8BF3CB822CD4BA9B00B0FCA9 /* URLSession+Polyfill.swift .swift in Sources */,
 				8B3591432BF892130066BCA3 /* HomePage.swift in Sources */,
 				8B1925CA2E3F4A5C00BCB851 /* CoopFilterView.swift in Sources */,
+				8B4BF2022E59F167007A8B05 /* ScheduleSubscription.swift in Sources */,
 				8B0D14842BFA210700B82AD1 /* SessionManager.swift in Sources */,
 				8BA30B082CAED80E0020D489 /* Operator.swift in Sources */,
 				8BD8CD542C0ADBC200FED66F /* WavePicker.swift in Sources */,

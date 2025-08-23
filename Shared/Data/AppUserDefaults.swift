@@ -47,6 +47,55 @@ class AppUserDefaults: ObservableObject {
 
     @AppStorage("scheduleRefreshTime", store: .appGroup)
     var scheduleRefreshTime: Int = 0
+    
+    // MARK: - 日程订阅相关
+    @AppStorage("scheduleSubscriptions", store: .appGroup)
+    private var subscriptionsData: Data = Data()
+    
+    @AppStorage("notificationSettings", store: .appGroup)
+    private var notificationSettingsData: Data = Data()
+    
+    // 订阅列表
+    var scheduleSubscriptions: [ScheduleSubscription] {
+        get {
+            guard !subscriptionsData.isEmpty else { return [] }
+            do {
+                return try JSONDecoder().decode([ScheduleSubscription].self, from: subscriptionsData)
+            } catch {
+                logError("解码订阅数据失败: \(error)" as! Error)
+                return []
+            }
+        }
+        set {
+            do {
+                subscriptionsData = try JSONEncoder().encode(newValue)
+                objectWillChange.send()
+            } catch {
+                logError("编码订阅数据失败: \(error)" as! Error)
+            }
+        }
+    }
+    
+    // 通知设置
+    var notificationSettings: NotificationSettings {
+        get {
+            guard !notificationSettingsData.isEmpty else { return .default }
+            do {
+                return try JSONDecoder().decode(NotificationSettings.self, from: notificationSettingsData)
+            } catch {
+                logError("解码通知设置失败: \(error)" as! Error)
+                return .default
+            }
+        }
+        set {
+            do {
+                notificationSettingsData = try JSONEncoder().encode(newValue)
+                objectWillChange.send()
+            } catch {
+                logError("编码通知设置失败: \(error)" as! Error)
+            }
+        }
+    }
 }
 
 

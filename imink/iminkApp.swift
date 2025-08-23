@@ -9,6 +9,7 @@ struct iminkApp: App {
     @StateObject var battleListViewModel = BattleListViewModel()
     @StateObject var backgroundTaskManager = BackgroundTaskManager.shared
     @StateObject var notificationManager = NotificationManager.shared
+    @StateObject var subscriptionManager = ScheduleSubscriptionManager.shared
 
     init(){
         #if DEBUG
@@ -41,6 +42,7 @@ struct iminkApp: App {
                     .environmentObject(battleListViewModel)
                     .environmentObject(backgroundTaskManager)
                     .environmentObject(notificationManager)
+                    .environmentObject(subscriptionManager)
             }
             .overlay(alignment: .top) {
                 IndicatorsOverlay(model: Indicators.shared)
@@ -56,6 +58,9 @@ struct iminkApp: App {
                 Task {
                     await NotificationManager.shared.requestNotificationPermission()
                     BackgroundTaskManager.shared.scheduleBackgroundRefresh()
+                    
+                    // 清理过期的日程订阅
+                    ScheduleSubscriptionManager.shared.removeExpiredSubscriptions()
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in

@@ -25,6 +25,19 @@ final class NotificationManager: NSObject, ObservableObject {
     override init() {
         super.init()
         UNUserNotificationCenter.current().delegate = self
+        setupNotificationCategories()
+    }
+    
+    // MARK: - 设置通知类别
+    private func setupNotificationCategories() {
+        let scheduleReminderCategory = UNNotificationCategory(
+            identifier: "SCHEDULE_REMINDER",
+            actions: [],
+            intentIdentifiers: [],
+            options: [.customDismissAction]
+        )
+        
+        UNUserNotificationCenter.current().setNotificationCategories([scheduleReminderCategory])
     }
     
     // MARK: - 请求通知权限

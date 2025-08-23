@@ -9,6 +9,7 @@ struct SettingPage: View {
     @EnvironmentObject var coopListViewModel: CoopListViewModel
     @EnvironmentObject var backgroundTaskManager: BackgroundTaskManager
     @EnvironmentObject var notificationManager: NotificationManager
+    @EnvironmentObject var subscriptionManager: ScheduleSubscriptionManager
     @State var showFilePicker = false
     @State private var isActivityPresented = false
     @State var showLogoutAlert = false
@@ -173,6 +174,61 @@ struct SettingPage: View {
                             .foregroundStyle(.orange)
                     }
                     #endif
+                }
+
+                Section(header: Text("日程订阅和提醒")) {
+                    Toggle("启用日程提醒", isOn: $subscriptionManager.notificationSettings.isEnabled)
+                        .onChange(of: subscriptionManager.notificationSettings.isEnabled) { _, _ in
+                            subscriptionManager.saveNotificationSettings()
+                        }
+                    
+                    if subscriptionManager.notificationSettings.isEnabled {
+                        // 第一次通知设置
+                        Picker("第一次提醒时间", selection: $subscriptionManager.notificationSettings.firstNotificationMinutes) {
+                            ForEach(NotificationSettings.firstNotificationOptions, id: \.0) { option in
+                                Text(option.1).tag(option.0)
+                            }
+                        }
+                        .onChange(of: subscriptionManager.notificationSettings.firstNotificationMinutes) { _, _ in
+                            subscriptionManager.saveNotificationSettings()
+                        }
+                        
+                        Toggle("启用二次提醒", isOn: $subscriptionManager.notificationSettings.enableSecondNotification)
+                            .onChange(of: subscriptionManager.notificationSettings.enableSecondNotification) { _, _ in
+                                subscriptionManager.saveNotificationSettings()
+                            }
+                        
+                        if subscriptionManager.notificationSettings.enableSecondNotification {
+                            Picker("二次提醒时间", selection: $subscriptionManager.notificationSettings.secondNotificationMinutes) {
+                                ForEach(NotificationSettings.secondNotificationOptions, id: \.0) { option in
+                                    Text(option.1).tag(option.0)
+                                }
+                            }
+                            .onChange(of: subscriptionManager.notificationSettings.secondNotificationMinutes) { _, _ in
+                                subscriptionManager.saveNotificationSettings()
+                            }
+                        }
+                    }
+                    
+                    HStack {
+                        Text("当前订阅数量")
+                        Spacer()
+                        Text("\(subscriptionManager.subscriptions.count)")
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    if !subscriptionManager.subscriptions.isEmpty {
+                        Button("清除所有订阅") {
+                            for subscription in subscriptionManager.subscriptions {
+                                subscriptionManager.unsubscribeFromSchedule(subscription.id)
+                            }
+                        }
+                        .foregroundStyle(.red)
+                    }
+                    
+                    Button("清理过期订阅") {
+                        subscriptionManager.removeExpiredSubscriptions()
+                    }
                 }
 
                 Section(header: Text("关于Imink")){

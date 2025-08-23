@@ -21,6 +21,8 @@
 	<array>
 		<string>com.zjoker.imink.refresh</string>
 	</array>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>imink需要发送通知来提醒您订阅的日程安排</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

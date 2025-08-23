@@ -5,11 +5,13 @@ import Charts
 struct HomePage: View {
 
     @StateObject var viewModel: HomeViewModel
+    @EnvironmentObject var subscriptionManager: ScheduleSubscriptionManager
 
     @State private var vdChartViewHeight: CGFloat = 200
     @State private var vdChartLastBlockWidth: CGFloat = 0
 
     @State private var mode: GameMode = .regular
+    @State private var showSubscribedOnly = false
 
     @AppStorage("home_page_selectedScheduleType")
     var selectedScheduleType = 0
@@ -30,9 +32,33 @@ struct HomePage: View {
                     .frame(height: 240)
 
                     VStack(spacing:0){
-                        Text("home_schedule_title")
-                            .font(.splatoonFont(size: 22))
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        HStack {
+                            Text("home_schedule_title")
+                                .font(.splatoonFont(size: 22))
+                            
+                            Spacer()
+                            
+                            // 筛选按钮
+                            Button(action: {
+                                showSubscribedOnly.toggle()
+                                Haptics.generateIfEnabled(.light)
+                            }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: showSubscribedOnly ? "bell.fill" : "bell")
+                                        .font(.system(size: 14, weight: .medium))
+                                    // Text(showSubscribedOnly ? "已订阅" : "全部")
+                                    //     .font(.system(size: 12, weight: .medium))
+                                }
+                                .foregroundColor(showSubscribedOnly ? .orange : .secondary)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(
+                                    Capsule()
+                                        .fill(showSubscribedOnly ? Color.orange.opacity(0.1) : Color.secondary.opacity(0.1))
+                                )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
 
                         Picker(selection: $selectedScheduleType) {
                             Text("home_picker_battle").tag(0)
@@ -46,9 +72,11 @@ struct HomePage: View {
 
                         
                         if selectedScheduleType == 0{
-                            BattleScheduleView(scheduleGroups: viewModel.scheduleGroups)
+                            BattleScheduleView(scheduleGroups: showSubscribedOnly ? 
+                                subscriptionManager.filterSubscribedBattleSchedules(viewModel.scheduleGroups) : viewModel.scheduleGroups)
                         }else{
-                            SalmonRunScheduleView(salmonRunSchedules: viewModel.salmonRunSchedules)
+                            SalmonRunScheduleView(salmonRunSchedules: showSubscribedOnly ? 
+                                subscriptionManager.filterSubscribedSalmonRunSchedules(viewModel.salmonRunSchedules) : viewModel.salmonRunSchedules)
                         }
                     }
                 }
