@@ -124,6 +124,7 @@ extension AppAPI: TargetType {
             ])
         case .nxapiZnca_auth_token:
             let params = [
+                ("client_id", "U2DFLOy1kFnkrvM6QslVVg"),
                 ("client_id", "imink_client"),
                 ("grant_type", "client_credentials"),
                 ("scope", "ca:gf ca:er ca:dr")
