@@ -11,7 +11,7 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
 
     // 新增成员变量，用于在多个流程中传递
     var nxapiZncaApiAccessToken: String = ""
-    var nsoVersion: String = AppUserDefaults.shared.NSOVersion
+    var nsoVersion: String = ""
     var coralUserId: String = ""
 
     static private func snakeCaseDecoder() -> JSONDecoder {
@@ -238,12 +238,12 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
     // 保留原有方法以兼容性
     func requestWebServiceToken(sessionToken:String, indicatorID: String? = nil) async throws -> WebServiceToken {
         // 1. 获取登录token
-        Indicators.shared.updateProgress(for: indicatorID, progress: 0.166)
+        Indicators.shared.updateTitle(for: indicatorID, title: "获取登录token")
         let loginToken = try await requestLoginToken(sessionToken: sessionToken)
         
         // 2. 获取用户信息（从存储中获取或重新请求）
         let naUser: NAUser
-        Indicators.shared.updateProgress(for: indicatorID, progress: 0.332)
+        Indicators.shared.updateTitle(for: indicatorID, title: "获取用户信息")
         naUser = try await requestUserInfo(accessToken: loginToken.accessToken)
 
         // 3. 获取nxapi-znca认证token（从存储中获取或重新请求）
@@ -251,7 +251,7 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
 
         // 4. 获取NSO版本（如果还没有的话）
         if nsoVersion.isEmpty {
-            Indicators.shared.updateProgress(for: indicatorID, progress: 0.4)
+            Indicators.shared.updateTitle(for: indicatorID, title: "获取NSO版本")
             let config = try await nxapiZncaConfig()
             if let version = config["nso_version"] as? String {
                 nsoVersion = version
@@ -260,7 +260,7 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
         }
         
         // 5. 生成登录f值
-        Indicators.shared.updateProgress(for: indicatorID, progress: 0.5)
+        Indicators.shared.updateTitle(for: indicatorID, title: "生成登录f值")
         let (version, encryptedTokenRequest) = try await nxapiZncaFAdvanced(
             accessToken: nxapiZncaApiAccessToken,
             step: 1,
@@ -281,13 +281,13 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
         AppUserDefaults.shared.NSOVersion = version
 
         // 6. 获取登录结果
-        Indicators.shared.updateProgress(for: indicatorID, progress: 0.666)
+        Indicators.shared.updateTitle(for: indicatorID, title: "获取登录结果")
         let loginResult = try await requestLogin(encryptedTokenRequest: encryptedTokenRequest)
 
 
 
         // 7. 生成web service f值
-        Indicators.shared.updateProgress(for: indicatorID, progress: 0.833)
+        Indicators.shared.updateTitle(for: indicatorID, title: "生成web service f值")
         let (_, encryptedTokenRequest2) = try await nxapiZncaFAdvanced(
             accessToken: nxapiZncaApiAccessToken,
             step: 2,
@@ -304,7 +304,7 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
         )
         
         // 8. 获取web service token
-        Indicators.shared.updateProgress(for: indicatorID, progress: 1.0)
+        Indicators.shared.updateTitle(for: indicatorID, title: "获取WebServiceToken")
         let webServiceToken = try await requestWebServiceToken(encryptedTokenRequest: encryptedTokenRequest2, accessToken: loginResult.result.webApiServerCredential.accessToken)
 
         

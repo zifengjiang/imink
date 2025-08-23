@@ -49,8 +49,8 @@ public final class Indicators {
 		dismissTimer(for: id)
 	}
 
-    public func updateProgress(for id: String?, progress: Double) {
-        if let id = id, let index = indicators.firstIndex(where: { $0.id == id }) {
+    public func updateProgress(for id: String, progress: Double) {
+        if let index = indicators.firstIndex(where: { $0.id == id }) {
             withAnimation {
                 indicators[index].progress = progress
             }
