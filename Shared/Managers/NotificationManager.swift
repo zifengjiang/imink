@@ -124,6 +124,42 @@ final class NotificationManager: NSObject, ObservableObject {
         logger.info("数据更新通知已清除")
     }
     
+    // MARK: - 发送Debug模式后台刷新通知
+    func sendDebugBackgroundRefreshNotification(battlesCount: Int, coopsCount: Int, success: Bool) async {
+        #if DEBUG
+        guard isAuthorized else {
+            logger.warning("通知权限未授权，无法发送Debug通知")
+            return
+        }
+        
+        let content = UNMutableNotificationContent()
+        content.title = "后台刷新调试"
+        content.sound = .default
+        
+        if success {
+            content.body = "后台刷新成功完成\n对战: +\(battlesCount) 条\n鲑鱼跑: +\(coopsCount) 条\n时间: \(Date().formatted(date: .omitted, time: .shortened))"
+        } else {
+            content.body = "后台刷新失败\n时间: \(Date().formatted(date: .omitted, time: .shortened))"
+        }
+        
+        // 使用不同的标识符避免与数据更新通知冲突
+        let debugIdentifier = "debug_background_refresh_\(UUID().uuidString)"
+        
+        let request = UNNotificationRequest(
+            identifier: debugIdentifier,
+            content: content,
+            trigger: nil // 立即发送
+        )
+        
+        do {
+            try await UNUserNotificationCenter.current().add(request)
+            logger.info("Debug后台刷新通知已发送: 对战+\(battlesCount), 鲑鱼跑+\(coopsCount), 成功:\(success)")
+        } catch {
+            logger.error("发送Debug通知失败: \(error.localizedDescription)")
+        }
+        #endif
+    }
+    
     // MARK: - 清除所有通知
     func clearAllNotifications() {
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()

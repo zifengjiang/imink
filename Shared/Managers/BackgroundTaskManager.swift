@@ -84,34 +84,50 @@ final class BackgroundTaskManager: ObservableObject {
         logger.info("开始后台数据刷新")
         
         var totalNewData = 0
+        var newBattles = 0
+        var newCoops = 0
+        var refreshSuccess = true
         
-        // 刷新token
-        await NSOAccountManager.shared.refreshGameServiceTokenIfNeeded()
-        
-        // 获取对战记录
-        let battleCountBefore = getBattleCount()
-        await SN3Client.shared.fetchBattles()
-        let battleCountAfter = getBattleCount()
-        let newBattles = max(0, battleCountAfter - battleCountBefore)
-        totalNewData += newBattles
-        
-        // 获取鲑鱼跑记录
-        let coopCountBefore = getCoopCount()
-        await SN3Client.shared.fetchCoops()
-        let coopCountAfter = getCoopCount()
-        let newCoops = max(0, coopCountAfter - coopCountBefore)
-        totalNewData += newCoops
-        
-        logger.info("后台刷新完成，新增数据: 对战\(newBattles)条，鲑鱼跑\(newCoops)条")
-        
-        // 发送通知
-        if totalNewData > 0 {
-            unviewedDataCount += totalNewData
-            await NotificationManager.shared.sendDataUpdateNotification(
-                newDataCount: totalNewData,
-                totalUnviewedCount: unviewedDataCount
-            )
+        do {
+            // 刷新token
+            await NSOAccountManager.shared.refreshGameServiceTokenIfNeeded()
+            
+            // 获取对战记录
+            let battleCountBefore = getBattleCount()
+            await SN3Client.shared.fetchBattles()
+            let battleCountAfter = getBattleCount()
+            newBattles = max(0, battleCountAfter - battleCountBefore)
+            totalNewData += newBattles
+            
+            // 获取鲑鱼跑记录
+            let coopCountBefore = getCoopCount()
+            await SN3Client.shared.fetchCoops()
+            let coopCountAfter = getCoopCount()
+            newCoops = max(0, coopCountAfter - coopCountBefore)
+            totalNewData += newCoops
+            
+            logger.info("后台刷新完成，新增数据: 对战\(newBattles)条，鲑鱼跑\(newCoops)条")
+            
+            // 发送数据更新通知（仅当有新数据时）
+            if totalNewData > 0 {
+                unviewedDataCount += totalNewData
+                await NotificationManager.shared.sendDataUpdateNotification(
+                    newDataCount: totalNewData,
+                    totalUnviewedCount: unviewedDataCount
+                )
+            }
+            
+        } catch {
+            logger.error("后台刷新过程中发生错误: \(error.localizedDescription)")
+            refreshSuccess = false
         }
+        
+        // 发送Debug模式通知（无论是否成功都发送）
+        await NotificationManager.shared.sendDebugBackgroundRefreshNotification(
+            battlesCount: newBattles,
+            coopsCount: newCoops,
+            success: refreshSuccess
+        )
     }
     
     // MARK: - 获取数据计数的辅助方法
@@ -141,6 +157,14 @@ final class BackgroundTaskManager: ObservableObject {
     func markDataAsViewed() {
         unviewedDataCount = 0
         logger.info("数据已标记为已查看")
+    }
+    
+    // MARK: - 手动触发后台数据刷新（用于测试）
+    func performManualBackgroundRefresh() async {
+        #if DEBUG
+        logger.info("手动触发后台数据刷新（测试模式）")
+        await performBackgroundDataRefresh()
+        #endif
     }
     
     // MARK: - 应用生命周期处理

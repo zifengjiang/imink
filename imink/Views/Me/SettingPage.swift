@@ -147,6 +147,32 @@ struct SettingPage: View {
                     } label: {
                         Text("调度后台刷新任务")
                     }
+                    
+                    #if DEBUG
+                    Button {
+                        Task {
+                            // 测试完整后台刷新流程
+                            await backgroundTaskManager.performManualBackgroundRefresh()
+                        }
+                    } label: {
+                        Text("测试完整后台刷新流程")
+                            .foregroundStyle(.blue)
+                    }
+                    
+                    Button {
+                        Task {
+                            // 测试Debug通知
+                            await notificationManager.sendDebugBackgroundRefreshNotification(
+                                battlesCount: Int.random(in: 0...3),
+                                coopsCount: Int.random(in: 0...2), 
+                                success: Bool.random()
+                            )
+                        }
+                    } label: {
+                        Text("测试Debug通知样式")
+                            .foregroundStyle(.orange)
+                    }
+                    #endif
                 }
 
                 Section(header: Text("关于Imink")){
