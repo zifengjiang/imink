@@ -25,13 +25,20 @@ final class BackgroundTaskManager: ObservableObject {
     // 通知计数器 - 记录未查看的数据条数
     @Published var unviewedDataCount: Int = 0
     
-    private init() {}
+    // 后台任务状态信息
+    @Published var lastBackgroundRefreshTime: Date?
+    @Published var backgroundTaskStatus: String = "未知"
+    @Published var pendingBackgroundTasks: Int = 0
+    
+    private init() {
+        checkBackgroundTaskStatus()
+    }
     
     // MARK: - 注册后台任务
     func registerBackgroundTasks() {
         BGTaskScheduler.shared.register(
             forTaskWithIdentifier: Self.refreshIdentifier,
-            using: nil
+            using: .main
         ) { task in
             Task {
                 await self.handleBackgroundRefresh(task: task as! BGAppRefreshTask)
@@ -47,9 +54,41 @@ final class BackgroundTaskManager: ObservableObject {
         
         do {
             try BGTaskScheduler.shared.submit(request)
+            backgroundTaskStatus = "已调度"
+            updatePendingTasksCount()
             logger.info("后台刷新任务已调度，将在15分钟后执行")
         } catch {
+            backgroundTaskStatus = "调度失败: \(error.localizedDescription)"
             logger.error("调度后台刷新任务失败: \(error.localizedDescription)")
+        }
+    }
+    
+    // MARK: - 状态检查
+    func checkBackgroundTaskStatus() {
+        Task {
+            // 检查后台应用刷新权限
+            let refreshStatus = await UIApplication.shared.backgroundRefreshStatus
+            switch refreshStatus {
+            case .available:
+                backgroundTaskStatus = "后台刷新可用"
+            case .denied:
+                backgroundTaskStatus = "用户已禁用后台刷新"
+            case .restricted:
+                backgroundTaskStatus = "系统限制后台刷新"
+            @unknown default:
+                backgroundTaskStatus = "未知状态"
+            }
+            
+            updatePendingTasksCount()
+        }
+    }
+    
+    private func updatePendingTasksCount() {
+        BGTaskScheduler.shared.getPendingTaskRequests { [weak self] requests in
+            Task { @MainActor in
+                self?.pendingBackgroundTasks = requests.count
+                self?.logger.info("待处理的后台任务数量: \(requests.count)")
+            }
         }
     }
     
@@ -76,6 +115,8 @@ final class BackgroundTaskManager: ObservableObject {
         
         // 标记任务完成
         task.setTaskCompleted(success: true)
+        lastBackgroundRefreshTime = Date()
+        updatePendingTasksCount()
         logger.info("后台刷新任务完成")
     }
     
@@ -164,6 +205,27 @@ final class BackgroundTaskManager: ObservableObject {
         #if DEBUG
         logger.info("手动触发后台数据刷新（测试模式）")
         await performBackgroundDataRefresh()
+        lastBackgroundRefreshTime = Date()
+        #endif
+    }
+    
+    // MARK: - 强制调度短间隔后台任务（仅用于测试）
+    func scheduleTestBackgroundRefresh() {
+        #if DEBUG
+        let request = BGAppRefreshTaskRequest(identifier: Self.refreshIdentifier)
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 30) // 30秒后
+        
+        do {
+            // 先取消现有任务
+            BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: Self.refreshIdentifier)
+            try BGTaskScheduler.shared.submit(request)
+            backgroundTaskStatus = "测试任务已调度(30秒)"
+            updatePendingTasksCount()
+            logger.info("测试后台刷新任务已调度，将在30秒后执行")
+        } catch {
+            backgroundTaskStatus = "测试调度失败: \(error.localizedDescription)"
+            logger.error("调度测试后台刷新任务失败: \(error.localizedDescription)")
+        }
         #endif
     }
     

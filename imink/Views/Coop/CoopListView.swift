@@ -199,9 +199,9 @@ struct CoopListView: View {
                         await viewModel.fetchCoops()
                     }
                 }
-                .onDisappear {
-                    TaskManager.shared.cancel(name: String(describing: Self.self))
-                }
+//                .onDisappear {
+//                    TaskManager.shared.cancel(name: String(describing: Self.self))
+//                }
             }
 
         }

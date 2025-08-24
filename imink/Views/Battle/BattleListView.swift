@@ -78,9 +78,9 @@ struct BattleListView: View {
                         await viewModel.fetchBattles()
                     }
                 }
-                .onDisappear {
-                    TaskManager.shared.cancel(name: String(describing: Self.self))
-                }
+//                .onDisappear {
+//                    TaskManager.shared.cancel(name: String(describing: Self.self))
+//                }
             }
         }
     }

@@ -259,7 +259,7 @@ struct SalmonRunStatusView:View {
     var body: some View {
 
         GeometryReader{ geometry in
-            CarouselView(activeIndex: .constant(1), autoScrollDuration: 15) {
+            CarouselView(activeIndex: .constant(1), autoScrollDuration: 150) {
                 HStack(spacing:8){
                     VStack{
                         HStack{

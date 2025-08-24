@@ -102,6 +102,51 @@ struct SettingPage: View {
                 }
 
                 Section(header: Text("后台刷新和通知")){
+                    // 后台刷新状态诊断
+                    HStack {
+                        Text("后台刷新状态")
+                        Spacer()
+                        Text(backgroundTaskManager.backgroundTaskStatus)
+                            .foregroundStyle(backgroundTaskManager.backgroundTaskStatus.contains("可用") ? .green : .orange)
+                            .font(.caption)
+                    }
+                    
+                    if let lastRefresh = backgroundTaskManager.lastBackgroundRefreshTime {
+                        HStack {
+                            Text("上次后台刷新")
+                            Spacer()
+                            Text(lastRefresh.toPlayedTimeString(full: true))
+                                .foregroundStyle(.secondary)
+                                .font(.caption)
+                        }
+                    }
+                    
+                    // Token刷新时间
+                    if AppUserDefaults.shared.gameServiceTokenRefreshTime > 0 {
+                        HStack {
+                            Text("上次Token刷新")
+                            Spacer()
+                            Text(Date(timeIntervalSince1970: TimeInterval(AppUserDefaults.shared.gameServiceTokenRefreshTime)).toPlayedTimeString(full: true))
+                                .foregroundStyle(.secondary)
+                                .font(.caption)
+                        }
+                    } else {
+                        HStack {
+                            Text("上次Token刷新")
+                            Spacer()
+                            Text("从未刷新")
+                                .foregroundStyle(.secondary)
+                                .font(.caption)
+                        }
+                    }
+                    
+                    HStack {
+                        Text("待处理后台任务")
+                        Spacer()
+                        Text("\(backgroundTaskManager.pendingBackgroundTasks)")
+                            .foregroundStyle(.secondary)
+                    }
+                    
                     HStack {
                         Text("通知权限状态")
                         Spacer()
@@ -149,6 +194,22 @@ struct SettingPage: View {
                         Text("调度后台刷新任务")
                     }
                     
+                    Button {
+                        backgroundTaskManager.checkBackgroundTaskStatus()
+                    } label: {
+                        Text("检查后台任务状态")
+                            .foregroundStyle(.blue)
+                    }
+                    
+                    Button {
+                        Task {
+                            await NSOAccountManager.shared.refreshGameServiceTokenManual()
+                        }
+                    } label: {
+                        Text("手动刷新游戏Token")
+                            .foregroundStyle(.green)
+                    }
+                    
                     #if DEBUG
                     Button {
                         Task {
@@ -158,6 +219,13 @@ struct SettingPage: View {
                     } label: {
                         Text("测试完整后台刷新流程")
                             .foregroundStyle(.blue)
+                    }
+                    
+                    Button {
+                        backgroundTaskManager.scheduleTestBackgroundRefresh()
+                    } label: {
+                        Text("调度30秒后台任务(测试)")
+                            .foregroundStyle(.purple)
                     }
                     
                     Button {
@@ -174,6 +242,22 @@ struct SettingPage: View {
                             .foregroundStyle(.orange)
                     }
                     #endif
+                    
+                    // 说明信息
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("⚠️ 后台刷新说明：")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundStyle(.orange)
+                        
+                        Text("• iOS系统严格控制后台任务执行")
+                        Text("• 需要在系统设置中启用后台应用刷新")
+                        Text("• 系统会根据使用情况决定执行频率")
+                        Text("• 充电和Wi-Fi环境下更容易执行")
+                        Text("• 实际执行时间可能超过15分钟")
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
                 }
 
                 Section(header: Text("日程订阅和提醒")) {
