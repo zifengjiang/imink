@@ -13,6 +13,7 @@ class CoopListViewModel: ObservableObject {
     @Published var navigationTitle = "全部打工"
     @Published var detailViewModel:CoopDetailViewModel? = nil
     @Published var detailId:Int64? = nil
+    @Published var currentCoopIsFavorite: Bool = false
 
     private var cancellables: Set<AnyCancellable> = []
 
@@ -124,6 +125,45 @@ class CoopListViewModel: ObservableObject {
             }
         }catch{
             logError(error)
+        }
+    }
+    
+    // MARK: - 收藏相关方法
+    
+    func toggleFavorite(for selectedRow: String?) {
+        guard let rowId = selectedRow, let coop = rows.first(where: {$0.id == rowId})?.coop else { return }
+        
+        Task {
+            do {
+                if let actualCoop = try await SplatDatabase.shared.dbQueue.read({ db in
+                    try Coop.fetchOne(db, key: coop.id)
+                }) {
+                    try actualCoop.toggleFavorite()
+                    await MainActor.run {
+                        self.currentCoopIsFavorite.toggle()
+                    }
+                }
+            } catch {
+                print("Error toggling favorite: \(error)")
+            }
+        }
+    }
+    
+    func loadCurrentCoopFavoriteStatus(for selectedRow: String?) {
+        guard let rowId = selectedRow, let coop = rows.first(where: {$0.id == rowId})?.coop else { return }
+        
+        Task {
+            do {
+                if let actualCoop = try await SplatDatabase.shared.dbQueue.read({ db in
+                    try Coop.fetchOne(db, key: coop.id)
+                }) {
+                    await MainActor.run {
+                        self.currentCoopIsFavorite = actualCoop.isFavorite
+                    }
+                }
+            } catch {
+                print("Error loading coop favorite status: \(error)")
+            }
         }
     }
 

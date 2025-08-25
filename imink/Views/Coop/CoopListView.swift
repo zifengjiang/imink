@@ -27,7 +27,6 @@ struct CoopListView: View {
                     ScrollView{
                         LazyVStack{
                             ForEach(viewModel.rows, id:\.id){ row in
-                                if row.isCoop {
                                     SelectableRowView(
                                         isSelectionMode: isSelectionMode,
                                         isSelected: selectedCoops.contains(row.coop?.id ?? -1),
@@ -57,6 +56,7 @@ struct CoopListView: View {
                                                 .fixSafeareaBackground()
                                                 .onAppear{
                                                     selectedRow = row.id
+                                                    viewModel.loadCurrentCoopFavoriteStatus(for: row.id)
                                                 }
                                                 .toolbar {
 
@@ -96,6 +96,15 @@ struct CoopListView: View {
                                                                 .frame(width: 20*1.2, height: 10*1.2)
                                                         }
 
+                                                        Button {
+                                                            viewModel.toggleFavorite(for: selectedRow)
+                                                            Haptics.generateIfEnabled(.light)
+                                                        } label: {
+                                                            Image(systemName: viewModel.currentCoopIsFavorite ? "heart.fill" : "heart")
+                                                                .foregroundColor(viewModel.currentCoopIsFavorite ? .red : .accentColor)
+                                                                .font(.system(size: 18))
+                                                        }
+
                                                         Button{
                                                             Haptics.generateIfEnabled(.medium)
                                                             if let rowId = selectedRow, let coop = viewModel.rows.first(where: {$0.id == rowId})?.coop{
@@ -131,11 +140,7 @@ struct CoopListView: View {
                                                 .id(row.id)
                                         }
                                     }
-                                } else {
-                                        // 非coop行（如card）直接显示，不参与选择
-                                    CoopListRowView(row: row)
-                                        .id(row.id)
-                                }
+
                             }
                             .scrollTargetLayout()
                         }
@@ -164,6 +169,7 @@ struct CoopListView: View {
                     .onChange(of: selectedRow, { oldValue, newValue in
                         proxy.scrollTo(newValue,anchor: .center)
                         self.isFirstRow = newValue == viewModel.rows.first?.id
+                        viewModel.loadCurrentCoopFavoriteStatus(for: newValue)
                         if newValue == viewModel.rows.last?.id {
                             Task{
                                 if viewModel.navigationTitle == "打工卡片"{
@@ -294,7 +300,6 @@ struct CoopListView: View {
             }
         }
     }
-    
 
 }
 
