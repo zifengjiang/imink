@@ -118,6 +118,7 @@
 		8BAD2C672E5BEDB100DE9952 /* CoopBatchOperationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAD2C662E5BEDB100DE9952 /* CoopBatchOperationView.swift */; };
 		8BAD2C6E2E5BEE0200DE9952 /* TrashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAD2C6D2E5BEE0200DE9952 /* TrashView.swift */; };
 		8BAD2C702E5BEE0A00DE9952 /* TrashViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAD2C6F2E5BEE0A00DE9952 /* TrashViewModel.swift */; };
+		8BAD2C722E5BFB5D00DE9952 /* SelectableRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAD2C712E5BFB5D00DE9952 /* SelectableRowView.swift */; };
 		8BB4A1F22BFDB49E008DB764 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB4A1F12BFDB49E008DB764 /* LoginView.swift */; };
 		8BB4A1F42BFDB4CE008DB764 /* FixVectorImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */; };
 		8BB719A72CAA2B54003C6909 /* ThreadSafeExecution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB719A62CAA2B54003C6909 /* ThreadSafeExecution.swift */; };
@@ -345,6 +346,7 @@
 		8BAD2C662E5BEDB100DE9952 /* CoopBatchOperationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopBatchOperationView.swift; sourceTree = "<group>"; };
 		8BAD2C6D2E5BEE0200DE9952 /* TrashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrashView.swift; sourceTree = "<group>"; };
 		8BAD2C6F2E5BEE0A00DE9952 /* TrashViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrashViewModel.swift; sourceTree = "<group>"; };
+		8BAD2C712E5BFB5D00DE9952 /* SelectableRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectableRowView.swift; sourceTree = "<group>"; };
 		8BB4A1F12BFDB49E008DB764 /* LoginView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FixVectorImage.swift; sourceTree = "<group>"; };
 		8BB719A62CAA2B54003C6909 /* ThreadSafeExecution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadSafeExecution.swift; sourceTree = "<group>"; };
@@ -680,6 +682,7 @@
 				8B7059032C0B00510076F680 /* NameplateView.swift */,
 				8BE0950C2C0315C40089705F /* ActivityView.swift */,
 				8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */,
+				8BAD2C712E5BFB5D00DE9952 /* SelectableRowView.swift */,
 				8BF3CB3D2CD4B26500B0FCA9 /* festIcon.svg */,
 				8B3136972CCCEB3B0085220E /* FestIcon.swift */,
 				8BB4A1F12BFDB49E008DB764 /* LoginView.swift */,
@@ -1083,6 +1086,7 @@
 				8BA1F3FA2CD3382D00E733EA /* CommonUtils.swift in Sources */,
 				8B07920B2C1078310094EA57 /* SalmonRunScheduleCardView.swift in Sources */,
 				8B5B7B1F2CCFBE450088069C /* GearView.swift in Sources */,
+				8BAD2C722E5BFB5D00DE9952 /* SelectableRowView.swift in Sources */,
 				8B0D14682BF8BE8C00B82AD1 /* HomeViewModel.swift in Sources */,
 				8B0D146D2BF9773E00B82AD1 /* AppUserDefaults.swift in Sources */,
 				8B5276122BFC1DF100022D5B /* OverlayImage.swift in Sources */,

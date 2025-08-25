@@ -49,16 +49,18 @@ struct BattleListDetailItemView: View {
                         .foregroundStyle(mode.color)
                     Spacer()
                     
-                    // 喜爱按钮
-                    Button(action: {
-                        toggleFavorite()
-                    }) {
-                        Image(systemName: isFavorite ? "heart.fill" : "heart")
-                            .foregroundColor(isFavorite ? .red : .gray)
-                            .font(.system(size: 14))
+                    // 喜爱按钮 - 只在被标记为喜爱时显示
+                    if isFavorite {
+                        Button(action: {
+                            toggleFavorite()
+                        }) {
+                            Image(systemName: "heart.fill")
+                                .foregroundColor(.red)
+                                .font(.system(size: 14))
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .padding(.trailing, 8)
                     }
-                    .buttonStyle(PlainButtonStyle())
-                    .padding(.trailing, 8)
 
                     if mode == .anarchy{
                         HStack(alignment: .firstTextBaseline, spacing: 0){

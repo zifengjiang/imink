@@ -22,10 +22,11 @@ struct BattleListView: View {
                     ScrollView{
                         LazyVStack{
                             ForEach(viewModel.rows,id: \.id){row in
-                                if isSelectionMode && row.isBattle {
-                                    // 选择模式下的行视图
-                                    HStack {
-                                        Button {
+                                if row.isBattle {
+                                    SelectableRowView(
+                                        isSelectionMode: isSelectionMode,
+                                        isSelected: selectedBattles.contains(row.battle?.id ?? -1),
+                                        onTap: {
                                             if let battleId = row.battle?.id {
                                                 if selectedBattles.contains(battleId) {
                                                     selectedBattles.remove(battleId)
@@ -33,28 +34,25 @@ struct BattleListView: View {
                                                     selectedBattles.insert(battleId)
                                                 }
                                             }
-                                        } label: {
-                                            Image(systemName: selectedBattles.contains(row.battle?.id ?? -1) ? "checkmark.circle.fill" : "circle")
-                                                .foregroundColor(selectedBattles.contains(row.battle?.id ?? -1) ? .accentColor : .gray)
                                         }
-                                        .padding(.leading)
-                                        
-                                        BattleListRowView(row: row)
-                                            .id(row.id)
-                                    }
-                                } else {
-                                    if row.isBattle, let battle = row.battle {
-                                        NavigationLink{
-                                            BattleDetailView(id: battle.id)
-                                        } label: {
+                                    ) {
+                                        if !isSelectionMode, let battle = row.battle {
+                                            NavigationLink{
+                                                BattleDetailView(id: battle.id)
+                                            } label: {
+                                                BattleListRowView(row: row)
+                                                    .id(row.id)
+                                            }
+                                            .buttonStyle(PlainButtonStyle())
+                                        } else {
                                             BattleListRowView(row: row)
                                                 .id(row.id)
                                         }
-                                        .buttonStyle(PlainButtonStyle())
-                                    } else {
-                                        BattleListRowView(row: row)
-                                            .id(row.id)
                                     }
+                                } else {
+                                    // 非battle行（如统计卡片）直接显示，不参与选择
+                                    BattleListRowView(row: row)
+                                        .id(row.id)
                                 }
                             }
                     }
