@@ -180,6 +180,7 @@ struct BattleListDetailItemView: View {
         .background(Color(.listItemBackground))
         .frame(height: 85)
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 10, style: .continuous))
         .contextMenu{
             Button{
                 toggleFavorite()

@@ -100,6 +100,7 @@ struct SalmonRunScheduleCardView: View {
         .padding()
         .background(Color.listItemBackground)
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 10, style: .continuous))
         .contextMenu {
             contextMenuContent
         }
