@@ -36,6 +36,7 @@ extension SN3Client {
 
     // MARK: - Generic fetch pipeline
 extension SN3Client {
+    @discardableResult
     func runPipeline(
         flag: TaskLocal<Bool>,
         refreshInterval: Int,
@@ -43,13 +44,11 @@ extension SN3Client {
         icon: ImageResource,
         getValidIDs: @escaping () async throws -> [String],
         fetchAndStoreDetails: @escaping ([String]) async throws -> Int
-    ) async {
-        guard !flag.get(), Gate.shouldProceed(last: lastRefreshTime, interval: refreshInterval) else { return }
+    ) async -> Int?{
+        guard !flag.get(), Gate.shouldProceed(last: lastRefreshTime, interval: refreshInterval) else { return nil}
         let IndicatorID = UUID().uuidString
-        defer {
-
-        }
         Indicators.shared.display(.init(id: IndicatorID, icon: .progressIndicator, title: "正在加载...", dismissType: .manual, isUserDismissible: false))
+        var count = 0
 
         await flag.withValue(true) {
             let maxRetries = 2
@@ -71,6 +70,7 @@ extension SN3Client {
                     }
                     Indicators.shared.updateTitle(for: IndicatorID, title: "加载\(ids.count)项新纪录")
                     let saved = try await fetchAndStoreDetails(ids)
+                    count = saved
                     lastRefreshTime = Int(Date().timeIntervalSince1970)
                     Indicators.shared.updateTitle(for: IndicatorID, title: "加载了\(saved)个新纪录")
                     Indicators.shared.updateIcon(for: IndicatorID, icon: .success)
@@ -96,13 +96,15 @@ extension SN3Client {
             Indicators.shared.updateIcon(for: IndicatorID, icon: .image(Image(systemName: "xmark.icloud")))
 
         }
+        return count
     }
 }
 
     // MARK: - High-level APIs
 extension SN3Client {
-    func fetchCoops() async {
-        await runPipeline(
+    @discardableResult
+    func fetchCoops() async -> Int?{
+        return await runPipeline(
             flag: .isFetchingCoops,
             refreshInterval: 300,
             lastRefreshTime: &AppUserDefaults.shared.coopsRefreshTime,
@@ -141,9 +143,9 @@ extension SN3Client {
             }
         )
     }
-
-    func fetchBattles() async {
-        await runPipeline(
+    @discardableResult
+    func fetchBattles() async -> Int?{
+        return await runPipeline(
             flag: .isFetchingBattles,
             refreshInterval: 300,
             lastRefreshTime: &AppUserDefaults.shared.battlesRefreshTime,
