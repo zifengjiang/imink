@@ -193,9 +193,7 @@ class HomeViewModel: ObservableObject {
             Indicators.shared.updateTitle(for: IndicatorId, title: "获取赛程失败")
             Indicators.shared.updateIcon(for: IndicatorId, icon: .image(Image(systemName: "xmark.icloud")))
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            Indicators.shared.dismiss(with: IndicatorId)
-        }
+        Indicators.shared.dismiss(with: IndicatorId)
     }
 
 }

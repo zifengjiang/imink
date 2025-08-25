@@ -15,9 +15,7 @@ class NSOAccountManager:ObservableObject {
         if let sessionToken = AppUserDefaults.shared.sessionToken, AppUserDefaults.shared.gameServiceTokenRefreshTime + 3600 < Int(Date().timeIntervalSince1970){
             let IndicatorId = UUID().uuidString
             defer{
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    Indicators.shared.dismiss(with: IndicatorId)
-                }
+                Indicators.shared.dismiss(with: IndicatorId)
             }
             do{
                 Indicators.shared.display(Indicator(id: IndicatorId, icon: .progressIndicator, title: "刷新游戏服务令牌", dismissType: .manual, isUserDismissible: false))

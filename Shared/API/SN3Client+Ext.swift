@@ -55,9 +55,7 @@ extension SN3Client {
             let maxRetries = 2
             var attempt = 0
             defer {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    Indicators.shared.dismiss(with: IndicatorID)
-                }
+                Indicators.shared.dismiss(with: IndicatorID)
             }
             while attempt < maxRetries {
                 do {
@@ -204,9 +202,7 @@ extension SN3Client {
         var retryCount = 0
         let IndicatorID = UUID().uuidString
         defer {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                Indicators.shared.dismiss(with: IndicatorID)
-            }
+            Indicators.shared.dismiss(with: IndicatorID)
         }
         Indicators.shared.display(.init(id: IndicatorID, icon: .progressIndicator, title: "正在加载...", dismissType: .manual, isUserDismissible: false))
         while retryCount < maxRetries {

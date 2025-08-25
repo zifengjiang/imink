@@ -24,9 +24,7 @@ class LoginViewModel:ObservableObject{
         
         let loginIndicatorId = UUID().uuidString
         defer {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                Indicators.shared.dismiss(with: loginIndicatorId)
-            }
+            Indicators.shared.dismiss(with: loginIndicatorId)
         }
         
         do {
