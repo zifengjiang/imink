@@ -9,33 +9,64 @@ struct CoopListView: View {
     @State var showFilterSheet = false
     @State var selectedRow:String?
     @State var isFirstRow = true
+    @State var isSelectionMode = false
+    @State var selectedCoops: Set<Int64> = []
     
 
     var body: some View {
         NavigationStack {
             ScrollViewReader { proxy in
-                ScrollView{
-                    LazyVStack{
-                        ForEach(viewModel.rows, id:\.id){ row in
-                            NavigationLink {
-                                TabView(selection: $selectedRow){
-                                    ForEach(viewModel.rows, id:\.id){ row in
-                                        CoopListDetailView(isCoop: row.isCoop, coopId: row.coop?.id, shiftId: row.card?.groupId)
-                                            .scrollIndicators(.hidden)
-                                            .scrollClipDisabled()
-                                            .containerRelativeFrame(.horizontal)
-                                            .tag(row.id)
+                VStack {
+                    // 批量操作视图
+                    CoopBatchOperationView(
+                        selectedCoops: $selectedCoops,
+                        isSelectionMode: $isSelectionMode,
+                        coops: viewModel.rows.compactMap { $0.coop }
+                    )
+                    
+                    ScrollView{
+                        LazyVStack{
+                            ForEach(viewModel.rows, id:\.id){ row in
+                                if isSelectionMode && row.isCoop {
+                                    // 选择模式下的行视图
+                                    HStack {
+                                        Button {
+                                            if let coopId = row.coop?.id {
+                                                if selectedCoops.contains(coopId) {
+                                                    selectedCoops.remove(coopId)
+                                                } else {
+                                                    selectedCoops.insert(coopId)
+                                                }
+                                            }
+                                        } label: {
+                                            Image(systemName: selectedCoops.contains(row.coop?.id ?? -1) ? "checkmark.circle.fill" : "circle")
+                                                .foregroundColor(selectedCoops.contains(row.coop?.id ?? -1) ? .accentColor : .gray)
+                                        }
+                                        .padding(.leading)
+                                        
+                                        CoopListRowView(row: row)
+                                            .id(row.id)
                                     }
-                                }
-                                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                                .edgesIgnoringSafeArea(.vertical)
-                                .fixSafeareaBackground()
-                                .onAppear{
-                                    selectedRow = row.id
-                                }
-                                .toolbar {
+                                } else {
+                                    NavigationLink {
+                                        TabView(selection: $selectedRow){
+                                            ForEach(viewModel.rows, id:\.id){ row in
+                                                CoopListDetailView(isCoop: row.isCoop, coopId: row.coop?.id, shiftId: row.card?.groupId)
+                                                    .scrollIndicators(.hidden)
+                                                    .scrollClipDisabled()
+                                                    .containerRelativeFrame(.horizontal)
+                                                    .tag(row.id)
+                                            }
+                                        }
+                                        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                                        .edgesIgnoringSafeArea(.vertical)
+                                        .fixSafeareaBackground()
+                                        .onAppear{
+                                            selectedRow = row.id
+                                        }
+                                        .toolbar {
 
-                                    HStack(alignment: .center, spacing: 10){
+                                            HStack(alignment: .center, spacing: 10){
                                         Button {
                                             moveToPreviousRow()
                                             Haptics.generateIfEnabled(self.isFirstRow ? .error : .light)
@@ -102,9 +133,11 @@ struct CoopListView: View {
                                     .id(row.id)
                             }
                             .buttonStyle(PlainButtonStyle())
+                                }
+                            }
                         }
+                        .scrollTargetLayout()
                     }
-                    .scrollTargetLayout()
                 }
                 .refreshable {
                     TaskManager.shared.start(named: String(describing: Self.self)) {
@@ -141,6 +174,16 @@ struct CoopListView: View {
                     }
                 })
                 .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        if !isSelectionMode {
+                            Button("选择") {
+                                isSelectionMode = true
+                            }
+                        } else {
+                            EmptyView()
+                        }
+                    }
+                    
                     ToolbarItem(placement: .topBarTrailing) {
                         Button{
                             showFilterSheet = true

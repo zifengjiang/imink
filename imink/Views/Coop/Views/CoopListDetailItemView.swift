@@ -1,8 +1,12 @@
 import SwiftUI
+import SplatDatabase
 
 struct CoopListDetailItemView: View {
     
     var coop: CoopListRowInfo
+    @State private var showDeleteAlert = false
+    @State private var isFavorite: Bool = false
+    @State private var isDeleted: Bool = false
 
     var dangerRateText:String{
         let dangerRate = coop.dangerRate
@@ -50,6 +54,17 @@ struct CoopListDetailItemView: View {
                         .padding([.top, .bottom], 0.5)
                 }
                 Spacer()
+                
+                // 喜爱按钮
+                Button(action: {
+                    toggleFavorite()
+                }) {
+                    Image(systemName: isFavorite ? "heart.fill" : "heart")
+                        .foregroundColor(isFavorite ? .red : .gray)
+                        .font(.system(size: 14))
+                }
+                .buttonStyle(PlainButtonStyle())
+                .padding(.trailing, 8)
 
                 HStack {
                     Text(coop.stage.localizedFromSplatNet)
@@ -150,6 +165,21 @@ struct CoopListDetailItemView: View {
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         .contextMenu{
             Button{
+                toggleFavorite()
+            } label: {
+                Label(isFavorite ? "取消收藏" : "添加到收藏", systemImage: isFavorite ? "heart.slash.fill" : "heart.fill")
+            }
+            
+            Button{
+                showDeleteAlert = true
+            } label: {
+                Label("删除", systemImage: "trash")
+            }
+            .foregroundColor(.red)
+            
+            Divider()
+            
+            Button{
                 let image = CoopListDetailView(isCoop: true, coopId: coop.id, shiftId: nil).asUIImage(size: CGSize(width: 400, height: coop.height))
                 let activityController = UIActivityViewController(
                     activityItems: [image], applicationActivities: nil)
@@ -161,8 +191,76 @@ struct CoopListDetailItemView: View {
         }
         .padding([.leading, .trailing])
         .padding(.top,3)
+        .alert("确认删除", isPresented: $showDeleteAlert) {
+            Button("取消", role: .cancel) {}
+            Button("删除", role: .destructive) {
+                softDeleteCoop()
+            }
+        } message: {
+            Text("此操作会将记录移动到回收站，可以恢复。")
+        }
+        .onAppear {
+            loadCoopData()
+        }
+    }
+    
+    // MARK: - 方法
+    private func loadCoopData() {
+        // 从数据库获取最新的isFavorite和isDeleted状态
+        Task {
+            do {
+                if let actualCoop = try await SplatDatabase.shared.dbQueue.read({ db in
+                    try Coop.fetchOne(db, key: coop.id)
+                }) {
+                    await MainActor.run {
+                        self.isFavorite = actualCoop.isFavorite
+                        self.isDeleted = actualCoop.isDeleted
+                    }
+                }
+            } catch {
+                print("Error loading coop data: \(error)")
+            }
+        }
+    }
+    
+    private func toggleFavorite() {
+        Task {
+            do {
+                if let actualCoop = try await SplatDatabase.shared.dbQueue.read({ db in
+                    try Coop.fetchOne(db, key: coop.id)
+                }) {
+                    try actualCoop.toggleFavorite()
+                    await MainActor.run {
+                        self.isFavorite.toggle()
+                    }
+                }
+            } catch {
+                print("Error toggling favorite: \(error)")
+            }
+        }
+    }
+    
+    private func softDeleteCoop() {
+        Task {
+            do {
+                if let actualCoop = try await SplatDatabase.shared.dbQueue.read({ db in
+                    try Coop.fetchOne(db, key: coop.id)
+                }) {
+                    try actualCoop.softDelete()
+                    // 可以发送通知让列表刷新
+                    NotificationCenter.default.post(name: .coopDataChanged, object: nil)
+                }
+            } catch {
+                print("Error deleting coop: \(error)")
+            }
+        }
     }
 
+}
+
+// MARK: - 通知扩展
+extension Notification.Name {
+    static let coopDataChanged = Notification.Name("coopDataChanged")
 }
 
 //#Preview {

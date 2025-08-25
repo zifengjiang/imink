@@ -59,6 +59,57 @@ struct CoopFilterView:View {
                 VStack(alignment: .leading) {
                     DatePicker("开始时间", selection: $filter.start, displayedComponents: [.date,.hourAndMinute])
                     DatePicker("结束时间", selection: $filter.end, displayedComponents: [.date,.hourAndMinute])
+                    
+                    Divider()
+                        .padding(.vertical, 8)
+                    
+                    // 记录状态过滤
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("记录状态")
+                            .font(.splatoonFont(size: 18))
+                        
+                        Toggle("只显示收藏", isOn: $filter.showOnlyFavorites)
+                        
+                        HStack {
+                            Text("显示模式:")
+                            Spacer()
+                            Picker("显示模式", selection: Binding(
+                                get: {
+                                    if filter.showDeleted && !filter.showOnlyActive {
+                                        return 1 // 只显示已删除
+                                    } else if filter.showDeleted && filter.showOnlyActive {
+                                        return 2 // 显示全部
+                                    } else {
+                                        return 0 // 只显示活跃
+                                    }
+                                },
+                                set: { value in
+                                    switch value {
+                                    case 0: // 只显示活跃
+                                        filter.showOnlyActive = true
+                                        filter.showDeleted = false
+                                    case 1: // 只显示已删除
+                                        filter.showOnlyActive = false
+                                        filter.showDeleted = true
+                                    case 2: // 显示全部
+                                        filter.showOnlyActive = true
+                                        filter.showDeleted = true
+                                    default:
+                                        break
+                                    }
+                                }
+                            )) {
+                                Text("活跃记录").tag(0)
+                                Text("已删除").tag(1)
+                                Text("全部记录").tag(2)
+                            }
+                            .pickerStyle(SegmentedPickerStyle())
+                        }
+                    }
+                    .padding(.bottom, 16)
+                    
+                    Divider()
+                        .padding(.vertical, 8)
 
                     ForEach(viewModel.weaponsByType.keys.sorted(), id: \.self) { type in
                         VStack(alignment: .leading) {

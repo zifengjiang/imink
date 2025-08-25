@@ -115,6 +115,9 @@
 		8BA30B082CAED80E0020D489 /* Operator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA30B072CAED80E0020D489 /* Operator.swift */; };
 		8BAADA552C11C382002D6370 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 8BAADA542C11C382002D6370 /* .swiftlint.yml */; };
 		8BAADA572C128DB6002D6370 /* RightCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAADA562C128DB6002D6370 /* RightCardView.swift */; };
+		8BAD2C672E5BEDB100DE9952 /* CoopBatchOperationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAD2C662E5BEDB100DE9952 /* CoopBatchOperationView.swift */; };
+		8BAD2C6E2E5BEE0200DE9952 /* TrashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAD2C6D2E5BEE0200DE9952 /* TrashView.swift */; };
+		8BAD2C702E5BEE0A00DE9952 /* TrashViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAD2C6F2E5BEE0A00DE9952 /* TrashViewModel.swift */; };
 		8BB4A1F22BFDB49E008DB764 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB4A1F12BFDB49E008DB764 /* LoginView.swift */; };
 		8BB4A1F42BFDB4CE008DB764 /* FixVectorImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */; };
 		8BB719A72CAA2B54003C6909 /* ThreadSafeExecution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB719A62CAA2B54003C6909 /* ThreadSafeExecution.swift */; };
@@ -192,6 +195,16 @@
 			files = (
 			);
 			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8BAD2C2F2E5B4FC700DE9952 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+			);
+			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -327,6 +340,11 @@
 		8BA30B072CAED80E0020D489 /* Operator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Operator.swift; sourceTree = "<group>"; };
 		8BAADA542C11C382002D6370 /* .swiftlint.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		8BAADA562C128DB6002D6370 /* RightCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightCardView.swift; sourceTree = "<group>"; };
+		8BAD2C1A2E5B4FC600DE9952 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		8BAD2C1C2E5B4FC600DE9952 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		8BAD2C662E5BEDB100DE9952 /* CoopBatchOperationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopBatchOperationView.swift; sourceTree = "<group>"; };
+		8BAD2C6D2E5BEE0200DE9952 /* TrashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrashView.swift; sourceTree = "<group>"; };
+		8BAD2C6F2E5BEE0A00DE9952 /* TrashViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrashViewModel.swift; sourceTree = "<group>"; };
 		8BB4A1F12BFDB49E008DB764 /* LoginView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FixVectorImage.swift; sourceTree = "<group>"; };
 		8BB719A62CAA2B54003C6909 /* ThreadSafeExecution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadSafeExecution.swift; sourceTree = "<group>"; };
@@ -440,6 +458,7 @@
 				8B0D148E2BFA2EBE00B82AD1 /* CoopListDetailItemView.swift */,
 				8B0D149D2BFAC56100B82AD1 /* CoopListShiftCardView.swift */,
 				8B1925C92E3F4A5C00BCB851 /* CoopFilterView.swift */,
+				8BAD2C662E5BEDB100DE9952 /* CoopBatchOperationView.swift */,
 				8B0851772BFB78D800AF22C5 /* CoopDetailWaveResultView.swift */,
 				8B0D14A52BFAD93A00B82AD1 /* CoopDetailView.swift */,
 				8B0D14AA2BFADDD200B82AD1 /* CoopDetailViewModel.swift */,
@@ -469,6 +488,7 @@
 				8B7F29282BF6E1B90010A525 /* imink */,
 				8B7F29392BF6E1BB0010A525 /* iminkTests */,
 				8B7F29432BF6E1BB0010A525 /* iminkUITests */,
+				8BAD2C192E5B4FC600DE9952 /* Frameworks */,
 				8B7F29272BF6E1B90010A525 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -575,6 +595,7 @@
 		8B8B28692BF85EF000790809 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				8BAD2C6C2E5BEDE900DE9952 /* Trash */,
 				8B8B287F2BF88BFB00790809 /* Common */,
 				8B8B287E2BF88BE300790809 /* Home */,
 				8B8B287D2BF88BCA00790809 /* Me */,
@@ -710,6 +731,24 @@
 			path = Haptics;
 			sourceTree = "<group>";
 		};
+		8BAD2C192E5B4FC600DE9952 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				8BAD2C1A2E5B4FC600DE9952 /* WidgetKit.framework */,
+				8BAD2C1C2E5B4FC600DE9952 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		8BAD2C6C2E5BEDE900DE9952 /* Trash */ = {
+			isa = PBXGroup;
+			children = (
+				8BAD2C6D2E5BEE0200DE9952 /* TrashView.swift */,
+				8BAD2C6F2E5BEE0A00DE9952 /* TrashViewModel.swift */,
+			);
+			path = Trash;
+			sourceTree = "<group>";
+		};
 		8BB99B352BF77B1900470408 /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -830,6 +869,7 @@
 				8B7F29232BF6E1B90010A525 /* Frameworks */,
 				8B7F29242BF6E1B90010A525 /* Resources */,
 				8B56712A2CD51130000CE6EE /* Embed Watch Content */,
+				8BAD2C2F2E5B4FC700DE9952 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
@@ -895,7 +935,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1610;
+				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1540;
 				TargetAttributes = {
 					8B7F29252BF6E1B90010A525 = {
@@ -1050,6 +1090,7 @@
 				8B0D146F2BF9789200B82AD1 /* MainViewModel.swift in Sources */,
 				8B4BF1FE2E59ECB6007A8B05 /* BackgroundTaskManager.swift in Sources */,
 				8B0D148B2BFA298A00B82AD1 /* CoopListViewModel.swift in Sources */,
+				8BAD2C6E2E5BEE0200DE9952 /* TrashView.swift in Sources */,
 				8B0D14892BFA28F100B82AD1 /* CoopListView.swift in Sources */,
 				8B5A77EF2CFDAD5700B34BDC /* SwiftyJSONDecodable.swift in Sources */,
 				8BA017472C099F23001CFC72 /* Precomputable.swift in Sources */,
@@ -1095,6 +1136,7 @@
 				8B0D14A62BFAD93A00B82AD1 /* CoopDetailView.swift in Sources */,
 				8B0D14A82BFAD9F200B82AD1 /* FixSafeareaBackgroundModifier.swift in Sources */,
 				8BA089322CCB8A6000BA7176 /* CoopRecordView.swift in Sources */,
+				8BAD2C672E5BEDB100DE9952 /* CoopBatchOperationView.swift in Sources */,
 				8BA017492C09A8CE001CFC72 /* FetchableFromDatabase.swift in Sources */,
 				8B7059062C0C25A90076F680 /* TouchDownAndTouchUpGestureView.swift in Sources */,
 				8B7059082C0C27980076F680 /* PopupModifier.swift in Sources */,
@@ -1124,6 +1166,7 @@
 				8BA30B082CAED80E0020D489 /* Operator.swift in Sources */,
 				8BD8CD542C0ADBC200FED66F /* WavePicker.swift in Sources */,
 				8B19CF8C2CB2A02600EF4424 /* BattleListRowInfo.swift in Sources */,
+				8BAD2C702E5BEE0A00DE9952 /* TrashViewModel.swift in Sources */,
 				8B23C1002CD0A1F600FB5934 /* StageRecordView.swift in Sources */,
 				8BB4A1F22BFDB49E008DB764 /* LoginView.swift in Sources */,
 			);
@@ -1397,7 +1440,6 @@
 		8B7F294E2BF6E1BB0010A525 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1417,7 +1459,6 @@
 		8B7F294F2BF6E1BB0010A525 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1437,7 +1478,6 @@
 		8B7F29512BF6E1BB0010A525 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ST3TQ6FXT;
@@ -1455,7 +1495,6 @@
 		8B7F29522BF6E1BB0010A525 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ST3TQ6FXT;

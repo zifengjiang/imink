@@ -5,27 +5,61 @@ struct BattleListView: View {
     @EnvironmentObject var viewModel: BattleListViewModel
     @Environment(\.scenePhase) var scenePhase
     @State var activeID:String?
+    @State var showFilterSheet = false
+    @State var isSelectionMode = false
+    @State var selectedBattles: Set<Int64> = []
     var body: some View {
         NavigationStack{
             ScrollViewReader{ proxy in
-                ScrollView{
-                    LazyVStack{
-                        ForEach(viewModel.rows,id: \.id){row in
-                            if row.isBattle, let battle = row.battle {
-                                NavigationLink{
-                                    BattleDetailView(id: battle.id)
-                                } label: {
-                                    BattleListRowView(row: row)
-                                        .id(row.id)
+                VStack {
+                    // 批量操作视图
+                    BattleBatchOperationView(
+                        selectedBattles: $selectedBattles,
+                        isSelectionMode: $isSelectionMode,
+                        battles: viewModel.rows.compactMap { $0.battle }
+                    )
+                    
+                    ScrollView{
+                        LazyVStack{
+                            ForEach(viewModel.rows,id: \.id){row in
+                                if isSelectionMode && row.isBattle {
+                                    // 选择模式下的行视图
+                                    HStack {
+                                        Button {
+                                            if let battleId = row.battle?.id {
+                                                if selectedBattles.contains(battleId) {
+                                                    selectedBattles.remove(battleId)
+                                                } else {
+                                                    selectedBattles.insert(battleId)
+                                                }
+                                            }
+                                        } label: {
+                                            Image(systemName: selectedBattles.contains(row.battle?.id ?? -1) ? "checkmark.circle.fill" : "circle")
+                                                .foregroundColor(selectedBattles.contains(row.battle?.id ?? -1) ? .accentColor : .gray)
+                                        }
+                                        .padding(.leading)
+                                        
+                                        BattleListRowView(row: row)
+                                            .id(row.id)
+                                    }
+                                } else {
+                                    if row.isBattle, let battle = row.battle {
+                                        NavigationLink{
+                                            BattleDetailView(id: battle.id)
+                                        } label: {
+                                            BattleListRowView(row: row)
+                                                .id(row.id)
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
+                                    } else {
+                                        BattleListRowView(row: row)
+                                            .id(row.id)
+                                    }
                                 }
-                                .buttonStyle(PlainButtonStyle())
-                            } else {
-                                BattleListRowView(row: row)
-                                    .id(row.id)
                             }
-                        }
                     }
                     .scrollTargetLayout()
+                }
                 }
                 .refreshable {
                     TaskManager.shared.start(named: String(describing: Self.self)) {
@@ -37,6 +71,31 @@ struct BattleListView: View {
                 .modifier(LoginViewModifier(isLogin: AppState.shared.isLogin, iconName: "TabBarBattle"))
                 .navigationTitle(viewModel.navigationTitle)
                 .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        if !isSelectionMode {
+                            Button("选择") {
+                                isSelectionMode = true
+                            }
+                        } else {
+                            EmptyView()
+                        }
+                    }
+                    
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button {
+                            showFilterSheet = true
+                        } label: {
+                            Image(systemName: "line.3.horizontal.decrease.circle")
+                                .foregroundColor(.accentColor)
+                        }
+                    }
+                }
+                .sheet(isPresented: $showFilterSheet) {
+                    BattleFilterView(showFilterView: $showFilterSheet, filter: $viewModel.filter) {
+                        await viewModel.loadBattles()
+                    }
+                }
                 .onChange(of: activeID) { oldValue, newValue in
                     if newValue == viewModel.rows.last?.id {
                         Task{

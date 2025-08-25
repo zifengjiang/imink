@@ -171,7 +171,20 @@ extension Filter{
 
         conditions.append("coop.playedTime <= ?")
         arguments.append(end)
-
+        
+        // 软删除和喜爱功能的过滤条件
+        if showOnlyActive && !showDeleted {
+            // 只显示未删除的记录
+            conditions.append("(coop.isDeleted = 0 OR coop.isDeleted IS NULL)")
+        } else if showDeleted && !showOnlyActive {
+            // 只显示已删除的记录
+            conditions.append("coop.isDeleted = 1")
+        }
+        // 如果showOnlyActive和showDeleted都为true，则显示所有记录
+        
+        if showOnlyFavorites {
+            conditions.append("coop.isFavorite = 1")
+        }
 
         let whereClause = conditions.isEmpty ? "1" : conditions.joined(separator: " AND ")
         let sql = """

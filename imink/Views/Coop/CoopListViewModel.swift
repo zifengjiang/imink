@@ -27,6 +27,15 @@ class CoopListViewModel: ObservableObject {
                 self?.handleLoginStateChange(isLogin: isLogin)
             }
             .store(in: &cancellables)
+        
+        // 监听数据变化通知
+        NotificationCenter.default.publisher(for: .coopDataChanged)
+            .sink { [weak self] _ in
+                Task { @MainActor in
+                    await self?.loadCoops()
+                }
+            }
+            .store(in: &cancellables)
     }
 
     func handleLoginStateChange(isLogin:Bool) {

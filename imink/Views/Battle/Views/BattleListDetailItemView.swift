@@ -6,9 +6,13 @@
 //
 
 import SwiftUI
+import SplatDatabase
 
 struct BattleListDetailItemView: View {
     let detail:BattleListRowInfo
+    @State private var showDeleteAlert = false
+    @State private var isFavorite: Bool = false
+    @State private var isDeleted: Bool = false
     var mode:BattleMode{detail.mode}
     var rule:BattleRule{detail.rule}
     var species:Species{detail.species ? Species.INKLING : Species.OCTOLING}
@@ -44,6 +48,17 @@ struct BattleListDetailItemView: View {
                         .font(.splatoonFont(size: 12))
                         .foregroundStyle(mode.color)
                     Spacer()
+                    
+                    // 喜爱按钮
+                    Button(action: {
+                        toggleFavorite()
+                    }) {
+                        Image(systemName: isFavorite ? "heart.fill" : "heart")
+                            .foregroundColor(isFavorite ? .red : .gray)
+                            .font(.system(size: 14))
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .padding(.trailing, 8)
 
                     if mode == .anarchy{
                         HStack(alignment: .firstTextBaseline, spacing: 0){
@@ -163,9 +178,91 @@ struct BattleListDetailItemView: View {
         .background(Color(.listItemBackground))
         .frame(height: 85)
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .contextMenu{
+            Button{
+                toggleFavorite()
+            } label: {
+                Label(isFavorite ? "取消收藏" : "添加到收藏", systemImage: isFavorite ? "heart.slash.fill" : "heart.fill")
+            }
+            
+            Button{
+                showDeleteAlert = true
+            } label: {
+                Label("删除", systemImage: "trash")
+            }
+            .foregroundColor(.red)
+        }
         .padding([.leading, .trailing])
         .padding(.top,3)
+        .alert("确认删除", isPresented: $showDeleteAlert) {
+            Button("取消", role: .cancel) {}
+            Button("删除", role: .destructive) {
+                softDeleteBattle()
+            }
+        } message: {
+            Text("此操作会将记录移动到回收站，可以恢复。")
+        }
+        .onAppear {
+            loadBattleData()
+        }
     }
+    
+    // MARK: - 方法
+    private func loadBattleData() {
+        // 从数据库获取最新的isFavorite和isDeleted状态
+        Task {
+            do {
+                if let actualBattle = try await SplatDatabase.shared.dbQueue.read({ db in
+                    try Battle.fetchOne(db, key: detail.id)
+                }) {
+                    await MainActor.run {
+                        self.isFavorite = actualBattle.isFavorite
+                        self.isDeleted = actualBattle.isDeleted
+                    }
+                }
+            } catch {
+                print("Error loading battle data: \(error)")
+            }
+        }
+    }
+    
+    private func toggleFavorite() {
+        Task {
+            do {
+                if let actualBattle = try await SplatDatabase.shared.dbQueue.read({ db in
+                    try Battle.fetchOne(db, key: detail.id)
+                }) {
+                    try actualBattle.toggleFavorite()
+                    await MainActor.run {
+                        self.isFavorite.toggle()
+                    }
+                }
+            } catch {
+                print("Error toggling favorite: \(error)")
+            }
+        }
+    }
+    
+    private func softDeleteBattle() {
+        Task {
+            do {
+                if let actualBattle = try await SplatDatabase.shared.dbQueue.read({ db in
+                    try Battle.fetchOne(db, key: detail.id)
+                }) {
+                    try actualBattle.softDelete()
+                    // 可以发送通知让列表刷新
+                    NotificationCenter.default.post(name: .battleDataChanged, object: nil)
+                }
+            } catch {
+                print("Error deleting battle: \(error)")
+            }
+        }
+    }
+}
+
+// MARK: - 通知扩展
+extension Notification.Name {
+    static let battleDataChanged = Notification.Name("battleDataChanged")
 }
 
 //#Preview {

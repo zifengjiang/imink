@@ -24,6 +24,15 @@ class BattleListViewModel: ObservableObject {
                 self?.handleLoginStateChange(isLogin: isLogin)
             }
             .store(in: &cancellables)
+        
+        // 监听数据变化通知
+        NotificationCenter.default.publisher(for: .battleDataChanged)
+            .sink { [weak self] _ in
+                Task { @MainActor in
+                    await self?.loadBattles()
+                }
+            }
+            .store(in: &cancellables)
     }
 
     func handleLoginStateChange(isLogin:Bool) {

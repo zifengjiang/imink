@@ -12,6 +12,11 @@ struct MePage: View {
                     NavigationLink("场地记录", destination: StageRecordView())
                     NavigationLink("武器记录", destination: WeaponRecordView())
                 }
+                
+                Section("数据管理"){
+                    NavigationLink("回收站", destination: TrashView())
+                        .foregroundColor(.primary)
+                }
             }
             .navigationTitle("tab_me")
             .navigationBarTitleDisplayMode(.inline)

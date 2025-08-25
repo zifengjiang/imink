@@ -15,4 +15,9 @@ struct Filter {
     var weaponIds: Set<Int> = []
     var start: Date = getCoopEarliestPlayedTime()
     var end: Date = Date()
+    
+    // 软删除和喜爱功能的过滤选项
+    var showDeleted: Bool = false
+    var showOnlyFavorites: Bool = false
+    var showOnlyActive: Bool = true  // 默认只显示活跃（未删除）的记录
 }
