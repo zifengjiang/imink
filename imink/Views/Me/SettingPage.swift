@@ -315,6 +315,10 @@ struct SettingPage: View {
                     }
                 }
 
+                Section(header: Text("偏好设置")){
+                    Toggle("启用振动", isOn: Preferences.shared.$enableHaptics)
+                }
+
                 Section(header: Text("关于Imink")){
                     Button{
 
