@@ -17,6 +17,7 @@ class HomeViewModel: ObservableObject {
     @Published var lastBattleGroupId: Int?
     @Published var salmonRunStatus: CoopGroupStatus?
     @Published var battleStatus: BattleGroupStatus?
+    @Published var lastCoopTime: Date?
 
     var scheduleGroups: [Date: [Schedule]] {
         Dictionary(grouping: schedules.filter { $0.mode != .salmonRun }, by: { $0.startTime })
@@ -67,6 +68,7 @@ class HomeViewModel: ObservableObject {
         last500Coop = []
         last500Battle = []
         battleStatus = nil
+        lastCoopTime = nil
     }
 
     func updateStatus() {
@@ -152,6 +154,20 @@ class HomeViewModel: ObservableObject {
                         .store(in: &self.cancelBag)
                 }
             }
+            .store(in: &cancelBag)
+
+        // 获取最新的 coop 时间
+        ValueObservation
+            .tracking { db in
+                try Date.fetchOne(db, sql: "SELECT MAX(playedTime) FROM coop WHERE accountId = ?", arguments: [AppUserDefaults.shared.accountId])
+            }
+            .publisher(in: SplatDatabase.shared.dbQueue, scheduling: .immediate)
+            .eraseToAnyPublisher()
+            .catch { error -> Just<Date?> in
+                logError(error)
+                return Just<Date?>(nil)
+            }
+            .assign(to: \.lastCoopTime, on: self)
             .store(in: &cancelBag)
     }
 

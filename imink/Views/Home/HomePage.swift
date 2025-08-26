@@ -142,6 +142,11 @@ struct HomePage: View {
                 HStack(alignment: .firstTextBaseline) {
                     Text("最近工况")
                         .font(.splatoonFont(size: 22))
+                    if let lastCoopTime = viewModel.lastCoopTime{
+                        Text("更新于: \(lastCoopTime.toPlayedTimeString())")
+                            .font(.splatoonFont(size: 10))
+                            .foregroundStyle(.secondary)
+                    }
                     Spacer()
                 }
 
