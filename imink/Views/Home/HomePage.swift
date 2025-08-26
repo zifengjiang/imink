@@ -242,6 +242,7 @@ struct HomePage: View {
                     BattleScheduleCardView(schedules: scheduleGroups[key]!)
                 }
             }
+            .padding(.bottom, 10)
         }
     }
 
@@ -253,6 +254,7 @@ struct HomePage: View {
                     SalmonRunScheduleCardView(schedule: salmonRunSchedules[index])
                 }
             }
+            .padding(.bottom, 10)
         }
     }
 }
