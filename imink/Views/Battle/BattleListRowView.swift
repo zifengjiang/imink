@@ -48,22 +48,10 @@ func getRatio(scores:[Int64], ratios:[Double],count:Int) -> [Double] {
 
 struct BattleListRowView: View {
     let row: BattleListRowModel
-    @Binding var isSelected: Bool
-    let isSelectionMode: Bool
-    
-    init(row: BattleListRowModel, isSelected: Binding<Bool> = .constant(false), isSelectionMode: Bool = false) {
-        self.row = row
-        self._isSelected = isSelected
-        self.isSelectionMode = isSelectionMode
-    }
 
     var body: some View {
         if row.isBattle, let battle = row.battle {
-            BattleListDetailItemView(
-                detail: battle,
-                isSelected: $isSelected,
-                isSelectionMode: isSelectionMode
-            )
+            BattleListDetailItemView(detail: battle)
         } else if let card = row.card {
             BattleListShiftCardView(status: card)
         } else {

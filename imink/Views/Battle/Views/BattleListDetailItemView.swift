@@ -10,19 +10,9 @@ import SplatDatabase
 
 struct BattleListDetailItemView: View {
     let detail:BattleListRowInfo
-    @Binding var isSelected: Bool
-    let isSelectionMode: Bool
-    
     @State private var showDeleteAlert = false
     @State private var isFavorite: Bool = false
     @State private var isDeleted: Bool = false
-    @State private var rotationAngle: Double = 0
-    
-    init(detail: BattleListRowInfo, isSelected: Binding<Bool> = .constant(false), isSelectionMode: Bool = false) {
-        self.detail = detail
-        self._isSelected = isSelected
-        self.isSelectionMode = isSelectionMode
-    }
     var mode:BattleMode{detail.mode}
     var rule:BattleRule{detail.rule}
     var species:Species{detail.species ? Species.INKLING : Species.OCTOLING}
@@ -205,14 +195,6 @@ struct BattleListDetailItemView: View {
             }
             .foregroundColor(.red)
         }
-        .overlay(
-            // 选中状态的边缘标记
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .stroke(isSelected ? Color.accentColor : Color.clear, lineWidth: 3)
-                .opacity(isSelectionMode ? 1 : 0)
-        )
-        .rotationEffect(.degrees(isSelectionMode ? rotationAngle : 0))
-        .animation(.easeInOut(duration: 0.3), value: isSelectionMode)
         .padding([.leading, .trailing])
         .padding(.top,3)
         .alert("确认删除", isPresented: $showDeleteAlert) {
@@ -225,16 +207,6 @@ struct BattleListDetailItemView: View {
         }
         .onAppear {
             loadBattleData()
-            if isSelectionMode {
-                startWiggleAnimation()
-            }
-        }
-        .onChange(of: isSelectionMode) { _, newValue in
-            if newValue {
-                startWiggleAnimation()
-            } else {
-                stopWiggleAnimation()
-            }
         }
     }
     
@@ -287,32 +259,6 @@ struct BattleListDetailItemView: View {
             } catch {
                 print("Error deleting battle: \(error)")
             }
-        }
-    }
-    
-    // MARK: - 抖动动画方法
-    private func startWiggleAnimation() {
-        // 创建更自然的摆动动画：正时针和逆时针交替
-        let wiggleAnimation = Animation
-            .easeInOut(duration: 0.1)
-            .repeatForever(autoreverses: true)
-        
-        withAnimation(wiggleAnimation) {
-            rotationAngle = 1.0
-        }
-        
-        // 添加一些随机延迟，让不同行的摆动不完全同步，更自然
-        let randomDelay = Double.random(in: 0.0...0.05)
-        DispatchQueue.main.asyncAfter(deadline: .now() + randomDelay) {
-            withAnimation(wiggleAnimation) {
-                rotationAngle = -1.0
-            }
-        }
-    }
-    
-    private func stopWiggleAnimation() {
-        withAnimation(.easeInOut(duration: 0.2)) {
-            rotationAngle = 0
         }
     }
 }

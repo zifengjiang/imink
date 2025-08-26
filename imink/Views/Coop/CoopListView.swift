@@ -27,62 +27,74 @@ struct CoopListView: View {
                     ScrollView{
                         LazyVStack{
                             ForEach(viewModel.rows, id:\.id){ row in
-                                    //                                if row.isCoop {
-                                if !isSelectionMode {
-                                    NavigationLink {
-                                        TabView(selection: $selectedRow){
-                                            ForEach(viewModel.rows, id:\.id){ row in
-                                                CoopListDetailView(isCoop: row.isCoop, coopId: row.coop?.id, shiftId: row.card?.groupId)
-                                                    .scrollIndicators(.hidden)
-                                                    .scrollClipDisabled()
-                                                    .containerRelativeFrame(.horizontal)
-                                                    .tag(row.id)
+                                    SelectableRowView(
+                                        isSelectionMode: isSelectionMode,
+                                        isSelected: selectedCoops.contains(row.coop?.id ?? -1),
+                                        onTap: {
+                                            if let coopId = row.coop?.id {
+                                                if selectedCoops.contains(coopId) {
+                                                    selectedCoops.remove(coopId)
+                                                } else {
+                                                    selectedCoops.insert(coopId)
+                                                }
                                             }
                                         }
-                                        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                                        .edgesIgnoringSafeArea(.vertical)
-                                        .fixSafeareaBackground()
-                                        .onAppear{
-                                            selectedRow = row.id
-                                            viewModel.loadCurrentCoopFavoriteStatus(for: row.id)
-                                        }
-                                        .toolbar {
+                                    ) {
+                                        if !isSelectionMode {
+                                            NavigationLink {
+                                                TabView(selection: $selectedRow){
+                                                    ForEach(viewModel.rows, id:\.id){ row in
+                                                        CoopListDetailView(isCoop: row.isCoop, coopId: row.coop?.id, shiftId: row.card?.groupId)
+                                                            .scrollIndicators(.hidden)
+                                                            .scrollClipDisabled()
+                                                            .containerRelativeFrame(.horizontal)
+                                                            .tag(row.id)
+                                                    }
+                                                }
+                                                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                                                .edgesIgnoringSafeArea(.vertical)
+                                                .fixSafeareaBackground()
+                                                .onAppear{
+                                                    selectedRow = row.id
+                                                    viewModel.loadCurrentCoopFavoriteStatus(for: row.id)
+                                                }
+                                                .toolbar {
 
-                                            HStack(alignment: .center, spacing: 10){
-                                                Button {
-                                                    moveToPreviousRow()
-                                                    Haptics.generateIfEnabled(self.isFirstRow ? .error : .light)
-                                                } label: {
-                                                    Image("KEEP")
-                                                        .resizable()
-                                                        .scaledToFill()
-                                                        .rotationEffect(.degrees(180))
-                                                        .overlay(self.isFirstRow ? Color(.gray) : Color(.accent))
-                                                        .mask{
+                                                    HStack(alignment: .center, spacing: 10){
+                                                        Button {
+                                                            moveToPreviousRow()
+                                                            Haptics.generateIfEnabled(self.isFirstRow ? .error : .light)
+                                                        } label: {
                                                             Image("KEEP")
                                                                 .resizable()
-                                                                .scaledToFit()
+                                                                .scaledToFill()
                                                                 .rotationEffect(.degrees(180))
+                                                                .overlay(self.isFirstRow ? Color(.gray) : Color(.accent))
+                                                                .mask{
+                                                                    Image("KEEP")
+                                                                        .resizable()
+                                                                        .scaledToFit()
+                                                                        .rotationEffect(.degrees(180))
+                                                                }
+                                                                .frame(width: 20*1.2, height: 10*1.2)
                                                         }
-                                                        .frame(width: 20*1.2, height: 10*1.2)
-                                                }
 
 
-                                                Button {
-                                                    moveToNextRow()
-                                                    Haptics.generateIfEnabled(.light)
-                                                } label: {
-                                                    Image("KEEP")
-                                                        .resizable()
-                                                        .scaledToFill()
-                                                        .overlay(Color(.accent))
-                                                        .mask{
+                                                        Button {
+                                                            moveToNextRow()
+                                                            Haptics.generateIfEnabled(.light)
+                                                        } label: {
                                                             Image("KEEP")
                                                                 .resizable()
-                                                                .scaledToFit()
+                                                                .scaledToFill()
+                                                                .overlay(Color(.accent))
+                                                                .mask{
+                                                                    Image("KEEP")
+                                                                        .resizable()
+                                                                        .scaledToFit()
+                                                                }
+                                                                .frame(width: 20*1.2, height: 10*1.2)
                                                         }
-                                                        .frame(width: 20*1.2, height: 10*1.2)
-                                                }
 
                                                 Button {
                                                     Task{
@@ -95,54 +107,42 @@ struct CoopListView: View {
                                                         .font(.system(size: 18))
                                                 }
 
-                                                Button{
-                                                    Haptics.generateIfEnabled(.medium)
-                                                    if let rowId = selectedRow, let coop = viewModel.rows.first(where: {$0.id == rowId})?.coop{
-                                                        let image = CoopDetailView(id: coop.id).asUIImage(size: CGSize(width: 400, height: coop.height))
-                                                        let activityController = UIActivityViewController(
-                                                            activityItems: [image], applicationActivities: nil)
-                                                        let vc = UIApplication.shared.windows.first!.rootViewController
-                                                        vc?.present(activityController, animated: true)
-                                                        AppState.shared.viewModelDict[coop.id] = nil
-                                                    }
-                                                }label:{
-                                                    Image("share")
-                                                        .resizable()
-                                                        .scaledToFit()
-                                                        .overlay(Color(.accent))
-                                                        .mask{
+                                                        Button{
+                                                            Haptics.generateIfEnabled(.medium)
+                                                            if let rowId = selectedRow, let coop = viewModel.rows.first(where: {$0.id == rowId})?.coop{
+                                                                let image = CoopDetailView(id: coop.id).asUIImage(size: CGSize(width: 400, height: coop.height))
+                                                                let activityController = UIActivityViewController(
+                                                                    activityItems: [image], applicationActivities: nil)
+                                                                let vc = UIApplication.shared.windows.first!.rootViewController
+                                                                vc?.present(activityController, animated: true)
+                                                                AppState.shared.viewModelDict[coop.id] = nil
+                                                            }
+                                                        }label:{
                                                             Image("share")
                                                                 .resizable()
                                                                 .scaledToFit()
+                                                                .overlay(Color(.accent))
+                                                                .mask{
+                                                                    Image("share")
+                                                                        .resizable()
+                                                                        .scaledToFit()
+                                                                }
+                                                                .frame(width: 20*1.2)
+                                                                .offset(y:-4)
                                                         }
-                                                        .frame(width: 20*1.2)
-                                                        .offset(y:-4)
+                                                    }
                                                 }
+                                            } label: {
+                                                CoopListRowView(row: row)
+                                                    .id(row.id)
                                             }
-                                        }
-                                    } label: {
-                                        CoopListRowView(row: row)
-                                        .id(row.id)
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
-                                } else {
-                                    // 选择模式下的直接显示
-                                    CoopListRowView(
-                                        row: row,
-                                        selectedCoops: self.selectedCoops,
-                                        isSelectionMode: isSelectionMode
-                                    )
-                                    .id(row.id)
-                                    .onTapGesture {
-                                        if let coopId = row.coop?.id {
-                                            if selectedCoops.contains(coopId) {
-                                                selectedCoops.remove(coopId)
-                                            } else {
-                                                selectedCoops.insert(coopId)
-                                            }
+                                            .buttonStyle(PlainButtonStyle())
+                                        } else {
+                                            CoopListRowView(row: row)
+                                                .id(row.id)
                                         }
                                     }
-                                }
+
                             }
                             .scrollTargetLayout()
                         }
@@ -251,6 +251,9 @@ struct CoopListView: View {
                             await viewModel.fetchCoops()
                         }
                     }
+                        //                .onDisappear {
+                        //                    TaskManager.shared.cancel(name: String(describing: Self.self))
+                        //                }
                 }
 
             }
@@ -263,7 +266,6 @@ struct CoopListView: View {
             }
         }
     }
-
 
     struct CustomTabView<Content: View>: View {
         @Binding var selection: String?
