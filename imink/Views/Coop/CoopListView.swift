@@ -85,7 +85,9 @@ struct CoopListView: View {
                                                 }
 
                                                 Button {
-                                                    viewModel.toggleFavorite(for: selectedRow)
+                                                    Task{
+                                                     await  viewModel.toggleFavorite(for: selectedRow)
+                                                    }
                                                     Haptics.generateIfEnabled(.light)
                                                 } label: {
                                                     Image(systemName: viewModel.currentCoopIsFavorite ? "heart.fill" : "heart")

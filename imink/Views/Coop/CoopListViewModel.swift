@@ -130,22 +130,18 @@ class CoopListViewModel: ObservableObject {
     
     // MARK: - 收藏相关方法
     
-    func toggleFavorite(for selectedRow: String?) {
+    func toggleFavorite(for selectedRow: String?) async {
         guard let rowId = selectedRow, let coop = rows.first(where: {$0.id == rowId})?.coop else { return }
         
-        Task {
-            do {
-                if let actualCoop = try await SplatDatabase.shared.dbQueue.read({ db in
-                    try Coop.fetchOne(db, key: coop.id)
-                }) {
-                    try actualCoop.toggleFavorite()
-                    await MainActor.run {
-                        self.currentCoopIsFavorite.toggle()
-                    }
-                }
-            } catch {
-                print("Error toggling favorite: \(error)")
+        do {
+            if let actualCoop = try await SplatDatabase.shared.dbQueue.read({ db in
+                try Coop.fetchOne(db, key: coop.id)
+            }) {
+                try actualCoop.toggleFavorite()
+                self.currentCoopIsFavorite.toggle()
             }
+        } catch {
+            print("Error toggling favorite: \(error)")
         }
     }
     
