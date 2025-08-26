@@ -23,31 +23,33 @@ struct BattleListView: View {
                         LazyVStack{
                             ForEach(viewModel.rows,id: \.id){row in
                                 if row.isBattle {
-                                    SelectableRowView(
-                                        isSelectionMode: isSelectionMode,
-                                        isSelected: selectedBattles.contains(row.battle?.id ?? -1),
-                                        onTap: {
-                                            if let battleId = row.battle?.id {
-                                                if selectedBattles.contains(battleId) {
-                                                    selectedBattles.remove(battleId)
-                                                } else {
-                                                    selectedBattles.insert(battleId)
-                                                }
-                                            }
-                                        }
-                                    ) {
-                                        if !isSelectionMode, let battle = row.battle {
-                                            NavigationLink{
-                                                BattleDetailView(id: battle.id)
-                                            } label: {
-                                                BattleListRowView(row: row)
-                                                    .id(row.id)
-                                            }
-                                            .buttonStyle(PlainButtonStyle())
-                                        } else {
+                                    if !isSelectionMode, let battle = row.battle {
+                                        NavigationLink{
+                                            BattleDetailView(id: battle.id)
+                                        } label: {
                                             BattleListRowView(row: row)
-                                                .id(row.id)
+                                            .id(row.id)
                                         }
+                                        .buttonStyle(PlainButtonStyle())
+                                    } else {
+                                        // 选择模式下的直接显示
+                                        BattleListRowView(
+                                            row: row,
+                                            isSelected: Binding(
+                                                get: { selectedBattles.contains(row.battle?.id ?? -1) },
+                                                set: { isSelected in
+                                                    if let battleId = row.battle?.id {
+                                                        if isSelected {
+                                                            selectedBattles.insert(battleId)
+                                                        } else {
+                                                            selectedBattles.remove(battleId)
+                                                        }
+                                                    }
+                                                }
+                                            ),
+                                            isSelectionMode: isSelectionMode
+                                        )
+                                        .id(row.id)
                                     }
                                 } else {
                                     // 非battle行（如统计卡片）直接显示，不参与选择

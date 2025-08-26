@@ -4,9 +4,19 @@ import SplatDatabase
 struct CoopListDetailItemView: View {
     
     var coop: CoopListRowInfo
+    @State var selectedCoops: Set<Int64>
+    let isSelectionMode: Bool
+    
     @State private var showDeleteAlert = false
     @State private var isFavorite: Bool = false
     @State private var isDeleted: Bool = false
+    @State private var rotationAngle: Double = 0
+    
+    init(coop: CoopListRowInfo, selectedCoops: Set<Int64> = [], isSelectionMode: Bool = false) {
+        self.coop = coop
+        self.selectedCoops = selectedCoops
+        self.isSelectionMode = isSelectionMode
+    }
 
     var dangerRateText:String{
         let dangerRate = coop.dangerRate
@@ -164,6 +174,12 @@ struct CoopListDetailItemView: View {
         .padding([.leading, .trailing], 8)
         .background(Color(.listItemBackground))
         .frame(height: 85)
+        .overlay(
+            // 选中状态的边缘标记
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .stroke(selectedCoops.contains(coop.id) ? Color.accentColor : Color.clear, lineWidth: 3)
+                .opacity(isSelectionMode ? 1 : 0)
+        )
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 10))
         .contextMenu{
@@ -192,6 +208,8 @@ struct CoopListDetailItemView: View {
                 Label("保存至相册", systemImage: "photo.on.rectangle")
             }
         }
+        .rotationEffect(.degrees(isSelectionMode ? rotationAngle : 0))
+        .animation(.easeInOut(duration: 0.3), value: isSelectionMode)
         .padding([.leading, .trailing])
         .padding(.top,3)
         .alert("确认删除", isPresented: $showDeleteAlert) {
@@ -204,6 +222,16 @@ struct CoopListDetailItemView: View {
         }
         .onAppear {
             loadCoopData()
+            if isSelectionMode {
+                startWiggleAnimation()
+            }
+        }
+        .onChange(of: isSelectionMode) { _, newValue in
+            if newValue {
+                startWiggleAnimation()
+            } else {
+                stopWiggleAnimation()
+            }
         }
     }
     
@@ -256,6 +284,32 @@ struct CoopListDetailItemView: View {
             } catch {
                 print("Error deleting coop: \(error)")
             }
+        }
+    }
+    
+    // MARK: - 抖动动画方法
+    private func startWiggleAnimation() {
+        // 创建更自然的摆动动画：正时针和逆时针交替
+        let wiggleAnimation = Animation
+            .easeInOut(duration: 0.1)
+            .repeatForever(autoreverses: true)
+        
+        withAnimation(wiggleAnimation) {
+            rotationAngle = 1.0
+        }
+        
+        // 添加一些随机延迟，让不同行的摆动不完全同步，更自然
+        let randomDelay = Double.random(in: 0.0...0.05)
+        DispatchQueue.main.asyncAfter(deadline: .now() + randomDelay) {
+            withAnimation(wiggleAnimation) {
+                rotationAngle = -1.0
+            }
+        }
+    }
+    
+    private func stopWiggleAnimation() {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            rotationAngle = 0
         }
     }
 
