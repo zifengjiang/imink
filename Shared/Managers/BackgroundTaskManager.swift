@@ -134,7 +134,7 @@ final class BackgroundTaskManager: ObservableObject {
         totalNewData += await SN3Client.shared.fetchCoops() ?? 0
         
         // 发送数据更新通知（仅当有新数据时）
-        if totalNewData >= 0 {
+        if totalNewData > 0 {
             unviewedDataCount += totalNewData
             await NotificationManager.shared.sendDataUpdateNotification(
                 newDataCount: totalNewData,
