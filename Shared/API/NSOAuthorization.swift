@@ -20,6 +20,22 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         return decoder
     }
+    
+    /// 检查FAPI请求间隔，如果间隔不够则抛出tooManyRequests错误
+    private func checkFAPIRequestInterval() throws {
+        let currentTime = Int(Date().timeIntervalSince1970 * 1000) // 转换为毫秒
+        let lastRequestTime = AppUserDefaults.shared.fapiLastRequestTime
+        let requestInterval = AppUserDefaults.shared.fapiRequestInterval
+        
+        if currentTime - lastRequestTime < requestInterval {
+            throw NSOAuthError.tooManyRequests
+        }
+    }
+    
+    /// 更新FAPI最后请求时间
+    private func updateFAPILastRequestTime() {
+        AppUserDefaults.shared.fapiLastRequestTime = Int(Date().timeIntervalSince1970 * 1000)
+    }
 
     // MARK: - 重构后的登录流程
     
@@ -154,24 +170,6 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
             authSession.start()
         }
     }
-    
-    func requestF(naId:String, accessToken:String, hashMethod:AppAPI.HashMethod) async throws -> F {
-        do {
-            let fAPI = AppAPI.nxapiZnca_f(naId: naId, naIdToken: accessToken, hashMethod: hashMethod)
-            return try await requestF(fAPI: fAPI)
-        } catch {
-            let fAPI = AppAPI.imink_f(naId: naId, naIdToken: accessToken, hashMethod: hashMethod)
-            return try await requestF(fAPI: fAPI)
-        }
-    }
-
-    func requestF(fAPI:AppAPI) async throws -> F {
-        let (data, response) = try await URLSession.shared.data(for: fAPI.request)
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            throw NSOAuthError.invalidSessionToken
-        }
-        return try decoder.decode(F.self, from: data)
-    }
 
     func requestUserInfo(accessToken:String) async throws -> NAUser {
         let meAPI = NSOAPI.me(accessToken: accessToken)
@@ -259,6 +257,7 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
 
     // 保留原有方法以兼容性
     func requestWebServiceToken(sessionToken:String, indicatorID: String? = nil) async throws -> WebServiceToken {
+        try checkFAPIRequestInterval()
         // 1. 获取登录token
         Indicators.shared.updateTitle(for: indicatorID, title: "获取登录token")
         let loginToken = try await requestLoginToken(sessionToken: sessionToken)
@@ -421,7 +420,10 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
         
         while retryCount < maxRetries {
             do {
-                // 首先获取NSO版本（如果还没有的话）
+                    // 检查请求间隔
+                try checkFAPIRequestInterval()
+
+                    // 首先获取NSO版本（如果还没有的话）
                 if nsoVersion.isEmpty {
                     let config = try await nxapiZncaConfig()
                     if let version = config["nso_version"] as? String {
@@ -429,7 +431,7 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
                         updateNSOVersion(version)
                     }
                 }
-                
+
                 let fAPI = AppAPI.nxapiZnca_f_advanced(
                     accessToken: accessToken,
                     step: step == 1 ? .hash1 : .hash2,
@@ -439,13 +441,24 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
                     coralUserId: coralUserId
                 )
                 let (data, response) = try await URLSession.shared.data(for: fAPI.request)
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                guard let httpResponse = response as? HTTPURLResponse else{
                     throw NSOAuthError.invalidSessionToken
                 }
-                
+
+                switch httpResponse.statusCode {
+                case 200, 201:
+                    updateFAPILastRequestTime()
+                    break // OK
+                case 401:
+                    throw SN3Client.Error.invalidGameServiceToken
+                case 429:
+                    throw SN3Client.Error.tooManyRequests
+                case let code:
+                    throw SN3Client.Error.responseError(code: code, url: httpResponse.url, body: String(data: data, encoding: .utf8))
+                }
                 let json = JSON(data)
-                
-                // 检查API警告信息
+
+                    // 检查API警告信息
                 if let warnings = json["warnings"].array {
                     for warning in warnings {
                         if let warningString = warning.string {
@@ -453,23 +466,23 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
                         }
                     }
                 }
-                
+
                 let encryptedTokenRequestString = json["encrypted_token_request"].stringValue
                 guard !encryptedTokenRequestString.isEmpty,
                       let encryptedTokenRequestData = Data(base64Encoded: encryptedTokenRequestString) else {
                     throw NSOAuthError.nxapiError(message: "Failed to get encrypted_token_request from response")
                 }
-                
+
+                    // 请求成功，更新最后请求时间
+                updateFAPILastRequestTime()
+
                 return (version: nsoVersion, encryptedTokenRequest: encryptedTokenRequestData)
-            } catch {
-                retryCount += 1
-                if retryCount >= maxRetries {
-                    throw NSOAuthError.nxapiError(message: "Failed to get f value after \(maxRetries) attempts: \(error.localizedDescription)")
-                }
-                try? await Task.sleep(nanoseconds: UInt64(1 * Double(NSEC_PER_SEC)))
+            } catch SN3Client.Error.tooManyRequests{
+                // 更新最后请求时间（包括错误情况）
+                updateFAPILastRequestTime()
+                throw SN3Client.Error.tooManyRequests
             }
         }
-        throw NSOAuthError.nxapiError(message: "Unexpected error in f request")
     }
     
     private func updateNSOVersion(_ version: String) {
@@ -499,6 +512,7 @@ extension NSOAuthorization {
         case invalidLoginToken
         case responseError(code: Int, url: URL? = nil, body: String? = nil)
         case nxapiError(message: String)
+        case tooManyRequests
     }
 }
 

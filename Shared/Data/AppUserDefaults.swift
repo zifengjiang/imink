@@ -48,6 +48,12 @@ class AppUserDefaults: ObservableObject {
     @AppStorage("scheduleRefreshTime", store: .appGroup)
     var scheduleRefreshTime: Int = 0
     
+    @AppStorage("fapiLastRequestTime", store: .appGroup)
+    var fapiLastRequestTime: Int = 0
+    
+    @AppStorage("fapiRequestInterval", store: .appGroup)
+    var fapiRequestInterval: Int = 1800000 // 默认30分钟间隔（30 * 60 * 1000毫秒）
+    
     // MARK: - 日程订阅相关
     @AppStorage("scheduleSubscriptions", store: .appGroup)
     private var subscriptionsData: Data = Data()

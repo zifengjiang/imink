@@ -27,7 +27,7 @@ private enum Gate {
     // MARK: - SN3Client token helper
 extension SN3Client {
     func ensureToken() async throws {
-        await NSOAccountManager.shared.refreshGameServiceTokenIfNeeded()
+//        await NSOAccountManager.shared.refreshGameServiceTokenIfNeeded()
         if let token = AppUserDefaults.shared.gameServiceToken {
             try await setToken(token)
         }
@@ -81,12 +81,22 @@ extension SN3Client {
                 } catch SN3Client.Error.invalidGameServiceToken {
                     if attempt < maxRetries { Indicators.shared.updateTitle(for: IndicatorID, title: "令牌已过期，重新获取...") }
                     else { Indicators.shared.updateTitle(for: IndicatorID, title: "令牌已过期，重试获取失败")}
-                    await NSOAccountManager.shared.refreshGameServiceTokenManual()
+                    await NSOAccountManager.shared.refreshGameServiceTokenManual(indicatorId: IndicatorID)
                     attempt += 1
+
+                }catch SN3Client.Error.tooManyRequests{
+                    Indicators.shared.updateTitle(for: IndicatorID, title: "请求过于频繁，稍后重试...")
+                    return
+                }catch NSOAuthorization.NSOAuthError.tooManyRequests{
+                    Indicators.shared.updateTitle(for: IndicatorID, title: "FAPI请求过于频繁，稍后重试...")
+                    return
+
+
                 }catch {
                     logError(error)
                     attempt += 1
                     Indicators.shared.updateTitle(for: IndicatorID, title: "第\(attempt)次重试中...")
+                    Indicators.shared.updateSubtitle(for: IndicatorID, subtitle: error.localizedDescription)
                     if attempt < maxRetries {
                         try? await Task.sleep(nanoseconds: 1_000_000_000)
                     }

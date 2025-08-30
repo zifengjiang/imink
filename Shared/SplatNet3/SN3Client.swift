@@ -104,6 +104,7 @@ extension SN3Client {
 public extension SN3Client {
     enum Error: Swift.Error {
         case invalidGameServiceToken
+        case tooManyRequests
         case invalidBulletToken
         case responseError(code: Int, url: URL? = nil, body: String? = nil)
     }

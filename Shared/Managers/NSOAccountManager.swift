@@ -31,10 +31,10 @@ class NSOAccountManager:ObservableObject {
         }
     }
 
-    func refreshGameServiceTokenManual() async {
+    func refreshGameServiceTokenManual(indicatorId: String? = nil) async {
         if let sessionToken = AppUserDefaults.shared.sessionToken{
             do{
-                try await refreshGameServiceToken(sessionToken: sessionToken)
+                try await refreshGameServiceToken(sessionToken: sessionToken, indicatorId: indicatorId)
             }catch{
                 logError(error)
             }
