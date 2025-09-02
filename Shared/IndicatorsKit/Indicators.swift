@@ -49,6 +49,12 @@ public final class Indicators {
 		dismissTimer(for: id)
 	}
 
+    public func dismiss(with id: String, after delay: TimeInterval){
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            self.dismiss(with: id)
+        }
+    }
+
     public func updateProgress(for id: String, progress: Double) {
         if let index = indicators.firstIndex(where: { $0.id == id }) {
             withAnimation {

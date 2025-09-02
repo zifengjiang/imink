@@ -76,9 +76,7 @@ struct SettingPage: View {
                     .background(ActivityView(isPresented: $isActivityPresented, item: $item))
 
                     Button {
-                        Task{
-                            await NSOAccountManager.shared.refreshGameServiceTokenManual()
-                        }
+                        
                     } label: {
                         Text("鲑鱼跑记录总数：\(AppState.shared.salmonRunRecordsCount)")
                     }
@@ -203,7 +201,11 @@ struct SettingPage: View {
                     
                     Button {
                         Task {
-                            await NSOAccountManager.shared.refreshGameServiceTokenManual()
+                            do{
+                                try await NSOAccountManager.shared.refreshGameServiceTokenManual()
+                            }catch{
+                                logError(error)
+                            }
                         }
                     } label: {
                         Text("手动刷新游戏Token")

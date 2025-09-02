@@ -27,7 +27,7 @@ private enum Gate {
     // MARK: - SN3Client token helper
 extension SN3Client {
     func ensureToken() async throws {
-//        await NSOAccountManager.shared.refreshGameServiceTokenIfNeeded()
+            //        await NSOAccountManager.shared.refreshGameServiceTokenIfNeeded()
         if let token = AppUserDefaults.shared.gameServiceToken {
             try await setToken(token)
         }
@@ -49,14 +49,8 @@ extension SN3Client {
         let IndicatorID = UUID().uuidString
         Indicators.shared.display(.init(id: IndicatorID, icon: .progressIndicator, title: "正在加载...", dismissType: .manual, isUserDismissible: false))
         var count = 0
-
-        await flag.withValue(true) {
-            let maxRetries = 2
-            var attempt = 0
-            defer {
-                Indicators.shared.dismiss(with: IndicatorID)
-            }
-            while attempt < maxRetries {
+        do{
+            try await flag.withValue(true) {
                 do {
                     try Task.checkCancellation()
                     try await ensureToken()
@@ -74,38 +68,32 @@ extension SN3Client {
                     lastRefreshTime = Int(Date().timeIntervalSince1970)
                     Indicators.shared.updateTitle(for: IndicatorID, title: "加载了\(saved)个新纪录")
                     Indicators.shared.updateIcon(for: IndicatorID, icon: .success)
+                    Indicators.shared.dismiss(with: IndicatorID, after: 1)
                     return
                 } catch is CancellationError{
                     Indicators.shared.dismiss(with: IndicatorID)
                     return
                 } catch SN3Client.Error.invalidGameServiceToken {
-                    if attempt < maxRetries { Indicators.shared.updateTitle(for: IndicatorID, title: "令牌已过期，重新获取...") }
-                    else { Indicators.shared.updateTitle(for: IndicatorID, title: "令牌已过期，重试获取失败")}
-                    await NSOAccountManager.shared.refreshGameServiceTokenManual(indicatorId: IndicatorID)
-                    attempt += 1
-
+                    Indicators.shared.updateTitle(for: IndicatorID, title: "令牌已过期，重新获取...")
+                    try await NSOAccountManager.shared.refreshGameServiceTokenManual(indicatorId: IndicatorID)
                 }catch SN3Client.Error.tooManyRequests{
-                    Indicators.shared.updateTitle(for: IndicatorID, title: "请求过于频繁，稍后重试...")
-                    return
-                }catch NSOAuthorization.NSOAuthError.tooManyRequests{
                     Indicators.shared.updateTitle(for: IndicatorID, title: "FAPI请求过于频繁，稍后重试...")
+                    Indicators.shared.dismiss(with: IndicatorID, after: 3)
                     return
-
-
                 }catch {
                     logError(error)
-                    attempt += 1
-                    Indicators.shared.updateTitle(for: IndicatorID, title: "第\(attempt)次重试中...")
-                    Indicators.shared.updateSubtitle(for: IndicatorID, subtitle: error.localizedDescription)
-                    if attempt < maxRetries {
-                        try? await Task.sleep(nanoseconds: 1_000_000_000)
-                    }
+                    Indicators.shared.dismiss(with: IndicatorID)
+                    return
                 }
             }
-            Indicators.shared.updateTitle(for: IndicatorID, title: "加载失败")
-            Indicators.shared.updateIcon(for: IndicatorID, icon: .image(Image(systemName: "xmark.icloud")))
-
+        }catch{
+            logError(error)
         }
+//        Indicators.shared.updateTitle(for: IndicatorID, title: "加载失败")
+//        Indicators.shared.updateIcon(for: IndicatorID, icon: .image(Image(systemName: "xmark.icloud")))
+
+
+//        Indicators.shared.dismissTimer(for: IndicatorID)
         return count
     }
 }
@@ -226,7 +214,11 @@ extension SN3Client {
                 }
                 return T(json: data)
             } catch SN3Client.Error.invalidGameServiceToken {
-                await NSOAccountManager.shared.refreshGameServiceTokenManual()
+                do{
+                    try await NSOAccountManager.shared.refreshGameServiceTokenManual()
+                }catch{
+                    logError(error)
+                }
                 retryCount += 1
             } catch is CancellationError {
                 Indicators.shared.dismiss(with: IndicatorID)
