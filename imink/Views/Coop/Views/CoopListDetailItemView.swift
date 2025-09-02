@@ -36,7 +36,16 @@ struct CoopListDetailItemView: View {
                         )
                         .frame(width: 13, height:13)
                         .padding([.top, .bottom], 0.5)
-                }else{
+                }else if coop.rule == .teamContest{
+                    HStack(spacing: 3) {
+                        Image(.golden)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 13, height: 13)
+                        Text("\(coop.goldenEgg)")
+                            .font(.splatoonFont(size: 12))
+                    }
+                }else {
                     Text("-")
                         .font(.splatoonFont(size: 12))
                         .foregroundStyle(Color(.clear))
@@ -117,13 +126,15 @@ struct CoopListDetailItemView: View {
 
                     }
 
-                    HStack(spacing: 3) {
-                        Image(.golden)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 12, height: 12)
-                        Text("\(coop.goldenEgg)")
-                            .font(.splatoonFont(size: 10))
+                    if coop.rule != .teamContest{
+                        HStack(spacing: 3) {
+                            Image(.golden)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 12, height: 12)
+                            Text("\(coop.goldenEgg)")
+                                .font(.splatoonFont(size: 10))
+                        }
                     }
 
                     HStack(spacing: 3) {
