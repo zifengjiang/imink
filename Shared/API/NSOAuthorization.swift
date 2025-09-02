@@ -21,12 +21,17 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
         return decoder
     }
 
-        /// 检查FAPI请求间隔，如果间隔不够则抛出tooManyRequests错误
+            /// 检查FAPI请求间隔，如果间隔不够则抛出tooManyRequests错误
     private func checkFAPIRequestInterval() throws {
         let currentTime = Int(Date().timeIntervalSince1970 * 1000) // 转换为毫秒
         let lastRequestTime = AppUserDefaults.shared.fapiLastRequestTime
         let requestInterval = AppUserDefaults.shared.fapiRequestInterval
-
+        
+        // 如果间隔设置为0或负数，则禁用间隔限制
+        if requestInterval <= 0 {
+            return
+        }
+        
         if currentTime - lastRequestTime < requestInterval {
             throw NSOAuthError.tooManyRequests
         }

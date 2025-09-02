@@ -47,6 +47,9 @@ extension SN3Client {
     ) async -> Int?{
         guard !flag.get(), Gate.shouldProceed(last: lastRefreshTime, interval: refreshInterval) else { return nil}
         let IndicatorID = UUID().uuidString
+        defer{
+            Indicators.shared.dismiss(with: IndicatorID,after: 2)
+        }
         Indicators.shared.display(.init(id: IndicatorID, icon: .progressIndicator, title: "正在加载...", dismissType: .manual, isUserDismissible: false))
         var count = 0
         do{

@@ -14,6 +14,8 @@ struct SettingPage: View {
     @State private var isActivityPresented = false
     @State var showLogoutAlert = false
     @State var showCopySessionIdAlert = false
+    @State var showFAPIIntervalAlert = false
+    @State private var fapiIntervalMinutes: String = ""
     @State private var item: Any = URL(fileURLWithPath: SplatDatabase.shared.dbQueue.path)
     var body: some View {
         NavigationStack{
@@ -34,6 +36,19 @@ struct SettingPage: View {
                             },
                             secondaryButton: .cancel()
                         )
+                    }
+                    
+                    .alert("设置FAPI请求间隔", isPresented: $showFAPIIntervalAlert) {
+                        TextField("请输入间隔分钟数", text: $fapiIntervalMinutes)
+                            .keyboardType(.numberPad)
+                        Button("确定") {
+                            if let minutes = Int(fapiIntervalMinutes), minutes > 0 {
+                                AppUserDefaults.shared.fapiRequestInterval = minutes * 60000 // 转换为毫秒
+                            }
+                        }
+                        Button("取消", role: .cancel) { }
+                    } message: {
+                        Text("当前间隔：\(AppUserDefaults.shared.fapiRequestInterval / 60000)分钟\n请输入新的间隔时间（分钟）：")
                     }
 
                     Button {
@@ -357,6 +372,95 @@ struct SettingPage: View {
                         }
                     }
                 }
+                
+                Section(header: Text("FAPI设置")){
+                    HStack {
+                        Text("FAPI请求间隔")
+                        Spacer()
+                        if AppUserDefaults.shared.fapiRequestInterval <= 0 {
+                            Text("已禁用")
+                                .foregroundStyle(.red)
+                        } else {
+                            Text("\(AppUserDefaults.shared.fapiRequestInterval / 60000)分钟")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    
+                    HStack {
+                        Text("上次FAPI请求")
+                        Spacer()
+                        if AppUserDefaults.shared.fapiLastRequestTime > 0 {
+                            Text(Date(timeIntervalSince1970: TimeInterval(AppUserDefaults.shared.fapiLastRequestTime / 1000)).toPlayedTimeString(full: true))
+                                .foregroundStyle(.secondary)
+                                .font(.caption)
+                        } else {
+                            Text("从未请求")
+                                .foregroundStyle(.secondary)
+                                .font(.caption)
+                        }
+                    }
+                    
+                    Button {
+                        // 重置FAPI请求时间
+                        AppUserDefaults.shared.fapiLastRequestTime = 0
+                    } label: {
+                        Text("重置FAPI请求时间")
+                            .foregroundStyle(.orange)
+                    }
+                    
+                    Button {
+                        // 显示FAPI间隔设置对话框
+                        showFAPIIntervalAlert = true
+                    } label: {
+                        Text("设置FAPI请求间隔")
+                            .foregroundStyle(.blue)
+                    }
+                    
+                    // 快速设置按钮
+                    HStack {
+                        Text("快速设置")
+                        Spacer()
+                        Button("5分钟") {
+                            AppUserDefaults.shared.fapiRequestInterval = 5 * 60000
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        
+                        Button("15分钟") {
+                            AppUserDefaults.shared.fapiRequestInterval = 15 * 60000
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        
+                        Button("30分钟") {
+                            AppUserDefaults.shared.fapiRequestInterval = 30 * 60000
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        
+                        Button("禁用") {
+                            AppUserDefaults.shared.fapiRequestInterval = 0
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        .foregroundStyle(.red)
+                    }
+                    
+                    // 说明信息
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("ℹ️ FAPI请求间隔说明：")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundStyle(.blue)
+                        
+                        Text("• 控制FAPI请求的频率，避免过于频繁的请求")
+                        Text("• 在间隔时间内重复请求会显示请求过于频繁提示")
+                        Text("• 建议设置为5-30分钟，根据使用频率调整")
+                        Text("• 设置为0或负数将禁用间隔限制")
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                }
             }
             .navigationTitle("setting_page_title")
             .navigationBarTitleDisplayMode(.inline)
@@ -375,6 +479,8 @@ struct SettingPage: View {
                 Task {
                     await notificationManager.checkNotificationPermission()
                 }
+                // 初始化FAPI间隔设置
+                fapiIntervalMinutes = String(AppUserDefaults.shared.fapiRequestInterval / 60000)
             }
         }
     }
