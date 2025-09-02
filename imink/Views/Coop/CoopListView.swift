@@ -195,7 +195,7 @@ struct CoopListView: View {
                                     }
                                     
                                     Text("\(selectedCoops.count)")
-                                        .font(.caption)
+                                        .font(.splatoonFont(size: 16))
                                         .foregroundColor(.secondary)
                                         .frame(minWidth: 20)
                                 }
