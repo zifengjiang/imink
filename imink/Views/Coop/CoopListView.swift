@@ -1,5 +1,5 @@
 import SwiftUI
-
+import SplatDatabase
 
 struct CoopListView: View {
     @EnvironmentObject var mainViewModel: MainViewModel
@@ -17,13 +17,6 @@ struct CoopListView: View {
         NavigationStack {
             ScrollViewReader { proxy in
                 VStack {
-                        // 批量操作视图
-                    CoopBatchOperationView(
-                        selectedCoops: $selectedCoops,
-                        isSelectionMode: $isSelectionMode,
-                        coops: viewModel.rows.compactMap { $0.coop }
-                    )
-
                     ScrollView{
                         LazyVStack{
                             ForEach(viewModel.rows, id:\.id){ row in
@@ -189,16 +182,57 @@ struct CoopListView: View {
                                     isSelectionMode = true
                                 }
                             } else {
-                                EmptyView()
+                                HStack(spacing: 12) {
+                                    Button {
+                                        if selectedCoops.count == viewModel.rows.compactMap({ $0.coop }).count {
+                                            selectedCoops.removeAll()
+                                        } else {
+                                            selectedCoops = Set(viewModel.rows.compactMap({ $0.coop }).map { $0.id })
+                                        }
+                                    } label: {
+                                        Image(systemName: selectedCoops.count == viewModel.rows.compactMap({ $0.coop }).count ? "checkmark.circle.fill" : "circle")
+                                            .foregroundColor(.accentColor)
+                                    }
+                                    
+                                    Text("\(selectedCoops.count)")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                        .frame(minWidth: 20)
+                                }
                             }
                         }
 
                         ToolbarItem(placement: .topBarTrailing) {
-                            Button{
-                                showFilterSheet = true
-                            } label: {
-                                    /// Filter
-                                Label("11", systemImage: "line.horizontal.3.decrease.circle")
+                            if isSelectionMode {
+                                HStack(spacing: 16) {
+                                    Button {
+                                        batchToggleFavorite()
+                                    } label: {
+                                        Image(systemName: "heart")
+                                            .foregroundColor(.red)
+                                    }
+                                    .disabled(selectedCoops.isEmpty)
+                                    
+                                    Button {
+                                        batchDelete()
+                                    } label: {
+                                        Image(systemName: "trash")
+                                            .foregroundColor(.red)
+                                    }
+                                    .disabled(selectedCoops.isEmpty)
+                                    
+                                    Button("取消") {
+                                        isSelectionMode = false
+                                        selectedCoops.removeAll()
+                                    }
+                                    .foregroundColor(.accentColor)
+                                }
+                            } else {
+                                Button{
+                                    showFilterSheet = true
+                                } label: {
+                                    Label("筛选", systemImage: "line.horizontal.3.decrease.circle")
+                                }
                             }
                         }
                     }
@@ -299,6 +333,46 @@ struct CoopListView: View {
                 }
             }else{
                 self.isFirstRow = true
+            }
+        }
+    }
+    
+    private func batchToggleFavorite() {
+        Task {
+            do {
+                for coopId in selectedCoops {
+                    if let actualCoop = try await SplatDatabase.shared.dbQueue.read({ db in
+                        try Coop.fetchOne(db, key: coopId)
+                    }) {
+                        try actualCoop.toggleFavorite()
+                    }
+                }
+                
+                NotificationCenter.default.post(name: .coopDataChanged, object: nil)
+                isSelectionMode = false
+                selectedCoops.removeAll()
+            } catch {
+                print("Error batch toggling favorites: \(error)")
+            }
+        }
+    }
+    
+    private func batchDelete() {
+        Task {
+            do {
+                for coopId in selectedCoops {
+                    if let actualCoop = try await SplatDatabase.shared.dbQueue.read({ db in
+                        try Coop.fetchOne(db, key: coopId)
+                    }) {
+                        try actualCoop.softDelete()
+                    }
+                }
+                
+                NotificationCenter.default.post(name: .coopDataChanged, object: nil)
+                isSelectionMode = false
+                selectedCoops.removeAll()
+            } catch {
+                print("Error batch deleting coops: \(error)")
             }
         }
     }
