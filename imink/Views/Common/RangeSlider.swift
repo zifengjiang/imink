@@ -1,112 +1,205 @@
+//
+//  RangeSlider.swift
+//  RangeSlider
+//
+//  Created by Brendan Perry on 10/7/21.
+//
+
 import SwiftUI
+import Combine
 
-struct RangeSlider: View {
-    @Binding var filter: Filter
-    var rangeBounds: ClosedRange<Date>
-    var dateFormatter: DateFormatter = DateFormatter()
+public protocol RangeSliderUnit {
+    func minValue() -> Double
+    func maxValue() -> Double
+    func defaultMin() -> Double
+    func defaultMax() -> Double
+}
 
-    @GestureState private var dragState = DragState.inactive
-    @State private var lowerBoundOffset: CGFloat = 0
-    @State private var upperBoundOffset: CGFloat = 0
-
-    init(filter: Binding<Filter>, rangeBounds: ClosedRange<Date>) {
-        self._filter = filter
-        self.rangeBounds = rangeBounds
-        dateFormatter.dateFormat = "yyyy MM/dd HH:mm"
+public struct RangeSlider: View {
+    let lineHeight: Double
+    let lineWidth: Double
+    let lineCornerRadius: Double
+    let circleWidth: Double
+    let circleShadowRadius: Double
+    let circleBorder: Double
+    let leftCircleBorderColor: Color
+    let rightCircleBorderColor: Color
+    let leftCircleColor: Color
+    let rightCircleColor: Color
+    let lineColorInRange: AnyShapeStyle
+    let lineColorOutOfRange: Color
+    let shadow: Color
+    let unitPublisher: AnyPublisher<RangeSliderUnit, Never>
+    
+    @Binding var leftValue: Double
+    @Binding var rightValue: Double
+    
+    @State var minValue: Double
+    @State var maxValue: Double
+    @State var hasAppeared = false
+    @State var observers = Set<AnyCancellable>()
+    @State var leftSliderPosition: Double
+    @State var rightSliderPosition: Double
+    
+    public init(lineHeight: Double,
+                lineWidth: Double,
+                lineCornerRadius: Double,
+                circleWidth: Double,
+                circleShadowRadius: Double,
+                minValue: Double,
+                maxValue: Double,
+                circleBorder: Double,
+                leftCircleBorderColor: Color,
+                rightCircleBorderColor: Color,
+                leftCircleColor: Color,
+                rightCircleColor: Color,
+                lineColorInRange: AnyShapeStyle,
+                lineColorOutOfRange: Color,
+                shadow: Color,
+                leftValue: Binding<Double>,
+                rightValue: Binding<Double>,
+                unitPublisher: AnyPublisher<RangeSliderUnit, Never>) {
+        self.lineHeight = lineHeight
+        self.lineWidth = lineWidth
+        self.lineCornerRadius = lineCornerRadius
+        self.circleWidth = circleWidth
+        self.circleShadowRadius = circleShadowRadius
+        self.minValue = minValue
+        self.maxValue = maxValue
+        self._leftValue = leftValue
+        self._rightValue = rightValue
+        self.circleBorder = circleBorder
+        self.leftCircleBorderColor = leftCircleBorderColor
+        self.rightCircleBorderColor = rightCircleBorderColor
+        self.leftCircleColor = leftCircleColor
+        self.rightCircleColor = rightCircleColor
+        self.lineColorInRange = lineColorInRange
+        self.lineColorOutOfRange = lineColorOutOfRange
+        self.shadow = shadow
+        self.unitPublisher = unitPublisher
+        
+        self.leftSliderPosition = (leftValue.wrappedValue - minValue) / (maxValue - minValue) * lineWidth
+        self.rightSliderPosition = (rightValue.wrappedValue - minValue) / (maxValue - minValue) * lineWidth
     }
-
-    enum DragState {
-        case inactive
-        case draggingLower
-        case draggingUpper
-    }
-
-    var body: some View {
-        GeometryReader { geometry in
-            let totalSeconds = rangeBounds.upperBound.timeIntervalSince(rangeBounds.lowerBound)
-            let lowerBoundSeconds = filter.start.timeIntervalSince(rangeBounds.lowerBound)
-            let upperBoundSeconds = filter.end.timeIntervalSince(rangeBounds.lowerBound)
-
+    
+    public var body: some View {
+        GeometryReader { geo in
             ZStack {
-                Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(height: 4)
-                    .cornerRadius(2)
-
-                    // Track
-                Rectangle()
-                    .fill(Color.blue)
-                    .frame(width: CGFloat(upperBoundSeconds - lowerBoundSeconds) / CGFloat(totalSeconds) * geometry.size.width, height: 4)
-                    .offset(x: lowerBoundOffset + geometry.size.width / CGFloat(totalSeconds) * CGFloat(lowerBoundSeconds))
-                    .cornerRadius(2)
-
-                    // Lower Bound Knob
-                Circle()
-                    .fill(Color.white)
-                    .frame(width: 20, height: 20)
-                    .offset(x: lowerBoundOffset)
-                    .gesture(
-                        DragGesture()
-                            .updating($dragState) { value, state, _ in
-                                state = .draggingLower
-                            }
-                            .onChanged { value in
-                                lowerBoundOffset = value.location.x
-                                let newStartDate = rangeBounds.lowerBound.addingTimeInterval(Double(lowerBoundOffset / geometry.size.width) * totalSeconds)
-                                if newStartDate < filter.end && newStartDate >= rangeBounds.lowerBound {
-                                    filter.start = newStartDate
-                                }
-                            }
-                    )
-
-                    // Upper Bound Knob
-                Circle()
-                    .fill(Color.white)
-                    .frame(width: 20, height: 20)
-                    .offset(x: upperBoundOffset)
-                    .gesture(
-                        DragGesture()
-                            .updating($dragState) { value, state, _ in
-                                state = .draggingUpper
-                            }
-                            .onChanged { value in
-                                upperBoundOffset = value.location.x
-                                let newEndDate = rangeBounds.lowerBound.addingTimeInterval(Double(upperBoundOffset / geometry.size.width) * totalSeconds)
-                                if newEndDate > filter.start && newEndDate <= rangeBounds.upperBound {
-                                    filter.end = newEndDate
-                                }
-                            }
-                    )
-
-                    // Lower Bound Tooltip
-                if dragState == .draggingLower {
-                    Text(dateFormatter.string(from: filter.start))
-                        .font(.caption)
-                        .padding(5)
-//                        .background(Color.black)
-                        .cornerRadius(5)
-                        .offset(x: lowerBoundOffset, y: 30)
+                RoundedRectangle(cornerSize: CGSize(width: lineCornerRadius, height: lineCornerRadius))
+                    .frame(width: lineWidth, height: lineHeight, alignment: .center)
+                    .foregroundColor(lineColorOutOfRange)
+                RoundedRectangle(cornerSize: CGSize(width: lineCornerRadius, height: lineCornerRadius))
+                    .fill(AnyShapeStyle(lineColorInRange))
+                    .frame(
+                        width: rightSliderPosition - leftSliderPosition,
+                        height: lineHeight,
+                        alignment: .center)
+                    .position(
+                        x: (rightSliderPosition - leftSliderPosition) / 2 + leftSliderPosition,
+                        y: geo.frame(in: .local).midY)
+                ZStack {
+                    Circle()
+                        .fill(leftCircleBorderColor)
+                        .frame(width: circleWidth, height: circleWidth, alignment: .center)
+                        .shadow(color: shadow, radius: 16, x: 0, y: 4)
+                    Circle()
+                        .fill(leftCircleColor)
+                        .frame(width: circleWidth - circleBorder, height: circleWidth - circleBorder, alignment: .center)
                 }
-
-                    // Upper Bound Tooltip
-                if dragState == .draggingUpper {
-                    Text(dateFormatter.string(from: filter.end))
-                        .font(.caption)
-                        .padding(5)
-//                        .background(Color.black)
-                        .cornerRadius(5)
-                        .offset(x: upperBoundOffset, y: 30)
+                .position(x: leftSliderPosition, y: geo.frame(in: .local).midY)
+                .gesture(dragLeftSlider)
+                .hoverEffect()
+                
+                ZStack {
+                    Circle()
+                        .fill(rightCircleBorderColor)
+                        .frame(width: circleWidth, height: circleWidth, alignment: .center)
+                        .shadow(color: shadow, radius: 16, x: 0, y: 4)
+                    Circle()
+                        .fill(rightCircleColor)
+                        .frame(width: circleWidth - circleBorder, height: circleWidth - circleBorder, alignment: .center)
                 }
+                .position(x: rightSliderPosition, y: geo.frame(in: .local).midY)
+                .gesture(dragRightSlider)
+                .hoverEffect()
             }
-            .frame(height: 50)
-            .onAppear {
-                lowerBoundOffset = geometry.size.width * CGFloat(lowerBoundSeconds / totalSeconds)
-                upperBoundOffset = geometry.size.width * CGFloat(upperBoundSeconds / totalSeconds)
+        }
+        .frame(width: lineWidth, height: circleWidth, alignment: .center)
+        .onAppear {
+            if !hasAppeared {
+                hasAppeared = true
+                
+                DispatchQueue.main.async {
+                    unitPublisher.sink { unit in
+                        minValue = unit.minValue()
+                        maxValue = unit.maxValue()
+                        leftValue = unit.defaultMin()
+                        rightValue = unit.defaultMax()
+                        
+                        leftSliderPosition = (leftValue - minValue) / (maxValue - minValue) * lineWidth
+                        rightSliderPosition = (rightValue - minValue) / (maxValue - minValue) * lineWidth
+                    }.store(in: &observers)
+                }
             }
         }
     }
-}
-
-#Preview {
-    RangeSlider(filter: .constant(Filter()), rangeBounds: Date(timeIntervalSince1970: 0)...Date())
+    
+    var dragLeftSlider: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                updateLeftSlider(value: value)
+            }
+    }
+    
+    func updateLeftSlider(value: DragGesture.Value) {
+        if value.location.x <= 0 {
+            leftSliderPosition = 0
+        } else if value.location.x <= rightSliderPosition - (minValue * (lineWidth / (maxValue - minValue))) {
+            leftSliderPosition = value.location.x
+        } else {
+            leftSliderPosition = rightSliderPosition - (minValue * (lineWidth / (maxValue - minValue)))
+        }
+        
+        let newValue = round((leftSliderPosition / lineWidth) * (maxValue - minValue) + minValue, toNearest: minValue)
+        
+        if newValue != leftValue {
+            leftValue = newValue
+            generateHapticFeedback()
+        }
+    }
+    
+    var dragRightSlider: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                updateRightSlider(value: value.location.x)
+            }
+    }
+    
+    func updateRightSlider(value: Double) {
+        if value >= lineWidth {
+            rightSliderPosition = lineWidth
+        } else if value >= leftSliderPosition + (minValue * (lineWidth / (maxValue - minValue))) {
+            rightSliderPosition = value
+        } else {
+            rightSliderPosition = leftSliderPosition + (minValue * (lineWidth / (maxValue - minValue)))
+        }
+        
+        let newValue = round((rightSliderPosition / lineWidth) * (maxValue - minValue) + minValue, toNearest: minValue)
+        
+        if newValue != rightValue {
+            rightValue = newValue
+            generateHapticFeedback()
+        }
+    }
+    
+    func generateHapticFeedback() {
+        let impact = UIImpactFeedbackGenerator(style: .light)
+        impact.impactOccurred()
+    }
+    
+    func round(_ value: Double, toNearest: Double) -> Double {
+        let rounded = Darwin.round(value / toNearest) * toNearest
+        
+        return rounded == -0 ? 0 : rounded
+    }
 }

@@ -57,8 +57,49 @@ struct CoopFilterView:View {
         NavigationStack{
             ScrollView {
                 VStack(alignment: .leading) {
-                    DatePicker("开始时间", selection: $filter.start, displayedComponents: [.date,.hourAndMinute])
-                    DatePicker("结束时间", selection: $filter.end, displayedComponents: [.date,.hourAndMinute])
+                    // 时间范围选择
+                    VStack(alignment: .center, spacing: 12) {
+                        Text("时间范围")
+                            .font(.splatoonFont(size: 18))
+                        
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("开始时间")
+                                    .font(.splatoonFont(size: 14))
+                                    .foregroundColor(.secondary)
+                                Text(filter.start, style: .date)
+                                    .font(.splatoonFont(size: 16))
+                            }
+                            
+                            Spacer()
+                            
+                            VStack(alignment: .trailing, spacing: 4) {
+                                Text("结束时间")
+                                    .font(.splatoonFont(size: 14))
+                                    .foregroundColor(.secondary)
+                                Text(filter.end, style: .date)
+                                    .font(.splatoonFont(size: 16))
+                            }
+                        }
+                        
+                        // 时间范围滑块
+                        TimeRangeSlider(
+                            lineWidth: UIScreen.main.bounds.width - 64,
+                            minDate: getCoopEarliestPlayedTime(),
+                            maxDate: Date(),
+                            startDate: $filter.start,
+                            endDate: $filter.end
+                        )
+                        .frame(height: 30)
+                        
+                        // 显示时间间隔（调试用）
+                        let timeInterval = filter.end.timeIntervalSince(filter.start)
+                        let days = Int(timeInterval / (24 * 3600))
+                        let hours = Int((timeInterval.truncatingRemainder(dividingBy: 24 * 3600)) / 3600)
+                        Text("时间间隔: \(days)天\(hours)小时")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                     
                     Divider()
                         .padding(.vertical, 8)
