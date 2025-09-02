@@ -53,15 +53,15 @@ struct SelectableRowView<Content: View>: View {
     private func startWiggleAnimation() {
         // 创建更自然的摆动动画：正时针和逆时针交替
         let wiggleAnimation = Animation
-            .easeInOut(duration: 0.1)
+            .easeInOut(duration: 0.2)
             .repeatForever(autoreverses: true)
         
         withAnimation(wiggleAnimation) {
-            rotationAngle = 1.0
+            rotationAngle = 2.0
         }
         
         // 添加一些随机延迟，让不同行的摆动不完全同步，更自然
-        let randomDelay = Double.random(in: 0.0...0.05)
+        let randomDelay = Double.random(in: 0.0...0.5)
         DispatchQueue.main.asyncAfter(deadline: .now() + randomDelay) {
             withAnimation(wiggleAnimation) {
                 rotationAngle = -1.0
