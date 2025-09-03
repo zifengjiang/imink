@@ -3,6 +3,9 @@ import SplatDatabase
 
 struct CoopShiftDetailView: View {
     @StateObject var viewModel: CoopShiftDetailViewModel
+    @State private var showPlayerDetail: Bool = false
+    @State private var activePlayer: CoopPlayerStatus? = nil
+    @State private var hoveredMember: Bool = false
 
     var id: Int
     init(id: Int){
@@ -38,6 +41,12 @@ struct CoopShiftDetailView: View {
         }
         .frame(maxWidth: .infinity)
         .fixSafeareaBackground()
+        .modifier(Popup(isPresented: showPlayerDetail,
+                       onDismiss: {
+            showPlayerDetail = false
+        }, content: {
+            CoopPlayerStatusView(status: activePlayer)
+        }))
         .task  {
             print("load Shift \(self.id)")
            await viewModel.load()
@@ -267,14 +276,22 @@ struct CoopShiftDetailView: View {
                 ForEach(viewModel.coopPlayerStatus.indices, id: \.self){ index in
                     VStack{
                         NameplateView(status: viewModel.coopPlayerStatus[index])
-                            .contextMenu {
-                                Button{
-                                    
-                                } label: {
-                                    Text("ok")
+                            .overlay {
+                                TouchDownAndTouchUpGestureView {
+                                    activePlayer = viewModel.coopPlayerStatus[index]
+                                    hoveredMember = true
+                                } touchMovedCallBack: { distance in
+                                    if distance > 10 {
+                                        hoveredMember = false
+                                    }
+                                } touchUpCallBack: {
+                                    if hoveredMember {
+                                        withAnimation {
+                                            showPlayerDetail = true
+                                        }
+                                        hoveredMember = false
+                                    }
                                 }
-                            } preview: {
-                                CoopPlayerStatusView(status: viewModel.coopPlayerStatus[index])
                             }
 
 
@@ -343,66 +360,72 @@ struct CoopShiftDetailView: View {
 }
 
 struct CoopPlayerStatusView:View {
-    let status:CoopPlayerStatus
+    let status: CoopPlayerStatus?
 
     var body: some View {
         VStack{
-            NameplateView(status: status)
-            if let uniformName = status.uniformName{
-                Image(uniformName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 100, height: 100)
-            }
-            HStack{
-                HStack(spacing: 3){
-                    Image(.salmonRun)
-                        .resizable()
-                        .bold()
-                        .foregroundStyle(Color.green)
-                        .frame(width: 18,height: 18)
-                    Text("\(status.defeatEnemyCount, places: 1)")
-                        .font(.splatoonFont(size: 18))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.3)
-                }
-//                .frame(width: 45, alignment: .leading)
-
-                HStack(spacing: 3){
-                    Image(.golden)
+            if let status = status {
+                NameplateView(status: status)
+                if let uniformName = status.uniformName{
+                    Image(uniformName)
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 18, height: 18)
-                    Text("\(status.goldenDeliverCount, places:1)")
-                        .font(.splatoonFont(size: 18)) + 
-                    Text("<\(status.goldenAssistCount, places:1)>")
-                        .font(.splatoonFont(size: 13)).foregroundColor(.secondary)
-                        
+                        .frame(width: 100, height: 100)
                 }
+                HStack{
+                    HStack(spacing: 3){
+                        Image(.salmonRun)
+                            .resizable()
+                            .bold()
+                            .foregroundStyle(Color.green)
+                            .frame(width: 18,height: 18)
+                        Text("\(status.defeatEnemyCount, places: 1)")
+                            .font(.splatoonFont(size: 18))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.3)
+                    }
+//                    .frame(width: 45, alignment: .leading)
 
-                HStack(spacing: 3){
-                    Image(.jobShiftCardHelp)
-                        .resizable()
-                        .bold()
-                        .foregroundStyle(Color.green)
-                        .frame(width: 18,height: 18)
-                    Text("\(status.rescueCount, places: 1)")
-                        .font(.splatoonFont(size: 18))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.3)
-                }
-                .frame(width: 45, alignment: .leading)
+                    HStack(spacing: 3){
+                        Image(.golden)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18, height: 18)
+                        Text("\(status.goldenDeliverCount, places:1)")
+                            .font(.splatoonFont(size: 18)) + 
+                        Text("<\(status.goldenAssistCount, places:1)>")
+                            .font(.splatoonFont(size: 13)).foregroundColor(.secondary)
+                            
+                    }
 
-                HStack(spacing: 3){
-                    Image(.jobShiftCardDead)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 18, height: 18)
-                    Text("\(status.rescuedCount, places:1)")
-                        .font(.splatoonFont(size: 18))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.3)
+                    HStack(spacing: 3){
+                        Image(.jobShiftCardHelp)
+                            .resizable()
+                            .bold()
+                            .foregroundStyle(Color.green)
+                            .frame(width: 18,height: 18)
+                        Text("\(status.rescueCount, places: 1)")
+                            .font(.splatoonFont(size: 18))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.3)
+                    }
+                    .frame(width: 45, alignment: .leading)
+
+                    HStack(spacing: 3){
+                        Image(.jobShiftCardDead)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18, height: 18)
+                        Text("\(status.rescuedCount, places:1)")
+                            .font(.splatoonFont(size: 18))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.3)
+                    }
                 }
+            } else {
+                Text("无玩家数据")
+                    .font(.splatoonFont(size: 16))
+                    .foregroundStyle(.secondary)
             }
         }
         .frame(width: 280,height: 250)

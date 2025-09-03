@@ -6,6 +6,9 @@ struct CoopDetailView: View {
     @State var phase:Double = 0
     @StateObject var viewModel: CoopDetailViewModel
     @State private var contentHeight: CGFloat = 0
+    @State private var showPlayerDetail: Bool = false
+    @State private var activePlayer: CoopPlayerResult? = nil
+    @State private var hoveredMember: Bool = false
 
     var id: Int64
     init(id: Int64){
@@ -63,6 +66,12 @@ struct CoopDetailView: View {
             .scrollClipDisabled()
             .frame(maxWidth: .infinity)
             .fixSafeareaBackground()
+            .modifier(Popup(isPresented: showPlayerDetail,
+                          onDismiss: {
+                showPlayerDetail = false
+            }, content: {
+                CoopPlayerView(result: activePlayer)
+            }))
             .onAppear  {
 
                 AppState.shared.viewModelDict[self.id] = viewModel
@@ -101,7 +110,12 @@ struct CoopDetailView: View {
                 if i != 0{
                     Divider()
                 }
-                MemberView(result: viewModel.playerResults[i])
+                MemberView(
+                    result: viewModel.playerResults[i],
+                    activePlayer: $activePlayer,
+                    showPlayerDetail: $showPlayerDetail,
+                    hoveredMember: $hoveredMember
+                )
             }
         }
         .padding(.all,10)
@@ -368,6 +382,10 @@ extension CoopDetailView {
 
         struct MemberView:View {
             let result: CoopPlayerResult
+            @Binding var activePlayer: CoopPlayerResult?
+            @Binding var showPlayerDetail: Bool
+            @Binding var hoveredMember: Bool
+            
             var body: some View {
                 HStack{
                     VStack(alignment: .leading, spacing:5){
@@ -440,23 +458,22 @@ extension CoopDetailView {
                     }
                 }
                 .frame(height: 45)
-                .contextMenu {
-                    Button {
-
-                    } label: {
-                        Text("ok")
+                .overlay {
+                    TouchDownAndTouchUpGestureView {
+                        activePlayer = result
+                        hoveredMember = true
+                    } touchMovedCallBack: { distance in
+                        if distance > 10 {
+                            hoveredMember = false
+                        }
+                    } touchUpCallBack: {
+                        if hoveredMember {
+                            withAnimation {
+                                showPlayerDetail = true
+                            }
+                            hoveredMember = false
+                        }
                     }
-
-                } preview: {
-                    VStack{
-                        NameplateView(result: result)
-                        Image(result.player!.uniformName!)
-                            .resizable()
-                            .scaledToFit()
-                    }
-                    .frame(width: 300, height: 300)
-                    .padding()
-                    .textureBackground(texture: .bubble, radius: 18)
                 }
             }
         }

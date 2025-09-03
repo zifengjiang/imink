@@ -185,9 +185,9 @@ struct BattleDetailView: View {
                                 }
                             } touchUpCallBack: {
                                 if hoveredMember {
-                                    withAnimation {
+//                                    withAnimation {
                                         showPlayerSkill = true
-                                    }
+//                                    }
 
                                     hoveredMember = false
                                 }

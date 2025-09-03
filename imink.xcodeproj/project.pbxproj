@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0A2C668C2E682CAF00F1FB81 /* CoopPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2C668B2E682CAF00F1FB81 /* CoopPlayerView.swift */; };
+		0AC00D832E6710F600F82E5A /* TimeRangeSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AC00D822E6710F500F82E5A /* TimeRangeSlider.swift */; };
 		8B0792072C0F435C0094EA57 /* TargetType+fetch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0792062C0F435C0094EA57 /* TargetType+fetch.swift */; };
 		8B0792092C1077DD0094EA57 /* BattleScheduleCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0792082C1077DD0094EA57 /* BattleScheduleCardView.swift */; };
 		8B07920B2C1078310094EA57 /* SalmonRunScheduleCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B07920A2C1078310094EA57 /* SalmonRunScheduleCardView.swift */; };
@@ -211,6 +213,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0A2C668B2E682CAF00F1FB81 /* CoopPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopPlayerView.swift; sourceTree = "<group>"; };
+		0AC00D822E6710F500F82E5A /* TimeRangeSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeRangeSlider.swift; sourceTree = "<group>"; };
 		8B0792062C0F435C0094EA57 /* TargetType+fetch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TargetType+fetch.swift"; sourceTree = "<group>"; };
 		8B0792082C1077DD0094EA57 /* BattleScheduleCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleScheduleCardView.swift; sourceTree = "<group>"; };
 		8B07920A2C1078310094EA57 /* SalmonRunScheduleCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SalmonRunScheduleCardView.swift; sourceTree = "<group>"; };
@@ -463,6 +467,7 @@
 				8BAD2C662E5BEDB100DE9952 /* CoopBatchOperationView.swift */,
 				8B0851772BFB78D800AF22C5 /* CoopDetailWaveResultView.swift */,
 				8B0D14A52BFAD93A00B82AD1 /* CoopDetailView.swift */,
+				0A2C668B2E682CAF00F1FB81 /* CoopPlayerView.swift */,
 				8B0D14AA2BFADDD200B82AD1 /* CoopDetailViewModel.swift */,
 				8BE095102C035B000089705F /* CoopShiftDetailView.swift */,
 				8BE095122C035B280089705F /* CoopShiftDetailViewModel.swift */,
@@ -679,6 +684,7 @@
 		8B8B287F2BF88BFB00790809 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				0AC00D822E6710F500F82E5A /* TimeRangeSlider.swift */,
 				8B7059032C0B00510076F680 /* NameplateView.swift */,
 				8BE0950C2C0315C40089705F /* ActivityView.swift */,
 				8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */,
@@ -1048,6 +1054,7 @@
 				8B0D14942BFAB57100B82AD1 /* Date+Ext.swift in Sources */,
 				8BE095132C035B280089705F /* CoopShiftDetailViewModel.swift in Sources */,
 				8B0D14A22BFAC98D00B82AD1 /* GrayscaleTextureView.swift in Sources */,
+				0A2C668C2E682CAF00F1FB81 /* CoopPlayerView.swift in Sources */,
 				8BF3CB5D2CD4B61900B0FCA9 /* GraphQLPlugin.swift in Sources */,
 				8BF3CB5E2CD4B61900B0FCA9 /* SN3AuthorizationStorage.swift in Sources */,
 				8BF3CB5F2CD4B61900B0FCA9 /* SN3GameServiceToken.swift in Sources */,
@@ -1135,6 +1142,7 @@
 				8BF3CB4A2CD4B29300B0FCA9 /* Indicator.swift in Sources */,
 				8BF3CB4B2CD4B29300B0FCA9 /* View+indicatorOverlay.swift in Sources */,
 				8BFE91742C0DEA3D00C12CBE /* RangeSlider.swift in Sources */,
+				0AC00D832E6710F600F82E5A /* TimeRangeSlider.swift in Sources */,
 				8BE095112C035B000089705F /* CoopShiftDetailView.swift in Sources */,
 				8B7F292A2BF6E1B90010A525 /* iminkApp.swift in Sources */,
 				8B0D14A62BFAD93A00B82AD1 /* CoopDetailView.swift in Sources */,
