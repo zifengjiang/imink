@@ -12,6 +12,16 @@ struct HomePage: View {
 
     @State private var mode: GameMode = .regular
     @State private var showSubscribedOnly = false
+    
+    // 场地预览弹窗状态管理
+    @State private var showStagePreview = false
+    @State private var activeStage: ImageMap? = nil
+    @State private var hoveredStage: Bool = false
+    
+    // Coop场地预览弹窗状态管理
+    @State private var showCoopStagePreview = false
+    @State private var activeCoopStage: ImageMap? = nil
+    @State private var hoveredCoopStage: Bool = false
 
     @AppStorage("home_page_selectedScheduleType")
     var selectedScheduleType = 0
@@ -24,7 +34,7 @@ struct HomePage: View {
             ScrollView{
                 VStack{
 
-                    CarouselView(activeIndex: $selectedScheduleType, autoScrollDuration: 15){
+                    CarouselView(activeIndex: $selectedScheduleType, autoScrollDuration: 60){
                             todayBattleStatusView
                             todaySalmonRunStatusView
                     }
@@ -72,11 +82,21 @@ struct HomePage: View {
 
                         
                         if selectedScheduleType == 0{
-                            BattleScheduleView(scheduleGroups: showSubscribedOnly ? 
-                                subscriptionManager.filterSubscribedBattleSchedules(viewModel.scheduleGroups) : viewModel.scheduleGroups)
+                            BattleScheduleView(
+                                scheduleGroups: showSubscribedOnly ? 
+                                    subscriptionManager.filterSubscribedBattleSchedules(viewModel.scheduleGroups) : viewModel.scheduleGroups,
+                                showStagePreview: $showStagePreview,
+                                activeStage: $activeStage,
+                                hoveredStage: $hoveredStage
+                            )
                         }else{
-                            SalmonRunScheduleView(salmonRunSchedules: showSubscribedOnly ? 
-                                subscriptionManager.filterSubscribedSalmonRunSchedules(viewModel.salmonRunSchedules) : viewModel.salmonRunSchedules)
+                            SalmonRunScheduleView(
+                                salmonRunSchedules: showSubscribedOnly ? 
+                                    subscriptionManager.filterSubscribedSalmonRunSchedules(viewModel.salmonRunSchedules) : viewModel.salmonRunSchedules,
+                                showCoopStagePreview: $showCoopStagePreview,
+                                activeCoopStage: $activeCoopStage,
+                                hoveredCoopStage: $hoveredCoopStage
+                            )
                         }
                     }
                 }
@@ -86,6 +106,21 @@ struct HomePage: View {
             .frame(maxWidth: .infinity)
             .fixSafeareaBackground()
             .navigationBarTitle("tab_home", displayMode: .inline)
+            .modifier(Popup(isPresented: showCoopStagePreview, onDismiss: {
+                showCoopStagePreview = false
+            }) {
+                if let stage = activeCoopStage {
+                    CoopStagePreviewView(stageId: stage.nameId, stageName: stage.name)
+                }
+            })
+            .modifier(Popup(isPresented: showStagePreview, onDismiss: {
+                showStagePreview = false
+            }) {
+                if let stage = activeStage {
+                    StagePreviewView(stageId: stage.nameId, stageName: stage.name)
+                }
+            })
+            
             .toolbar{
                 LoadingView {
                     Haptics.generateIfEnabled(.medium)
@@ -236,10 +271,19 @@ struct HomePage: View {
 
     struct BattleScheduleView: View {
         let scheduleGroups: [Date: [Schedule]]
+        @Binding var showStagePreview: Bool
+        @Binding var activeStage: ImageMap?
+        @Binding var hoveredStage: Bool
+        
         var body: some View {
             VStack{
                 ForEach(scheduleGroups.keys.sorted(), id: \.self){ key in
-                    BattleScheduleCardView(schedules: scheduleGroups[key]!)
+                    BattleScheduleCardView(
+                        schedules: scheduleGroups[key]!,
+                        showStagePreview: $showStagePreview,
+                        activeStage: $activeStage,
+                        hoveredStage: $hoveredStage
+                    )
                 }
             }
             .padding(.bottom, 10)
@@ -248,10 +292,19 @@ struct HomePage: View {
 
     struct SalmonRunScheduleView: View {
         let salmonRunSchedules: [Schedule]
+        @Binding var showCoopStagePreview: Bool
+        @Binding var activeCoopStage: ImageMap?
+        @Binding var hoveredCoopStage: Bool
+        
         var body: some View {
             VStack{
                 ForEach(salmonRunSchedules.indices, id: \.self){ index in
-                    SalmonRunScheduleCardView(schedule: salmonRunSchedules[index])
+                    SalmonRunScheduleCardView(
+                        schedule: salmonRunSchedules[index],
+                        showCoopStagePreview: $showCoopStagePreview,
+                        activeCoopStage: $activeCoopStage,
+                        hoveredCoopStage: $hoveredCoopStage
+                    )
                 }
             }
             .padding(.bottom, 10)

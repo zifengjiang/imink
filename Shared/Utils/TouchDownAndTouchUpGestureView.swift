@@ -46,8 +46,9 @@ struct TouchDownAndTouchUpGestureView: UIViewRepresentable {
         }
 
     }
+    
     func makeCoordinator() -> Coordinator {
-        Coordinator(touchDownCallback: touchDownCallBack, touchMovedCallBack: touchMovedCallBack, touchUpCallback: touchUpCallBack)
+        return Coordinator(touchDownCallback: touchDownCallBack, touchMovedCallBack: touchMovedCallBack, touchUpCallback: touchUpCallBack)
     }
 
     func updateUIView(_ uiView: UIView, context: UIViewRepresentableContext<Self>) {}

@@ -5,6 +5,11 @@ struct BattleScheduleCardView: View {
     var schedules: [Schedule]
     @EnvironmentObject private var subscriptionManager: ScheduleSubscriptionManager
 
+        // 添加弹窗状态管理
+    @Binding var showStagePreview: Bool
+    @Binding var activeStage: ImageMap?
+    @Binding var hoveredStage: Bool
+
     var body: some View {
         VStack{
             VStack{
@@ -27,13 +32,40 @@ struct BattleScheduleCardView: View {
                 HStack{
                     ForEach(schedules, id: \.id){ schedule in
                         if schedule.mode == .fest || schedule.mode == .bankara{
-                            CardColumn(schedule: schedule, mode: schedule.mode, rule: schedule.rule1, stages: schedule.challengeStage, isOpen: false)
-                                .environmentObject(subscriptionManager)
-                            CardColumn(schedule: schedule, mode: schedule.mode, rule: schedule.rule2!, stages: schedule.openStage, isOpen: true)
-                                .environmentObject(subscriptionManager)
+                            CardColumn(
+                                schedule: schedule,
+                                mode: schedule.mode,
+                                rule: schedule.rule1,
+                                stages: schedule.challengeStage,
+                                isOpen: false,
+                                showStagePreview: $showStagePreview,
+                                activeStage: $activeStage,
+                                hoveredStage: $hoveredStage
+                            )
+                            .environmentObject(subscriptionManager)
+                            CardColumn(
+                                schedule: schedule,
+                                mode: schedule.mode,
+                                rule: schedule.rule2!,
+                                stages: schedule.openStage,
+                                isOpen: true,
+                                showStagePreview: $showStagePreview,
+                                activeStage: $activeStage,
+                                hoveredStage: $hoveredStage
+                            )
+                            .environmentObject(subscriptionManager)
                         }else{
-                            CardColumn(schedule: schedule, mode: schedule.mode, rule: schedule.rule1, stages: schedule._stage, event: schedule.event)
-                                .environmentObject(subscriptionManager)
+                            CardColumn(
+                                schedule: schedule,
+                                mode: schedule.mode,
+                                rule: schedule.rule1,
+                                stages: schedule._stage,
+                                event: schedule.event,
+                                showStagePreview: $showStagePreview,
+                                activeStage: $activeStage,
+                                hoveredStage: $hoveredStage
+                            )
+                            .environmentObject(subscriptionManager)
                         }
                     }
                 }
@@ -51,27 +83,35 @@ struct BattleScheduleCardView: View {
         let stages: [ImageMap]
         let event:String?
         let isOpen:Bool
-        
+
         @EnvironmentObject private var subscriptionManager: ScheduleSubscriptionManager
 
-        init(schedule: Schedule, mode: Schedule.Mode, rule: Schedule.Rule, stages: [ImageMap], event: String? = nil, isOpen:Bool = false) {
+            // 添加弹窗状态管理
+        @Binding var showStagePreview: Bool
+        @Binding var activeStage: ImageMap?
+        @Binding var hoveredStage: Bool
+
+        init(schedule: Schedule, mode: Schedule.Mode, rule: Schedule.Rule, stages: [ImageMap], event: String? = nil, isOpen:Bool = false, showStagePreview: Binding<Bool>, activeStage: Binding<ImageMap?>, hoveredStage: Binding<Bool>) {
             self.schedule = schedule
             self.mode = mode
             self.rule = rule
             self.stages = stages
             self.event = event
             self.isOpen = isOpen
+            self._showStagePreview = showStagePreview
+            self._activeStage = activeStage
+            self._hoveredStage = hoveredStage
         }
-        
+
         private var subscription: ScheduleSubscription {
-            // 对于bankara和fest模式使用特定的规则和场地
+                // 对于bankara和fest模式使用特定的规则和场地
             if (schedule.mode == .bankara || schedule.mode == .fest) && rule != schedule.rule1 {
                 return subscriptionManager.createSubscription(from: schedule, specificRule: rule, stages: stages, isOpen: isOpen)
             } else {
                 return subscriptionManager.createSubscription(from: schedule)
             }
         }
-        
+
         private var isSubscribed: Bool {
             subscriptionManager.isSubscribed(subscription.id)
         }
@@ -112,25 +152,31 @@ struct BattleScheduleCardView: View {
 
                     ForEach(stages.indices, id:\.self) { index in
 
-                        Text(stages[index].nameId.localizedFromSplatNet)
-                            .font(.splatoonFont(size: 12))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.1)
+                        VStack{
+                            Text(stages[index].nameId.localizedFromSplatNet)
+                                .font(.splatoonFont(size: 12))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.1)
 
-                        Image(stages[index].name)
-                            .resizable()
-                            .aspectRatio(640 / 360, contentMode: .fill)
-                            .frame(width: 640 / 6, height: 60)
-                            .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color(UIColor.separator), lineWidth: 1)
-                            )
+                            Image(stages[index].name)
+                                .resizable()
+                                .aspectRatio(640 / 360, contentMode: .fill)
+                                .frame(width: 640 / 6, height: 60)
+                                .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color(UIColor.separator), lineWidth: 1)
+                                )
+                                .onTapGesture {
+                                    activeStage = stages[index]
+                                    showStagePreview = true
+                                }
+                        }
                     }
                 }
                 .frame(width: 640 / 6)
-                
-                // 订阅状态指示器
+
+                    // 订阅状态指示器
                 if isSubscribed {
                     VStack {
                         HStack {
@@ -142,11 +188,11 @@ struct BattleScheduleCardView: View {
                     .frame(width: 640 / 6)
                 }
             }
-            .contextMenu {
-                contextMenuContent
-            }
+                // .contextMenu {
+                //     contextMenuContent
+                // }
         }
-        
+
         private var subscriptionIndicator: some View {
             Image(systemName: "bell.fill")
                 .foregroundColor(.orange)
@@ -158,7 +204,7 @@ struct BattleScheduleCardView: View {
                         .blur(radius: 1)
                 )
         }
-        
+
         private var contextMenuContent: some View {
             Group {
                 if isSubscribed {
@@ -178,9 +224,9 @@ struct BattleScheduleCardView: View {
                         Label("订阅提醒", systemImage: "bell")
                     }
                 }
-                
+
                 Button {
-                    // 可以添加更多功能，比如查看详情
+                        // 可以添加更多功能，比如查看详情
                 } label: {
                     Label("查看详情", systemImage: "info.circle")
                 }

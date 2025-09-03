@@ -54,6 +54,8 @@
 		8B19CF8C2CB2A02600EF4424 /* BattleListRowInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B19CF8B2CB2A02600EF4424 /* BattleListRowInfo.swift */; };
 		8B19CF8E2CB2C9C400EF4424 /* Species.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B19CF8D2CB2C9C400EF4424 /* Species.swift */; };
 		8B19CF902CB2CB0200EF4424 /* Judgement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B19CF8F2CB2CB0200EF4424 /* Judgement.swift */; };
+		8B1A7EEC2E68768A009CDE79 /* StagePreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1A7EEB2E68768A009CDE79 /* StagePreviewView.swift */; };
+		8B1A7EEE2E687699009CDE79 /* CoopStagePreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1A7EED2E687699009CDE79 /* CoopStagePreviewView.swift */; };
 		8B1F74612CDB034D00BBC8E9 /* WeaponRecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1F74602CDB034D00BBC8E9 /* WeaponRecordView.swift */; };
 		8B1F74632CDB039D00BBC8E9 /* WeaponRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1F74622CDB039D00BBC8E9 /* WeaponRecord.swift */; };
 		8B23C0FE2CD09E2500FB5934 /* StageRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B23C0FD2CD09E2500FB5934 /* StageRecord.swift */; };
@@ -272,6 +274,8 @@
 		8B19CF8B2CB2A02600EF4424 /* BattleListRowInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleListRowInfo.swift; sourceTree = "<group>"; };
 		8B19CF8D2CB2C9C400EF4424 /* Species.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Species.swift; sourceTree = "<group>"; };
 		8B19CF8F2CB2CB0200EF4424 /* Judgement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Judgement.swift; sourceTree = "<group>"; };
+		8B1A7EEB2E68768A009CDE79 /* StagePreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StagePreviewView.swift; sourceTree = "<group>"; };
+		8B1A7EED2E687699009CDE79 /* CoopStagePreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopStagePreviewView.swift; sourceTree = "<group>"; };
 		8B1F74602CDB034D00BBC8E9 /* WeaponRecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaponRecordView.swift; sourceTree = "<group>"; };
 		8B1F74622CDB039D00BBC8E9 /* WeaponRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaponRecord.swift; sourceTree = "<group>"; };
 		8B23C0FD2CD09E2500FB5934 /* StageRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StageRecord.swift; sourceTree = "<group>"; };
@@ -687,10 +691,12 @@
 				0AC00D822E6710F500F82E5A /* TimeRangeSlider.swift */,
 				8B7059032C0B00510076F680 /* NameplateView.swift */,
 				8BE0950C2C0315C40089705F /* ActivityView.swift */,
+				8B1A7EEB2E68768A009CDE79 /* StagePreviewView.swift */,
 				8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */,
 				8BAD2C712E5BFB5D00DE9952 /* SelectableRowView.swift */,
 				8BF3CB3D2CD4B26500B0FCA9 /* festIcon.svg */,
 				8B3136972CCCEB3B0085220E /* FestIcon.swift */,
+				8B1A7EED2E687699009CDE79 /* CoopStagePreviewView.swift */,
 				8BB4A1F12BFDB49E008DB764 /* LoginView.swift */,
 				8B0851792BFB790700AF22C5 /* WaveShape.swift */,
 				8B0D14692BF8BFF700B82AD1 /* VDGridView.swift */,
@@ -1096,6 +1102,7 @@
 				8BAD2C722E5BFB5D00DE9952 /* SelectableRowView.swift in Sources */,
 				8B0D14682BF8BE8C00B82AD1 /* HomeViewModel.swift in Sources */,
 				8B0D146D2BF9773E00B82AD1 /* AppUserDefaults.swift in Sources */,
+				8B1A7EEC2E68768A009CDE79 /* StagePreviewView.swift in Sources */,
 				8B5276122BFC1DF100022D5B /* OverlayImage.swift in Sources */,
 				8B0D14922BFA31D000B82AD1 /* String+LocalizedString.swift in Sources */,
 				8B0D146F2BF9789200B82AD1 /* MainViewModel.swift in Sources */,
@@ -1163,6 +1170,7 @@
 				8B19CF352CB2488200EF4424 /* BattleListRowView.swift in Sources */,
 				8B5B7B1B2CCF9CE20088069C /* HistoryRecord.swift in Sources */,
 				8BF3CB802CD4BA7100B0FCA9 /* IMSession.swift in Sources */,
+				8B1A7EEE2E687699009CDE79 /* CoopStagePreviewView.swift in Sources */,
 				8B19CF332CB2486B00EF4424 /* BattleListDetailView.swift in Sources */,
 				8B7F296C2BF711C40010A525 /* NSOAuthorization.swift in Sources */,
 				8B5276162BFC371300022D5B /* CoopListRowModel.swift in Sources */,

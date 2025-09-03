@@ -7,6 +7,9 @@ import os
 import SwiftyJSON
 
 class HomeViewModel: ObservableObject {
+    
+    // MARK: - Shared Instance
+    static let shared = HomeViewModel()
 
     @Published var totalCoop: Int = 0
     @Published var totalBattle: Int = 0
@@ -18,6 +21,12 @@ class HomeViewModel: ObservableObject {
     @Published var salmonRunStatus: CoopGroupStatus?
     @Published var battleStatus: BattleGroupStatus?
     @Published var lastCoopTime: Date?
+    
+    // MARK: - Stage Records Data
+    @Published var stageRecords: [StageRecord] = []
+    @Published var coopRecord: CoopRecord?
+    @Published var isLoadingStageRecords = false
+    @Published var isLoadingCoopRecord = false
 
     var scheduleGroups: [Date: [Schedule]] {
         Dictionary(grouping: schedules.filter { $0.mode != .salmonRun }, by: { $0.startTime })
@@ -42,6 +51,7 @@ class HomeViewModel: ObservableObject {
             }
             .store(in: &loginStateCancelBag)
         loadSchedules()
+        loadCachedRecords()
     }
 
         // 取消数据订阅，但不取消登录状态监听
@@ -69,6 +79,8 @@ class HomeViewModel: ObservableObject {
         last500Battle = []
         battleStatus = nil
         lastCoopTime = nil
+        stageRecords = []
+        coopRecord = nil
     }
 
     func updateStatus() {
@@ -210,6 +222,84 @@ class HomeViewModel: ObservableObject {
             Indicators.shared.updateIcon(for: IndicatorId, icon: .image(Image(systemName: "xmark.icloud")))
         }
         Indicators.shared.dismiss(with: IndicatorId)
+    }
+    
+    // MARK: - Stage Records Management
+    
+    /// 从缓存加载场地记录数据
+    func loadCachedRecords() {
+        // 加载场地记录缓存
+        let cachedStageRecords = AppUserDefaults.shared.stageRecordsCache
+        if !cachedStageRecords.isEmpty {
+            self.stageRecords = cachedStageRecords
+        }
+        
+        // 加载Coop记录缓存
+        if let cachedCoopRecord = AppUserDefaults.shared.coopRecordCache {
+            self.coopRecord = cachedCoopRecord
+        }
+    }
+    
+    /// 获取场地记录数据
+    func fetchStageRecords() async {
+        guard !isLoadingStageRecords else { return }
+        
+        await MainActor.run {
+            isLoadingStageRecords = true
+        }
+        
+        let records: [StageRecord] = await SN3Client.shared.fetchRecord(.stageRecord) ?? []
+        
+        await MainActor.run {
+            self.stageRecords = records
+            self.isLoadingStageRecords = false
+            // 保存到缓存
+            AppUserDefaults.shared.stageRecordsCache = records
+        }
+    }
+    
+    /// 获取Coop记录数据
+    func fetchCoopRecord() async {
+        guard !isLoadingCoopRecord else { return }
+        
+        await MainActor.run {
+            isLoadingCoopRecord = true
+        }
+        
+        let record: CoopRecord? = await SN3Client.shared.fetchRecord(.coopRecord)
+        
+        await MainActor.run {
+            self.coopRecord = record
+            self.isLoadingCoopRecord = false
+            // 保存到缓存
+            if let record = record {
+                AppUserDefaults.shared.coopRecordCache = record
+            }
+        }
+    }
+    
+    /// 根据场地ID获取场地记录
+    func getStageRecord(for stageId: String) -> StageRecord? {
+        return stageRecords.first { $0.nameId == stageId }
+    }
+    
+    /// 根据场地ID获取Coop场地记录
+    func getCoopStageRecord(for stageId: String) -> StageHighestRecord? {
+        return coopRecord?.stageHighestRecords.first { $0.coopStage == stageId }
+    }
+    
+    /// 确保场地记录数据可用，如果缓存为空则自动获取
+    func ensureStageRecordsAvailable() async {
+        if stageRecords.isEmpty && !isLoadingStageRecords {
+            await fetchStageRecords()
+        }
+    }
+    
+    /// 确保Coop记录数据可用，如果缓存为空则自动获取
+    func ensureCoopRecordAvailable() async {
+        if coopRecord == nil && !isLoadingCoopRecord {
+            await fetchCoopRecord()
+        }
     }
 
 }

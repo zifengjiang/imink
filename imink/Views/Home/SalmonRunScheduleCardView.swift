@@ -5,6 +5,11 @@ struct SalmonRunScheduleCardView: View {
     let schedule: Schedule
     @EnvironmentObject private var subscriptionManager: ScheduleSubscriptionManager
     
+    // 添加弹窗状态管理
+    @Binding var showCoopStagePreview: Bool
+    @Binding var activeCoopStage: ImageMap?
+    @Binding var hoveredCoopStage: Bool
+    
     private var subscription: ScheduleSubscription {
         subscriptionManager.createSubscription(from: schedule)
     }
@@ -39,6 +44,10 @@ struct SalmonRunScheduleCardView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                .onTapGesture {
+                                    activeCoopStage = schedule._stage[0]
+                                    showCoopStagePreview = true
+                                }
                         }
                     }
                     VStack(spacing: 8){
