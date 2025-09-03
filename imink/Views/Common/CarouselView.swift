@@ -18,17 +18,41 @@ struct CarouselView<Content: View>: View {
     @State private var offsetBasedPosition: Int = 0
     @State private var isSettled = false
     @GestureState private var isHoldingScreen = false
-    @State private var timer: Publishers.Autoconnect<Timer.TimerPublisher>
+    @State private var timer: Publishers.Autoconnect<Timer.TimerPublisher>?
+    @State private var delayTimer: Timer?
 
     @State private var autoScrollDuration: CGFloat
+    @State private var userInactivityDelay: CGFloat = 3.0 // 用户不活动3秒后开始自动滚动
 
-    init(activeIndex:Binding<Int>, autoScrollDuration: CGFloat, @ViewBuilder content: () -> Content) {
+    init(activeIndex:Binding<Int>, autoScrollDuration: CGFloat, userInactivityDelay: CGFloat = 3.0, @ViewBuilder content: () -> Content) {
         self.content = content()
         _autoScrollDuration = State(initialValue: autoScrollDuration)
-        _timer = State(initialValue: Timer.publish(every: autoScrollDuration, on: .main, in: .default).autoconnect())
+        _userInactivityDelay = State(initialValue: userInactivityDelay)
+        _timer = State(initialValue: nil)
         self._activeIndex = activeIndex
     }
 
+
+    // 开始延迟定时器
+    private func startDelayTimer() {
+        stopAllTimers()
+        delayTimer = Timer.scheduledTimer(withTimeInterval: userInactivityDelay, repeats: false) { _ in
+            startAutoScrollTimer()
+        }
+    }
+    
+    // 开始自动滚动定时器
+    private func startAutoScrollTimer() {
+        timer = Timer.publish(every: autoScrollDuration, on: .main, in: .default).autoconnect()
+    }
+    
+    // 停止所有定时器
+    private func stopAllTimers() {
+        delayTimer?.invalidate()
+        delayTimer = nil
+        timer?.upstream.connect().cancel()
+        timer = nil
+    }
 
     var body: some View {
         GeometryReader {
@@ -77,13 +101,15 @@ struct CarouselView<Content: View>: View {
                     out = true
                 }))
                 .onChange(of: isHoldingScreen) { oldValue, newValue in
-                    if newValue{
-                        timer.upstream.connect().cancel()
-                    } else{
-                        if isSettled && scrollPosition != offsetBasedPosition{
+                    if newValue {
+                        // 用户开始触摸，停止所有定时器
+                        stopAllTimers()
+                    } else {
+                        // 用户停止触摸，开始延迟定时器
+                        if isSettled && scrollPosition != offsetBasedPosition {
                             scrollPosition = offsetBasedPosition
                         }
-                        timer = Timer.publish(every: self.autoScrollDuration, on: .main, in: .default).autoconnect()
+                        startDelayTimer()
                     }
                 }
                 .onChange(of: scrollPosition, { oldValue, newValue in
@@ -91,8 +117,8 @@ struct CarouselView<Content: View>: View {
                         activeIndex = max(min(newValue, collection.count-1),0)
                     }
                 })
-                .onReceive(timer) { _ in
-                    guard !isHoldingScreen && !isScrolling else { return }
+                .onReceive(timer ?? Timer.publish(every: 1, on: .main, in: .default).autoconnect()) { _ in
+                    guard timer != nil && !isHoldingScreen && !isScrolling else { return }
                     let nextIndex = (scrollPosition ?? 0) + 1
                     withAnimation(.snappy(duration: 0.25, extraBounce: 0)){
                         scrollPosition = (nextIndex == collection.count + 1) ? 0 : nextIndex
@@ -117,6 +143,12 @@ struct CarouselView<Content: View>: View {
             }
             .onAppear{
                 scrollPosition = 0
+                // 启动初始延迟定时器
+                startDelayTimer()
+            }
+            .onDisappear {
+                // 清理定时器
+                stopAllTimers()
             }
         }
     }

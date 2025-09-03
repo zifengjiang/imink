@@ -34,7 +34,7 @@ struct HomePage: View {
             ScrollView{
                 VStack{
 
-                    CarouselView(activeIndex: $selectedScheduleType, autoScrollDuration: 60){
+                    CarouselView(activeIndex: $selectedScheduleType, autoScrollDuration: 60, userInactivityDelay: 15.0){
                             todayBattleStatusView
                             todaySalmonRunStatusView
                     }
