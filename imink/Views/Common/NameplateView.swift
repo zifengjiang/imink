@@ -28,6 +28,7 @@ struct NameplateView: View {
     let name:String
     let background: String
     let byname:String
+    var bynameFormatted: FormattedByname? = nil
     let textColor:Color
     let badges: [String?]
     let nameId: String
@@ -40,6 +41,7 @@ struct NameplateView: View {
         textColor = status._nameplate?.textColor ?? .white
         badges = status._nameplate?.badges ?? []
         nameId = status.nameId
+        bynameFormatted = status._bynameFormatted
     }
     
     init(result: CoopPlayerResult) {
@@ -58,6 +60,7 @@ struct NameplateView: View {
         textColor = player._nameplate!.textColor
         badges = player._nameplate!.badges
         nameId = player.nameId
+        bynameFormatted = player._bynameFormatted
     }
 
     var body: some View {
@@ -73,22 +76,16 @@ struct NameplateView: View {
                         .frame(width: geometryWidth, height: geometryHeight)
                         .clipped()
                         .cornerRadius(geometryWidth*0.02)
-
-
-                if let byname = viewModel.formattedByname{
-                    Text(byname)
+                
+                if let bynameFormatted = bynameFormatted{
+                    Text("\(bynameFormatted.adjective.localizedFromSplatNet)\(bynameFormatted.male == nil ? bynameFormatted.subject.localizedFromSplatNet : (bynameFormatted.male! ? "\(bynameFormatted.subject.localizedFromSplatNet.split(separator: "/").first!)" : "\(bynameFormatted.subject.localizedFromSplatNet.split(separator: "/").last!)"))")
                         .font(.splatoonFont(size: geometryWidth * 12/284))
                         .foregroundColor(textColor)
                         .padding(.top, geometryWidth * 5/284)
                         .padding(.leading, geometryWidth * 10/284)
-                }else{
-                    Text(byname)
-                        .font(.splatoonFont(size: geometryWidth * 12/284))
-                        .foregroundColor(textColor)
-                        .padding(.top, geometryWidth * 5/284)
-                        .padding(.leading, geometryWidth * 10/284)
+                        
                 }
-
+                
 
                 Text(name)
                     .font(.splatoonFont1(size: geometryWidth * 26/284))

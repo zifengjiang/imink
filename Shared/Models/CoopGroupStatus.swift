@@ -79,6 +79,7 @@ extension CoopGroupStatus{
 struct CoopPlayerStatus:FetchableRecord, Decodable{
     var name: String
     var byname: String
+    var bynameFormatted: PackableNumbers?
     var nameId: String
     var nameplate: PackableNumbers
     var nameplateTextColor: PackableNumbers
@@ -94,6 +95,7 @@ struct CoopPlayerStatus:FetchableRecord, Decodable{
     // MARK: - Computed
     var uniformName: String? = nil
     var _nameplate: Nameplate? = nil
+    var _bynameFormatted: FormattedByname? = nil
 
     var id:String{
         "\(name)-\(byname)-\(nameId)"
@@ -102,6 +104,7 @@ struct CoopPlayerStatus:FetchableRecord, Decodable{
     enum CodingKeys: String, CodingKey {
         case name
         case byname
+        case bynameFormatted
         case nameId
         case nameplate
         case nameplateTextColor
@@ -129,6 +132,9 @@ extension CoopPlayerStatus: PreComputable{
         for index in rows.indices {
             rows[index]._nameplate = .init(nameplate: rows[index].nameplate, textColor: rows[index].nameplateTextColor, db: db)
             rows[index].uniformName = try ImageMap.fetchOne(db, key: rows[index].uniformId)?.name
+            if let bynameFormatted = rows[index].bynameFormatted {
+                rows[index]._bynameFormatted = .init(with: bynameFormatted, db: db)
+            }
         }
         return rows
     }
