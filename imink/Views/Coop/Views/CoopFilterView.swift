@@ -24,18 +24,23 @@ class CoopFilterViewModel: ObservableObject {
     func load() async {
         let weapons = try! await SplatDatabase.shared.dbQueue.read { db in
             try ImageMap.fetchAll(db, sql:"""
-                                SELECT *
-                                FROM imageMap
-                                WHERE name LIKE 'Wst%'
-                                AND name NOT LIKE '%_O'
-                                AND name NOT LIKE '%01'
-                                AND name NOT LIKE '%Scope_00'
-                                AND name != 'Wst_Shooter_Normal_H'
-                                ORDER BY name ASC
-                                """)
+                                SELECT DISTINCT im.*
+                                FROM imageMap im
+                                INNER JOIN weapon w ON im.id = w.imageMapId
+                                INNER JOIN coopPlayerResult cpr ON w.coopPlayerResultId = cpr.id
+                                INNER JOIN coop c ON cpr.coopId = c.id
+                                WHERE cpr.'order' = 0
+                                AND c.accountId = ?
+                                AND im.name LIKE 'Wst%'
+                                AND im.name NOT LIKE '%_O'
+                                AND im.name NOT LIKE '%01'
+                                AND im.name NOT LIKE '%Scope_00'
+                                AND im.name != 'Wst_Shooter_Normal_H'
+                                ORDER BY im.name ASC
+                                """, arguments: [AppUserDefaults.shared.accountId])
         }
 
-            // 分组
+        // 分组
         let grouped = Dictionary(grouping: weapons, by: \.weaponType)
 
         await MainActor.run {
