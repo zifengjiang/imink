@@ -51,6 +51,7 @@ struct NameplateView: View {
         textColor = result.player!._nameplate!.textColor
         badges = result.player!._nameplate!.badges
         nameId = result.player!.nameId
+        bynameFormatted = result.player!._bynameFormatted
     }
 
     init (player: Player) {
