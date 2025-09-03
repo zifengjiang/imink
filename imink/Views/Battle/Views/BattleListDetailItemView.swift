@@ -32,8 +32,17 @@ struct BattleListDetailItemView: View {
             VStack(spacing:0){
                 HStack(spacing:6){
                     if mode == .fest{
-                        FestIcon()
-                            .frame(width: 16, height: 16)
+                        FestIcon(colors: detail.colors.map{$0.toColor()})
+                            .frame(width: 26, height: 26)
+                            .mask(                                 // 再把整体裁小一圈
+                                GeometryReader { geo in
+                                    let w = geo.size.width  * 0.75
+                                    let h = geo.size.height * 0.75
+                                    Rectangle()
+                                        .frame(width: w, height: h)
+                                        .position(x: geo.size.width / 2, y: geo.size.height / 2)
+                                }
+                            )
                             .padding(.top, -0.5)
                             .padding(.bottom, -1.5)
                     }else{

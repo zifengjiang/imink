@@ -61,11 +61,26 @@ struct BattleDetailView: View {
         VStack(spacing: 0) {
             if let battle = viewModel.battle,let mode = BattleMode(rawValue: battle.mode), let rule = BattleRule(rawValue: battle.rule),let stage = battle.stage{
                 HStack{
-                    mode.icon
-                        .resizable()
-                        .frame(width: 30, height: 30)
-                        .padding(.top, -0.5)
-                        .padding(.bottom, -1.5)
+                    if rule == .triColor{
+                        FestIcon(colors: battle.getColors())
+                            //                            .resizable()
+                            .frame(width: 30, height: 30)
+                            .mask(                                 // 再把整体裁小一圈
+                                GeometryReader { geo in
+                                    let w = geo.size.width  * 0.75
+                                    let h = geo.size.height * 0.75
+                                    Rectangle()
+                                        .frame(width: w, height: h)
+                                        .position(x: geo.size.width / 2, y: geo.size.height / 2)
+                                }
+                            )
+                    }else{
+                        mode.icon
+                            .resizable()
+                            .frame(width: 30, height: 30)
+                            .padding(.top, -0.5)
+                            .padding(.bottom, -1.5)
+                    }
                     Text(rule.name)
                         .font(.splatoonFont(size: 20))
                         .foregroundStyle(mode.color)
@@ -324,8 +339,8 @@ struct BattleDetailView: View {
                 VStack(spacing:1){
                     if let weapon = player._weapon{
                         SpecialWeaponImage(imageName: weapon.specialWeapon.name, color: color, size: 12)
-//                            .scaledToFit()
-//                            .frame(width: 12, height: 12)
+                            //                            .scaledToFit()
+                            //                            .frame(width: 12, height: 12)
                     }
                     Text("x\(player.special ?? 0)")
                         .font(.splatoonFont(size: 12))
@@ -336,13 +351,13 @@ struct BattleDetailView: View {
 
 }
 
-//#Preview {
-//    BattleDetailView()
-//}
+    //#Preview {
+    //    BattleDetailView()
+    //}
 
 extension Battle {
     func getColorRatioText()->([Color?],[Double?],[String?]){
-        var colors:[Color?] = []
+        var colors:[Color?] = self.getColors()
         var ratios:[Double?] = []
         var texts:[String?] = []
         colors.append(teams.first{$0.order == 1}?.color.toColor())
@@ -387,6 +402,19 @@ extension Battle {
             texts.append(nil)
         }
         return (colors, ratios, texts)
+    }
+
+    func getColors()->[Color?]{
+        var colors:[Color?] = []
+        colors.append(teams.first{$0.order == 1}?.color.toColor())
+        if let rule = BattleRule(rawValue: rule), rule == .triColor{
+            colors.append(teams.first{$0.order == 2}?.color.toColor())
+            colors.append(teams.first{$0.order == 3}?.color.toColor())
+        }else{
+            colors.append(nil)
+            colors.append(teams.first{$0.order == 2}?.color.toColor())
+        }
+        return colors
     }
 }
 
