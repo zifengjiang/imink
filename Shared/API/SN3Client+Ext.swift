@@ -205,7 +205,7 @@ extension SN3Client {
         var retryCount = 0
         let IndicatorID = UUID().uuidString
         defer {
-            Indicators.shared.dismiss(with: IndicatorID)
+            Indicators.shared.dismiss(with: IndicatorID, after: 2)
         }
         Indicators.shared.display(.init(id: IndicatorID, icon: .progressIndicator, title: "正在加载...", dismissType: .manual, isUserDismissible: false))
         while retryCount < maxRetries {

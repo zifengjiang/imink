@@ -51,15 +51,24 @@ struct StageRecordView: View {
 
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        Picker(selection: $viewModel.sortedBy) {
-                            ForEach(StageRecordViewModel.SortedBy.allCases, id: \.self) { sortedBy in
-                                Text(sortedBy.rawValue)
-                                    .tag(sortedBy)
+                        HStack {
+                            Button {
+                                Task {
+                                    await viewModel.refreshData()
+                                }
+                            } label: {
+                                Image(systemName: "arrow.clockwise")
                             }
-                        } label: {
+                            
+                            Picker(selection: $viewModel.sortedBy) {
+                                ForEach(StageRecordViewModel.SortedBy.allCases, id: \.self) { sortedBy in
+                                    Text(sortedBy.rawValue)
+                                        .tag(sortedBy)
+                                }
+                            } label: {
 
+                            }
                         }
-
                     }
                 }
             }else{
@@ -71,7 +80,7 @@ struct StageRecordView: View {
         .frame(maxWidth: .infinity)
         .fixSafeareaBackground()
         .task {
-            await viewModel.fetchStageRecords()
+            await viewModel.loadData()
         }
         .onChange(of: viewModel.sortedBy) { oldValue, newValue in
             viewModel.sort()
@@ -220,11 +229,29 @@ class StageRecordViewModel: ObservableObject {
         }
     }
 
-    func fetchStageRecords() async {
+    func loadData() async {
+        // 首先尝试从缓存加载数据
+        let cachedRecords = AppUserDefaults.shared.stageRecordsCache
+        if !cachedRecords.isEmpty {
+            DispatchQueue.main.async {
+                self.stageRecords = cachedRecords
+                self.sort()
+            }
+        }
+        
+        // 如果没有缓存数据，则从网络获取
+        if cachedRecords.isEmpty {
+            await refreshData()
+        }
+    }
+    
+    func refreshData() async {
         let records:[StageRecord] = await SN3Client.shared.fetchRecord(.stageRecord) ?? []
         DispatchQueue.main.async {
             self.stageRecords = records
             self.sort()
+            // 保存到缓存
+            AppUserDefaults.shared.stageRecordsCache = records
         }
     }
 

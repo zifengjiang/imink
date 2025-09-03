@@ -54,6 +54,79 @@ class AppUserDefaults: ObservableObject {
     @AppStorage("fapiRequestInterval", store: .appGroup)
     var fapiRequestInterval: Int = 1800000 // 默认30分钟间隔（30 * 60 * 1000毫秒）
     
+    // MARK: - 记录缓存相关
+    @AppStorage("stageRecordsCache", store: .appGroup)
+    private var stageRecordsCacheData: Data = Data()
+    
+    @AppStorage("weaponRecordsCache", store: .appGroup)
+    private var weaponRecordsCacheData: Data = Data()
+    
+    @AppStorage("coopRecordCache", store: .appGroup)
+    private var coopRecordCacheData: Data = Data()
+    
+    // 场地记录缓存
+    var stageRecordsCache: [StageRecord] {
+        get {
+            guard !stageRecordsCacheData.isEmpty else { return [] }
+            do {
+                return try JSONDecoder().decode([StageRecord].self, from: stageRecordsCacheData)
+            } catch {
+                print("解码场地记录缓存失败: \(error)")
+                return []
+            }
+        }
+        set {
+            do {
+                stageRecordsCacheData = try JSONEncoder().encode(newValue)
+                objectWillChange.send()
+            } catch {
+                print("编码场地记录缓存失败: \(error)")
+            }
+        }
+    }
+    
+    // 武器记录缓存
+    var weaponRecordsCache: WeaponRecords? {
+        get {
+            guard !weaponRecordsCacheData.isEmpty else { return nil }
+            do {
+                return try JSONDecoder().decode(WeaponRecords.self, from: weaponRecordsCacheData)
+            } catch {
+                print("解码武器记录缓存失败: \(error)")
+                return nil
+            }
+        }
+        set {
+            do {
+                weaponRecordsCacheData = try JSONEncoder().encode(newValue)
+                objectWillChange.send()
+            } catch {
+                print("编码武器记录缓存失败: \(error)")
+            }
+        }
+    }
+    
+    // 合作模式记录缓存
+    var coopRecordCache: CoopRecord? {
+        get {
+            guard !coopRecordCacheData.isEmpty else { return nil }
+            do {
+                return try JSONDecoder().decode(CoopRecord.self, from: coopRecordCacheData)
+            } catch {
+                print("解码合作模式记录缓存失败: \(error)")
+                return nil
+            }
+        }
+        set {
+            do {
+                coopRecordCacheData = try JSONEncoder().encode(newValue)
+                objectWillChange.send()
+            } catch {
+                print("编码合作模式记录缓存失败: \(error)")
+            }
+        }
+    }
+    
     // MARK: - 日程订阅相关
     @AppStorage("scheduleSubscriptions", store: .appGroup)
     private var subscriptionsData: Data = Data()

@@ -64,8 +64,20 @@ struct CoopRecordView: View {
                     }
                     .padding(.horizontal,8)
                 }
+                .scrollIndicators(.hidden)
                 .frame(maxWidth: .infinity)
                 .fixSafeareaBackground()
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            Task {
+                                await model.refreshData()
+                            }
+                        } label: {
+                            Image(systemName: "arrow.clockwise")
+                        }
+                    }
+                }
             } else {
                 LoadingView(size: 100)
             }
@@ -140,13 +152,31 @@ class SalmonRunStatsViewModel:ObservableObject{
 
     init() {
         Task{@MainActor in
-            await loadCoopRecord()
+            await loadData()
         }
     }
 
     @MainActor
-    func loadCoopRecord() async {
-        self.coopRecord = await SN3Client.shared.fetchRecord(.coopRecord)
+    func loadData() async {
+        // 首先尝试从缓存加载数据
+        if let cachedRecord = AppUserDefaults.shared.coopRecordCache {
+            self.coopRecord = cachedRecord
+        }
+        
+        // 如果没有缓存数据，则从网络获取
+        if coopRecord == nil {
+            await refreshData()
+        }
+    }
+    
+    @MainActor
+    func refreshData() async {
+        let record:CoopRecord? = await SN3Client.shared.fetchRecord(.coopRecord)
+        self.coopRecord = record
+        // 保存到缓存
+        if let record = record {
+            AppUserDefaults.shared.coopRecordCache = record
+        }
     }
 }
 

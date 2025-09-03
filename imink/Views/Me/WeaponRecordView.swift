@@ -25,10 +25,20 @@ struct WeaponRecordView: View {
         .fixSafeareaBackground()
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showingSortOptions = true
-                } label: {
-                    Image(systemName: "arrow.up.arrow.down")
+                HStack {
+                    Button {
+                        Task {
+                            await viewModel.refreshData()
+                        }
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                    
+                    Button {
+                        showingSortOptions = true
+                    } label: {
+                        Image(systemName: "arrow.up.arrow.down")
+                    }
                 }
             }
         }
@@ -150,13 +160,31 @@ class WeaponRecordViewModel: ObservableObject {
     
     init() {
         Task{@MainActor in
-            await load()
+            await loadData()
         }
     }
     
     @MainActor
-    func load() async {
-        self.weaponRecords = await SN3Client.shared.fetchRecord(.weaponRecord)
+    func loadData() async {
+        // 首先尝试从缓存加载数据
+        if let cachedRecords = AppUserDefaults.shared.weaponRecordsCache {
+            self.weaponRecords = cachedRecords
+        }
+        
+        // 如果没有缓存数据，则从网络获取
+        if weaponRecords == nil {
+            await refreshData()
+        }
+    }
+    
+    @MainActor
+    func refreshData() async {
+        let records: WeaponRecords? = await SN3Client.shared.fetchRecord(.weaponRecord)
+        self.weaponRecords = records
+        // 保存到缓存
+        if let records = records {
+            AppUserDefaults.shared.weaponRecordsCache = records
+        }
     }
 }
 import SwiftyJSON
