@@ -272,15 +272,52 @@ final class ScheduleSubscriptionManager: ObservableObject {
         return Set(subscriptions.map { $0.id })
     }
     
-    /// 筛选已订阅的对战日程
+    /// 筛选包含已订阅场地的对战日程（精确到时间+场地+规则粒度）
     func filterSubscribedBattleSchedules(_ scheduleGroups: [Date: [Schedule]]) -> [Date: [Schedule]] {
-        let subscribedIds = getSubscribedScheduleIds()
         var filteredGroups: [Date: [Schedule]] = [:]
         
         for (date, schedules) in scheduleGroups {
             let filteredSchedules = schedules.filter { schedule in
-                let subscription = createSubscription(from: schedule)
-                return subscribedIds.contains(subscription.id)
+                // 检查这个日程中是否有被订阅的场地和规则
+                return schedule._stage.contains { stage in
+                    let stageName = stage.nameId.localizedFromSplatNet
+                    return subscriptions.contains { subscription in
+                        // 检查订阅是否包含这个场地，时间匹配
+                        let stageAndTimeMatch = subscription.stages.contains(stageName) &&
+                                               subscription.startTime == schedule.startTime
+                        
+                        if !stageAndTimeMatch {
+                            return false
+                        }
+                        
+                        // 检查mode和rule是否匹配订阅中存储的信息
+                        if let subscriptionMode = subscription.mode,
+                           let subscriptionRule = subscription.rule {
+                            // 对于bankara和fest模式，需要特殊处理开放/挑战规则
+                            if schedule.mode == .bankara || schedule.mode == .fest {
+                                let scheduleModeDesc = schedule.mode.localizedDescription
+                                let scheduleRuleDesc = schedule.rule1.localizedDescription
+                                
+                                // 检查mode是否匹配
+                                if subscriptionMode != scheduleModeDesc {
+                                    return false
+                                }
+                                
+                                // 检查规则是否匹配（开放或挑战）
+                                let openRule = scheduleRuleDesc + " (开放)"
+                                let challengeRule = scheduleRuleDesc + " (挑战)"
+                                return subscriptionRule == openRule || subscriptionRule == challengeRule
+                            } else {
+                                // 其他模式直接比较
+                                return subscriptionMode == schedule.mode.localizedDescription &&
+                                       subscriptionRule == schedule.rule1.localizedDescription
+                            }
+                        } else {
+                            // 如果没有mode和rule信息，只按场地和时间筛选
+                            return true
+                        }
+                    }
+                }
             }
             
             if !filteredSchedules.isEmpty {
@@ -291,13 +328,30 @@ final class ScheduleSubscriptionManager: ObservableObject {
         return filteredGroups
     }
     
-    /// 筛选已订阅的鲑鱼跑日程
+    /// 筛选包含已订阅场地的鲑鱼跑日程（精确到时间+场地+规则粒度）
     func filterSubscribedSalmonRunSchedules(_ schedules: [Schedule]) -> [Schedule] {
-        let subscribedIds = getSubscribedScheduleIds()
-        
         return schedules.filter { schedule in
-            let subscription = createSubscription(from: schedule)
-            return subscribedIds.contains(subscription.id)
+            // 检查这个日程中是否有被订阅的场地和规则
+            return schedule._stage.contains { stage in
+                let stageName = stage.nameId.localizedFromSplatNet
+                return subscriptions.contains { subscription in
+                    // 检查订阅是否包含这个场地，时间匹配
+                    let stageAndTimeMatch = subscription.stages.contains(stageName) &&
+                                           subscription.startTime == schedule.startTime
+                    
+                    if !stageAndTimeMatch {
+                        return false
+                    }
+                    
+                    // 检查rule是否匹配订阅中存储的信息
+                    if let subscriptionRule = subscription.rule {
+                        return subscriptionRule == schedule.rule1.localizedDescription
+                    } else {
+                        // 如果没有rule信息，只按场地和时间筛选
+                        return true
+                    }
+                }
+            }
         }
     }
 }

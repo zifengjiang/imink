@@ -15,9 +15,15 @@ struct SalmonRunScheduleCardView: View {
     }
     
     private var isSubscribed: Bool {
-        subscriptionManager.isSubscribed(subscription.id)
+        // 检查这个日程中的任何场地是否被订阅
+        return schedule._stage.contains { stage in
+            let stageName = stage.nameId.localizedFromSplatNet
+            return subscriptionManager.subscriptions.contains { subscription in
+                return subscription.stages.contains(stageName)
+            }
+        }
     }
-
+    
     var body: some View {
         ZStack {
             VStack{
@@ -31,7 +37,7 @@ struct SalmonRunScheduleCardView: View {
                 .background(Color.secondary)
                 .clipShape(Capsule())
                 .padding(.bottom, 5)
-
+                
                 HStack{
                     if schedule._stage.count >= 1{
                         VStack{
@@ -39,7 +45,7 @@ struct SalmonRunScheduleCardView: View {
                                 .font(.splatoonFont(size: 15))
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.3)
-
+                            
                             Image(schedule._stage[0].name)
                                 .resizable()
                                 .scaledToFit()
@@ -56,41 +62,41 @@ struct SalmonRunScheduleCardView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 30, height: 30, alignment: .center)
-
+                            
                             Text(schedule.rule1.localized)
                                 .font(.splatoonFont(size: 20))
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.3)
                         }
-
+                        
                         HStack{
-
+                            
                             if let _boss = schedule._boss, schedule.rule1 != .teamContest{
                                 Image(_boss.name)
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 20, height: 20)
-
+                                
                                 Text(_boss.nameId.localizedFromSplatNet)
                                     .font(.splatoonFont(size: 15))
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.3)
                             }
                         }
-
+                        
                         HStack{
-
+                            
                             ForEach(schedule._weapons.indices, id: \.self){ index in
                                 Image(schedule._weapons[index].name)
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 30, height: 30)
                             }
-
+                            
                         }
                     }
                 }
-
+                
             }
             
             // 订阅状态指示器
@@ -110,9 +116,6 @@ struct SalmonRunScheduleCardView: View {
         .background(Color.listItemBackground)
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 10, style: .continuous))
-        .contextMenu {
-            contextMenuContent
-        }
     }
     
     private var subscriptionIndicator: some View {
@@ -127,35 +130,8 @@ struct SalmonRunScheduleCardView: View {
             )
     }
     
-    private var contextMenuContent: some View {
-        Group {
-            if isSubscribed {
-                Button {
-                    Haptics.generateIfEnabled(.light)
-                    subscriptionManager.unsubscribeFromSchedule(subscription.id)
-                } label: {
-                    Label("取消订阅", systemImage: "bell.slash")
-                }
-            } else {
-                Button {
-                    Haptics.generateIfEnabled(.light)
-                    Task {
-                        await subscriptionManager.subscribeToSchedule(subscription)
-                    }
-                } label: {
-                    Label("订阅提醒", systemImage: "bell")
-                }
-            }
-            
-            Button {
-                // 可以添加更多功能，比如查看详情
-            } label: {
-                Label("查看详情", systemImage: "info.circle")
-            }
-        }
-    }
 }
 
-    //#Preview {
-    //    SalmonRunScheduleCardView()
-    //}
+//#Preview {
+//    SalmonRunScheduleCardView()
+//}

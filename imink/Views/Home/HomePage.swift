@@ -34,7 +34,7 @@ struct HomePage: View {
             ScrollView{
                 VStack{
 
-                    CarouselView(activeIndex: $selectedScheduleType, autoScrollDuration: 60, userInactivityDelay: 15.0){
+                    CarouselView(activeIndex: $selectedScheduleType, autoScrollDuration: 600, userInactivityDelay: 15.0){
                             todayBattleStatusView
                             todaySalmonRunStatusView
                     }
@@ -111,6 +111,7 @@ struct HomePage: View {
             }) {
                 if let stage = activeCoopStage {
                     CoopStagePreviewView(stageId: stage.nameId, stageName: stage.name)
+                        .environmentObject(subscriptionManager)
                 }
             })
             .modifier(Popup(isPresented: showStagePreview, onDismiss: {
@@ -118,6 +119,7 @@ struct HomePage: View {
             }) {
                 if let stage = activeStage {
                     StagePreviewView(stageId: stage.nameId, stageName: stage.name)
+                        .environmentObject(subscriptionManager)
                 }
             })
             

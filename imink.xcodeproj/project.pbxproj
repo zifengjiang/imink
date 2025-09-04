@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		0A2C668C2E682CAF00F1FB81 /* CoopPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2C668B2E682CAF00F1FB81 /* CoopPlayerView.swift */; };
+		0AADD2362E694D17002A19FF /* SubscriptionOptionsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AADD2352E694D17002A19FF /* SubscriptionOptionsSheet.swift */; };
+		0AADD23A2E694F8B002A19FF /* SubscriptionInfoRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AADD2392E694F8B002A19FF /* SubscriptionInfoRow.swift */; };
 		0AC00D832E6710F600F82E5A /* TimeRangeSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AC00D822E6710F500F82E5A /* TimeRangeSlider.swift */; };
 		8B0792072C0F435C0094EA57 /* TargetType+fetch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0792062C0F435C0094EA57 /* TargetType+fetch.swift */; };
 		8B0792092C1077DD0094EA57 /* BattleScheduleCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0792082C1077DD0094EA57 /* BattleScheduleCardView.swift */; };
@@ -216,6 +218,8 @@
 
 /* Begin PBXFileReference section */
 		0A2C668B2E682CAF00F1FB81 /* CoopPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopPlayerView.swift; sourceTree = "<group>"; };
+		0AADD2352E694D17002A19FF /* SubscriptionOptionsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionOptionsSheet.swift; sourceTree = "<group>"; };
+		0AADD2392E694F8B002A19FF /* SubscriptionInfoRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionInfoRow.swift; sourceTree = "<group>"; };
 		0AC00D822E6710F500F82E5A /* TimeRangeSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeRangeSlider.swift; sourceTree = "<group>"; };
 		8B0792062C0F435C0094EA57 /* TargetType+fetch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TargetType+fetch.swift"; sourceTree = "<group>"; };
 		8B0792082C1077DD0094EA57 /* BattleScheduleCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleScheduleCardView.swift; sourceTree = "<group>"; };
@@ -692,9 +696,11 @@
 				8B7059032C0B00510076F680 /* NameplateView.swift */,
 				8BE0950C2C0315C40089705F /* ActivityView.swift */,
 				8B1A7EEB2E68768A009CDE79 /* StagePreviewView.swift */,
+				0AADD2392E694F8B002A19FF /* SubscriptionInfoRow.swift */,
 				8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */,
 				8BAD2C712E5BFB5D00DE9952 /* SelectableRowView.swift */,
 				8BF3CB3D2CD4B26500B0FCA9 /* festIcon.svg */,
+				0AADD2352E694D17002A19FF /* SubscriptionOptionsSheet.swift */,
 				8B3136972CCCEB3B0085220E /* FestIcon.swift */,
 				8B1A7EED2E687699009CDE79 /* CoopStagePreviewView.swift */,
 				8BB4A1F12BFDB49E008DB764 /* LoginView.swift */,
@@ -1067,6 +1073,7 @@
 				8BF3CB7E2CD4B9F700B0FCA9 /* PluginType.swift in Sources */,
 				8BF3CB602CD4B61900B0FCA9 /* WebVersionPlugin.swift in Sources */,
 				8BF3CB612CD4B61900B0FCA9 /* SN3PersistedQuery.swift in Sources */,
+				0AADD2362E694D17002A19FF /* SubscriptionOptionsSheet.swift in Sources */,
 				8BF3CB622CD4B61900B0FCA9 /* AuthorizationMemoryStorage.swift in Sources */,
 				8BF3CB632CD4B61900B0FCA9 /* BulletTokens.swift in Sources */,
 				8B5A77ED2CFDACEA00B34BDC /* CoopSummary.swift in Sources */,
@@ -1074,6 +1081,7 @@
 				8BF3CB652CD4B61900B0FCA9 /* Logging.swift in Sources */,
 				8BF3CB662CD4B61900B0FCA9 /* SN3Client.swift in Sources */,
 				8BF3CB672CD4B61900B0FCA9 /* BulletTokenPlugin.swift in Sources */,
+				0AADD23A2E694F8B002A19FF /* SubscriptionInfoRow.swift in Sources */,
 				8BF3CB682CD4B61900B0FCA9 /* Splatoon3InkAPI.swift in Sources */,
 				8BF3CB692CD4B61900B0FCA9 /* SN3API.swift in Sources */,
 				8B19CF8E2CB2C9C400EF4424 /* Species.swift in Sources */,

@@ -113,7 +113,13 @@ struct BattleScheduleCardView: View {
         }
 
         private var isSubscribed: Bool {
-            subscriptionManager.isSubscribed(subscription.id)
+            // 检查这个日程中的任何场地是否被订阅
+            return stages.contains { stage in
+                let stageName = stage.nameId.localizedFromSplatNet
+                return subscriptionManager.subscriptions.contains { subscription in
+                    return subscription.stages.contains(stageName) && subscription.startTime == schedule.startTime && subscription.endTime == schedule.endTime
+                }
+            }
         }
 
         var body: some View {
