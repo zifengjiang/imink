@@ -55,10 +55,9 @@ struct StagePreviewView: View {
                 .frame(height: 100)
             }
         }
-        .padding(20)
+        .padding(10)
         .frame(width: 280)
-        .background(Color.listItemBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .textureBackground(texture: .bubble, radius: 18)
         .shadow(radius: 8, x: 0, y: 4)
         .task {
             await homeViewModel.ensureStageRecordsAvailable()
