@@ -1,5 +1,6 @@
 import SwiftUI
 import SplatDatabase
+import GRDB
 
 //struct Filter {
 //    var modes: [String] 
@@ -17,9 +18,27 @@ extension ImageMap {
     }
 }
 
+struct PlayerSearchResult: Identifiable, Hashable {
+    let id = UUID()
+    let name: String
+    let byname: String
+    let nameId: String
+    let playCount: Int
+    
+    var displayName: String {
+        if byname.isEmpty {
+            return name
+        } else {
+            return "\(name) (\(byname))"
+        }
+    }
+}
+
 
 class CoopFilterViewModel: ObservableObject {
     @Published var weaponsByType: [String: [ImageMap]] = [:]
+    @Published var searchResults: [PlayerSearchResult] = []
+    @Published var isSearching: Bool = false
 
     func load() async {
         let weapons = try! await SplatDatabase.shared.dbQueue.read { db in
@@ -47,11 +66,58 @@ class CoopFilterViewModel: ObservableObject {
             self.weaponsByType = grouped
         }
     }
+    
+    func searchPlayers(query: String) async {
+        guard !query.isEmpty else {
+            await MainActor.run {
+                self.searchResults = []
+                self.isSearching = false
+            }
+            return
+        }
+        
+        await MainActor.run {
+            self.isSearching = true
+        }
+        
+        let results = try! await SplatDatabase.shared.dbQueue.read { db in
+            try Row.fetchAll(db, sql: """
+                SELECT 
+                    player.name,
+                    player.byname,
+                    player.nameId,
+                    COUNT(DISTINCT coop.id) as playCount
+                FROM player
+                INNER JOIN coopPlayerResult ON player.coopPlayerResultId = coopPlayerResult.id
+                INNER JOIN coop ON coopPlayerResult.coopId = coop.id
+                WHERE coop.accountId = ?
+                AND (player.name LIKE ? OR player.byname LIKE ?)
+                AND player.isMyself != 1
+                GROUP BY player.name, player.byname, player.nameId
+                HAVING playCount > 0
+                ORDER BY playCount DESC, player.name ASC
+                LIMIT 20
+            """, arguments: [AppUserDefaults.shared.accountId, "%\(query)%", "%\(query)%"])
+        }.map { row in
+            PlayerSearchResult(
+                name: row["name"],
+                byname: row["byname"],
+                nameId: row["nameId"],
+                playCount: row["playCount"]
+            )
+        }
+        
+        await MainActor.run {
+            self.searchResults = results
+            self.isSearching = false
+        }
+    }
 }
 
 
 struct CoopFilterView:View {
     @StateObject var viewModel = CoopFilterViewModel()
+    @State private var searchText: String = ""
     
     @Binding var showFilterView: Bool
     @Binding var filter: Filter
@@ -150,6 +216,127 @@ struct CoopFilterView:View {
                                 Text("全部记录").tag(2)
                             }
                             .pickerStyle(SegmentedPickerStyle())
+                        }
+                    }
+                    .padding(.bottom, 16)
+                    
+                    Divider()
+                        .padding(.vertical, 8)
+                    
+                    // 玩家筛选
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("玩家筛选")
+                            .font(.splatoonFont(size: 18))
+                        
+                        // 搜索玩家
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("搜索玩家")
+                                .font(.splatoonFont(size: 14))
+                                .foregroundColor(.secondary)
+                            
+                            HStack {
+                                TextField("输入玩家名称或昵称", text: $searchText)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .onChange(of: searchText) { _, newValue in
+                                        Task {
+                                            await viewModel.searchPlayers(query: newValue)
+                                        }
+                                    }
+                                
+                                if viewModel.isSearching {
+                                    ProgressView()
+                                        .scaleEffect(0.8)
+                                }
+                            }
+                            
+                            // 搜索结果
+                            if !viewModel.searchResults.isEmpty {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("搜索结果")
+                                        .font(.splatoonFont(size: 12))
+                                        .foregroundColor(.secondary)
+                                    
+                                    ForEach(viewModel.searchResults) { result in
+                                        Button(action: {
+                                            filter.playerName = result.name
+                                            filter.playerByname = result.byname
+                                            filter.playerNameId = result.nameId
+                                        }) {
+                                            HStack {
+                                                VStack(alignment: .leading, spacing: 2) {
+                                                    Text(result.displayName)
+                                                        .font(.splatoonFont(size: 14))
+                                                        .foregroundColor(.primary)
+                                                    Text("打工次数: \(result.playCount)")
+                                                        .font(.splatoonFont(size: 12))
+                                                        .foregroundColor(.secondary)
+                                                }
+                                                Spacer()
+                                                if filter.playerName == result.name && 
+                                                   filter.playerByname == result.byname && 
+                                                   filter.playerNameId == result.nameId {
+                                                    Image(systemName: "checkmark.circle.fill")
+                                                        .foregroundColor(.accentColor)
+                                                }
+                                            }
+                                            .padding(.vertical, 4)
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
+                                    }
+                                }
+                                .padding(.top, 4)
+                            }
+                        }
+                        
+                        Divider()
+                            .padding(.vertical, 8)
+                        
+                        // 手动输入筛选条件
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("手动输入筛选条件")
+                                .font(.splatoonFont(size: 14))
+                                .foregroundColor(.secondary)
+                            
+                            Text("玩家名称")
+                                .font(.splatoonFont(size: 12))
+                                .foregroundColor(.secondary)
+                            
+                            TextField("输入玩家名称", text: Binding(
+                                get: { filter.playerName ?? "" },
+                                set: { filter.playerName = $0.isEmpty ? nil : $0 }
+                            ))
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            
+                            Text("玩家昵称")
+                                .font(.splatoonFont(size: 12))
+                                .foregroundColor(.secondary)
+                            
+                            TextField("输入玩家昵称", text: Binding(
+                                get: { filter.playerByname ?? "" },
+                                set: { filter.playerByname = $0.isEmpty ? nil : $0 }
+                            ))
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            
+                            Text("玩家ID")
+                                .font(.splatoonFont(size: 12))
+                                .foregroundColor(.secondary)
+                            
+                            TextField("输入玩家ID", text: Binding(
+                                get: { filter.playerNameId ?? "" },
+                                set: { filter.playerNameId = $0.isEmpty ? nil : $0 }
+                            ))
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                        }
+                        
+                        // 清除玩家筛选按钮
+                        if filter.playerName != nil || filter.playerByname != nil || filter.playerNameId != nil {
+                            Button("清除玩家筛选") {
+                                filter.playerName = nil
+                                filter.playerByname = nil
+                                filter.playerNameId = nil
+                            }
+                            .foregroundColor(.red)
+                            .font(.splatoonFont(size: 14))
                         }
                     }
                     .padding(.bottom, 16)

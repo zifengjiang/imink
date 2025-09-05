@@ -185,63 +185,157 @@ extension Filter{
         if showOnlyFavorites {
             conditions.append("coop.isFavorite = 1")
         }
+        
+        // 玩家筛选条件 - 需要修改SQL查询结构
+        var playerFilterConditions: [String] = []
+        var playerFilterArguments: [DatabaseValueConvertible] = []
+        
+        if let playerName = playerName, !playerName.isEmpty {
+            playerFilterConditions.append("targetPlayer.name = ?")
+            playerFilterArguments.append(playerName)
+        }
+        
+        if let playerByname = playerByname, !playerByname.isEmpty {
+            playerFilterConditions.append("targetPlayer.byname = ?")
+            playerFilterArguments.append(playerByname)
+        }
+        
+        if let playerNameId = playerNameId, !playerNameId.isEmpty {
+            playerFilterConditions.append("targetPlayer.nameId = ?")
+            playerFilterArguments.append(playerNameId)
+        }
 
         let whereClause = conditions.isEmpty ? "1" : conditions.joined(separator: " AND ")
-        let sql = """
-            SELECT DISTINCT
-            coop.id,
-            coop.rule AS RULE,
-            coop.afterGrade AS grade,
-            coop.afterGradePoint AS gradePoint,
-            CASE WHEN coop.wave = 3
-            AND coop.rule != 'TEAM_CONTEST'
-            AND coop.afterGradePoint < 999 THEN
-            'UP'
-            WHEN (coop.wave = 2
-            AND coop.rule != 'TEAM_CONTEST')
-            OR(coop.wave = 3
+        
+        // 如果有玩家筛选条件，需要修改查询结构
+        let hasPlayerFilter = !playerFilterConditions.isEmpty
+        let playerFilterClause = hasPlayerFilter ? playerFilterConditions.joined(separator: " AND ") : "1"
+        
+        let sql: String
+        if hasPlayerFilter {
+            // 当有玩家筛选时，需要先找到包含该玩家的coop记录，然后返回自己的记录
+            sql = """
+                SELECT DISTINCT
+                coop.id,
+                coop.rule AS RULE,
+                coop.afterGrade AS grade,
+                coop.afterGradePoint AS gradePoint,
+                CASE WHEN coop.wave = 3
                 AND coop.rule != 'TEAM_CONTEST'
-                AND coop.afterGradePoint = 999) THEN
-            'KEEP'
-            WHEN coop.rule = 'TEAM_CONTEST' THEN
-            NULL
-            ELSE
-            'DOWN'
-            END AS gradeDiff,
-            coop.dangerRate,
-            coopPlayerResult.defeatEnemyCount AS enemyDefeatCount,
-            player.species AS specie,
-            imageMap.nameId AS stage,
-            bossI18n.key AS boss,
-            coop.bossDefeated AS haveBossDefeated,
-            coop.wave AS resultWave,
-            coop.egg AS goldenEgg,
-            coop.powerEgg,
-            coopPlayerResult.rescueCount AS rescue,
-            coopPlayerResult.rescuedCount AS rescued,
-            coop.playedTime AS time,
-            coop.GroupID,
-            (SELECT COUNT(*) 
-            FROM coopEnemyResult 
-            WHERE coopEnemyResult.coopId = coop.id) AS enemyKindCount
-            FROM
-            coop_view AS coop
-            JOIN coopPlayerResult ON coopPlayerResult.coopId = coop.id
-            JOIN imageMap ON coop.stageId = imageMap.id
-            JOIN player ON player.coopPlayerResultId = coopPlayerResult.id
-            LEFT JOIN imageMap AS bossImageMap ON coop.boss = bossImageMap.id
-            LEFT JOIN coopWaveResult ON coopWaveResult.coopId = coop.id
-            AND coopWaveResult.waveNumber = 4
-            LEFT JOIN i18n AS bossI18n ON coopWaveResult.eventWave = bossI18n.id
-            LEFT JOIN weapon ON weapon.coopPlayerResultId = coopPlayerResult.id
-            WHERE \(whereClause)
-            AND coop.accountId = \(accountId)
-            AND coopPlayerResult.'order' = 0
-            ORDER BY
-            time DESC
-            LIMIT \(limit) OFFSET \(offset)
-        """
+                AND coop.afterGradePoint < 999 THEN
+                'UP'
+                WHEN (coop.wave = 2
+                AND coop.rule != 'TEAM_CONTEST')
+                OR(coop.wave = 3
+                    AND coop.rule != 'TEAM_CONTEST'
+                    AND coop.afterGradePoint = 999) THEN
+                'KEEP'
+                WHEN coop.rule = 'TEAM_CONTEST' THEN
+                NULL
+                ELSE
+                'DOWN'
+                END AS gradeDiff,
+                coop.dangerRate,
+                coopPlayerResult.defeatEnemyCount AS enemyDefeatCount,
+                player.species AS specie,
+                imageMap.nameId AS stage,
+                bossI18n.key AS boss,
+                coop.bossDefeated AS haveBossDefeated,
+                coop.wave AS resultWave,
+                coop.egg AS goldenEgg,
+                coop.powerEgg,
+                coopPlayerResult.rescueCount AS rescue,
+                coopPlayerResult.rescuedCount AS rescued,
+                coop.playedTime AS time,
+                coop.GroupID,
+                (SELECT COUNT(*) 
+                FROM coopEnemyResult 
+                WHERE coopEnemyResult.coopId = coop.id) AS enemyKindCount
+                FROM
+                coop_view AS coop
+                JOIN coopPlayerResult ON coopPlayerResult.coopId = coop.id
+                JOIN imageMap ON coop.stageId = imageMap.id
+                JOIN player ON player.coopPlayerResultId = coopPlayerResult.id
+                LEFT JOIN imageMap AS bossImageMap ON coop.boss = bossImageMap.id
+                LEFT JOIN coopWaveResult ON coopWaveResult.coopId = coop.id
+                AND coopWaveResult.waveNumber = 4
+                LEFT JOIN i18n AS bossI18n ON coopWaveResult.eventWave = bossI18n.id
+                LEFT JOIN weapon ON weapon.coopPlayerResultId = coopPlayerResult.id
+                WHERE \(whereClause)
+                AND coop.accountId = \(accountId)
+                AND coopPlayerResult.'order' = 0
+                AND coop.id IN (
+                    SELECT DISTINCT c.id
+                    FROM coop_view c
+                    JOIN coopPlayerResult cpr ON cpr.coopId = c.id
+                    JOIN player targetPlayer ON targetPlayer.coopPlayerResultId = cpr.id
+                    WHERE c.accountId = \(accountId)
+                    AND \(playerFilterClause)
+                )
+                ORDER BY
+                time DESC
+                LIMIT \(limit) OFFSET \(offset)
+            """
+        } else {
+            // 没有玩家筛选时的原始查询
+            sql = """
+                SELECT DISTINCT
+                coop.id,
+                coop.rule AS RULE,
+                coop.afterGrade AS grade,
+                coop.afterGradePoint AS gradePoint,
+                CASE WHEN coop.wave = 3
+                AND coop.rule != 'TEAM_CONTEST'
+                AND coop.afterGradePoint < 999 THEN
+                'UP'
+                WHEN (coop.wave = 2
+                AND coop.rule != 'TEAM_CONTEST')
+                OR(coop.wave = 3
+                    AND coop.rule != 'TEAM_CONTEST'
+                    AND coop.afterGradePoint = 999) THEN
+                'KEEP'
+                WHEN coop.rule = 'TEAM_CONTEST' THEN
+                NULL
+                ELSE
+                'DOWN'
+                END AS gradeDiff,
+                coop.dangerRate,
+                coopPlayerResult.defeatEnemyCount AS enemyDefeatCount,
+                player.species AS specie,
+                imageMap.nameId AS stage,
+                bossI18n.key AS boss,
+                coop.bossDefeated AS haveBossDefeated,
+                coop.wave AS resultWave,
+                coop.egg AS goldenEgg,
+                coop.powerEgg,
+                coopPlayerResult.rescueCount AS rescue,
+                coopPlayerResult.rescuedCount AS rescued,
+                coop.playedTime AS time,
+                coop.GroupID,
+                (SELECT COUNT(*) 
+                FROM coopEnemyResult 
+                WHERE coopEnemyResult.coopId = coop.id) AS enemyKindCount
+                FROM
+                coop_view AS coop
+                JOIN coopPlayerResult ON coopPlayerResult.coopId = coop.id
+                JOIN imageMap ON coop.stageId = imageMap.id
+                JOIN player ON player.coopPlayerResultId = coopPlayerResult.id
+                LEFT JOIN imageMap AS bossImageMap ON coop.boss = bossImageMap.id
+                LEFT JOIN coopWaveResult ON coopWaveResult.coopId = coop.id
+                AND coopWaveResult.waveNumber = 4
+                LEFT JOIN i18n AS bossI18n ON coopWaveResult.eventWave = bossI18n.id
+                LEFT JOIN weapon ON weapon.coopPlayerResultId = coopPlayerResult.id
+                WHERE \(whereClause)
+                AND coop.accountId = \(accountId)
+                AND coopPlayerResult.'order' = 0
+                ORDER BY
+                time DESC
+                LIMIT \(limit) OFFSET \(offset)
+            """
+        }
 
-        return SQLRequest<Row>(sql: sql, arguments: StatementArguments(arguments))
+        // 合并所有参数
+        let allArguments = arguments + playerFilterArguments
+        return SQLRequest<Row>(sql: sql, arguments: StatementArguments(allArguments))
     }
 }

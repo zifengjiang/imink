@@ -1,8 +1,12 @@
 import SwiftUI
 import SplatDatabase
+import GRDB
 
 struct CoopPlayerView: View {
     let result: CoopPlayerResult?
+    var onViewPlayerRecords: ((String, String, String) -> Void)? = nil
+    @State private var playCount: Int = 0
+    @State private var isLoadingCount: Bool = false
     
     var body: some View {
         VStack(alignment: .center, spacing: 10) {
@@ -15,6 +19,49 @@ struct CoopPlayerView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 100, height: 100)
+                }
+                
+                // 显示与这个玩家的游戏次数
+                if player.isMyself != true {
+                    VStack(spacing: 8) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "person.2.fill")
+                                .foregroundColor(.secondary)
+                                .font(.system(size: 12))
+                            Text("一起打工次数:")
+                                .font(.splatoonFont(size: 12))
+                                .foregroundColor(.secondary)
+                            
+                            if isLoadingCount {
+                                ProgressView()
+                                    .scaleEffect(0.7)
+                            } else {
+                                Text("\(playCount)")
+                                    .font(.splatoonFont(size: 14))
+                                    .foregroundColor(.accentColor)
+                            }
+                        }
+                        
+                        // 查看记录按钮
+                        if let onViewPlayerRecords = onViewPlayerRecords {
+                            Button(action: {
+                                onViewPlayerRecords(player.name, player.byname, player.nameId)
+                            }) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "person.crop.circle.badge.checkmark")
+                                        .foregroundColor(.accentColor)
+                                    Text("查看打工记录")
+                                        .font(.splatoonFont(size: 14))
+                                        .foregroundColor(.accentColor)
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(Color.accentColor.opacity(0.1))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
                 }
                 
 //                VStack(spacing: 8) {
@@ -85,6 +132,41 @@ struct CoopPlayerView: View {
         .padding()
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .onAppear {
+            if let player = result?.player, player.isMyself != true {
+                loadPlayCount(player: player)
+            }
+        }
+    }
+    
+    private func loadPlayCount(player: Player) {
+        isLoadingCount = true
+        Task {
+            do {
+                let count = try await SplatDatabase.shared.dbQueue.read { db in
+                    try Int.fetchOne(db, sql: """
+                        SELECT COUNT(DISTINCT c.id)
+                        FROM coop_view c
+                        JOIN coopPlayerResult cpr1 ON cpr1.coopId = c.id
+                        JOIN coopPlayerResult cpr2 ON cpr2.coopId = c.id
+                        JOIN player p1 ON p1.coopPlayerResultId = cpr1.id
+                        JOIN player p2 ON p2.coopPlayerResultId = cpr2.id
+                        WHERE c.accountId = ?
+                        AND p2.name = ? AND p2.byname = ? AND p2.nameId = ?
+                    """, arguments: [AppUserDefaults.shared.accountId, player.name, player.byname, player.nameId]) ?? 0
+                }
+                
+                await MainActor.run {
+                    self.playCount = count
+                    self.isLoadingCount = false
+                }
+            } catch {
+                await MainActor.run {
+                    self.playCount = 0
+                    self.isLoadingCount = false
+                }
+            }
+        }
     }
 }
 

@@ -10,7 +10,7 @@ class HomeViewModel: ObservableObject {
     
     // MARK: - Shared Instance
     static let shared = HomeViewModel()
-
+    
     @Published var totalCoop: Int = 0
     @Published var totalBattle: Int = 0
     @Published var last500Battle: [Bool?] = []
@@ -27,24 +27,24 @@ class HomeViewModel: ObservableObject {
     @Published var coopRecord: CoopRecord?
     @Published var isLoadingStageRecords = false
     @Published var isLoadingCoopRecord = false
-
+    
     var scheduleGroups: [Date: [Schedule]] {
         Dictionary(grouping: schedules.filter { $0.mode != .salmonRun }, by: { $0.startTime })
     }
-
+    
     var salmonRunSchedules: [Schedule] {
         schedules.filter { $0.mode == .salmonRun }.sorted { $0.rule1.rawValue > $1.rule1.rawValue }
     }
-
+    
     private var cancelBag = Set<AnyCancellable>()
     private var scheduleCancelBag = Set<AnyCancellable>()
     private var loginStateCancelBag = Set<AnyCancellable>()  // 用于监听登录状态
-
+    
     init() {
-            // 根据当前的登录状态进行处理
+        // 根据当前的登录状态进行处理
         handleLoginStateChange(isLogin: AppState.shared.isLogin)
-
-            // 监听登录状态变化
+        
+        // 监听登录状态变化
         AppState.shared.$isLogin
             .sink { [weak self] isLogin in
                 self?.handleLoginStateChange(isLogin: isLogin)
@@ -53,24 +53,24 @@ class HomeViewModel: ObservableObject {
         loadSchedules()
         loadCachedRecords()
     }
-
-        // 取消数据订阅，但不取消登录状态监听
+    
+    // 取消数据订阅，但不取消登录状态监听
     func cancelSubscriptions() {
         cancelBag.forEach { $0.cancel() }
         cancelBag.removeAll()
     }
-
+    
     func handleLoginStateChange(isLogin: Bool) {
         if isLogin {
-                // 用户已登录，加载数据
+            // 用户已登录，加载数据
             updateStatus()
         } else {
-                // 用户未登录，清空数据
+            // 用户未登录，清空数据
             clearData()
             cancelSubscriptions()
         }
     }
-
+    
     func clearData() {
         salmonRunStatus = nil
         lastCoopGroupId = nil
@@ -82,10 +82,10 @@ class HomeViewModel: ObservableObject {
         stageRecords = []
         coopRecord = nil
     }
-
+    
     func updateStatus() {
         cancelBag = Set<AnyCancellable>()
-
+        
         SplatDatabase.shared.totalCoopCount()
             .catch { error -> Just<Int> in
                 os_log("Database Error: [totalCount] \(error.localizedDescription)")
@@ -93,7 +93,7 @@ class HomeViewModel: ObservableObject {
             }
             .assign(to: \.totalCoop, on: self)
             .store(in: &cancelBag)
-
+        
         SplatDatabase.shared.totalBattleCount()
             .catch { error -> Just<Int> in
                 os_log("Database Error: [totalCount] \(error.localizedDescription)")
@@ -114,7 +114,7 @@ class HomeViewModel: ObservableObject {
             }
             .assign(to: \.lastCoopGroupId, on: self)
             .store(in: &cancelBag)
-
+        
         ValueObservation
             .tracking { db in
                 try Int.fetchOne(db, sql: "SELECT MAX(GroupId) FROM battle_group_status_view WHERE accountId = ?", arguments: [AppUserDefaults.shared.accountId])
@@ -127,19 +127,19 @@ class HomeViewModel: ObservableObject {
             }
             .assign(to: \.lastBattleGroupId, on: self)
             .store(in: &cancelBag)
-
-
-
+        
+        
+        
         $totalCoop
             .map{ _ in SplatDatabase.shared.fetchLast500(isCoop:true) }
             .assign(to: \.last500Coop, on: self)
             .store(in: &cancelBag)
-
+        
         $totalBattle
             .map{ _ in SplatDatabase.shared.fetchLast500(isCoop:false) }
             .assign(to: \.last500Battle, on: self)
             .store(in: &cancelBag)
-
+        
         $lastCoopGroupId
             .sink{ _ in
                 if let lastCoopGroupId = self.lastCoopGroupId{
@@ -153,7 +153,7 @@ class HomeViewModel: ObservableObject {
                 }
             }
             .store(in: &cancelBag)
-
+        
         $lastBattleGroupId
             .sink{ _ in
                 if let lastBattleGroupId = self.lastBattleGroupId{
@@ -167,7 +167,7 @@ class HomeViewModel: ObservableObject {
                 }
             }
             .store(in: &cancelBag)
-
+        
         // 获取最新的 coop 时间
         ValueObservation
             .tracking { db in
@@ -182,8 +182,8 @@ class HomeViewModel: ObservableObject {
             .assign(to: \.lastCoopTime, on: self)
             .store(in: &cancelBag)
     }
-
-
+    
+    
     func loadSchedules(date:Date = Date()){
         scheduleCancelBag = Set<AnyCancellable>()
         DispatchQueue.main.async{
@@ -199,7 +199,7 @@ class HomeViewModel: ObservableObject {
                 .store(in: &self.scheduleCancelBag)
         }
     }
-
+    
     func fetchSchedules() async {
         // 5分钟内不重复获取
         guard AppUserDefaults.shared.scheduleRefreshTime + 300 <= Int(Date().timeIntervalSince1970 ) else{ return }
@@ -301,7 +301,7 @@ class HomeViewModel: ObservableObject {
             await fetchCoopRecord()
         }
     }
-
+    
 }
 
 extension Schedule: @retroactive Identifiable {
@@ -327,25 +327,21 @@ extension SplatDatabase {
             }
         }
     }
-
+    
     func totalCoopCount() -> AnyPublisher<Int, Error> {
         return ValueObservation
-            .tracking(
-                Coop
-                //                    .filter(sql: "accountId = ?", arguments: [0])
-                    .fetchCount
-            )
+            .tracking { db in
+                try Coop.filter(sql: "isDeleted = 0").fetchCount(db)
+            }
             .publisher(in: dbQueue, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
-
+    
     func totalBattleCount() -> AnyPublisher<Int, Error> {
         return ValueObservation
-            .tracking(
-                Battle
-                //                    .filter(sql: "accountId = ?", arguments: [0])
-                    .fetchCount
-            )
+            .tracking { db in
+                try Battle.filter(sql: "isDeleted = 0").fetchCount(db)
+            }
             .publisher(in: dbQueue, scheduling: .immediate)
             .eraseToAnyPublisher()
     }

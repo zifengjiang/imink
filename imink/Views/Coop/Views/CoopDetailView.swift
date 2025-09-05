@@ -2,6 +2,8 @@ import SwiftUI
 import SplatDatabase
 
 struct CoopDetailView: View {
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var listViewModel: CoopListViewModel
 
     @State var phase:Double = 0
     @StateObject var viewModel: CoopDetailViewModel
@@ -11,6 +13,7 @@ struct CoopDetailView: View {
     @State private var hoveredMember: Bool = false
 
     var id: Int64
+    
     init(id: Int64){
         self.id = id
         if let model = AppState.shared.viewModelDict[id]{
@@ -70,7 +73,21 @@ struct CoopDetailView: View {
                           onDismiss: {
                 showPlayerDetail = false
             }, content: {
-                CoopPlayerView(result: activePlayer)
+                CoopPlayerView(result: activePlayer, onViewPlayerRecords: { playerName, playerByname, playerNameId in
+                    // 设置筛选条件
+                    listViewModel.filter.playerName = playerName
+                    listViewModel.filter.playerByname = playerByname
+                    listViewModel.filter.playerNameId = playerNameId
+                    listViewModel.navigationTitle = "\(playerName)的打工记录"
+                    
+                    // 关闭当前详情页面
+                    dismiss()
+                    
+                    // 重新加载数据
+                    Task {
+                        await listViewModel.loadCoops()
+                    }
+                })
             }))
             .onAppear  {
 
