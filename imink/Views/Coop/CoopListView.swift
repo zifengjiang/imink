@@ -48,11 +48,17 @@ struct CoopListView: View {
                                             } label: {
                                                 CoopListRowView(row: row)
                                                     .id(row.id)
+                                                    .onAppear {
+                                                        checkForLoadMore(rowId: row.id)
+                                                    }
                                             }
                                             .buttonStyle(PlainButtonStyle())
                                         } else {
                                             CoopListRowView(row: row)
                                                 .id(row.id)
+                                                .onAppear {
+                                                    checkForLoadMore(rowId: row.id)
+                                                }
                                         }
                                     }
 
@@ -71,7 +77,10 @@ struct CoopListView: View {
                     .navigationTitle(viewModel.navigationTitle)
                     .navigationBarTitleDisplayMode(.inline)
                     .onChange(of: activeID) { oldValue, newValue in
+                        print("🔍 activeID changed: \(oldValue ?? "nil") -> \(newValue ?? "nil"), isSelectionMode: \(isSelectionMode)")
+                        print("🔍 last row id: \(viewModel.rows.last?.id ?? "nil")")
                         if newValue == viewModel.rows.last?.id {
+                            print("🔍 Triggering loadMore in selection mode: \(isSelectionMode)")
                             Task{
                                 if viewModel.navigationTitle == "打工卡片"{
                                     await viewModel.loadMoreCards()
@@ -250,6 +259,20 @@ struct CoopListView: View {
                 selectedCoops.removeAll()
             } catch {
                 print("Error batch toggling favorites: \(error)")
+            }
+        }
+    }
+    
+    private func checkForLoadMore(rowId: String) {
+        print("🔍 Row appeared: \(rowId), last row: \(viewModel.rows.last?.id ?? "nil"), isSelectionMode: \(isSelectionMode)")
+        if rowId == viewModel.rows.last?.id {
+            print("🔍 Triggering loadMore from onAppear in selection mode: \(isSelectionMode)")
+            Task {
+                if viewModel.navigationTitle == "打工卡片" {
+                    await viewModel.loadMoreCards()
+                    return
+                }
+                await viewModel.loadMore()
             }
         }
     }
