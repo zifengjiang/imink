@@ -79,14 +79,13 @@ struct CoopDetailView: View {
                     listViewModel.filter.playerByname = playerByname
                     listViewModel.filter.playerNameId = playerNameId
                     listViewModel.navigationTitle = "\(playerName)的打工记录"
-                    
-                    // 关闭当前详情页面
-                    dismiss()
-                    
                     // 重新加载数据
                     Task {
                         await listViewModel.loadCoops()
                     }
+
+                    // 关闭当前详情页面
+                    dismiss()
                 })
             }))
             .onAppear  {
