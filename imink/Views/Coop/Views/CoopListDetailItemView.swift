@@ -37,14 +37,12 @@ struct CoopListDetailItemView: View {
                         .frame(width: 13, height:13)
                         .padding([.top, .bottom], 0.5)
                 }else if coop.rule == .teamContest{
-                    HStack(spacing: 3) {
                         Image(.golden)
                             .resizable()
                             .scaledToFit()
                             .frame(width: 13, height: 13)
                         Text("\(coop.goldenEgg)")
-                            .font(.splatoonFont(size: 12))
-                    }
+                            .font(.splatoonFont1(size: 12))
                 }else {
                     Text("-")
                         .font(.splatoonFont(size: 12))
