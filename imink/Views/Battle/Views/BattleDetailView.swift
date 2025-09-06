@@ -45,6 +45,9 @@ struct BattleDetailView: View {
             }
             .padding(.horizontal,8)
         }
+        .scrollIndicators(.hidden)
+        .scrollClipDisabled()
+        .containerRelativeFrame(.horizontal)
         .frame(maxWidth: .infinity)
         .fixSafeareaBackground()
         .modifier(Popup(isPresented: showPlayerSkill,
