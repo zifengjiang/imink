@@ -2,14 +2,6 @@ import SwiftUI
 import SplatDatabase
 import GRDB
 
-//struct Filter {
-//    var modes: [String] 
-//    var rules: [String]?
-//    var stageIds: [Int]?
-//    var weaponIds: [Int]?
-//    var start: Date?
-//    var end: Date?
-//}
 
 extension ImageMap {
     var weaponType: String {
@@ -24,7 +16,7 @@ struct PlayerSearchResult: Identifiable, Hashable {
     let byname: String
     let nameId: String
     let playCount: Int
-    
+
     var displayName: String {
         if byname.isEmpty {
             return name
@@ -39,6 +31,7 @@ class CoopFilterViewModel: ObservableObject {
     @Published var weaponsByType: [String: [ImageMap]] = [:]
     @Published var searchResults: [PlayerSearchResult] = []
     @Published var isSearching: Bool = false
+    @Published var stages: [ImageMap] = [] // 新增地图数据
 
     func load() async {
         let weapons = try! await SplatDatabase.shared.dbQueue.read { db in
@@ -59,14 +52,26 @@ class CoopFilterViewModel: ObservableObject {
                                 """, arguments: [AppUserDefaults.shared.accountId])
         }
 
-        // 分组
+            // 加载地图数据
+        let stages = try! await SplatDatabase.shared.dbQueue.read { db in
+            try ImageMap.fetchAll(db, sql: """
+                SELECT DISTINCT im.*
+                FROM imageMap im
+                INNER JOIN coop c ON im.id = c.stageId
+                WHERE c.accountId = ?
+                ORDER BY im.name ASC
+            """, arguments: [AppUserDefaults.shared.accountId])
+        }
+
+            // 分组
         let grouped = Dictionary(grouping: weapons, by: \.weaponType)
 
         await MainActor.run {
             self.weaponsByType = grouped
+            self.stages = stages
         }
     }
-    
+
     func searchPlayers(query: String) async {
         guard !query.isEmpty else {
             await MainActor.run {
@@ -75,11 +80,11 @@ class CoopFilterViewModel: ObservableObject {
             }
             return
         }
-        
+
         await MainActor.run {
             self.isSearching = true
         }
-        
+
         let results = try! await SplatDatabase.shared.dbQueue.read { db in
             try Row.fetchAll(db, sql: """
                 SELECT 
@@ -106,7 +111,7 @@ class CoopFilterViewModel: ObservableObject {
                 playCount: row["playCount"]
             )
         }
-        
+
         await MainActor.run {
             self.searchResults = results
             self.isSearching = false
@@ -118,7 +123,7 @@ class CoopFilterViewModel: ObservableObject {
 struct CoopFilterView:View {
     @StateObject var viewModel = CoopFilterViewModel()
     @State private var searchText: String = ""
-    
+
     @Binding var showFilterView: Bool
     @Binding var filter: Filter
 
@@ -128,11 +133,11 @@ struct CoopFilterView:View {
         NavigationStack{
             ScrollView {
                 VStack(alignment: .leading) {
-                    // 时间范围选择
+                        // 时间范围选择
                     VStack(alignment: .center, spacing: 12) {
                         Text("时间范围")
                             .font(.splatoonFont(size: 18))
-                        
+
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("开始时间")
@@ -141,9 +146,9 @@ struct CoopFilterView:View {
                                 Text(filter.start, style: .date)
                                     .font(.splatoonFont(size: 16))
                             }
-                            
+
                             Spacer()
-                            
+
                             VStack(alignment: .trailing, spacing: 4) {
                                 Text("结束时间")
                                     .font(.splatoonFont(size: 14))
@@ -152,8 +157,8 @@ struct CoopFilterView:View {
                                     .font(.splatoonFont(size: 16))
                             }
                         }
-                        
-                        // 时间范围滑块
+
+                            // 时间范围滑块
                         TimeRangeSlider(
                             lineWidth: UIScreen.main.bounds.width - 64,
                             minDate: getCoopEarliestPlayedTime(),
@@ -162,8 +167,8 @@ struct CoopFilterView:View {
                             endDate: $filter.end
                         )
                         .frame(height: 30)
-                        
-                        // 显示时间间隔（调试用）
+
+                            // 显示时间间隔（调试用）
                         let timeInterval = filter.end.timeIntervalSince(filter.start)
                         let days = Int(timeInterval / (24 * 3600))
                         let hours = Int((timeInterval.truncatingRemainder(dividingBy: 24 * 3600)) / 3600)
@@ -171,17 +176,17 @@ struct CoopFilterView:View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
-                    
+
                     Divider()
                         .padding(.vertical, 8)
-                    
-                    // 记录状态过滤
+
+                        // 记录状态过滤
                     VStack(alignment: .leading, spacing: 12) {
                         Text("记录状态")
                             .font(.splatoonFont(size: 18))
-                        
+
                         Toggle("只显示收藏", isOn: $filter.showOnlyFavorites)
-                        
+
                         HStack {
                             Text("显示模式:")
                             Spacer()
@@ -195,7 +200,7 @@ struct CoopFilterView:View {
                                         return 0 // 只显示活跃
                                     }
                                 },
-                                set: { value in
+                                set: { (value: Int) in
                                     switch value {
                                     case 0: // 只显示活跃
                                         filter.showOnlyActive = true
@@ -219,21 +224,21 @@ struct CoopFilterView:View {
                         }
                     }
                     .padding(.bottom, 16)
-                    
+
                     Divider()
                         .padding(.vertical, 8)
-                    
-                    // 玩家筛选
+
+                        // 玩家筛选
                     VStack(alignment: .leading, spacing: 12) {
                         Text("玩家筛选")
                             .font(.splatoonFont(size: 18))
-                        
-                        // 搜索玩家
+
+                            // 搜索玩家
                         VStack(alignment: .leading, spacing: 8) {
                             Text("搜索玩家")
                                 .font(.splatoonFont(size: 14))
                                 .foregroundColor(.secondary)
-                            
+
                             HStack {
                                 TextField("输入玩家名称或昵称", text: $searchText)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -242,20 +247,20 @@ struct CoopFilterView:View {
                                             await viewModel.searchPlayers(query: newValue)
                                         }
                                     }
-                                
+
                                 if viewModel.isSearching {
                                     ProgressView()
                                         .scaleEffect(0.8)
                                 }
                             }
-                            
-                            // 搜索结果
+
+                                // 搜索结果
                             if !viewModel.searchResults.isEmpty {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("搜索结果")
                                         .font(.splatoonFont(size: 12))
                                         .foregroundColor(.secondary)
-                                    
+
                                     ForEach(viewModel.searchResults) { result in
                                         Button(action: {
                                             filter.playerName = result.name
@@ -272,9 +277,9 @@ struct CoopFilterView:View {
                                                         .foregroundColor(.secondary)
                                                 }
                                                 Spacer()
-                                                if filter.playerName == result.name && 
-                                                   filter.playerByname == result.byname && 
-                                                   filter.playerNameId == result.nameId {
+                                                if filter.playerName == result.name &&
+                                                    filter.playerByname == result.byname &&
+                                                    filter.playerNameId == result.nameId {
                                                     Image(systemName: "checkmark.circle.fill")
                                                         .foregroundColor(.accentColor)
                                                 }
@@ -287,48 +292,48 @@ struct CoopFilterView:View {
                                 .padding(.top, 4)
                             }
                         }
-                        
+
                         Divider()
                             .padding(.vertical, 8)
-                        
-                        // 手动输入筛选条件
+
+                            // 手动输入筛选条件
                         VStack(alignment: .leading, spacing: 8) {
                             Text("手动输入筛选条件")
                                 .font(.splatoonFont(size: 14))
                                 .foregroundColor(.secondary)
-                            
+
                             Text("玩家名称")
                                 .font(.splatoonFont(size: 12))
                                 .foregroundColor(.secondary)
-                            
+
                             TextField("输入玩家名称", text: Binding(
                                 get: { filter.playerName ?? "" },
                                 set: { filter.playerName = $0.isEmpty ? nil : $0 }
                             ))
                             .textFieldStyle(RoundedBorderTextFieldStyle())
-                            
+
                             Text("玩家昵称")
                                 .font(.splatoonFont(size: 12))
                                 .foregroundColor(.secondary)
-                            
+
                             TextField("输入玩家昵称", text: Binding(
                                 get: { filter.playerByname ?? "" },
                                 set: { filter.playerByname = $0.isEmpty ? nil : $0 }
                             ))
                             .textFieldStyle(RoundedBorderTextFieldStyle())
-                            
+
                             Text("玩家ID")
                                 .font(.splatoonFont(size: 12))
                                 .foregroundColor(.secondary)
-                            
+
                             TextField("输入玩家ID", text: Binding(
                                 get: { filter.playerNameId ?? "" },
                                 set: { filter.playerNameId = $0.isEmpty ? nil : $0 }
                             ))
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                         }
-                        
-                        // 清除玩家筛选按钮
+
+                            // 清除玩家筛选按钮
                         if filter.playerName != nil || filter.playerByname != nil || filter.playerNameId != nil {
                             Button("清除玩家筛选") {
                                 filter.playerName = nil
@@ -340,7 +345,43 @@ struct CoopFilterView:View {
                         }
                     }
                     .padding(.bottom, 16)
-                    
+
+                    Divider()
+                        .padding(.vertical, 8)
+
+                        // 地图筛选
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("地图筛选")
+                            .font(.splatoonFont(size: 18))
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 4) {
+                            ForEach(viewModel.stages, id: \.hash) { stage in
+                                Button {
+                                    if filter.stageIds.contains(Int(stage.id!)) {
+                                        filter.stageIds.remove(Int(stage.id!))
+                                    } else {
+                                        filter.stageIds.insert(Int(stage.id!))
+                                    }
+                                } label: {
+                                    VStack {
+                                        Image(stage.name)
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 100)
+                                            .overlay(filter.stageIds.contains(Int(stage.id!)) ? Color.accent.opacity(0.5) : Color.clear)
+                                            .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+                                        Text(stage.nameId.localizedFromSplatNet)
+                                            .font(.splatoonFont(size: 12))
+                                            .lineLimit(1)
+                                            .minimumScaleFactor(0.3)
+                                            .foregroundColor(.primary)
+                                    }
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                        }
+                    }
+                    .padding(.bottom, 16)
+
                     Divider()
                         .padding(.vertical, 8)
 
@@ -348,7 +389,7 @@ struct CoopFilterView:View {
                         VStack(alignment: .leading) {
                             Text(type)
                                 .font(.splatoonFont(size: 22))
-//                                .padding(.leading)
+                                //                                .padding(.leading)
 
 
                             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 8) {
@@ -393,7 +434,6 @@ struct CoopFilterView:View {
                 await viewModel.load()
             }
         }
-
 
     }
 }

@@ -157,7 +157,7 @@ struct CoopListView: View {
                         }
                     }
                     .toolbarTitleMenu {
-                        ForEach(CoopRule.allCases, id:\.rawValue){rule in
+                        ForEach(CoopRule.allCases, id:\.rawValue){ rule in
                             Button{
                                 viewModel.filter.clear()
                                 if rule != .ALL{
@@ -205,9 +205,6 @@ struct CoopListView: View {
                             await viewModel.fetchCoops()
                         }
                     }
-                        //                .onDisappear {
-                        //                    TaskManager.shared.cancel(name: String(describing: Self.self))
-                        //                }
                 }
 
             }
