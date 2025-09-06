@@ -120,21 +120,21 @@ struct BattleListView: View {
                         }
                     }
                 }
-                .onChange(of: scenePhase) { oldValue, newPhase in
-                    switch newPhase {
-                    case .active:
-                        TaskManager.shared.start(named: String(describing: Self.self)) {
-                            await viewModel.fetchBattles()
-                        }
-                    default:
-                        break
-                    }
-                }
-                .onAppear {
-                    TaskManager.shared.startLoop(name: String(describing: Self.self), interval: .seconds(300)) {
-                        await viewModel.fetchBattles()
-                    }
-                }
+//                .onChange(of: scenePhase) { oldValue, newPhase in
+//                    switch newPhase {
+//                    case .active:
+//                        TaskManager.shared.start(named: String(describing: Self.self)) {
+//                            await viewModel.fetchBattles()
+//                        }
+//                    default:
+//                        break
+//                    }
+//                }
+//                .onAppear {
+//                    TaskManager.shared.startLoop(name: String(describing: Self.self), interval: .seconds(300)) {
+//                        await viewModel.fetchBattles()
+//                    }
+//                }
 //                .onDisappear {
 //                    TaskManager.shared.cancel(name: String(describing: Self.self))
 //                }

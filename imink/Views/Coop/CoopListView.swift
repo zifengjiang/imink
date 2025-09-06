@@ -190,21 +190,21 @@ struct CoopListView: View {
                             )
                         }
                     }
-                    .onChange(of: scenePhase) { oldValue, newPhase in
-                        switch newPhase {
-                        case .active:
-                            TaskManager.shared.start(named: String(describing: Self.self)) {
-                                await viewModel.fetchCoops()
-                            }
-                        default:
-                            break
-                        }
-                    }
-                    .onAppear {
-                        TaskManager.shared.startLoop(name: String(describing: Self.self), interval: .seconds(300)) {
-                            await viewModel.fetchCoops()
-                        }
-                    }
+//                    .onChange(of: scenePhase) { oldValue, newPhase in
+//                        switch newPhase {
+//                        case .active:
+//                            TaskManager.shared.start(named: String(describing: Self.self)) {
+//                                await viewModel.fetchCoops()
+//                            }
+//                        default:
+//                            break
+//                        }
+//                    }
+//                    .onAppear {
+//                        TaskManager.shared.startLoop(name: String(describing: Self.self), interval: .seconds(300)) {
+//                            await viewModel.fetchCoops()
+//                        }
+//                    }
                 }
 
             }

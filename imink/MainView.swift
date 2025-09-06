@@ -43,10 +43,11 @@ struct MainView: View {
                 AppState.shared.viewModelDict.removeAll()
             }
         }
-//        .task {
-//            MainViewModel.shared.isLogin = AppUserDefaults.shared.sessionToken != nil
-//            await NSOAccountManager.shared.refreshGameServiceTokenIfNeeded()
-//        }
+        .task {
+            MainViewModel.shared.isLogin = AppUserDefaults.shared.sessionToken != nil
+            await SN3Client.shared.fetchCoops()
+            await SN3Client.shared.fetchBattles()
+        }
     }
 }
 

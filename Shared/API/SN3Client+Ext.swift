@@ -92,11 +92,6 @@ extension SN3Client {
         }catch{
             logError(error)
         }
-//        Indicators.shared.updateTitle(for: IndicatorID, title: "加载失败")
-//        Indicators.shared.updateIcon(for: IndicatorID, icon: .image(Image(systemName: "xmark.icloud")))
-
-
-//        Indicators.shared.dismissTimer(for: IndicatorID)
         return count
     }
 }
