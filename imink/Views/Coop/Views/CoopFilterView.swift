@@ -98,7 +98,7 @@ class CoopFilterViewModel: ObservableObject {
                 WHERE coop.accountId = ?
                 AND (player.name LIKE ? OR player.byname LIKE ?)
                 AND player.isMyself != 1
-                GROUP BY player.name, player.byname, player.nameId
+                GROUP BY player.name, player.nameId
                 HAVING playCount > 0
                 ORDER BY playCount DESC, player.name ASC
                 LIMIT 20

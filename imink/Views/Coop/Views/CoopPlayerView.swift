@@ -152,8 +152,8 @@ struct CoopPlayerView: View {
                         JOIN player p1 ON p1.coopPlayerResultId = cpr1.id
                         JOIN player p2 ON p2.coopPlayerResultId = cpr2.id
                         WHERE c.accountId = ?
-                        AND p2.name = ? AND p2.byname = ? AND p2.nameId = ?
-                    """, arguments: [AppUserDefaults.shared.accountId, player.name, player.byname, player.nameId]) ?? 0
+                        AND p2.name = ? AND p2.nameId = ?
+                    """, arguments: [AppUserDefaults.shared.accountId, player.name, player.nameId]) ?? 0
                 }
                 
                 await MainActor.run {

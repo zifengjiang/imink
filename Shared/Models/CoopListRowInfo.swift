@@ -195,15 +195,15 @@ extension Filter{
             playerFilterArguments.append(playerName)
         }
         
-        if let playerByname = playerByname, !playerByname.isEmpty {
-            playerFilterConditions.append("targetPlayer.byname = ?")
-            playerFilterArguments.append(playerByname)
-        }
-        
-        if let playerNameId = playerNameId, !playerNameId.isEmpty {
-            playerFilterConditions.append("targetPlayer.nameId = ?")
-            playerFilterArguments.append(playerNameId)
-        }
+//        if let playerByname = playerByname, !playerByname.isEmpty {
+//            playerFilterConditions.append("targetPlayer.byname = ?")
+//            playerFilterArguments.append(playerByname)
+//        }
+//        
+//        if let playerNameId = playerNameId, !playerNameId.isEmpty {
+//            playerFilterConditions.append("targetPlayer.nameId = ?")
+//            playerFilterArguments.append(playerNameId)
+//        }
 
         let whereClause = conditions.isEmpty ? "1" : conditions.joined(separator: " AND ")
         
