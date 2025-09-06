@@ -1,4 +1,5 @@
 import SwiftUI
+import Photos
 
 struct CoopDetailContainer: View {
     let rows: [CoopListRowModel]
@@ -77,14 +78,7 @@ struct CoopDetailContainer: View {
                 
                 Button {
                     Haptics.generateIfEnabled(.medium)
-                    if let rowId = selectedRow, let coop = rows.first(where: {$0.id == rowId})?.coop {
-                        let image = CoopDetailView(id: coop.id).asUIImage(size: CGSize(width: 400, height: coop.height))
-                        let activityController = UIActivityViewController(
-                            activityItems: [image], applicationActivities: nil)
-                        let vc = UIApplication.shared.windows.first!.rootViewController
-                        vc?.present(activityController, animated: true)
-                        AppState.shared.viewModelDict[coop.id] = nil
-                    }
+                    saveImageToPhotos()
                 } label: {
                     Image("share")
                         .resizable()
@@ -118,6 +112,63 @@ struct CoopDetailContainer: View {
         if let index = rows.firstIndex(where: {$0.id == selectedRow}), index > 0 {
             withAnimation {
                 selectedRow = rows[index - 1].id
+            }
+        }
+    }
+    
+    private func saveImageToPhotos() {
+        // 直接请求权限，系统会自动处理弹窗
+        PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
+            DispatchQueue.main.async {
+                switch status {
+                case .authorized, .limited:
+                    self.performSaveImage()
+                case .denied, .restricted:
+                    print("照片库访问权限被拒绝")
+                    // 可以在这里添加用户友好的提示
+                case .notDetermined:
+                    print("权限状态未确定")
+                @unknown default:
+                    break
+                }
+            }
+        }
+    }
+    
+    private func performSaveImage() {
+        guard let rowId = selectedRow,
+              let coop = rows.first(where: { $0.id == rowId })?.coop else {
+            return
+        }
+        
+        let image = CoopDetailView(id: coop.id).asUIImage(size: CGSize(width: 400, height: coop.height))
+        
+        PHPhotoLibrary.shared().performChanges({
+            PHAssetChangeRequest.creationRequestForAsset(from: image)
+        }) { success, error in
+            DispatchQueue.main.async {
+                if success {
+                    // 显示保存成功提示，2秒后自动关闭
+                    Indicators.shared.display(.init(
+                        id: UUID().uuidString,
+                        icon: .systemImage("checkmark.circle.fill"),
+                        title: "保存成功",
+                        subtitle: "图片已保存到相册",
+                        dismissType: .after(2)
+                    ))
+                } else if let error = error {
+                    // 显示保存失败提示
+                    Indicators.shared.display(.init(
+                        id: UUID().uuidString,
+                        icon: .systemImage("xmark.circle.fill"),
+                        title: "保存失败",
+                        subtitle: error.localizedDescription,
+                        dismissType: .after(3),
+                        style: .error
+                    ))
+                }
+                // 清理视图模型
+                AppState.shared.viewModelDict[coop.id] = nil
             }
         }
     }

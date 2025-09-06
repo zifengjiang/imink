@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>imink保存图片</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>KoreanERIN-M.ttf</string>
@@ -23,6 +25,8 @@
 	</array>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>imink需要发送通知来提醒您订阅的日程安排</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>imink需要访问照片库来保存游戏截图到相册</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
