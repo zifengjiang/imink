@@ -160,11 +160,10 @@ struct HomePage: View {
                     Task {
                         isAnimating = true
                         rotationAngle = 720
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                            isAnimating = false
-                            rotationAngle = 0
-                        }
                         await self.task()
+
+                        isAnimating = false
+                        rotationAngle = 0
 
                     }
                 }
