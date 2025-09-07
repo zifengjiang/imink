@@ -2,6 +2,8 @@ import SwiftUI
 import SplatDatabase
 
 struct CoopShiftDetailView: View {
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var listViewModel: CoopListViewModel
     @StateObject var viewModel: CoopShiftDetailViewModel
     @State private var showPlayerDetail: Bool = false
     @State private var activePlayer: CoopPlayerStatus? = nil
@@ -45,7 +47,20 @@ struct CoopShiftDetailView: View {
                        onDismiss: {
             showPlayerDetail = false
         }, content: {
-            CoopPlayerStatusView(status: activePlayer)
+            CoopPlayerStatusView(status: activePlayer, onViewPlayerRecords: { playerName, playerByname, playerNameId in
+                // 设置筛选条件
+                listViewModel.filter.playerName = playerName
+                listViewModel.filter.playerByname = playerByname
+                listViewModel.filter.playerNameId = playerNameId
+                listViewModel.navigationTitle = "\(playerName)的打工记录"
+                // 重新加载数据
+                Task {
+                    await listViewModel.loadCoops()
+                }
+                
+                // 关闭当前详情页面
+                dismiss()
+            })
         }))
         .task  {
             print("load Shift \(self.id)")
@@ -294,9 +309,8 @@ struct CoopShiftDetailView: View {
                                 }
                             }
 
+                            PlayerEncounterIndicator(playerStatus: viewModel.coopPlayerStatus[index])
 
-                        Text("x\(viewModel.coopPlayerStatus[index].count)")
-                            .font(.splatoonFont(size: 15))
                     }
                 }
             }
@@ -361,6 +375,10 @@ struct CoopShiftDetailView: View {
 
 struct CoopPlayerStatusView:View {
     let status: CoopPlayerStatus?
+    let onViewPlayerRecords: ((String, String, String) -> Void)?
+    
+    @State private var totalPlayCount: Int = 0
+    @State private var isLoadingCount: Bool = false
 
     var body: some View {
         VStack{
@@ -422,15 +440,151 @@ struct CoopPlayerStatusView:View {
                             .minimumScaleFactor(0.3)
                     }
                 }
+                
+                // 显示与这个玩家的游戏次数
+                VStack(spacing: 8) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "person.2.fill")
+                            .foregroundColor(.secondary)
+                            .font(.system(size: 12))
+                        Text("一起打工次数:")
+                            .font(.splatoonFont(size: 12))
+                            .foregroundColor(.secondary)
+                        
+                        if isLoadingCount {
+                            ProgressView()
+                                .scaleEffect(0.7)
+                        } else {
+                            Text("\(totalPlayCount)")
+                                .font(.splatoonFont(size: 14))
+                                .foregroundColor(.accentColor)
+                        }
+                    }
+                    
+                    // 如果总次数与当前shift中的次数不一致，显示说明
+                    if totalPlayCount != status.count && totalPlayCount > 0 {
+                        HStack(spacing: 4) {
+                            Image(systemName: "info.circle.fill")
+                                .foregroundColor(.orange)
+                                .font(.system(size: 12))
+                            Text("在其他时段也遇到过该玩家")
+                                .font(.splatoonFont(size: 11))
+                                .foregroundColor(.orange)
+                        }
+                    }
+                }
+                .padding(.top, 8)
+                
+                // 添加查看玩家记录按钮
+                if let onViewPlayerRecords = onViewPlayerRecords {
+                    Button {
+                        onViewPlayerRecords(status.name, status.byname, status.nameId)
+                    } label: {
+                        HStack {
+                            Image(systemName: "person.text.rectangle")
+                                .font(.system(size: 14))
+                            Text("查看该玩家的所有记录")
+                                .font(.splatoonFont(size: 14))
+                        }
+                        .foregroundColor(.accentColor)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color.accentColor.opacity(0.1))
+                        .cornerRadius(8)
+                    }
+                    .padding(.top, 8)
+                }
             } else {
                 Text("无玩家数据")
                     .font(.splatoonFont(size: 16))
                     .foregroundStyle(.secondary)
             }
         }
-        .frame(width: 280,height: 250)
+        .frame(width: 280, height: onViewPlayerRecords != nil ? 350 : 310)
         .padding(.all)
         .textureBackground(texture: .bubble, radius: 18)
+        .onAppear {
+            if let status = status {
+                loadPlayCount(playerName: status.name, playerNameId: status.nameId)
+            }
+        }
+    }
+    
+    private func loadPlayCount(playerName: String, playerNameId: String) {
+        isLoadingCount = true
+        Task {
+            do {
+                let count = try await SplatDatabase.shared.dbQueue.read { db in
+                    try Int.fetchOne(db, sql: """
+                        SELECT COUNT(DISTINCT c.id)
+                        FROM coop_view c
+                        JOIN coopPlayerResult cpr1 ON cpr1.coopId = c.id
+                        JOIN coopPlayerResult cpr2 ON cpr2.coopId = c.id
+                        JOIN player p1 ON p1.coopPlayerResultId = cpr1.id
+                        JOIN player p2 ON p2.coopPlayerResultId = cpr2.id
+                        WHERE c.accountId = ?
+                        AND p2.name = ? AND p2.nameId = ?
+                    """, arguments: [AppUserDefaults.shared.accountId, playerName, playerNameId]) ?? 0
+                }
+                
+                await MainActor.run {
+                    self.totalPlayCount = count
+                    self.isLoadingCount = false
+                }
+            } catch {
+                await MainActor.run {
+                    self.totalPlayCount = 0
+                    self.isLoadingCount = false
+                }
+            }
+        }
+    }
+}
+
+struct PlayerEncounterIndicator: View {
+    let playerStatus: CoopPlayerStatus
+    @State private var totalPlayCount: Int = 0
+    @State private var isLoaded: Bool = false
+    
+    var body: some View {
+        Group {
+            Text("x\(playerStatus.count)")
+                .foregroundColor(isLoaded && totalPlayCount > playerStatus.count ? .spGreen : .primary)
+                .font(.splatoonFont(size: 15))
+        }
+        .onAppear {
+            loadPlayCount()
+        }
+    }
+    
+    private func loadPlayCount() {
+        Task {
+            NSLog("Loading play count for player \(playerStatus.name) (\(playerStatus.nameId))")
+            do {
+                let count = try await SplatDatabase.shared.dbQueue.read { db in
+                    try Int.fetchOne(db, sql: """
+                        SELECT COUNT(DISTINCT c.id)
+                        FROM coop_view c
+                        JOIN coopPlayerResult cpr1 ON cpr1.coopId = c.id
+                        JOIN coopPlayerResult cpr2 ON cpr2.coopId = c.id
+                        JOIN player p1 ON p1.coopPlayerResultId = cpr1.id
+                        JOIN player p2 ON p2.coopPlayerResultId = cpr2.id
+                        WHERE c.accountId = ?
+                        AND p2.name = ? AND p2.nameId = ?
+                    """, arguments: [AppUserDefaults.shared.accountId, playerStatus.name, playerStatus.nameId]) ?? 0
+                }
+                
+                await MainActor.run {
+                    self.totalPlayCount = count
+                    self.isLoaded = true
+                }
+            } catch {
+                await MainActor.run {
+                    self.totalPlayCount = 0
+                    self.isLoaded = true
+                }
+            }
+        }
     }
 }
 
