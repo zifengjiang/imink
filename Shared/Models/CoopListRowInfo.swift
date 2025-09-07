@@ -200,10 +200,10 @@ extension Filter{
 //            playerFilterArguments.append(playerByname)
 //        }
 //        
-//        if let playerNameId = playerNameId, !playerNameId.isEmpty {
-//            playerFilterConditions.append("targetPlayer.nameId = ?")
-//            playerFilterArguments.append(playerNameId)
-//        }
+        if let playerNameId = playerNameId, !playerNameId.isEmpty {
+            playerFilterConditions.append("targetPlayer.nameId = ?")
+            playerFilterArguments.append(playerNameId)
+        }
 
         let whereClause = conditions.isEmpty ? "1" : conditions.joined(separator: " AND ")
         
