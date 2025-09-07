@@ -17,6 +17,7 @@ class NameplateEditorViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     
     init() {
+        loadSavedSettings()
         Task {
             await loadAssets()
         }
@@ -40,10 +41,6 @@ class NameplateEditorViewModel: ObservableObject {
                 self.availableBackgrounds = backgrounds
                 self.availableBadges = badges
                 
-                // 设置默认背景
-                if let firstBackground = backgrounds.first {
-                    self.selectedBackground = firstBackground.name
-                }
                 
                 self.isLoading = false
             }
@@ -58,19 +55,23 @@ class NameplateEditorViewModel: ObservableObject {
     func setBadge(at index: Int, badge: String?) {
         guard index >= 0 && index < selectedBadges.count else { return }
         selectedBadges[index] = badge
+        saveSettings()
     }
     
     func removeBadge(at index: Int) {
         guard index >= 0 && index < selectedBadges.count else { return }
         selectedBadges[index] = nil
+        saveSettings()
     }
     
     func setBackground(_ background: String) {
         selectedBackground = background
+        saveSettings()
     }
     
     func setTextColor(_ color: Color) {
         selectedTextColor = color
+        saveSettings()
     }
     
     // 预设颜色选项
@@ -164,7 +165,7 @@ class NameplateEditorViewModel: ObservableObject {
         
         return ZStack(alignment: .topLeading) {
             // 背景图片
-            Image(selectedBackground)
+            Image(selectedBackground ?? "Npl_Catalog_Season01_Lv01")
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .frame(width: width, height: height)
@@ -248,5 +249,38 @@ class NameplateEditorViewModel: ObservableObject {
         return renderer.image { context in
             controller.view.drawHierarchy(in: CGRect(origin: .zero, size: size), afterScreenUpdates: true)
         }
+    }
+    
+    // MARK: - 持久化方法
+    
+    private func loadSavedSettings() {
+        let settings = AppUserDefaults.shared.nameplateSettings
+        print(settings.selectedBackground)
+
+        customName = settings.customName
+        customByname = settings.customByname
+        customNameId = settings.customNameId
+        selectedBackground = settings.selectedBackground
+        selectedBadges = settings.selectedBadges
+        selectedTextColor = settings.selectedTextColorComponents.toColor()
+    }
+    
+    private func saveSettings() {
+        let settings = NameplateSettings(
+            customName: customName,
+            customByname: customByname,
+            customNameId: customNameId,
+            selectedBackground: selectedBackground,
+            selectedBadges: selectedBadges,
+            selectedTextColorComponents: ColorComponents(from: selectedTextColor)
+        )
+        print(settings.selectedBackground)
+
+        AppUserDefaults.shared.nameplateSettings = settings
+    }
+    
+    // 手动保存设置（用于文本输入等场景）
+    func saveCurrentSettings() {
+        saveSettings()
     }
 }

@@ -45,6 +45,15 @@ struct NameplateEditorView: View {
                             }
                             TextField("输入玩家名称", text: $viewModel.customName)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .onSubmit {
+                                    viewModel.saveCurrentSettings()
+                                }
+                                .onChange(of: viewModel.customName) { _, _ in
+                                    // 延迟保存，避免频繁写入
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                        viewModel.saveCurrentSettings()
+                                    }
+                                }
                         }
                         
                         VStack(spacing: 8) {
@@ -55,6 +64,14 @@ struct NameplateEditorView: View {
                             }
                             TextField("输入称号", text: $viewModel.customByname)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .onSubmit {
+                                    viewModel.saveCurrentSettings()
+                                }
+                                .onChange(of: viewModel.customByname) { _, _ in
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                        viewModel.saveCurrentSettings()
+                                    }
+                                }
                         }
                         
                         VStack(spacing: 8) {
@@ -66,6 +83,14 @@ struct NameplateEditorView: View {
                             TextField("输入玩家ID", text: $viewModel.customNameId)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .keyboardType(.numberPad)
+                                .onSubmit {
+                                    viewModel.saveCurrentSettings()
+                                }
+                                .onChange(of: viewModel.customNameId) { _, _ in
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                        viewModel.saveCurrentSettings()
+                                    }
+                                }
                         }
                     }
                     

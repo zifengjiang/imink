@@ -127,6 +127,31 @@ class AppUserDefaults: ObservableObject {
         }
     }
     
+    // MARK: - 铭牌编辑器设置
+    @AppStorage("nameplateSettings", store: .appGroup)
+    private var nameplateSettingsData: Data = Data()
+    
+    // 铭牌编辑器设置
+    var nameplateSettings: NameplateSettings {
+        get {
+            guard !nameplateSettingsData.isEmpty else { return .defaultSettings }
+            do {
+                return try JSONDecoder().decode(NameplateSettings.self, from: nameplateSettingsData)
+            } catch {
+                print("解码铭牌设置失败: \(error)")
+                return .defaultSettings
+            }
+        }
+        set {
+            do {
+                nameplateSettingsData = try JSONEncoder().encode(newValue)
+                objectWillChange.send()
+            } catch {
+                print("编码铭牌设置失败: \(error)")
+            }
+        }
+    }
+    
     // MARK: - 日程订阅相关
     @AppStorage("scheduleSubscriptions", store: .appGroup)
     private var subscriptionsData: Data = Data()

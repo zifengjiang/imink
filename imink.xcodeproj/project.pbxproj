@@ -135,6 +135,7 @@
 		8BC2B0AE2E6D46A0009ACFE8 /* BadgeSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC2B0AD2E6D46A0009ACFE8 /* BadgeSelectorView.swift */; };
 		8BC2B0B02E6D46A7009ACFE8 /* BackgroundSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC2B0AF2E6D46A7009ACFE8 /* BackgroundSelectorView.swift */; };
 		8BC2B0B22E6D46D6009ACFE8 /* NameplateEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC2B0B12E6D46D6009ACFE8 /* NameplateEditorView.swift */; };
+		8BC2B0B42E6D7A63009ACFE8 /* NameplateSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC2B0B32E6D7A63009ACFE8 /* NameplateSettings.swift */; };
 		8BD548DD2E483C69005B8F27 /* TaskManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD548DC2E483C69005B8F27 /* TaskManager.swift */; };
 		8BD548E22E4AC53E005B8F27 /* SplatDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 8BD548E12E4AC53E005B8F27 /* SplatDatabase */; };
 		8BD8CD522C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD8CD512C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift */; };
@@ -375,6 +376,7 @@
 		8BC2B0AD2E6D46A0009ACFE8 /* BadgeSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeSelectorView.swift; sourceTree = "<group>"; };
 		8BC2B0AF2E6D46A7009ACFE8 /* BackgroundSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSelectorView.swift; sourceTree = "<group>"; };
 		8BC2B0B12E6D46D6009ACFE8 /* NameplateEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NameplateEditorView.swift; sourceTree = "<group>"; };
+		8BC2B0B32E6D7A63009ACFE8 /* NameplateSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NameplateSettings.swift; sourceTree = "<group>"; };
 		8BD548DC2E483C69005B8F27 /* TaskManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskManager.swift; sourceTree = "<group>"; };
 		8BD8CD512C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopShiftDetailWaveStatusView.swift; sourceTree = "<group>"; };
 		8BD8CD532C0ADBC200FED66F /* WavePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WavePicker.swift; sourceTree = "<group>"; };
@@ -684,6 +686,7 @@
 				8BC2B0AD2E6D46A0009ACFE8 /* BadgeSelectorView.swift */,
 				8BC2B0A92E6D468B009ACFE8 /* NameplateEditorViewModel.swift */,
 				8B0D14702BF9898100B82AD1 /* SettingPage.swift */,
+				8BC2B0B32E6D7A63009ACFE8 /* NameplateSettings.swift */,
 				8BC2B0B12E6D46D6009ACFE8 /* NameplateEditorView.swift */,
 				8BA089312CCB8A6000BA7176 /* CoopRecordView.swift */,
 				8BC2B0AF2E6D46A7009ACFE8 /* BackgroundSelectorView.swift */,
@@ -1104,6 +1107,7 @@
 				8BF3CB692CD4B61900B0FCA9 /* SN3API.swift in Sources */,
 				8B19CF8E2CB2C9C400EF4424 /* Species.swift in Sources */,
 				8BB719A72CAA2B54003C6909 /* ThreadSafeExecution.swift in Sources */,
+				8BC2B0B42E6D7A63009ACFE8 /* NameplateSettings.swift in Sources */,
 				8BA1F3F32CD313EE00E733EA /* Haptics+UIKit.swift in Sources */,
 				8BA1F3F42CD313EE00E733EA /* Haptics+WatchKit.swift in Sources */,
 				8BA1F3F52CD313EE00E733EA /* Haptics+AppKit.swift in Sources */,
