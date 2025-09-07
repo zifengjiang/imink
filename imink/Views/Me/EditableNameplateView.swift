@@ -20,23 +20,7 @@ struct EditableNameplateView: View {
                     .clipped()
                     .cornerRadius(geometryWidth*0.02)
                 
-                // 背景点击区域 - 覆盖中央区域
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        Button {
-                            print("Background tapped")
-                            showingBackgroundSelector = true
-                        } label: {
-                            Color.clear
-                                .frame(width: geometryWidth * 0.5, height: geometryHeight * 0.4)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        Spacer()
-                    }
-                    Spacer()
-                }
+
                 
                 // 称号文本
                 VStack(alignment: .leading) {
@@ -47,12 +31,19 @@ struct EditableNameplateView: View {
                         .padding(.leading, geometryWidth * 10/284)
                     Spacer()
                 }
+                .onTapGesture {
+                    print("test tap byname")
+                }
 
                 // 玩家名称 - 居中
                 Text(viewModel.customName)
                     .font(.splatoonFont1(size: geometryWidth * 26/284))
                     .foregroundColor(viewModel.selectedTextColor)
                     .position(x: geometryWidth / 2, y: geometryHeight / 2)
+                    .onTapGesture {
+                        print("test tap name")
+                    }
+
 
                 // 徽章区域
                 VStack {
@@ -87,10 +78,16 @@ struct EditableNameplateView: View {
                         Spacer()
                     }
                 }
+                .onTapGesture {
+                    print("test tap nameid")
+                }
             }
         }
         .aspectRatio(3.5, contentMode: .fit)
         .frame(minWidth: 200, maxWidth: 400)
+        .onTapGesture {
+            showingBackgroundSelector = true
+        }
     }
 }
 

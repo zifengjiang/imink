@@ -5,7 +5,6 @@ struct NameplateEditorView: View {
     @State private var showingBadgeSelector = false
     @State private var showingBackgroundSelector = false
     @State private var selectedBadgeIndex = 0
-    @State private var showingColorPicker = false
     
     var body: some View {
         ScrollView {
@@ -128,15 +127,9 @@ struct NameplateEditorView: View {
                             }
                         }
                         
-                        Button {
-                            showingColorPicker = true
-                        } label: {
-                            HStack {
-                                Image(systemName: "eyedropper")
-                                Text("自定义颜色")
-                            }
-                            .foregroundColor(.accentColor)
-                        }
+                        ColorPicker("选择字体颜色", selection: $viewModel.selectedTextColor)
+                            .presentationDetents([.medium])
+                            .presentationDragIndicator(.visible)
                     }
                     
                     Divider()
@@ -192,11 +185,6 @@ struct NameplateEditorView: View {
         }
         .sheet(isPresented: $showingBackgroundSelector) {
             BackgroundSelectorView(viewModel: viewModel)
-        }
-        .sheet(isPresented: $showingColorPicker) {
-            ColorPicker("选择字体颜色", selection: $viewModel.selectedTextColor)
-                .presentationDetents([.medium])
-                .presentationDragIndicator(.visible)
         }
     }
 }
