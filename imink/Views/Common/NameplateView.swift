@@ -63,6 +63,17 @@ struct NameplateView: View {
         nameId = player.nameId
         bynameFormatted = player._bynameFormatted
     }
+    
+    // 自定义铭牌初始化方法
+    init(name: String, background: String, byname: String, textColor: Color, badges: [String?], nameId: String) {
+        self.name = name
+        self.background = background
+        self.byname = byname
+        self.textColor = textColor
+        self.badges = badges
+        self.nameId = nameId
+        self.bynameFormatted = nil
+    }
 
     var body: some View {
         GeometryReader { geometry in
@@ -135,6 +146,9 @@ struct NameplateView: View {
 
                 }
 
+            }
+            .onAppear {
+                print(geometryHeight,geometryWidth)
             }
         }
         .aspectRatio(3.5, contentMode: .fit)

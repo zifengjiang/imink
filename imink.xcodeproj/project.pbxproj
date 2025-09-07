@@ -130,6 +130,11 @@
 		8BB4A1F42BFDB4CE008DB764 /* FixVectorImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */; };
 		8BB719A72CAA2B54003C6909 /* ThreadSafeExecution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB719A62CAA2B54003C6909 /* ThreadSafeExecution.swift */; };
 		8BB99B372BF77B3B00470408 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB99B362BF77B3B00470408 /* Models.swift */; };
+		8BC2B0AA2E6D468B009ACFE8 /* NameplateEditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC2B0A92E6D468B009ACFE8 /* NameplateEditorViewModel.swift */; };
+		8BC2B0AC2E6D4697009ACFE8 /* EditableNameplateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC2B0AB2E6D4697009ACFE8 /* EditableNameplateView.swift */; };
+		8BC2B0AE2E6D46A0009ACFE8 /* BadgeSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC2B0AD2E6D46A0009ACFE8 /* BadgeSelectorView.swift */; };
+		8BC2B0B02E6D46A7009ACFE8 /* BackgroundSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC2B0AF2E6D46A7009ACFE8 /* BackgroundSelectorView.swift */; };
+		8BC2B0B22E6D46D6009ACFE8 /* NameplateEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC2B0B12E6D46D6009ACFE8 /* NameplateEditorView.swift */; };
 		8BD548DD2E483C69005B8F27 /* TaskManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD548DC2E483C69005B8F27 /* TaskManager.swift */; };
 		8BD548E22E4AC53E005B8F27 /* SplatDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 8BD548E12E4AC53E005B8F27 /* SplatDatabase */; };
 		8BD8CD522C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD8CD512C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift */; };
@@ -365,6 +370,11 @@
 		8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FixVectorImage.swift; sourceTree = "<group>"; };
 		8BB719A62CAA2B54003C6909 /* ThreadSafeExecution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadSafeExecution.swift; sourceTree = "<group>"; };
 		8BB99B362BF77B3B00470408 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		8BC2B0A92E6D468B009ACFE8 /* NameplateEditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NameplateEditorViewModel.swift; sourceTree = "<group>"; };
+		8BC2B0AB2E6D4697009ACFE8 /* EditableNameplateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableNameplateView.swift; sourceTree = "<group>"; };
+		8BC2B0AD2E6D46A0009ACFE8 /* BadgeSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeSelectorView.swift; sourceTree = "<group>"; };
+		8BC2B0AF2E6D46A7009ACFE8 /* BackgroundSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSelectorView.swift; sourceTree = "<group>"; };
+		8BC2B0B12E6D46D6009ACFE8 /* NameplateEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NameplateEditorView.swift; sourceTree = "<group>"; };
 		8BD548DC2E483C69005B8F27 /* TaskManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskManager.swift; sourceTree = "<group>"; };
 		8BD8CD512C0AD30500FED66F /* CoopShiftDetailWaveStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopShiftDetailWaveStatusView.swift; sourceTree = "<group>"; };
 		8BD8CD532C0ADBC200FED66F /* WavePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WavePicker.swift; sourceTree = "<group>"; };
@@ -670,8 +680,13 @@
 			isa = PBXGroup;
 			children = (
 				8B3591442BF893D60066BCA3 /* MePage.swift */,
+				8BC2B0AB2E6D4697009ACFE8 /* EditableNameplateView.swift */,
+				8BC2B0AD2E6D46A0009ACFE8 /* BadgeSelectorView.swift */,
+				8BC2B0A92E6D468B009ACFE8 /* NameplateEditorViewModel.swift */,
 				8B0D14702BF9898100B82AD1 /* SettingPage.swift */,
+				8BC2B0B12E6D46D6009ACFE8 /* NameplateEditorView.swift */,
 				8BA089312CCB8A6000BA7176 /* CoopRecordView.swift */,
+				8BC2B0AF2E6D46A7009ACFE8 /* BackgroundSelectorView.swift */,
 				8B23C0FF2CD0A1F600FB5934 /* StageRecordView.swift */,
 				8B5B7B182CCF9C6B0088069C /* AccountReviewView.swift */,
 				8B1F74602CDB034D00BBC8E9 /* WeaponRecordView.swift */,
@@ -1104,6 +1119,7 @@
 				8B50DBE22C01C1C20076AE6D /* Logger.swift in Sources */,
 				8BFF73E72C0939160048F2A6 /* CoopListRowView.swift in Sources */,
 				8B23C0FE2CD09E2500FB5934 /* StageRecord.swift in Sources */,
+				8BC2B0B02E6D46A7009ACFE8 /* BackgroundSelectorView.swift in Sources */,
 				8BA1F3FC2CD45B2200E733EA /* LoadingView.swift in Sources */,
 				8B7F29622BF6E5310010A525 /* NSOHash.swift in Sources */,
 				8B0D14A42BFACD8E00B82AD1 /* StringInterpolation.swift in Sources */,
@@ -1140,6 +1156,7 @@
 				8BF3CB882CD4BB3A00B0FCA9 /* SN3WebViewData.swift in Sources */,
 				8B0851762BFB6DB400AF22C5 /* WaveAnimationView.swift in Sources */,
 				8B0792072C0F435C0094EA57 /* TargetType+fetch.swift in Sources */,
+				8BC2B0AA2E6D468B009ACFE8 /* NameplateEditorViewModel.swift in Sources */,
 				8B19CF882CB299F300EF4424 /* BattleMode.swift in Sources */,
 				8B5276142BFC228600022D5B /* SpecialWeaponImage.swift in Sources */,
 				8B4E4F962C01F69900818D31 /* LoginViewModel.swift in Sources */,
@@ -1168,10 +1185,12 @@
 				8BA089322CCB8A6000BA7176 /* CoopRecordView.swift in Sources */,
 				8BAD2C672E5BEDB100DE9952 /* CoopBatchOperationView.swift in Sources */,
 				8BA017492C09A8CE001CFC72 /* FetchableFromDatabase.swift in Sources */,
+				8BC2B0AE2E6D46A0009ACFE8 /* BadgeSelectorView.swift in Sources */,
 				8B7059062C0C25A90076F680 /* TouchDownAndTouchUpGestureView.swift in Sources */,
 				8B7059082C0C27980076F680 /* PopupModifier.swift in Sources */,
 				8BFFDF692CB40F43004F2390 /* BattlePlayerView.swift in Sources */,
 				8B0D146A2BF8BFF700B82AD1 /* VDGridView.swift in Sources */,
+				8BC2B0B22E6D46D6009ACFE8 /* NameplateEditorView.swift in Sources */,
 				8B7F295F2BF6E4A80010A525 /* NSOAPI.swift in Sources */,
 				8B65636E2CB00B050017F5D0 /* BattleGroupStatus.swift in Sources */,
 				8B0851742BFB673000AF22C5 /* TextureBackGround.swift in Sources */,
@@ -1196,6 +1215,7 @@
 				8B4BF2022E59F167007A8B05 /* ScheduleSubscription.swift in Sources */,
 				8B0D14842BFA210700B82AD1 /* SessionManager.swift in Sources */,
 				8BA30B082CAED80E0020D489 /* Operator.swift in Sources */,
+				8BC2B0AC2E6D4697009ACFE8 /* EditableNameplateView.swift in Sources */,
 				8BD8CD542C0ADBC200FED66F /* WavePicker.swift in Sources */,
 				8B19CF8C2CB2A02600EF4424 /* BattleListRowInfo.swift in Sources */,
 				8BAD2C702E5BEE0A00DE9952 /* TrashViewModel.swift in Sources */,

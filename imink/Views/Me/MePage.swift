@@ -13,6 +13,11 @@ struct MePage: View {
                     NavigationLink("武器记录", destination: WeaponRecordView())
                 }
                 
+                Section("个性化"){
+                    NavigationLink("铭牌编辑器", destination: NameplateEditorView())
+                        .foregroundColor(.primary)
+                }
+                
                 Section("数据管理"){
                     NavigationLink("回收站", destination: TrashView())
                         .foregroundColor(.primary)
