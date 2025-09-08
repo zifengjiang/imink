@@ -3,6 +3,14 @@ import SplatDatabase
 import GRDB
 import Photos
 
+extension ImageMap: @retroactive Equatable{
+    public static func == (lhs: ImageMap, rhs: ImageMap) -> Bool {
+        lhs.name == rhs.name && lhs.nameId == rhs.nameId && lhs.hash == rhs.hash
+    }
+    
+    
+}
+
 @MainActor
 class NameplateEditorViewModel: ObservableObject {
     @Published var customName: String = "自定义玩家"
