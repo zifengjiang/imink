@@ -196,3 +196,13 @@ extension SN3PersistedQuery where Self == CoopHistoryDetailQuery {
         .init(parameter: .init(coopHistoryDetailId: id))
     }
 }
+
+// MARK: FriendListQuery
+
+public struct FriendListQuery: SN3PersistedQuery {
+    public static let name = "FriendListQuery"
+}
+
+extension SN3PersistedQuery where Self == FriendListQuery {
+    public static var friendList: FriendListQuery { .init() }
+}

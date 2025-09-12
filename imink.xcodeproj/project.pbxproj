@@ -9,6 +9,12 @@
 /* Begin PBXBuildFile section */
 		0A2C668C2E682CAF00F1FB81 /* CoopPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2C668B2E682CAF00F1FB81 /* CoopPlayerView.swift */; };
 		0A6035BF2E6AC02100B4B460 /* CoopDetailContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A6035BE2E6AC02100B4B460 /* CoopDetailContainer.swift */; };
+		0AA478C32E72781D00E8499D /* OrientationTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA478C22E72781D00E8499D /* OrientationTestView.swift */; };
+		0AA478D62E74094700E8499D /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 0AA478D52E74094700E8499D /* Kingfisher */; };
+		0AA478D82E74096400E8499D /* FriendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA478D72E74096400E8499D /* FriendsView.swift */; };
+		0AA478DA2E74096C00E8499D /* FriendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA478D92E74096C00E8499D /* FriendView.swift */; };
+		0AA478DC2E74097800E8499D /* FriendList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA478DB2E74097800E8499D /* FriendList.swift */; };
+		0AA478DE2E74098600E8499D /* FriendStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA478DD2E74098600E8499D /* FriendStyles.swift */; };
 		0AADD2362E694D17002A19FF /* SubscriptionOptionsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AADD2352E694D17002A19FF /* SubscriptionOptionsSheet.swift */; };
 		0AADD23A2E694F8B002A19FF /* SubscriptionInfoRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AADD2392E694F8B002A19FF /* SubscriptionInfoRow.swift */; };
 		0AC00D832E6710F600F82E5A /* TimeRangeSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AC00D822E6710F500F82E5A /* TimeRangeSlider.swift */; };
@@ -226,6 +232,11 @@
 /* Begin PBXFileReference section */
 		0A2C668B2E682CAF00F1FB81 /* CoopPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopPlayerView.swift; sourceTree = "<group>"; };
 		0A6035BE2E6AC02100B4B460 /* CoopDetailContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopDetailContainer.swift; sourceTree = "<group>"; };
+		0AA478C22E72781D00E8499D /* OrientationTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationTestView.swift; sourceTree = "<group>"; };
+		0AA478D72E74096400E8499D /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
+		0AA478D92E74096C00E8499D /* FriendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendView.swift; sourceTree = "<group>"; };
+		0AA478DB2E74097800E8499D /* FriendList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendList.swift; sourceTree = "<group>"; };
+		0AA478DD2E74098600E8499D /* FriendStyles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendStyles.swift; sourceTree = "<group>"; };
 		0AADD2352E694D17002A19FF /* SubscriptionOptionsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionOptionsSheet.swift; sourceTree = "<group>"; };
 		0AADD2392E694F8B002A19FF /* SubscriptionInfoRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionInfoRow.swift; sourceTree = "<group>"; };
 		0AC00D822E6710F500F82E5A /* TimeRangeSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeRangeSlider.swift; sourceTree = "<group>"; };
@@ -435,6 +446,7 @@
 			files = (
 				8B93C0CC2C12EB1A00D7EFBC /* GRDB in Frameworks */,
 				8BDA845E2C0003D70038655C /* Algorithms in Frameworks */,
+				0AA478D62E74094700E8499D /* Kingfisher in Frameworks */,
 				8B26364F2BFEB00700F8964A /* AlertKit in Frameworks */,
 				8B26364C2BFEAE9400F8964A /* Zip in Frameworks */,
 				8B4BF1FC2E59E9EC007A8B05 /* SplatDatabase in Frameworks */,
@@ -606,6 +618,7 @@
 				8B0D14932BFAB57100B82AD1 /* Date+Ext.swift */,
 				8B0D14A32BFACD8E00B82AD1 /* StringInterpolation.swift */,
 				8B0D14912BFA31D000B82AD1 /* String+LocalizedString.swift */,
+				0AA478DD2E74098600E8499D /* FriendStyles.swift */,
 				8B7F29612BF6E5310010A525 /* NSOHash.swift */,
 				8B0D14952BFAB8C100B82AD1 /* Font+Ext.swift */,
 				8B0792132C1131590094EA57 /* DFPZongYiW7-GB.ttf */,
@@ -688,6 +701,7 @@
 				8B0D14702BF9898100B82AD1 /* SettingPage.swift */,
 				8BC2B0B32E6D7A63009ACFE8 /* NameplateSettings.swift */,
 				8BC2B0B12E6D46D6009ACFE8 /* NameplateEditorView.swift */,
+				0AA478C22E72781D00E8499D /* OrientationTestView.swift */,
 				8BA089312CCB8A6000BA7176 /* CoopRecordView.swift */,
 				8BC2B0AF2E6D46A7009ACFE8 /* BackgroundSelectorView.swift */,
 				8B23C0FF2CD0A1F600FB5934 /* StageRecordView.swift */,
@@ -720,6 +734,8 @@
 				0AADD2392E694F8B002A19FF /* SubscriptionInfoRow.swift */,
 				8BB4A1F32BFDB4CE008DB764 /* FixVectorImage.swift */,
 				8BAD2C712E5BFB5D00DE9952 /* SelectableRowView.swift */,
+				0AA478D92E74096C00E8499D /* FriendView.swift */,
+				0AA478D72E74096400E8499D /* FriendsView.swift */,
 				8BF3CB3D2CD4B26500B0FCA9 /* festIcon.svg */,
 				0AADD2352E694D17002A19FF /* SubscriptionOptionsSheet.swift */,
 				8B3136972CCCEB3B0085220E /* FestIcon.swift */,
@@ -803,6 +819,7 @@
 				8BB99B362BF77B3B00470408 /* Models.swift */,
 				8B4BF2012E59F167007A8B05 /* ScheduleSubscription.swift */,
 				8B0D14812BF9B85700B82AD1 /* GameMode.swift */,
+				0AA478DB2E74097800E8499D /* FriendList.swift */,
 				8B19CF872CB299F300EF4424 /* BattleMode.swift */,
 				8B50DBE12C01C1C20076AE6D /* Logger.swift */,
 				8BFE91712C0D7CE000C12CBE /* Filter.swift */,
@@ -929,6 +946,7 @@
 				8B93C0CB2C12EB1A00D7EFBC /* GRDB */,
 				8BD548E12E4AC53E005B8F27 /* SplatDatabase */,
 				8B4BF1FB2E59E9EC007A8B05 /* SplatDatabase */,
+				0AA478D52E74094700E8499D /* Kingfisher */,
 			);
 			productName = imink;
 			productReference = 8B7F29262BF6E1B90010A525 /* imink.app */;
@@ -1019,6 +1037,7 @@
 				8B93C0CA2C12EB1A00D7EFBC /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 				8B93C0CD2C12EB4800D7EFBC /* XCRemoteSwiftPackageReference "SwiftyJSON" */,
 				8B4BF1FA2E59E9EC007A8B05 /* XCRemoteSwiftPackageReference "SplatDatabase" */,
+				0AA478D42E74094700E8499D /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			productRefGroup = 8B7F29272BF6E1B90010A525 /* Products */;
 			projectDirPath = "";
@@ -1071,6 +1090,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0AA478DE2E74098600E8499D /* FriendStyles.swift in Sources */,
 				8B3591452BF893D60066BCA3 /* MePage.swift in Sources */,
 				8BFE91722C0D7CE000C12CBE /* Filter.swift in Sources */,
 				8B0D148D2BFA2CEF00B82AD1 /* CoopListRowInfo.swift in Sources */,
@@ -1120,6 +1140,7 @@
 				8BF3CB8A2CD4BE4700B0FCA9 /* RotationView.swift in Sources */,
 				8B19CF8A2CB29BC500EF4424 /* BattleRule.swift in Sources */,
 				8B9B606D2CD74522001D5C7D /* MultiSelectionView.swift in Sources */,
+				0AA478D82E74096400E8499D /* FriendsView.swift in Sources */,
 				8B50DBE22C01C1C20076AE6D /* Logger.swift in Sources */,
 				8BFF73E72C0939160048F2A6 /* CoopListRowView.swift in Sources */,
 				8B23C0FE2CD09E2500FB5934 /* StageRecord.swift in Sources */,
@@ -1162,6 +1183,7 @@
 				8B0792072C0F435C0094EA57 /* TargetType+fetch.swift in Sources */,
 				8BC2B0AA2E6D468B009ACFE8 /* NameplateEditorViewModel.swift in Sources */,
 				8B19CF882CB299F300EF4424 /* BattleMode.swift in Sources */,
+				0AA478C32E72781D00E8499D /* OrientationTestView.swift in Sources */,
 				8B5276142BFC228600022D5B /* SpecialWeaponImage.swift in Sources */,
 				8B4E4F962C01F69900818D31 /* LoginViewModel.swift in Sources */,
 				8BF3CB7C2CD4B9D800B0FCA9 /* TargetType.swift in Sources */,
@@ -1216,6 +1238,7 @@
 				8BF3CB822CD4BA9B00B0FCA9 /* URLSession+Polyfill.swift .swift in Sources */,
 				8B3591432BF892130066BCA3 /* HomePage.swift in Sources */,
 				8B1925CA2E3F4A5C00BCB851 /* CoopFilterView.swift in Sources */,
+				0AA478DC2E74097800E8499D /* FriendList.swift in Sources */,
 				8B4BF2022E59F167007A8B05 /* ScheduleSubscription.swift in Sources */,
 				8B0D14842BFA210700B82AD1 /* SessionManager.swift in Sources */,
 				8BA30B082CAED80E0020D489 /* Operator.swift in Sources */,
@@ -1224,6 +1247,7 @@
 				8B19CF8C2CB2A02600EF4424 /* BattleListRowInfo.swift in Sources */,
 				8BAD2C702E5BEE0A00DE9952 /* TrashViewModel.swift in Sources */,
 				8B23C1002CD0A1F600FB5934 /* StageRecordView.swift in Sources */,
+				0AA478DA2E74096C00E8499D /* FriendView.swift in Sources */,
 				8BB4A1F22BFDB49E008DB764 /* LoginView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1607,6 +1631,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		0AA478D42E74094700E8499D /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		8B26364A2BFEAE9400F8964A /* XCRemoteSwiftPackageReference "Zip" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/marmelroy/Zip.git";
@@ -1658,6 +1690,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		0AA478D52E74094700E8499D /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0AA478D42E74094700E8499D /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
 		8B26364B2BFEAE9400F8964A /* Zip */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 8B26364A2BFEAE9400F8964A /* XCRemoteSwiftPackageReference "Zip" */;

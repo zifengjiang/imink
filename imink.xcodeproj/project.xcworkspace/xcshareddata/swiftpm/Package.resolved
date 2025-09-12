@@ -1,5 +1,5 @@
 {
-  "originHash" : "444d05af6040723e631531c1c7840235efa55a4cd5c4b7765f957f5a7a60b482",
+  "originHash" : "e7689f9a4e0140cef7e3f6610c93f25dfe21940eb62186646e7404d1bfab5ba9",
   "pins" : [
     {
       "identity" : "grdb.swift",
@@ -8,6 +8,15 @@
       "state" : {
         "branch" : "master",
         "revision" : "3801ab9ac659d9eb57133629270e900444020e8e"
+      }
+    },
+    {
+      "identity" : "kingfisher",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/onevcat/Kingfisher.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "e04d865097c1e6e2e4e8bab1368a7a4846b127b9"
       }
     },
     {
@@ -25,7 +34,7 @@
       "location" : "https://github.com/zifengjiang/SplatDatabase.git",
       "state" : {
         "branch" : "main",
-        "revision" : "664da93000f45e40446a7af44610b6e83f6434ae"
+        "revision" : "fbf88a4e34621ffb0252abd88f46c5ad5e4f7edf"
       }
     },
     {

@@ -240,3 +240,94 @@ extension Array: SwiftyJSONDecodable where Element == StageRecord {
         self = json["data"]["stageRecords"]["nodes"].arrayValue.map { StageRecord(json: $0) }
     }
 }
+
+// MARK: - Friend List Support
+
+extension SN3Client {
+    /// 获取好友列表
+    func fetchFriendList() async -> FriendListResult? {
+        do {
+            try await ensureToken()
+            let data = try await JSON(data: self.graphQL(.friendList))
+            return FriendListResult(json: data)
+        } catch {
+            logError(error, "获取好友列表失败")
+            return nil
+        }
+    }
+}
+
+// MARK: - FriendListResult SwiftyJSONDecodable Support
+
+extension FriendListResult: SwiftyJSONDecodable {
+    init(json: JSON) {
+        self.data = FriendListResult.Data(json: json["data"])
+    }
+}
+
+extension FriendListResult.Data: SwiftyJSONDecodable {
+    init(json: JSON) {
+        self.currentFest = json["currentFest"].exists() ? FriendListResult.Data.CurrentFest(json: json["currentFest"]) : nil
+        self.friends = json["friends"].exists() ? FriendListResult.Data.Friends(json: json["friends"]) : nil
+    }
+}
+
+extension FriendListResult.Data.CurrentFest: SwiftyJSONDecodable {
+    init(json: JSON) {
+        self.id = json["id"].stringValue
+        self.state = json["state"].stringValue
+        self.teams = json["teams"].arrayValue.map { FriendListResult.Data.CurrentFest.FestTeam(json: $0) }
+    }
+}
+
+extension FriendListResult.Data.CurrentFest.FestTeam: SwiftyJSONDecodable {
+    init(json: JSON) {
+        self.id = json["id"].stringValue
+        self.color = FriendListResult.Data.CurrentFest.FestTeam.Color(json: json["color"])
+    }
+}
+
+extension FriendListResult.Data.CurrentFest.FestTeam.Color: SwiftyJSONDecodable {
+    init(json: JSON) {
+        self.r = json["r"].floatValue
+        self.g = json["g"].floatValue
+        self.b = json["b"].floatValue
+        self.a = json["a"].floatValue
+    }
+}
+
+extension FriendListResult.Data.Friends: SwiftyJSONDecodable {
+    init(json: JSON) {
+        self.nodes = json["nodes"].arrayValue.map { FriendListResult.Data.Friends.Node(json: $0) }
+    }
+}
+
+extension FriendListResult.Data.Friends.Node: SwiftyJSONDecodable {
+    init(json: JSON) {
+        self.id = json["id"].stringValue
+        self.coopRule = json["coopRule"].string
+        self.isLocked = json["isLocked"].bool
+        self.isVcEnabled = json["isVcEnabled"].bool
+        self.nickname = json["nickname"].stringValue
+        self.onlineState = json["onlineState"].stringValue
+        self.playerName = json["playerName"].string
+        self.userIcon = json["userIcon"].exists() ? FriendListResult.Data.Friends.Node.UserIcon(json: json["userIcon"]) : nil
+        self.vsMode = json["vsMode"].exists() ? VsMode(json: json["vsMode"]) : nil
+        self.isFavorite = json["isFavorite"].bool
+    }
+}
+
+extension FriendListResult.Data.Friends.Node.UserIcon: SwiftyJSONDecodable {
+    init(json: JSON) {
+        self.height = json["height"].intValue
+        self.url = json["url"].stringValue
+        self.width = json["width"].intValue
+    }
+}
+
+extension VsMode: SwiftyJSONDecodable {
+    init(json: JSON) {
+        self.id = json["id"].stringValue
+        self.mode = json["mode"].stringValue
+    }
+}
