@@ -54,6 +54,12 @@ class AppUserDefaults: ObservableObject {
     @AppStorage("fapiRequestInterval", store: .appGroup)
     var fapiRequestInterval: Int = 1800000 // 默认30分钟间隔（30 * 60 * 1000毫秒）
     
+    @AppStorage("manualGameServiceToken", store: .appGroup)
+    var manualGameServiceToken: String?
+    
+    @AppStorage("useManualGameServiceToken", store: .appGroup)
+    var useManualGameServiceToken: Bool = false
+    
     // MARK: - 记录缓存相关
     @AppStorage("stageRecordsCache", store: .appGroup)
     private var stageRecordsCacheData: Data = Data()

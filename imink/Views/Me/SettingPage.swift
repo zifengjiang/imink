@@ -23,6 +23,10 @@ struct SettingPage: View {
     // 新增状态变量
     @State private var isUpdatingByname = false
     @State private var bynameUpdateProgress: BynameUpdateProgress?
+    
+    // 手动输入token相关状态
+    @State private var showManualTokenAlert = false
+    @State private var manualTokenInput: String = ""
     var body: some View {
         NavigationStack{
             List{
@@ -43,7 +47,7 @@ struct SettingPage: View {
                             secondaryButton: .cancel()
                         )
                     }
-                    
+
                     .alert("设置FAPI请求间隔", isPresented: $showFAPIIntervalAlert) {
                         TextField("请输入间隔分钟数", text: $fapiIntervalMinutes)
                             .keyboardType(.numberPad)
@@ -56,6 +60,48 @@ struct SettingPage: View {
                     } message: {
                         Text("当前间隔：\(AppUserDefaults.shared.fapiRequestInterval / 60000)分钟\n请输入新的间隔时间（分钟）：")
                     }
+
+                    // 手动输入游戏服务令牌
+                    Toggle("使用手动游戏服务令牌", isOn: Binding(
+                        get: { AppUserDefaults.shared.useManualGameServiceToken },
+                        set: { AppUserDefaults.shared.useManualGameServiceToken = $0 }
+                    ))
+                    
+                    if AppUserDefaults.shared.useManualGameServiceToken {
+                        Button("设置游戏服务令牌") {
+                            manualTokenInput = AppUserDefaults.shared.manualGameServiceToken ?? ""
+                            showManualTokenAlert = true
+                        }
+                        .foregroundColor(.blue)
+                        .alert("设置游戏服务令牌", isPresented: $showManualTokenAlert) {
+                            TextField("请输入游戏服务令牌", text: $manualTokenInput)
+                            Button("确定") {
+                                if !manualTokenInput.isEmpty {
+                                    AppUserDefaults.shared.manualGameServiceToken = manualTokenInput
+                                }
+                            }
+                            Button("清除") {
+                                AppUserDefaults.shared.manualGameServiceToken = nil
+                                manualTokenInput = ""
+                            }
+                            Button("取消", role: .cancel) { }
+                        } message: {
+                            Text("请输入您的游戏服务令牌。此令牌用于访问Nintendo Switch Online服务。")
+                        }
+
+                        if let token = AppUserDefaults.shared.manualGameServiceToken, !token.isEmpty {
+                            HStack {
+                                Text("当前令牌:")
+                                    .foregroundColor(.secondary)
+                                Text("\(String(token.prefix(20)))...")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                            }
+                        }
+                    }
+                    
+
 
                     Button {
                         showLogoutAlert = true
@@ -497,6 +543,26 @@ struct SettingPage: View {
                     }
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+                }
+                
+                // 手动游戏服务令牌说明
+                if AppUserDefaults.shared.useManualGameServiceToken {
+                    Section(header: Text("游戏服务令牌说明")) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("ℹ️ 游戏服务令牌获取方法：")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundStyle(.blue)
+                            
+                            Text("• 游戏服务令牌是用于访问Nintendo Switch Online服务的凭证")
+                            Text("• 可通过抓包或开发者工具从网页版SplatNet 3获取")
+                            Text("• 令牌通常以'gtoken='开头，是一串长字符串")
+                            Text("• 使用手动令牌时将不会自动刷新，需要手动更新")
+                            Text("• 如果令牌过期，请重新获取并更新")
+                        }
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    }
                 }
             }
             .navigationTitle("setting_page_title")

@@ -36,6 +36,7 @@ struct MainView: View {
                 }
                 .tag(3)
         }
+        .tabBarMinimizeBehavior(.onScrollDown)
         .onChange(of: tabSelection){ _, newValue in
             Haptics.generateIfEnabled(.selectionChanged)
             // remove all coopDetailViewModelDetail in case of memory leak

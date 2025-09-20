@@ -15,13 +15,15 @@ struct CoopDetailContainer: View {
                     shiftId: row.card?.groupId
                 )
                 .scrollIndicators(.hidden)
-                .scrollClipDisabled()
+//                .scrollClipDisabled()
                 .containerRelativeFrame(.horizontal)
                 .tag(row.id)
             }
         }
         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+//        .padding(.vertical,50) // leave space for toolbar
         .edgesIgnoringSafeArea(.vertical)
+
         .fixSafeareaBackground()
 //        .onAppear {
 //            if let firstRow = rows.first {

@@ -51,8 +51,11 @@ class CoopListViewModel: ObservableObject {
 
     func loadCoops(limit: Int = 50, offset: Int = 0, loadRecent:Bool = false) async{
         self.groupId = 0
-        let coopss:[CoopListRowInfo] = await measureTime(title: "loadCoops") {
-            await coops(filter: loadRecent ? Filter() : filter, limit: limit, offset)
+        let coopss:[CoopListRowInfo] = await measureTime(title: #function) {
+            if loadRecent {
+                self.filter = Filter()
+            }
+            return await coops(filter: filter, limit: limit, offset)
         }
         let rows = measureTime(title: "processCoops") {
             processCoops(coopss)

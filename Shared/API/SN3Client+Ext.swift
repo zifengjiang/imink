@@ -28,7 +28,13 @@ private enum Gate {
 extension SN3Client {
     func ensureToken() async throws {
             //        await NSOAccountManager.shared.refreshGameServiceTokenIfNeeded()
-        if let token = AppUserDefaults.shared.gameServiceToken {
+        
+        // 优先使用手动输入的token
+        if AppUserDefaults.shared.useManualGameServiceToken, 
+           let manualToken = AppUserDefaults.shared.manualGameServiceToken,
+           !manualToken.isEmpty {
+            try await setToken(manualToken)
+        } else if let token = AppUserDefaults.shared.gameServiceToken {
             try await setToken(token)
         }
     }
@@ -77,8 +83,15 @@ extension SN3Client {
                     Indicators.shared.dismiss(with: IndicatorID)
                     return
                 } catch SN3Client.Error.invalidGameServiceToken {
-                    Indicators.shared.updateTitle(for: IndicatorID, title: "令牌已过期，重新获取...")
-                    try await NSOAccountManager.shared.refreshGameServiceTokenManual(indicatorId: IndicatorID)
+                    if AppUserDefaults.shared.useManualGameServiceToken {
+                        Indicators.shared.updateTitle(for: IndicatorID, title: "手动令牌已过期，请更新令牌")
+                        Indicators.shared.updateIcon(for: IndicatorID, icon: .image(Image(systemName: "exclamationmark.triangle")))
+                        Indicators.shared.dismiss(with: IndicatorID, after: 3)
+                        return
+                    } else {
+                        Indicators.shared.updateTitle(for: IndicatorID, title: "令牌已过期，重新获取...")
+                        try await NSOAccountManager.shared.refreshGameServiceTokenManual(indicatorId: IndicatorID)
+                    }
                 }catch SN3Client.Error.tooManyRequests{
                     Indicators.shared.updateTitle(for: IndicatorID, title: "FAPI请求过于频繁，稍后重试...")
                     Indicators.shared.dismiss(with: IndicatorID, after: 3)
@@ -212,12 +225,18 @@ extension SN3Client {
                 }
                 return T(json: data)
             } catch SN3Client.Error.invalidGameServiceToken {
-                do{
-                    try await NSOAccountManager.shared.refreshGameServiceTokenManual()
-                }catch{
-                    logError(error)
+                if AppUserDefaults.shared.useManualGameServiceToken {
+                    Indicators.shared.updateTitle(for: IndicatorID, title: "手动令牌已过期，请在设置中更新")
+                    Indicators.shared.updateIcon(for: IndicatorID, icon: .image(Image(systemName: "exclamationmark.triangle")))
+                    return nil
+                } else {
+                    do{
+                        try await NSOAccountManager.shared.refreshGameServiceTokenManual()
+                    }catch{
+                        logError(error)
+                    }
+                    retryCount += 1
                 }
-                retryCount += 1
             } catch is CancellationError {
                 Indicators.shared.dismiss(with: IndicatorID)
                 return nil

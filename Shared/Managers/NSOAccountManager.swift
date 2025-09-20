@@ -12,6 +12,9 @@ class NSOAccountManager:ObservableObject {
     @Published var accountId:Int? = AppUserDefaults.shared.accountId
 
     func refreshGameServiceTokenIfNeeded() async {
+        // 如果使用手动输入的token，则不自动刷新
+        guard !AppUserDefaults.shared.useManualGameServiceToken else { return }
+        
         if let sessionToken = AppUserDefaults.shared.sessionToken, AppUserDefaults.shared.gameServiceTokenRefreshTime + 3600 < Int(Date().timeIntervalSince1970){
             let IndicatorId = UUID().uuidString
             defer{

@@ -73,7 +73,7 @@ extension AppAPI: TargetType {
         case .nxapiZnca_f:
             return [
                 "User-Agent": "imink/1.0.0",
-                "x-znca-client-version": AppUserDefaults.shared.NSOVersion,
+                "X-znca-Client-Version": "3.0.2",
                 "X-znca-platform": "Android",
                 "x-znca-version": AppUserDefaults.shared.NSOVersion,
             ]
@@ -85,9 +85,9 @@ extension AppAPI: TargetType {
             return [
                 "Authorization": "Bearer \(accessToken)",
                 "User-Agent": "imink/1.0.0",
-                "x-znca-client-version": AppUserDefaults.shared.NSOVersion,
+                "X-znca-Client-Version": "3.0.2",
                 "x-znca-platform": "Android",
-                "x-znca-version": AppUserDefaults.shared.NSOVersion,
+                "X-znca-Version": AppUserDefaults.shared.NSOVersion,
             ]
         case .nxapiZnca_config:
             return [
@@ -97,9 +97,9 @@ extension AppAPI: TargetType {
             return [
                 "Authorization": "Bearer \(accessToken)",
                 "User-Agent": "imink/1.0.0",
-                "x-znca-client-version": AppUserDefaults.shared.NSOVersion,
+                "X-znca-Client-Version": "3.0.2",
                 "x-znca-platform": "Android",
-                "x-znca-version": AppUserDefaults.shared.NSOVersion,
+                "X-znca-Version": AppUserDefaults.shared.NSOVersion,
             ]
         default:
             return nil

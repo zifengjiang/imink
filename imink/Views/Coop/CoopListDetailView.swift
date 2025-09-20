@@ -12,10 +12,20 @@ struct CoopListDetailView: View {
     }
 
     var body: some View {
-        if isCoop {
-            CoopDetailView(id: coopId!)
-        } else {
-            CoopShiftDetailView(id: shiftId!)
+        VStack{
+            Rectangle()
+                .fill(Color.clear)
+                .frame(height: 70) // To avoid "EmptyView" error
+
+            if isCoop {
+                CoopDetailView(id: coopId!)
+            } else {
+                CoopShiftDetailView(id: shiftId!)
+            }
+
+            Rectangle()
+                .fill(Color.clear)
+                .frame(height: 80) // To avoid "EmptyView" error
         }
     }
 }

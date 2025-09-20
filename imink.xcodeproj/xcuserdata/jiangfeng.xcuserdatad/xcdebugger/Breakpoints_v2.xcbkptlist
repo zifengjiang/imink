@@ -98,6 +98,20 @@
                   endingLineNumber = "134">
                </Location>
                <Location
+                  uuid = "0D37A466-1165-44C6-AD1F-16C354AF6F8F - 21dc292903014dd2"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(6) await resume partial function for imink.BackgroundTaskManager.performBackgroundDataRefresh() async -&gt; ()"
+                  moduleName = "imink.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/jiangfeng/XcodeProject/jiangfeng/imink/Shared/Managers/BackgroundTaskManager.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "134"
+                  endingLineNumber = "134">
+               </Location>
+               <Location
                   uuid = "0D37A466-1165-44C6-AD1F-16C354AF6F8F - 3bedfa6b48b590e3"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"

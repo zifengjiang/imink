@@ -5,6 +5,7 @@ struct CoopListView: View {
     @EnvironmentObject var mainViewModel: MainViewModel
     @EnvironmentObject var viewModel: CoopListViewModel
     @Environment(\.scenePhase) var scenePhase
+    @Namespace private var animation
     @State var activeID:String?
     @State var showFilterSheet = false
     @State var selectedRow:String?
@@ -74,8 +75,8 @@ struct CoopListView: View {
                     .scrollPosition(id: $activeID, anchor: .bottom)
                     .fixSafeareaBackground()
                     .modifier(LoginViewModifier(isLogin: AppState.shared.isLogin, iconName: "TabBarSalmonRun"))
-                    .navigationTitle(viewModel.navigationTitle)
-                    .navigationBarTitleDisplayMode(.inline)
+                    .navigationBarTitle(viewModel.navigationTitle,displayMode: .inline)
+//                    .navigationBarTitleDisplayMode(.inline)
                     .onChange(of: activeID) { oldValue, newValue in
                         print("🔍 activeID changed: \(oldValue ?? "nil") -> \(newValue ?? "nil"), isSelectionMode: \(isSelectionMode)")
                         print("🔍 last row id: \(viewModel.rows.last?.id ?? "nil")")
@@ -164,6 +165,7 @@ struct CoopListView: View {
                                 }
                             }
                         }
+                        .matchedTransitionSource(id: "filter", in: animation)
                     }
                     .toolbarTitleMenu {
                         ForEach(CoopRule.allCases, id:\.rawValue){ rule in
@@ -223,6 +225,7 @@ struct CoopListView: View {
                     guard AppState.shared.isLogin else { return }
                     await viewModel.loadCoops()
                 }
+                .navigationTransition(.zoom(sourceID: "filter", in: animation))
             }
         }
     }
