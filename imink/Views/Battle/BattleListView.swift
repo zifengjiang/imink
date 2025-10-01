@@ -230,9 +230,10 @@ struct BattleListView: View {
                     
                     // 批量软删除 - 直接在事务内执行SQL更新
                     try await SplatDatabase.shared.dbQueue.write { db in
-                        for battleId in batch {
-                            try db.execute(sql: "UPDATE battle SET isDeleted = 1 WHERE id = ?", arguments: [battleId])
-                        }
+                        // Use a single UPDATE statement with IN clause for better performance
+                        let placeholders = batch.map { _ in "?" }.joined(separator: ",")
+                        let sql = "UPDATE battle SET isDeleted = 1 WHERE id IN (\(placeholders))"
+                        try db.execute(sql: sql, arguments: batch)
                     }
                     
                     processedCount += batch.count
