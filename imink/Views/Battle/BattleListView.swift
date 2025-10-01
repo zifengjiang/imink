@@ -92,7 +92,7 @@ struct BattleListView: View {
                         }
                     }
 
-                    ToolbarItem(placement: .topBarTrailing) {
+                    ToolbarItem(placement: .navigationBarTrailing) {
                         if isSelectionMode {
                             HStack(spacing: 16) {
                                 Button {
