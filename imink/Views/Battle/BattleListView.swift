@@ -184,14 +184,13 @@ struct BattleListView: View {
     private func batchToggleFavorite() {
         Task {
             do {
-                for battleId in selectedBattles {
-                    if let actualBattle = try await SplatDatabase.shared.dbQueue.read({ db in
-                        try Battle.fetchOne(db, key: battleId)
-                    }) {
-                        try actualBattle.toggleFavorite()
+                try await SplatDatabase.shared.dbQueue.write { db in
+                    for battleId in selectedBattles {
+                        if let actualBattle = try Battle.fetchOne(db, key: battleId) {
+                            try actualBattle.toggleFavorite()
+                        }
                     }
                 }
-                
                 NotificationCenter.default.post(name: .battleDataChanged, object: nil)
                 isSelectionMode = false
                 selectedBattles.removeAll()
