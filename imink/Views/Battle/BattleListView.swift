@@ -121,7 +121,7 @@ struct BattleListView: View {
                             Button{
                                 showFilterSheet = true
                             } label: {
-                                Label("筛选", systemImage: "line.horizontal.3.decrease.circle")
+                                Label("筛选", systemImage: "line.3.horizontal.decrease.circle")
                             }
                         }
                     }
