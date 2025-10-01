@@ -1,5 +1,6 @@
 import SwiftUI
 import SplatDatabase
+import GRDB
 
 
 struct BattleListView: View {
@@ -14,7 +15,7 @@ struct BattleListView: View {
         NavigationStack{
             ScrollViewReader{ proxy in
                 VStack {
-                    
+
                     ScrollView{
                         LazyVStack{
                             ForEach(viewModel.rows,id: \.id){row in
@@ -46,14 +47,14 @@ struct BattleListView: View {
                                         }
                                     }
                                 } else {
-                                    // 非battle行（如统计卡片）直接显示，不参与选择
+                                        // 非battle行（如统计卡片）直接显示，不参与选择
                                     BattleListRowView(row: row)
                                         .id(row.id)
                                 }
                             }
+                        }
+                        .scrollTargetLayout()
                     }
-                    .scrollTargetLayout()
-                }
                 }
                 .refreshable {
                     TaskManager.shared.start(named: String(describing: Self.self)) {
@@ -83,7 +84,7 @@ struct BattleListView: View {
                                     Image(systemName: selectedBattles.count == viewModel.rows.compactMap({ $0.battle }).count ? "checkmark.circle.fill" : "circle")
                                         .foregroundColor(.accentColor)
                                 }
-                                
+
                                 Text("\(selectedBattles.count)")
                                     .font(.splatoonFont(size: 16))
                                     .foregroundColor(.secondary)
@@ -102,7 +103,7 @@ struct BattleListView: View {
                                         .foregroundColor(.red)
                                 }
                                 .disabled(selectedBattles.isEmpty)
-                                
+
                                 Button {
                                     batchDelete()
                                 } label: {
@@ -110,7 +111,7 @@ struct BattleListView: View {
                                         .foregroundColor(.red)
                                 }
                                 .disabled(selectedBattles.isEmpty)
-                                
+
                                 Button("取消") {
                                     isSelectionMode = false
                                     selectedBattles.removeAll()
@@ -159,24 +160,24 @@ struct BattleListView: View {
                         }
                     }
                 }
-//                .onChange(of: scenePhase) { oldValue, newPhase in
-//                    switch newPhase {
-//                    case .active:
-//                        TaskManager.shared.start(named: String(describing: Self.self)) {
-//                            await viewModel.fetchBattles()
-//                        }
-//                    default:
-//                        break
-//                    }
-//                }
-//                .onAppear {
-//                    TaskManager.shared.startLoop(name: String(describing: Self.self), interval: .seconds(300)) {
-//                        await viewModel.fetchBattles()
-//                    }
-//                }
-//                .onDisappear {
-//                    TaskManager.shared.cancel(name: String(describing: Self.self))
-//                }
+                    //                .onChange(of: scenePhase) { oldValue, newPhase in
+                    //                    switch newPhase {
+                    //                    case .active:
+                    //                        TaskManager.shared.start(named: String(describing: Self.self)) {
+                    //                            await viewModel.fetchBattles()
+                    //                        }
+                    //                    default:
+                    //                        break
+                    //                    }
+                    //                }
+                    //                .onAppear {
+                    //                    TaskManager.shared.startLoop(name: String(describing: Self.self), interval: .seconds(300)) {
+                    //                        await viewModel.fetchBattles()
+                    //                    }
+                    //                }
+                    //                .onDisappear {
+                    //                    TaskManager.shared.cancel(name: String(describing: Self.self))
+                    //                }
             }
         }
     }
@@ -199,14 +200,14 @@ struct BattleListView: View {
             }
         }
     }
-    
+
     private func batchDelete() {
         let indicatorId = UUID().uuidString
         let totalCount = selectedBattles.count
-        
+
         Task {
             do {
-                // 显示进度提示
+                    // 显示进度提示
                 await MainActor.run {
                     Indicators.shared.display(.init(
                         id: indicatorId,
@@ -217,37 +218,38 @@ struct BattleListView: View {
                         isUserDismissible: false
                     ))
                 }
-                
-                // 批量处理，减少数据库操作次数
+
+                    // 批量处理，减少数据库操作次数
                 let battleIds = Array(selectedBattles)
                 let batchSize = 50 // 每批处理50个
                 var processedCount = 0
-                
+
                 for i in stride(from: 0, to: battleIds.count, by: batchSize) {
                     let endIndex = min(i + batchSize, battleIds.count)
                     let batch = Array(battleIds[i..<endIndex])
-                    
-                    // 批量软删除 - 直接在事务内执行SQL更新
+
+                        // 批量软删除 - 直接在事务内执行SQL更新
                     try await SplatDatabase.shared.dbQueue.write { db in
-                        // Use a single UPDATE statement with IN clause for better performance
+                            // Use a single UPDATE statement with IN clause for better performance
                         let placeholders = batch.map { _ in "?" }.joined(separator: ",")
                         let sql = "UPDATE battle SET isDeleted = 1 WHERE id IN (\(placeholders))"
-                        try db.execute(sql: sql, arguments: batch)
+                        let args = StatementArguments(batch)
+                        try db.execute(sql: sql, arguments: args)
                     }
-                    
+
                     processedCount += batch.count
-                    
-                    // 更新进度
+
+                        // 更新进度
                     await MainActor.run {
                         Indicators.shared.updateSubtitle(for: indicatorId, subtitle: "\(processedCount)/\(totalCount)")
                     }
-                    
-                    // 让出控制权，避免阻塞UI
+
+                        // 让出控制权，避免阻塞UI
                     await Task.yield()
                 }
-                
+
                 await MainActor.run {
-                    // 显示完成提示
+                        // 显示完成提示
                     Indicators.shared.dismiss(with: indicatorId)
                     Indicators.shared.display(.init(
                         id: UUID().uuidString,
@@ -256,7 +258,7 @@ struct BattleListView: View {
                         subtitle: "已删除 \(totalCount) 条记录",
                         dismissType: .after(2)
                     ))
-                    
+
                     NotificationCenter.default.post(name: .battleDataChanged, object: nil)
                     isSelectionMode = false
                     selectedBattles.removeAll()
@@ -285,8 +287,8 @@ struct BattleListView: View {
 
             TabView(selection: $selectedRow) {
                 ForEach(rows, id:\.id){ row in
-//                    CoopListDetailView(isCoop: row.isCoop, coopId: row.coop?.id, shiftId: row.card?.groupId)
-//                        .tag(row.id)
+                        //                    CoopListDetailView(isCoop: row.isCoop, coopId: row.coop?.id, shiftId: row.card?.groupId)
+                        //                        .tag(row.id)
                     Rectangle()
                         .fill(Color.red)
                 }
@@ -298,6 +300,6 @@ struct BattleListView: View {
     }
 }
 
-//#Preview {
-//    BattleListView()
-//}
+    //#Preview {
+    //    BattleListView()
+    //}
