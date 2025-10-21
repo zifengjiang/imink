@@ -11,11 +11,13 @@ struct CoopDetailView: View {
     @State private var showPlayerDetail: Bool = false
     @State private var activePlayer: CoopPlayerResult? = nil
     @State private var hoveredMember: Bool = false
+    @Binding var navigationPath: NavigationPath
 
     var id: Int64
     
-    init(id: Int64){
+    init(id: Int64, navigationPath: Binding<NavigationPath>){
         self.id = id
+        self._navigationPath = navigationPath
         if let model = AppState.shared.viewModelDict[id]{
             _viewModel = StateObject(wrappedValue: model)
         }else{
@@ -84,8 +86,8 @@ struct CoopDetailView: View {
                         await listViewModel.loadCoops()
                     }
 
-                    // 关闭当前详情页面
-                    dismiss()
+                    // 关闭当前详情页面，返回到列表
+                    navigationPath.removeLast(navigationPath.count)
                 })
             }))
             .onAppear  {
@@ -553,5 +555,5 @@ struct ProgressBar: View {
 
 
 #Preview {
-    CoopDetailView(id: 0)
+    CoopDetailView(id: 0, navigationPath: .constant(NavigationPath()))
 }

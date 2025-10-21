@@ -8,10 +8,12 @@ struct CoopShiftDetailView: View {
     @State private var showPlayerDetail: Bool = false
     @State private var activePlayer: CoopPlayerStatus? = nil
     @State private var hoveredMember: Bool = false
+    @Binding var navigationPath: NavigationPath
 
     var id: Int
-    init(id: Int){
+    init(id: Int, navigationPath: Binding<NavigationPath>){
         self.id = id
+        self._navigationPath = navigationPath
         _viewModel = StateObject(wrappedValue: CoopShiftDetailViewModel(id: id))
     }
 
@@ -58,8 +60,8 @@ struct CoopShiftDetailView: View {
                     await listViewModel.loadCoops()
                 }
                 
-                // 关闭当前详情页面
-                dismiss()
+                // 关闭当前详情页面，返回到列表
+                navigationPath.removeLast(navigationPath.count)
             })
         }))
         .task  {

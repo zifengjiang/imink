@@ -12,10 +12,11 @@ struct CoopListView: View {
     @State var isFirstRow = true
     @State var isSelectionMode = false
     @State var selectedCoops: Set<Int64> = []
+    @State private var navigationPath = NavigationPath()
 
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             ScrollViewReader { proxy in
                 VStack {
                     ScrollView{
@@ -35,18 +36,7 @@ struct CoopListView: View {
                                         }
                                     ) {
                                         if !isSelectionMode {
-                                            NavigationLink {
-                                                CoopDetailContainer(
-                                                    rows: viewModel.rows,
-                                                    selectedRow: $selectedRow,
-                                                    viewModel: viewModel
-                                                )
-                                                .environmentObject(viewModel)
-                                                .onAppear{
-                                                    selectedRow = row.id
-                                                    viewModel.loadCurrentCoopFavoriteStatus(for: row.id)
-                                                }
-                                            } label: {
+                                            NavigationLink(value: row.id) {
                                                 CoopListRowView(row: row)
                                                     .id(row.id)
                                                     .onAppear {
@@ -218,6 +208,19 @@ struct CoopListView: View {
 //                    }
                 }
 
+            }
+            .navigationDestination(for: String.self) { rowId in
+                CoopDetailContainer(
+                    rows: viewModel.rows,
+                    selectedRow: $selectedRow,
+                    viewModel: viewModel,
+                    navigationPath: $navigationPath
+                )
+                .environmentObject(viewModel)
+                .onAppear{
+                    selectedRow = rowId
+                    viewModel.loadCurrentCoopFavoriteStatus(for: rowId)
+                }
             }
             .sheet(isPresented: $showFilterSheet){
                 CoopFilterView(showFilterView: $showFilterSheet, filter: $viewModel.filter){

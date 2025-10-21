@@ -5,6 +5,7 @@ struct CoopDetailContainer: View {
     let rows: [CoopListRowModel]
     @Binding var selectedRow: String?
     @ObservedObject var viewModel: CoopListViewModel
+    @Binding var navigationPath: NavigationPath
     
     var body: some View {
         TabView(selection: $selectedRow) {
@@ -12,7 +13,8 @@ struct CoopDetailContainer: View {
                 CoopListDetailView(
                     isCoop: row.isCoop, 
                     coopId: row.coop?.id, 
-                    shiftId: row.card?.groupId
+                    shiftId: row.card?.groupId,
+                    navigationPath: $navigationPath
                 )
                 .scrollIndicators(.hidden)
 //                .scrollClipDisabled()
@@ -143,7 +145,8 @@ struct CoopDetailContainer: View {
             return
         }
         
-        let image = CoopDetailView(id: coop.id).asUIImage(size: CGSize(width: 400, height: coop.height))
+        @State var tempNavigationPath = NavigationPath()
+        let image = CoopDetailView(id: coop.id, navigationPath: .constant(NavigationPath())).asUIImage(size: CGSize(width: 400, height: coop.height))
         
         PHPhotoLibrary.shared().performChanges({
             PHAssetChangeRequest.creationRequestForAsset(from: image)

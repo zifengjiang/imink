@@ -192,7 +192,7 @@ struct CoopListDetailItemView: View {
             Divider()
             
             Button{
-                let image = CoopListDetailView(isCoop: true, coopId: coop.id, shiftId: nil).asUIImage(size: CGSize(width: 400, height: coop.height))
+                let image = CoopListDetailView(isCoop: true, coopId: coop.id, shiftId: nil, navigationPath: .constant(NavigationPath())).asUIImage(size: CGSize(width: 400, height: coop.height))
                 let activityController = UIActivityViewController(
                     activityItems: [image], applicationActivities: nil)
                 let vc = UIApplication.shared.windows.first!.rootViewController
