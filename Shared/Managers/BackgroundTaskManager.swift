@@ -21,6 +21,7 @@ final class BackgroundTaskManager: ObservableObject {
     
     // 后台任务标识符
     private static let refreshIdentifier = "com.zjoker.imink.refresh"
+    private static let scheduleRefreshIdentifier = "com.zjoker.imink.schedule.refresh"
     
     // 通知计数器 - 记录未查看的数据条数
     @Published var unviewedDataCount: Int = 0
@@ -44,6 +45,15 @@ final class BackgroundTaskManager: ObservableObject {
                 await self.handleBackgroundRefresh(task: task as! BGAppRefreshTask)
             }
         }
+        
+        BGTaskScheduler.shared.register(
+            forTaskWithIdentifier: Self.scheduleRefreshIdentifier,
+            using: .main
+        ) { task in
+            Task {
+                await self.handleScheduleRefresh(task: task as! BGAppRefreshTask)
+            }
+        }
         logger.info("后台任务已注册")
     }
     
@@ -60,6 +70,20 @@ final class BackgroundTaskManager: ObservableObject {
         } catch {
             backgroundTaskStatus = "调度失败: \(error.localizedDescription)"
             logger.error("调度后台刷新任务失败: \(error.localizedDescription)")
+        }
+    }
+    
+    // MARK: - 调度日程后台刷新
+    func scheduleScheduleRefresh() {
+        let request = BGAppRefreshTaskRequest(identifier: Self.scheduleRefreshIdentifier)
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 60) // 1小时后
+        
+        do {
+            try BGTaskScheduler.shared.submit(request)
+            updatePendingTasksCount()
+            logger.info("日程后台刷新任务已调度，将在1小时后执行")
+        } catch {
+            logger.error("调度日程后台刷新任务失败: \(error.localizedDescription)")
         }
     }
     
@@ -120,6 +144,33 @@ final class BackgroundTaskManager: ObservableObject {
         logger.info("后台刷新任务完成")
     }
     
+    // MARK: - 处理日程后台刷新
+    private func handleScheduleRefresh(task: BGAppRefreshTask) async {
+        logger.info("开始执行日程后台刷新任务")
+        
+        // 调度下一次日程刷新（1小时后）
+        scheduleScheduleRefresh()
+        
+        // 创建操作任务
+        let operation = Task {
+            await performScheduleRefresh()
+        }
+        
+        // 设置过期处理
+        task.expirationHandler = {
+            self.logger.info("日程后台任务即将过期，取消操作")
+            operation.cancel()
+        }
+        
+        // 等待操作完成
+        await operation.value
+        
+        // 标记任务完成
+        task.setTaskCompleted(success: true)
+        updatePendingTasksCount()
+        logger.info("日程后台刷新任务完成")
+    }
+    
     // MARK: - 执行后台数据刷新
     private func performBackgroundDataRefresh() async {
         logger.info("开始后台数据刷新")
@@ -142,6 +193,28 @@ final class BackgroundTaskManager: ObservableObject {
             )
         }
         
+    }
+    
+    // MARK: - 执行日程后台刷新
+    private func performScheduleRefresh() async {
+        logger.info("开始后台日程刷新")
+        
+        do {
+            // 获取日程数据
+            let json = try await Splatoon3InkAPI.schedule.GetJSON()
+            
+            // 保存到数据库
+            try await SplatDatabase.shared.dbQueue.write { db in
+                try insertSchedules(json: json, db: db)
+            }
+            
+            // 更新刷新时间
+            AppUserDefaults.shared.scheduleRefreshTime = Int(Date().timeIntervalSince1970)
+            
+            logger.info("日程后台刷新成功")
+        } catch {
+            logger.error("日程后台刷新失败: \(error.localizedDescription)")
+        }
     }
     
     // MARK: - 获取数据计数的辅助方法
@@ -202,15 +275,43 @@ final class BackgroundTaskManager: ObservableObject {
 #endif
     }
     
+    // MARK: - 强制调度短间隔日程刷新任务（仅用于测试）
+    func scheduleTestScheduleRefresh() {
+#if DEBUG
+        let request = BGAppRefreshTaskRequest(identifier: Self.scheduleRefreshIdentifier)
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 30) // 30秒后
+        
+        do {
+            // 先取消现有任务
+            BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: Self.scheduleRefreshIdentifier)
+            try BGTaskScheduler.shared.submit(request)
+            updatePendingTasksCount()
+            logger.info("测试日程刷新任务已调度，将在30秒后执行")
+        } catch {
+            logger.error("调度测试日程刷新任务失败: \(error.localizedDescription)")
+        }
+#endif
+    }
+    
+    // MARK: - 手动触发日程刷新（用于测试）
+    func performManualScheduleRefresh() async {
+#if DEBUG
+        logger.info("手动触发日程刷新（测试模式）")
+        await performScheduleRefresh()
+#endif
+    }
+    
     // MARK: - 应用生命周期处理
     func handleAppWillResignActive() {
         scheduleBackgroundRefresh()
-        logger.info("应用进入后台，已调度后台刷新")
+        scheduleScheduleRefresh()
+        logger.info("应用进入后台，已调度后台刷新和日程刷新")
     }
     
     func handleAppDidBecomeActive() {
         // 取消待处理的后台任务（如果用户返回应用）
         BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: Self.refreshIdentifier)
+        BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: Self.scheduleRefreshIdentifier)
         logger.info("应用进入前台，已取消待处理的后台任务")
     }
 }

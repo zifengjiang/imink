@@ -21,6 +21,7 @@
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>com.zjoker.imink.refresh</string>
+		<string>com.zjoker.imink.schedule.refresh</string>
 	</array>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>imink需要发送通知来提醒您订阅的日程安排</string>
