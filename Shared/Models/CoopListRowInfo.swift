@@ -128,11 +128,19 @@ func coops(filter:Filter = Filter(), limit:Int = 30, _ offset: Int = 0) -> AnyPu
 }
 
 func coops(filter:Filter = Filter(), limit:Int = 30, _ offset: Int = 0) async -> [CoopListRowInfo] {
-    return try! await SplatDatabase.shared.dbQueue.read { db in
+    let results = try! await SplatDatabase.shared.dbQueue.read { db in
         try Row.fetchAll(db, filter.buildCoopQuery(limit:limit, offset:offset))
             .map { row in
                 try! CoopListRowInfo(row: row)
             }
+    }
+    
+    // 先按rule排序，再按时间排序
+    return results.sorted { first, second in
+        if first.GroupId != second.GroupId {
+            return first.GroupId > second.GroupId
+        }
+        return first.time > second.time // 时间降序
     }
 }
 
