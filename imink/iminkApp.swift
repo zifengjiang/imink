@@ -65,9 +65,20 @@ struct iminkApp: App {
             }
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
                 BackgroundTaskManager.shared.handleAppWillResignActive()
+                Task { @MainActor in
+                    Indicators.shared.handleAppWillResignActive()
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
+                Task { @MainActor in
+                    Indicators.shared.handleAppDidEnterBackground()
+                }
             }
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
                 BackgroundTaskManager.shared.handleAppDidBecomeActive()
+                Task { @MainActor in
+                    Indicators.shared.handleAppDidBecomeActive()
+                }
                 // 当用户返回应用时，标记数据为已查看
                 BackgroundTaskManager.shared.markDataAsViewed()
                 NotificationManager.shared.clearDataUpdateNotifications()

@@ -49,14 +49,43 @@ extension SN3Client {
         lastRefreshTime: inout Int,
         icon: ImageResource,
         getValidIDs: @escaping () async throws -> [String],
-        fetchAndStoreDetails: @escaping ([String]) async throws -> Int
+        fetchAndStoreDetails: @escaping ([String]) async throws -> Int,
+        groupId: String? = nil,  // 可选的任务组ID
+        taskName: String? = nil  // 可选的子任务名称
     ) async -> Int?{
         guard !flag.get(), Gate.shouldProceed(last: lastRefreshTime, interval: refreshInterval) else { return nil}
-        let IndicatorID = UUID().uuidString
-        defer{
-            Indicators.shared.dismiss(with: IndicatorID,after: 2)
+        
+        let IndicatorID: String
+        let useTaskGroup: Bool
+        
+        // 如果提供了 groupId，使用任务组管理
+        if let groupId = groupId {
+            useTaskGroup = true
+            IndicatorID = await Indicators.shared.acquireSharedIndicator(
+                groupId: groupId,
+                title: "正在加载...",
+                icon: .progressIndicator
+            )
+            
+            // 如果提供了 taskName，注册为子任务
+            if let taskName = taskName {
+                await Indicators.shared.registerSubTask(groupId: groupId, taskName: taskName)
+            }
+        } else {
+            // 向后兼容：使用原有的独立 Indicator 逻辑
+            useTaskGroup = false
+            IndicatorID = UUID().uuidString
+            await Indicators.shared.display(.init(id: IndicatorID, icon: .progressIndicator, title: "正在加载...", dismissType: .manual, isUserDismissible: false))
         }
-        Indicators.shared.display(.init(id: IndicatorID, icon: .progressIndicator, title: "正在加载...", dismissType: .manual, isUserDismissible: false))
+        
+        defer {
+            if !useTaskGroup {
+                Task {
+                    await Indicators.shared.dismiss(with: IndicatorID, after: 2)
+                }
+            }
+        }
+        
         var count = 0
         do{
             try await flag.withValue(true) {
@@ -66,39 +95,74 @@ extension SN3Client {
                     let ids = try await getValidIDs()
                     try Task.checkCancellation()
                     guard !ids.isEmpty else {
-                        Indicators.shared.updateTitle(for: IndicatorID, title: "没有新纪录")
-                        Indicators.shared.updateIcon(for: IndicatorID, icon: .success)
+                        if useTaskGroup, let groupId = groupId, let taskName = taskName {
+                            await Indicators.shared.completeSubTask(groupId: groupId, taskName: taskName)
+                        } else {
+                            await Indicators.shared.updateTitle(for: IndicatorID, title: "没有新纪录")
+                            await Indicators.shared.updateIcon(for: IndicatorID, icon: .success)
+                        }
                         lastRefreshTime = Int(Date().timeIntervalSince1970)
                         return
                     }
-                    Indicators.shared.updateTitle(for: IndicatorID, title: "加载\(ids.count)项新纪录")
+                    
+                    // 如果使用任务组，不更新标题（由任务组统一管理）
+                    if !useTaskGroup {
+                        await Indicators.shared.updateTitle(for: IndicatorID, title: "加载\(ids.count)项新纪录")
+                    }
+                    
                     let saved = try await fetchAndStoreDetails(ids)
                     count = saved
                     lastRefreshTime = Int(Date().timeIntervalSince1970)
-                    Indicators.shared.updateTitle(for: IndicatorID, title: "加载了\(saved)个新纪录")
-                    Indicators.shared.updateIcon(for: IndicatorID, icon: .success)
-                    Indicators.shared.dismiss(with: IndicatorID, after: 1)
+                    
+                    if useTaskGroup, let groupId = groupId, let taskName = taskName {
+                        // 完成子任务，任务组会自动更新标题
+                        await Indicators.shared.completeSubTask(groupId: groupId, taskName: taskName)
+                    } else {
+                        // 非任务组模式，更新标题和图标并 dismiss
+                        await Indicators.shared.updateTitle(for: IndicatorID, title: "加载了\(saved)个新纪录")
+                        await Indicators.shared.updateIcon(for: IndicatorID, icon: .success)
+                        await Indicators.shared.dismiss(with: IndicatorID, after: 1)
+                    }
                     return
                 } catch is CancellationError{
-                    Indicators.shared.dismiss(with: IndicatorID)
+                    if useTaskGroup, let groupId = groupId, let taskName = taskName {
+                        await Indicators.shared.completeSubTask(groupId: groupId, taskName: taskName)
+                    } else {
+                        await Indicators.shared.dismiss(with: IndicatorID)
+                    }
                     return
                 } catch SN3Client.Error.invalidGameServiceToken {
                     if AppUserDefaults.shared.useManualGameServiceToken {
-                        Indicators.shared.updateTitle(for: IndicatorID, title: "手动令牌已过期，请更新令牌")
-                        Indicators.shared.updateIcon(for: IndicatorID, icon: .image(Image(systemName: "exclamationmark.triangle")))
-                        Indicators.shared.dismiss(with: IndicatorID, after: 3)
+                        if useTaskGroup, let groupId = groupId, let taskName = taskName {
+                            await Indicators.shared.completeSubTask(groupId: groupId, taskName: taskName)
+                            await Indicators.shared.updateTitle(for: IndicatorID, title: "手动令牌已过期，请更新令牌")
+                            await Indicators.shared.updateIcon(for: IndicatorID, icon: .image(Image(systemName: "exclamationmark.triangle")))
+                        } else {
+                            await Indicators.shared.updateTitle(for: IndicatorID, title: "手动令牌已过期，请更新令牌")
+                            await Indicators.shared.updateIcon(for: IndicatorID, icon: .image(Image(systemName: "exclamationmark.triangle")))
+                            await Indicators.shared.dismiss(with: IndicatorID, after: 3)
+                        }
                         return
                     } else {
-                        Indicators.shared.updateTitle(for: IndicatorID, title: "令牌已过期，重新获取...")
+                        await Indicators.shared.updateTitle(for: IndicatorID, title: "令牌已过期，重新获取...")
                         try await NSOAccountManager.shared.refreshGameServiceTokenManual(indicatorId: IndicatorID)
                     }
                 }catch SN3Client.Error.tooManyRequests{
-                    Indicators.shared.updateTitle(for: IndicatorID, title: "FAPI请求过于频繁，稍后重试...")
-                    Indicators.shared.dismiss(with: IndicatorID, after: 3)
+                    if useTaskGroup, let groupId = groupId, let taskName = taskName {
+                        await Indicators.shared.completeSubTask(groupId: groupId, taskName: taskName)
+                        await Indicators.shared.updateTitle(for: IndicatorID, title: "FAPI请求过于频繁，稍后重试...")
+                    } else {
+                        await Indicators.shared.updateTitle(for: IndicatorID, title: "FAPI请求过于频繁，稍后重试...")
+                        await Indicators.shared.dismiss(with: IndicatorID, after: 3)
+                    }
                     return
                 }catch {
                     logError(error)
-                    Indicators.shared.dismiss(with: IndicatorID)
+                    if useTaskGroup, let groupId = groupId, let taskName = taskName {
+                        await Indicators.shared.completeSubTask(groupId: groupId, taskName: taskName)
+                    } else {
+                        await Indicators.shared.dismiss(with: IndicatorID)
+                    }
                     return
                 }
             }
@@ -112,7 +176,7 @@ extension SN3Client {
     // MARK: - High-level APIs
 extension SN3Client {
     @discardableResult
-    func fetchCoops() async -> Int?{
+    func fetchCoops(groupId: String? = nil) async -> Int?{
         return await runPipeline(
             flag: .isFetchingCoops,
             refreshInterval: 300,
@@ -149,11 +213,13 @@ extension SN3Client {
                     } catch { logError(error) }
                 }
                 return results.count
-            }
+            },
+            groupId: groupId,
+            taskName: groupId != nil ? "获取鲑鱼跑记录" : nil
         )
     }
     @discardableResult
-    func fetchBattles() async -> Int?{
+    func fetchBattles(groupId: String? = nil) async -> Int?{
         return await runPipeline(
             flag: .isFetchingBattles,
             refreshInterval: 300,
@@ -204,7 +270,9 @@ extension SN3Client {
                     } catch { logError(error) }
                 }
                 return results.count
-            }
+            },
+            groupId: groupId,
+            taskName: groupId != nil ? "获取对战记录" : nil
         )
     }
 

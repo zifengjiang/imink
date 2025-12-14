@@ -243,11 +243,30 @@ struct SettingPage: View {
                     }
                     
                     Button {
-                        Task {
-                            // 手动触发后台刷新测试
+                        Task { @MainActor in
+                            // 使用实时任务功能，支持后台执行
+                            let groupId = "manual-refresh-\(UUID().uuidString)"
+                            _ = Indicators.shared.startRealtimeTask(
+                                groupId: groupId,
+                                title: "正在刷新数据",
+                                icon: .progressIndicator
+                            )
+                            
+                            // 刷新token
                             await NSOAccountManager.shared.refreshGameServiceTokenIfNeeded()
-                            await SN3Client.shared.fetchBattles()
-                            await SN3Client.shared.fetchCoops()
+                            
+                            // 获取对战记录
+                            await Indicators.shared.registerSubTask(groupId: groupId, taskName: "获取对战记录")
+                            _ = await SN3Client.shared.fetchBattles(groupId: groupId)
+                            await Indicators.shared.completeSubTask(groupId: groupId, taskName: "获取对战记录")
+                            
+                            // 获取鲑鱼跑记录
+                            await Indicators.shared.registerSubTask(groupId: groupId, taskName: "获取鲑鱼跑记录")
+                            _ = await SN3Client.shared.fetchCoops(groupId: groupId)
+                            await Indicators.shared.completeSubTask(groupId: groupId, taskName: "获取鲑鱼跑记录")
+                            
+                            // 完成任务组
+                            await Indicators.shared.completeTaskGroup(groupId: groupId, success: true, message: "刷新完成")
                         }
                     } label: {
                         Text("手动刷新数据（测试）")
