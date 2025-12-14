@@ -600,6 +600,11 @@ struct SettingPage: View {
         let tempFilePath = tempDirectory.appendingPathComponent("db.sqlite")
 
         do {
+            // 先执行 checkpoint，将 WAL 文件合并回主数据库文件
+            try SplatDatabase.shared.dbQueue.write { db in
+                try db.checkpoint()
+            }
+            
             if fileManager.fileExists(atPath: tempFilePath.path) {
                 try fileManager.removeItem(at: tempFilePath)
             }
