@@ -203,25 +203,40 @@ class HomeViewModel: ObservableObject {
     func fetchSchedules() async {
         // 5分钟内不重复获取
         guard AppUserDefaults.shared.scheduleRefreshTime + 300 <= Int(Date().timeIntervalSince1970 ) else{ return }
-        let IndicatorId = UUID().uuidString
+        
+        // 使用全局任务组ID，所有任务共享同一个indicator
+        let groupId = Indicators.globalTaskGroupId
+        let indicatorId = await Indicators.shared.acquireSharedIndicator(
+            groupId: groupId,
+            title: "获取赛程中",
+            icon: .progressIndicator
+        )
+        
         do{
             print("fetchSchedules")
-            Indicators.shared.display(Indicator(id: IndicatorId, icon: .progressIndicator, title: "获取赛程中", dismissType: .manual, isUserDismissible: false))
+            // 注册子任务
+            await Indicators.shared.registerSubTask(groupId: groupId, taskName: "获取赛程-获取赛程数据")
+            
             let json = try await Splatoon3InkAPI.schedule.GetJSON()
             try await SplatDatabase.shared.dbQueue.write { db in
                 try insertSchedules(json: json, db: db)
             }
             loadSchedules()
-            Indicators.shared.updateTitle(for: IndicatorId, title: "获取赛程成功")
-            Indicators.shared.updateIcon(for: IndicatorId, icon: .success)
+            
+            // 完成子任务
+            await Indicators.shared.completeSubTask(groupId: groupId, taskName: "获取赛程-获取赛程数据")
+            
+            // 完成任务组（只有在没有其他活跃任务时才真正完成）
+            await Indicators.shared.completeTaskGroup(groupId: groupId, success: true, message: "获取赛程成功")
             AppUserDefaults.shared.scheduleRefreshTime = Int(Date().timeIntervalSince1970)
         }catch{
             loadSchedules()
             logError(error)
-            Indicators.shared.updateTitle(for: IndicatorId, title: "获取赛程失败")
-            Indicators.shared.updateIcon(for: IndicatorId, icon: .image(Image(systemName: "xmark.icloud")))
+            // 完成子任务
+            await Indicators.shared.completeSubTask(groupId: groupId, taskName: "获取赛程-获取赛程数据")
+            // 完成任务组（只有在没有其他活跃任务时才真正完成）
+            await Indicators.shared.completeTaskGroup(groupId: groupId, success: false, message: "获取赛程失败")
         }
-        Indicators.shared.dismiss(with: IndicatorId)
     }
     
     // MARK: - Stage Records Management

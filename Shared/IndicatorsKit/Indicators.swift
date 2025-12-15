@@ -113,6 +113,9 @@ public final class Indicators {
 // MARK: - Indicators+IndicatorTaskGroup
 
 public extension Indicators {
+    /// 全局任务组ID（所有任务共享同一个indicator）
+    static let globalTaskGroupId = "global-indicator"
+    
     /// 创建或获取任务组的共享 Indicator
     /// - Parameters:
     ///   - groupId: 任务组ID，如 "data-refresh", "login-flow"
@@ -129,8 +132,14 @@ public extension Indicators {
         supportsLiveActivity: Bool = false,
         allowBackgroundExecution: Bool = false
     ) -> String {
-        // 如果任务组已存在，返回现有的 Indicator ID
+        // 如果任务组已存在，返回现有的 Indicator ID（复用现有indicator）
         if let existingGroup = taskGroups[groupId] {
+            // 更新标题为更通用的标题（如果有多个不同类型的任务）
+            let newTitle = existingGroup.activeTasks.isEmpty ? title : "正在处理任务"
+            if existingGroup.title != newTitle {
+                existingGroup.title = newTitle
+                updateTitle(for: existingGroup.indicatorId, title: newTitle)
+            }
             return existingGroup.indicatorId
         }
         
@@ -247,12 +256,48 @@ public extension Indicators {
     func updateGroupTitle(groupId: String) {
         guard let taskGroup = taskGroups[groupId] else { return }
         
+        // 生成副标题（显示所有任务状态）
         let subtitle = taskGroup.generateSubtitle()
         updateSubtitle(for: taskGroup.indicatorId, subtitle: subtitle ?? "")
+        
+        // 如果有多个不同类型的任务，更新标题为通用标题
+        let taskTypes = Set(taskGroup.activeTasks.map { taskName in
+            // 提取任务类型（"-"之前的部分）
+            if let dashIndex = taskName.firstIndex(of: "-") {
+                return String(taskName[..<dashIndex])
+            }
+            return taskName
+        })
+        
+        // 如果有多个不同类型的任务，使用通用标题
+        if taskTypes.count > 1 {
+            updateTitle(for: taskGroup.indicatorId, title: "正在处理任务")
+        } else if let firstTaskType = taskTypes.first {
+            // 如果只有一个类型，使用该类型的标题
+            let typeTitle = getTitleForTaskType(firstTaskType)
+            updateTitle(for: taskGroup.indicatorId, title: typeTitle)
+        }
         
         // 如果有进度，更新进度
         if let progress = taskGroup.progress {
             updateProgress(for: taskGroup.indicatorId, progress: progress)
+        }
+    }
+    
+    /// 根据任务类型获取标题
+    /// - Parameter taskType: 任务类型
+    /// - Returns: 标题
+    @MainActor
+    private func getTitleForTaskType(_ taskType: String) -> String {
+        switch taskType {
+        case "数据刷新", "手动刷新":
+            return "正在刷新数据"
+        case "登录":
+            return "登录中"
+        case "获取赛程":
+            return "正在获取赛程"
+        default:
+            return "正在处理任务"
         }
     }
     
@@ -290,13 +335,21 @@ public extension Indicators {
     ///   - groupId: 任务组ID
     ///   - success: 是否成功
     ///   - message: 完成消息（可选）
+    ///   - force: 是否强制完成（即使还有活跃任务）
     /// - Note: 只有在所有子任务都完成后才会 dismiss indicator
     @MainActor
-    func completeTaskGroup(groupId: String, success: Bool, message: String? = nil) {
+    func completeTaskGroup(groupId: String, success: Bool, message: String? = nil, force: Bool = false) {
         guard let taskGroup = taskGroups[groupId] else { return }
         
-        // 安全检查：如果还有活跃任务，先完成它们（可能是调用方遗漏）
-        if !taskGroup.activeTasks.isEmpty {
+        // 如果还有活跃任务且不是强制完成，不执行完成操作
+        // 这样可以避免一个任务完成时dismiss掉还在进行中的其他任务的indicator
+        if !taskGroup.activeTasks.isEmpty && !force {
+            // 只更新当前已完成的任务状态，不dismiss
+            return
+        }
+        
+        // 安全检查：如果还有活跃任务且是强制完成，先完成它们（可能是调用方遗漏）
+        if !taskGroup.activeTasks.isEmpty && force {
             // 将所有活跃任务标记为已完成
             for taskName in taskGroup.activeTasks {
                 taskGroup.activeTasks.remove(taskName)

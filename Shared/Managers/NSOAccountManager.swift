@@ -16,20 +16,32 @@ class NSOAccountManager:ObservableObject {
         guard !AppUserDefaults.shared.useManualGameServiceToken else { return }
         
         if let sessionToken = AppUserDefaults.shared.sessionToken, AppUserDefaults.shared.gameServiceTokenRefreshTime + 3600 < Int(Date().timeIntervalSince1970){
-            let IndicatorId = UUID().uuidString
-            defer{
-                Indicators.shared.dismiss(with: IndicatorId)
-            }
+            // 使用全局任务组ID，所有任务共享同一个indicator
+            let groupId = Indicators.globalTaskGroupId
+            let indicatorId = await Indicators.shared.acquireSharedIndicator(
+                groupId: groupId,
+                title: "刷新游戏服务令牌",
+                icon: .progressIndicator
+            )
+            
             do{
-                Indicators.shared.display(Indicator(id: IndicatorId, icon: .progressIndicator, title: "刷新游戏服务令牌", dismissType: .manual, isUserDismissible: false))
-                try await refreshGameServiceToken(sessionToken: sessionToken, indicatorId: IndicatorId)
-                Indicators.shared.updateTitle(for: IndicatorId, title: "刷新游戏服务令牌成功")
-                Indicators.shared.updateIcon(for: IndicatorId, icon: .success)
+                // 注册子任务
+                await Indicators.shared.registerSubTask(groupId: groupId, taskName: "刷新令牌-刷新游戏服务令牌")
+                
+                try await refreshGameServiceToken(sessionToken: sessionToken, indicatorId: indicatorId)
+                
+                // 完成子任务
+                await Indicators.shared.completeSubTask(groupId: groupId, taskName: "刷新令牌-刷新游戏服务令牌")
+                
+                // 完成任务组（只有在没有其他活跃任务时才真正完成）
+                await Indicators.shared.completeTaskGroup(groupId: groupId, success: true, message: "刷新游戏服务令牌成功")
 
             }catch{
                 logError(error)
-                Indicators.shared.updateTitle(for: IndicatorId, title: "刷新游戏服务令牌失败")
-                Indicators.shared.updateIcon(for: IndicatorId, icon: .image(Image(systemName: "xmark.icloud")))
+                // 完成子任务
+                await Indicators.shared.completeSubTask(groupId: groupId, taskName: "刷新令牌-刷新游戏服务令牌")
+                // 完成任务组（只有在没有其他活跃任务时才真正完成）
+                await Indicators.shared.completeTaskGroup(groupId: groupId, success: false, message: "刷新游戏服务令牌失败")
             }
         }
     }

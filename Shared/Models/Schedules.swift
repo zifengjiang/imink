@@ -5,7 +5,7 @@ import SwiftyJSON
 
 
 
-func performTaskEveryHourSince(startDate: Date, task: @escaping (Date) async throws -> Void, progress: @escaping (Double) -> Void) async {
+func performTaskEveryHourSince(startDate: Date, task: @escaping (Date) async throws -> Void, progress: @escaping (Double) async -> Void) async {
     let calendar = Calendar.current
     var currentDate = startDate
     
@@ -28,7 +28,7 @@ func performTaskEveryHourSince(startDate: Date, task: @escaping (Date) async thr
             // Move to next day
         if let nextDay = calendar.date(byAdding: .day, value: 1, to: currentDate) {
             currentDate = nextDay
-            progress(Double(calendar.dateComponents([.day], from: startDate, to: currentDate).day!) / Double(totalDays))
+            await progress(Double(calendar.dateComponents([.day], from: startDate, to: currentDate).day!) / Double(totalDays))
         } else {
             break
         }
@@ -36,8 +36,17 @@ func performTaskEveryHourSince(startDate: Date, task: @escaping (Date) async thr
 }
 
 func fetchHistorySchedules() async {
-    let indicatorId = UUID().uuidString
-    Indicators.shared.display(.init(id: indicatorId, title: "正在获取历史日程", progress: 0))
+    // 使用全局任务组ID，所有任务共享同一个indicator
+    let groupId = Indicators.globalTaskGroupId
+    let indicatorId = await Indicators.shared.acquireSharedIndicator(
+        groupId: groupId,
+        title: "正在获取历史日程",
+        icon: .progressIndicator
+    )
+    
+    // 注册子任务
+    await Indicators.shared.registerSubTask(groupId: groupId, taskName: "获取赛程-获取历史日程")
+    
     await performTaskEveryHourSince(startDate: getCoopEarliestPlayedTime()) { date in
         let api = Splatoon3InkAPI.historySchedule(date)
         let (data, _) = try await URLSession.shared.data(for: api.request)
@@ -45,10 +54,15 @@ func fetchHistorySchedules() async {
         try await SplatDatabase.shared.dbQueue.write { db in
             try insertSchedules(json: json, db: db)
         }
-    } progress: { date in
-        Indicators.shared.updateProgress(for: indicatorId, progress: date)
-        if date == 1.0 {
-            Indicators.shared.dismiss(with: indicatorId)
+    } progress: { progress in
+        // 更新进度
+        await Indicators.shared.updateTaskProgress(groupId: groupId, progress: progress)
+        
+        if progress == 1.0 {
+            // 完成子任务
+            await Indicators.shared.completeSubTask(groupId: groupId, taskName: "获取赛程-获取历史日程")
+            // 完成任务组（只有在没有其他活跃任务时才真正完成）
+            await Indicators.shared.completeTaskGroup(groupId: groupId, success: true, message: "获取历史日程完成")
         }
     }
 }

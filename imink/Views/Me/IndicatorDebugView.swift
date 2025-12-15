@@ -102,7 +102,8 @@ struct IndicatorDebugView: View {
     
     /// 测试多个子任务
     private func testMultipleSubTasks() {
-        let groupId = "test-multiple-\(UUID().uuidString)"
+        // 使用全局任务组ID，所有任务共享同一个indicator
+        let groupId = Indicators.globalTaskGroupId
         currentGroupId = groupId
         
         Task { @MainActor in
@@ -134,7 +135,8 @@ struct IndicatorDebugView: View {
     
     /// 测试延迟 Dismiss 机制
     private func testDelayedDismiss() {
-        let groupId = "test-delayed-\(UUID().uuidString)"
+        // 使用全局任务组ID，所有任务共享同一个indicator
+        let groupId = Indicators.globalTaskGroupId
         currentGroupId = groupId
         
         Task { @MainActor in
@@ -164,7 +166,8 @@ struct IndicatorDebugView: View {
     
     /// 测试任务组取消
     private func testTaskGroupCancellation() {
-        let groupId = "test-cancel-\(UUID().uuidString)"
+        // 使用全局任务组ID，所有任务共享同一个indicator
+        let groupId = Indicators.globalTaskGroupId
         currentGroupId = groupId
         
         Task { @MainActor in
@@ -185,7 +188,8 @@ struct IndicatorDebugView: View {
     
     /// 测试实时任务（后台执行）
     private func testRealtimeTask() {
-        let groupId = "test-realtime-\(UUID().uuidString)"
+        // 使用全局任务组ID，所有任务共享同一个indicator
+        let groupId = Indicators.globalTaskGroupId
         currentGroupId = groupId
         
         Task { @MainActor in
@@ -210,7 +214,8 @@ struct IndicatorDebugView: View {
     /// 测试实时任务 + Live Activity
     @available(iOS 16.1, *)
     private func testRealtimeTaskWithLiveActivity() {
-        let groupId = "test-realtime-la-\(UUID().uuidString)"
+        // 使用全局任务组ID，所有任务共享同一个indicator
+        let groupId = Indicators.globalTaskGroupId
         currentGroupId = groupId
         
         Task { @MainActor in
@@ -235,7 +240,8 @@ struct IndicatorDebugView: View {
     /// 测试启动 Live Activity
     @available(iOS 16.1, *)
     private func testStartLiveActivity() {
-        let groupId = "test-la-start-\(UUID().uuidString)"
+        // 使用全局任务组ID，所有任务共享同一个indicator
+        let groupId = Indicators.globalTaskGroupId
         currentGroupId = groupId
         
         Task { @MainActor in

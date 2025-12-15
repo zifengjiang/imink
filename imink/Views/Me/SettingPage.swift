@@ -244,8 +244,8 @@ struct SettingPage: View {
                     
                     Button {
                         Task { @MainActor in
-                            // 使用实时任务功能，支持后台执行
-                            let groupId = "manual-refresh-\(UUID().uuidString)"
+                            // 使用全局任务组ID，所有任务共享同一个indicator
+                            let groupId = Indicators.globalTaskGroupId
                             _ = Indicators.shared.startRealtimeTask(
                                 groupId: groupId,
                                 title: "正在刷新数据",
@@ -256,16 +256,16 @@ struct SettingPage: View {
                             await NSOAccountManager.shared.refreshGameServiceTokenIfNeeded()
                             
                             // 获取对战记录
-                            await Indicators.shared.registerSubTask(groupId: groupId, taskName: "获取对战记录")
+                            await Indicators.shared.registerSubTask(groupId: groupId, taskName: "手动刷新-获取对战记录")
                             _ = await SN3Client.shared.fetchBattles(groupId: groupId)
-                            await Indicators.shared.completeSubTask(groupId: groupId, taskName: "获取对战记录")
+                            await Indicators.shared.completeSubTask(groupId: groupId, taskName: "手动刷新-获取对战记录")
                             
                             // 获取鲑鱼跑记录
-                            await Indicators.shared.registerSubTask(groupId: groupId, taskName: "获取鲑鱼跑记录")
+                            await Indicators.shared.registerSubTask(groupId: groupId, taskName: "手动刷新-获取鲑鱼跑记录")
                             _ = await SN3Client.shared.fetchCoops(groupId: groupId)
-                            await Indicators.shared.completeSubTask(groupId: groupId, taskName: "获取鲑鱼跑记录")
+                            await Indicators.shared.completeSubTask(groupId: groupId, taskName: "手动刷新-获取鲑鱼跑记录")
                             
-                            // 完成任务组
+                            // 完成任务组（只有在没有其他活跃任务时才真正完成）
                             await Indicators.shared.completeTaskGroup(groupId: groupId, success: true, message: "刷新完成")
                         }
                     } label: {

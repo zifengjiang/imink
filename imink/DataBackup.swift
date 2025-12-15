@@ -416,33 +416,53 @@ struct ProgressTracker {
 
 extension DataBackup {
     static func `import`(url: URL) {
-        let progressIndicatorId = UUID().uuidString
-        Indicators.shared.display(.init(id: progressIndicatorId, title: "正在导入数据", progress: 0))
+        // 使用全局任务组ID，所有任务共享同一个indicator
+        let groupId = Indicators.globalTaskGroupId
+        
+        Task { @MainActor in
+            let indicatorId = await Indicators.shared.acquireSharedIndicator(
+                groupId: groupId,
+                title: "正在导入数据",
+                icon: .progressIndicator
+            )
+            
+            // 注册子任务
+            await Indicators.shared.registerSubTask(groupId: groupId, taskName: "数据导入-导入数据")
+            
+            var progressTracker = ProgressTracker()
 
-        var progressTracker = ProgressTracker()
-
-        DataBackup.shared.import(url: url) { progress, error in
-            if let remainingTime = progressTracker.update(progress: progress.value) {
-                let remainingTimeString = formatTimeInterval(remainingTime)
-                Indicators.shared.updateProgress(for: progressIndicatorId, progress: progress.value)
-                Indicators.shared.updateSubtitle(for: progressIndicatorId, subtitle: "预计剩余时间: \(remainingTimeString)")
-                // 根据导入类型显示不同的信息
-                if progress.importDatabaseTotalCount > 0 {
-                    // 数据库导入
-                    Indicators.shared.updateExpandedText(for: progressIndicatorId, expandedText: "已导入\(Int(progress.importDatabaseCoopCount))个打工记录，\(Int(progress.importDatabaseBattleCount))个对战记录")
-                } else {
-                    // ZIP导入
-                    Indicators.shared.updateExpandedText(for: progressIndicatorId, expandedText: "已导入\(Int(progress.importJobsProgress))个打工记录，\(Int(progress.importBattlesProgress))个对战记录")
+            DataBackup.shared.import(url: url) { progress, error in
+                Task { @MainActor in
+                    if let remainingTime = progressTracker.update(progress: progress.value) {
+                        let remainingTimeString = formatTimeInterval(remainingTime)
+                        // 更新进度
+                        await Indicators.shared.updateTaskProgress(groupId: groupId, progress: progress.value)
+                        Indicators.shared.updateSubtitle(for: indicatorId, subtitle: "预计剩余时间: \(remainingTimeString)")
+                        // 根据导入类型显示不同的信息
+                        if progress.importDatabaseTotalCount > 0 {
+                            // 数据库导入
+                            Indicators.shared.updateExpandedText(for: indicatorId, expandedText: "已导入\(Int(progress.importDatabaseCoopCount))个打工记录，\(Int(progress.importDatabaseBattleCount))个对战记录")
+                        } else {
+                            // ZIP导入
+                            Indicators.shared.updateExpandedText(for: indicatorId, expandedText: "已导入\(Int(progress.importJobsProgress))个打工记录，\(Int(progress.importBattlesProgress))个对战记录")
+                        }
+                    } else {
+                        // 更新进度
+                        await Indicators.shared.updateTaskProgress(groupId: groupId, progress: progress.value)
+                    }
+                    
+                    if let error = error {
+                        // 完成子任务
+                        await Indicators.shared.completeSubTask(groupId: groupId, taskName: "数据导入-导入数据")
+                        // 完成任务组（只有在没有其他活跃任务时才真正完成）
+                        await Indicators.shared.completeTaskGroup(groupId: groupId, success: false, message: "导入失败: \(error.localizedDescription)")
+                    } else if progress.value == 1 {
+                        // 完成子任务
+                        await Indicators.shared.completeSubTask(groupId: groupId, taskName: "数据导入-导入数据")
+                        // 完成任务组（只有在没有其他活跃任务时才真正完成）
+                        await Indicators.shared.completeTaskGroup(groupId: groupId, success: true, message: "导入成功: 成功导入\(progress.count)个记录")
+                    }
                 }
-            } else {
-                Indicators.shared.updateProgress(for: progressIndicatorId, progress: progress.value)
-            }
-            if let error = error {
-                Indicators.shared.dismiss(with: progressIndicatorId)
-                Indicators.shared.display(.init(id: UUID().uuidString, icon: .systemImage("xmark.circle.fill"), title: "导入失败",subtitle: error.localizedDescription, dismissType: .after(5),style: .error))
-            } else if progress.value == 1 {
-                Indicators.shared.dismiss(with: progressIndicatorId)
-                Indicators.shared.display(.init(id: UUID().uuidString, icon: .systemImage("checkmark.circle.fill"), title: "导入成功",subtitle: "成功导入\(progress.count)个记录", dismissType: .after(10)))
             }
         }
     }

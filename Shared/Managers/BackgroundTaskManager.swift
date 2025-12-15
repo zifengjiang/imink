@@ -175,8 +175,8 @@ final class BackgroundTaskManager: ObservableObject {
     private func performBackgroundDataRefresh() async {
         logger.info("开始后台数据刷新")
         
-        // 创建任务组，统一管理多个刷新任务
-        let groupId = "background-refresh-\(UUID().uuidString)"
+        // 使用全局任务组ID，所有任务共享同一个indicator
+        let groupId = Indicators.globalTaskGroupId
         await Indicators.shared.acquireSharedIndicator(
             groupId: groupId,
             title: "正在刷新数据",
@@ -190,18 +190,18 @@ final class BackgroundTaskManager: ObservableObject {
         await NSOAccountManager.shared.refreshGameServiceTokenIfNeeded()
         
         // 获取对战记录
-        await Indicators.shared.registerSubTask(groupId: groupId, taskName: "获取对战记录")
+        await Indicators.shared.registerSubTask(groupId: groupId, taskName: "数据刷新-获取对战记录")
         let battlesCount = await SN3Client.shared.fetchBattles(groupId: groupId) ?? 0
-        await Indicators.shared.completeSubTask(groupId: groupId, taskName: "获取对战记录")
+        await Indicators.shared.completeSubTask(groupId: groupId, taskName: "数据刷新-获取对战记录")
         totalNewData += battlesCount
         
         // 获取鲑鱼跑记录
-        await Indicators.shared.registerSubTask(groupId: groupId, taskName: "获取鲑鱼跑记录")
+        await Indicators.shared.registerSubTask(groupId: groupId, taskName: "数据刷新-获取鲑鱼跑记录")
         let coopsCount = await SN3Client.shared.fetchCoops(groupId: groupId) ?? 0
-        await Indicators.shared.completeSubTask(groupId: groupId, taskName: "获取鲑鱼跑记录")
+        await Indicators.shared.completeSubTask(groupId: groupId, taskName: "数据刷新-获取鲑鱼跑记录")
         totalNewData += coopsCount
         
-        // 完成任务组
+        // 完成任务组（只有在没有其他活跃任务时才真正完成）
         let message = totalNewData > 0 ? "成功加载 \(totalNewData) 个新纪录" : "没有新纪录"
         await Indicators.shared.completeTaskGroup(groupId: groupId, success: success, message: message)
         
