@@ -24,6 +24,7 @@ class IndicatorTaskGroup {
     var allowBackgroundExecution: Bool  // 是否允许后台执行
     var liveActivityToken: String?  // Live Activity 的 token
     var backgroundTaskIdentifier: UIBackgroundTaskIdentifier?  // 后台任务标识符
+    var pendingDismissTask: Task<Void, Never>?  // 延迟dismiss任务
     
     init(
         id: String,

@@ -164,6 +164,12 @@ public extension Indicators {
     func registerSubTask(groupId: String, taskName: String) {
         guard let taskGroup = taskGroups[groupId] else { return }
         
+        // 如果有待处理的延迟dismiss任务，取消它（因为新任务来了）
+        if let pendingTask = taskGroup.pendingDismissTask {
+            pendingTask.cancel()
+            taskGroup.pendingDismissTask = nil
+        }
+        
         taskGroup.activeTasks.insert(taskName)
         updateGroupTitle(groupId: groupId)
         
@@ -184,6 +190,50 @@ public extension Indicators {
         taskGroup.activeTasks.remove(taskName)
         taskGroup.completedTasks.insert(taskName)
         updateGroupTitle(groupId: groupId)
+        
+        // 如果支持 Live Activity，更新 Live Activity
+        if taskGroup.supportsLiveActivity {
+            updateLiveActivity(for: groupId)
+        }
+        
+        // 如果所有任务都完成了，启动延迟dismiss检查
+        if taskGroup.activeTasks.isEmpty {
+            scheduleDelayedDismissCheck(for: groupId)
+        }
+    }
+    
+    /// 调度延迟dismiss检查
+    /// - Parameter groupId: 任务组ID
+    /// - Note: 延迟1.5秒后检查，如果确实没有活跃任务且任务组已完成，更新为完成状态
+    ///   但不自动dismiss，等待 completeTaskGroup 显式调用
+    @MainActor
+    private func scheduleDelayedDismissCheck(for groupId: String) {
+        guard let taskGroup = taskGroups[groupId] else { return }
+        
+        // 取消之前的延迟dismiss任务（如果有）
+        taskGroup.pendingDismissTask?.cancel()
+        
+        // 创建新的延迟dismiss任务
+        taskGroup.pendingDismissTask = Task { @MainActor [weak self] in
+            // 等待1.5秒
+            try? await Task.sleep(nanoseconds: 1_500_000_000) // 1.5秒
+            
+            // 检查任务组是否还存在，以及是否确实没有活跃任务
+            guard let self = self,
+                  let taskGroup = self.taskGroups[groupId] else { return }
+            
+            // 再次检查：如果确实没有活跃任务且任务组已完成
+            if taskGroup.activeTasks.isEmpty && taskGroup.isCompleted() {
+                // 更新indicator为完成状态，但不自动dismiss
+                // 等待 completeTaskGroup 显式调用来dismiss
+                // 这样可以避免在短时间内多个任务完成时频繁创建/销毁indicator
+                self.updateTitle(for: taskGroup.indicatorId, title: "\(taskGroup.title)完成")
+                self.updateIcon(for: taskGroup.indicatorId, icon: .success)
+            }
+            
+            // 清理延迟dismiss任务引用
+            taskGroup.pendingDismissTask = nil
+        }
     }
     
     /// 更新任务组 Indicator 的标题（自动聚合所有子任务状态）
@@ -201,6 +251,18 @@ public extension Indicators {
         }
     }
     
+    /// 更新 Live Activity（内部方法）
+    /// - Parameter groupId: 任务组ID
+    @MainActor
+    private func updateLiveActivity(for groupId: String) {
+        guard let taskGroup = taskGroups[groupId],
+              taskGroup.supportsLiveActivity else { return }
+        
+        if #available(iOS 16.1, *) {
+            liveActivityManager.updateActivity(for: taskGroup)
+        }
+    }
+    
     /// 更新任务进度
     /// - Parameters:
     ///   - groupId: 任务组ID
@@ -211,6 +273,11 @@ public extension Indicators {
         
         taskGroup.progress = max(0.0, min(1.0, progress))
         updateProgress(for: taskGroup.indicatorId, progress: taskGroup.progress!)
+        
+        // 如果支持 Live Activity，更新 Live Activity
+        if taskGroup.supportsLiveActivity {
+            updateLiveActivity(for: groupId)
+        }
     }
     
     /// 完成整个任务组
@@ -243,8 +310,27 @@ public extension Indicators {
             updateIcon(for: taskGroup.indicatorId, icon: .image(Image(systemName: "xmark.circle.fill")))
         }
         
+        // 如果支持 Live Activity，结束 Live Activity
+        if taskGroup.supportsLiveActivity {
+            let finalState = TaskGroupActivityAttributes.ContentState(
+                title: finalTitle,
+                subtitle: taskGroup.generateSubtitle(),
+                progress: taskGroup.progress ?? 1.0,
+                activeTasks: [],
+                completedTasks: Array(taskGroup.completedTasks),
+                status: success ? .completed : .failed
+            )
+            if #available(iOS 16.1, *) {
+                liveActivityManager.endActivity(for: taskGroup, finalState: finalState)
+            }
+        }
+        
         // 延迟关闭 Indicator（确保所有任务都已完成）
         dismiss(with: taskGroup.indicatorId, after: success ? 2 : 3)
+        
+        // 取消任何待处理的延迟dismiss任务
+        taskGroup.pendingDismissTask?.cancel()
+        taskGroup.pendingDismissTask = nil
         
         // 清理任务组（延迟清理，避免频繁创建/销毁）
         Task {
@@ -277,6 +363,13 @@ public extension Indicators {
         
         // 申请后台执行时间
         startBackgroundTask(for: groupId)
+        
+        // 启动 Live Activity（如果可用）
+        if let taskGroup = taskGroups[groupId], taskGroup.supportsLiveActivity {
+            if #available(iOS 16.1, *) {
+                _ = liveActivityManager.startActivity(for: taskGroup)
+            }
+        }
         
         return indicatorId
     }
@@ -345,10 +438,12 @@ public extension Indicators {
                 startBackgroundTask(for: groupId)
             }
             
-            // TODO: 如果支持 Live Activity，启动 Live Activity
-            // if taskGroup.supportsLiveActivity {
-            //     liveActivityManager?.startActivity(for: taskGroup)
-            // }
+            // 如果支持 Live Activity，启动 Live Activity
+            if taskGroup.supportsLiveActivity {
+                if #available(iOS 16.1, *) {
+                    _ = liveActivityManager.startActivity(for: taskGroup)
+                }
+            }
         }
     }
     
@@ -368,11 +463,13 @@ public extension Indicators {
                 endBackgroundTask(for: groupId)
             }
             
-            // TODO: 如果支持 Live Activity，同步状态并关闭
-            // if taskGroup.supportsLiveActivity {
-            //     liveActivityManager?.syncFromActivity(to: taskGroup)
-            //     liveActivityManager?.endActivity(for: taskGroup)
-            // }
+            // 如果支持 Live Activity，同步状态并关闭
+            if taskGroup.supportsLiveActivity {
+                if #available(iOS 16.1, *) {
+                    liveActivityManager.syncFromActivity(to: taskGroup)
+                    liveActivityManager.endActivity(for: taskGroup)
+                }
+            }
         }
     }
 }

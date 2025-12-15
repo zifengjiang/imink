@@ -12,6 +12,7 @@
 		0A4B54C42EEEA74F003FDBF7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BAD2C1C2E5B4FC600DE9952 /* SwiftUI.framework */; };
 		0A4B54D52EEEA750003FDBF7 /* liveWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 0A4B54C22EEEA74E003FDBF7 /* liveWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		0A4B54FE2EEEA868003FDBF7 /* IndicatorTaskGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A4B54FD2EEEA868003FDBF7 /* IndicatorTaskGroup.swift */; };
+		0A4B55002EEEA9F6003FDBF7 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A4B54FF2EEEA9F6003FDBF7 /* LiveActivityManager.swift */; };
 		0A6035BF2E6AC02100B4B460 /* CoopDetailContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A6035BE2E6AC02100B4B460 /* CoopDetailContainer.swift */; };
 		0AA478C32E72781D00E8499D /* OrientationTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA478C22E72781D00E8499D /* OrientationTestView.swift */; };
 		0AA478D62E74094700E8499D /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 0AA478D52E74094700E8499D /* Kingfisher */; };
@@ -245,6 +246,7 @@
 		0A2C668B2E682CAF00F1FB81 /* CoopPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopPlayerView.swift; sourceTree = "<group>"; };
 		0A4B54C22EEEA74E003FDBF7 /* liveWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = liveWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		0A4B54FD2EEEA868003FDBF7 /* IndicatorTaskGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndicatorTaskGroup.swift; sourceTree = "<group>"; };
+		0A4B54FF2EEEA9F6003FDBF7 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
 		0A6035BE2E6AC02100B4B460 /* CoopDetailContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopDetailContainer.swift; sourceTree = "<group>"; };
 		0AA478C22E72781D00E8499D /* OrientationTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationTestView.swift; sourceTree = "<group>"; };
 		0AA478D72E74096400E8499D /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
@@ -456,10 +458,31 @@
 			);
 			target = 0A4B54C12EEEA74E003FDBF7 /* liveWidgetExtension */;
 		};
+		0A4B55042EEEAA32003FDBF7 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				liveWidgetLiveActivity.swift,
+			);
+			target = 8B7F29252BF6E1B90010A525 /* imink */;
+		};
+		0A4B55052EEEAA32003FDBF7 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				liveWidgetLiveActivity.swift,
+			);
+			target = 8B7F29352BF6E1BB0010A525 /* iminkTests */;
+		};
+		0A4B55062EEEAA32003FDBF7 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				liveWidgetLiveActivity.swift,
+			);
+			target = 8B7F293F2BF6E1BB0010A525 /* iminkUITests */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		0A4B54C52EEEA74F003FDBF7 /* liveWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (0A4B54D82EEEA750003FDBF7 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = liveWidget; sourceTree = "<group>"; };
+		0A4B54C52EEEA74F003FDBF7 /* liveWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (0A4B55042EEEAA32003FDBF7 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 0A4B55052EEEAA32003FDBF7 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 0A4B55062EEEAA32003FDBF7 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 0A4B54D82EEEA750003FDBF7 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = liveWidget; sourceTree = "<group>"; };
 		8B19CF932CB3BD4000EF4424 /* Views */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Views; sourceTree = "<group>"; };
 		8B65636F2CB15DC40017F5D0 /* App */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = App; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -516,6 +539,7 @@
 		8B0D14852BFA212400B82AD1 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				0A4B54FF2EEEA9F6003FDBF7 /* LiveActivityManager.swift */,
 				8BD548DC2E483C69005B8F27 /* TaskManager.swift */,
 				8B4BF1FF2E59ECDF007A8B05 /* NotificationManager.swift */,
 				8B4BF2032E59F17C007A8B05 /* ScheduleSubscriptionManager.swift */,
@@ -1281,6 +1305,7 @@
 				8BF3CB492CD4B29300B0FCA9 /* IndicatorView.swift in Sources */,
 				8BF3CB4A2CD4B29300B0FCA9 /* Indicator.swift in Sources */,
 				8BF3CB4B2CD4B29300B0FCA9 /* View+indicatorOverlay.swift in Sources */,
+				0A4B55002EEEA9F6003FDBF7 /* LiveActivityManager.swift in Sources */,
 				8BFE91742C0DEA3D00C12CBE /* RangeSlider.swift in Sources */,
 				0AC00D832E6710F600F82E5A /* TimeRangeSlider.swift in Sources */,
 				8BE095112C035B000089705F /* CoopShiftDetailView.swift in Sources */,
@@ -1420,6 +1445,7 @@
 				INFOPLIST_FILE = liveWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = liveWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1451,6 +1477,7 @@
 				INFOPLIST_FILE = liveWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = liveWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

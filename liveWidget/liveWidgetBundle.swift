@@ -14,5 +14,6 @@ struct liveWidgetBundle: WidgetBundle {
         liveWidget()
         liveWidgetControl()
         liveWidgetLiveActivity()
+        TaskGroupLiveActivity()
     }
 }
