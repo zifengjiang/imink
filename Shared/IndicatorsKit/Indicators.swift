@@ -22,6 +22,11 @@ public final class Indicators {
 	// MARK: - Task Group Management
 	internal var taskGroups: [String: IndicatorTaskGroup] = [:]
 	internal var liveActivityManager: LiveActivityManager = LiveActivityManager.shared
+	
+	/// 获取当前任务组数量（用于调试）
+	public var taskGroupCount: Int {
+		taskGroups.count
+	}
 
 	public init() { }
 

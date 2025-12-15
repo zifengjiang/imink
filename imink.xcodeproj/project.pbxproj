@@ -13,6 +13,7 @@
 		0A4B54D52EEEA750003FDBF7 /* liveWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 0A4B54C22EEEA74E003FDBF7 /* liveWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		0A4B54FE2EEEA868003FDBF7 /* IndicatorTaskGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A4B54FD2EEEA868003FDBF7 /* IndicatorTaskGroup.swift */; };
 		0A4B55002EEEA9F6003FDBF7 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A4B54FF2EEEA9F6003FDBF7 /* LiveActivityManager.swift */; };
+		0A4B65E82EEFDCC1003FDBF7 /* IndicatorDebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A4B65E72EEFDCC1003FDBF7 /* IndicatorDebugView.swift */; };
 		0A6035BF2E6AC02100B4B460 /* CoopDetailContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A6035BE2E6AC02100B4B460 /* CoopDetailContainer.swift */; };
 		0AA478C32E72781D00E8499D /* OrientationTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA478C22E72781D00E8499D /* OrientationTestView.swift */; };
 		0AA478D62E74094700E8499D /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 0AA478D52E74094700E8499D /* Kingfisher */; };
@@ -247,6 +248,7 @@
 		0A4B54C22EEEA74E003FDBF7 /* liveWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = liveWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		0A4B54FD2EEEA868003FDBF7 /* IndicatorTaskGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndicatorTaskGroup.swift; sourceTree = "<group>"; };
 		0A4B54FF2EEEA9F6003FDBF7 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
+		0A4B65E72EEFDCC1003FDBF7 /* IndicatorDebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndicatorDebugView.swift; sourceTree = "<group>"; };
 		0A6035BE2E6AC02100B4B460 /* CoopDetailContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopDetailContainer.swift; sourceTree = "<group>"; };
 		0AA478C22E72781D00E8499D /* OrientationTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationTestView.swift; sourceTree = "<group>"; };
 		0AA478D72E74096400E8499D /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
@@ -754,6 +756,7 @@
 		8B8B287D2BF88BCA00790809 /* Me */ = {
 			isa = PBXGroup;
 			children = (
+				0A4B65E72EEFDCC1003FDBF7 /* IndicatorDebugView.swift */,
 				8B3591442BF893D60066BCA3 /* MePage.swift */,
 				8BC2B0AB2E6D4697009ACFE8 /* EditableNameplateView.swift */,
 				8BC2B0AD2E6D46A0009ACFE8 /* BadgeSelectorView.swift */,
@@ -1220,6 +1223,7 @@
 				8BF3CB622CD4B61900B0FCA9 /* AuthorizationMemoryStorage.swift in Sources */,
 				8BF3CB632CD4B61900B0FCA9 /* BulletTokens.swift in Sources */,
 				8B5A77ED2CFDACEA00B34BDC /* CoopSummary.swift in Sources */,
+				0A4B65E82EEFDCC1003FDBF7 /* IndicatorDebugView.swift in Sources */,
 				8BF3CB642CD4B61900B0FCA9 /* GraphQLRequestBody.swift in Sources */,
 				8BF3CB652CD4B61900B0FCA9 /* Logging.swift in Sources */,
 				8BF3CB662CD4B61900B0FCA9 /* SN3Client.swift in Sources */,

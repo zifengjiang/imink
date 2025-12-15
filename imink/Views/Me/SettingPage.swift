@@ -347,6 +347,14 @@ struct SettingPage: View {
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                 }
+                
+                #if DEBUG
+                Section("开发测试") {
+                    NavigationLink("Indicator Debug") {
+                        IndicatorDebugView()
+                    }
+                }
+                #endif
 
                 Section(header: Text("日程订阅和提醒")) {
                     Toggle("启用日程提醒", isOn: $subscriptionManager.notificationSettings.isEnabled)
