@@ -102,8 +102,7 @@ struct IndicatorDebugView: View {
     
     /// 测试多个子任务
     private func testMultipleSubTasks() {
-        // 使用全局任务组ID，所有任务共享同一个indicator
-        let groupId = Indicators.globalTaskGroupId
+        let groupId = "test-multiple-\(UUID().uuidString)"
         currentGroupId = groupId
         
         Task { @MainActor in
@@ -135,8 +134,7 @@ struct IndicatorDebugView: View {
     
     /// 测试延迟 Dismiss 机制
     private func testDelayedDismiss() {
-        // 使用全局任务组ID，所有任务共享同一个indicator
-        let groupId = Indicators.globalTaskGroupId
+        let groupId = "test-delayed-\(UUID().uuidString)"
         currentGroupId = groupId
         
         Task { @MainActor in
@@ -166,8 +164,7 @@ struct IndicatorDebugView: View {
     
     /// 测试任务组取消
     private func testTaskGroupCancellation() {
-        // 使用全局任务组ID，所有任务共享同一个indicator
-        let groupId = Indicators.globalTaskGroupId
+        let groupId = "test-cancel-\(UUID().uuidString)"
         currentGroupId = groupId
         
         Task { @MainActor in
@@ -188,8 +185,7 @@ struct IndicatorDebugView: View {
     
     /// 测试实时任务（后台执行）
     private func testRealtimeTask() {
-        // 使用全局任务组ID，所有任务共享同一个indicator
-        let groupId = Indicators.globalTaskGroupId
+        let groupId = "test-realtime-\(UUID().uuidString)"
         currentGroupId = groupId
         
         Task { @MainActor in
@@ -214,8 +210,7 @@ struct IndicatorDebugView: View {
     /// 测试实时任务 + Live Activity
     @available(iOS 16.1, *)
     private func testRealtimeTaskWithLiveActivity() {
-        // 使用全局任务组ID，所有任务共享同一个indicator
-        let groupId = Indicators.globalTaskGroupId
+        let groupId = "test-realtime-la-\(UUID().uuidString)"
         currentGroupId = groupId
         
         Task { @MainActor in
@@ -240,8 +235,7 @@ struct IndicatorDebugView: View {
     /// 测试启动 Live Activity
     @available(iOS 16.1, *)
     private func testStartLiveActivity() {
-        // 使用全局任务组ID，所有任务共享同一个indicator
-        let groupId = Indicators.globalTaskGroupId
+        let groupId = "test-la-start-\(UUID().uuidString)"
         currentGroupId = groupId
         
         Task { @MainActor in

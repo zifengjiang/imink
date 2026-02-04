@@ -177,8 +177,6 @@ extension SN3Client {
 extension SN3Client {
     @discardableResult
     func fetchCoops(groupId: String? = nil) async -> Int?{
-        // 如果没有提供groupId，使用全局任务组ID（默认使用共享indicator）
-        let finalGroupId = groupId ?? Indicators.globalTaskGroupId
         return await runPipeline(
             flag: .isFetchingCoops,
             refreshInterval: 300,
@@ -216,14 +214,12 @@ extension SN3Client {
                 }
                 return results.count
             },
-            groupId: finalGroupId,
-            taskName: "数据刷新-获取鲑鱼跑记录"
+            groupId: groupId,
+            taskName: groupId != nil ? "获取鲑鱼跑记录" : nil
         )
     }
     @discardableResult
     func fetchBattles(groupId: String? = nil) async -> Int?{
-        // 如果没有提供groupId，使用全局任务组ID（默认使用共享indicator）
-        let finalGroupId = groupId ?? Indicators.globalTaskGroupId
         return await runPipeline(
             flag: .isFetchingBattles,
             refreshInterval: 300,
@@ -275,8 +271,8 @@ extension SN3Client {
                 }
                 return results.count
             },
-            groupId: finalGroupId,
-            taskName: "数据刷新-获取对战记录"
+            groupId: groupId,
+            taskName: groupId != nil ? "获取对战记录" : nil
         )
     }
 
