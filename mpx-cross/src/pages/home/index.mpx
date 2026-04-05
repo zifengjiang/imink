@@ -1,0 +1,29 @@
+<template>
+  <view>
+    <view class="card">
+      <view class="title">主页（来自 HomePage.swift）</view>
+      <view>当前日程数：{{schedules.length}}</view>
+      <button @tap="toSwiftIndex">查看全部 Swift 页面映射</button>
+    </view>
+  </view>
+</template>
+
+<script>
+  import { fetchSchedules } from '../../api/game'
+  export default {
+    data: { schedules: [] },
+    async onShow() {
+      try {
+        const data = await fetchSchedules()
+        this.schedules = data.items || []
+      } catch (e) {
+        console.warn(e)
+      }
+    },
+    methods: {
+      toSwiftIndex() {
+        mpx.navigateTo({ url: '/pages/swift-index/index' })
+      }
+    }
+  }
+</script>

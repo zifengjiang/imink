@@ -1,0 +1,9 @@
+{
+  "name": "imink-mpx",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo '请使用你现有的 mpx 脚手架接入 src 目录（此仓库仅提供迁移后的业务代码模板）'",
+    "lint": "echo 'no lint config'"
+  }
+}

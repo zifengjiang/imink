@@ -1,0 +1,16 @@
+<template>
+  <view class="card">
+    <view class="title">对战记录（BattleListView.swift）</view>
+    <view wx:for="{{battles}}" wx:key="id">{{item.rule}} - {{item.result}}</view>
+  </view>
+</template>
+<script>
+  import { fetchBattles } from '../../api/game'
+  export default {
+    data: { battles: [] },
+    async onShow() {
+      const data = await fetchBattles()
+      this.battles = data.items || []
+    }
+  }
+</script>

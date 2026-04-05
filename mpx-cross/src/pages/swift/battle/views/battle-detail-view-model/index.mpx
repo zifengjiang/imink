@@ -1,0 +1,10 @@
+<template>
+  <view class="card">
+    <view class="title">BattleDetailViewModel</view>
+    <view>来源: Battle/Views/BattleDetailViewModel.swift</view>
+    <view>说明: 该页面为从 SwiftUI 迁移到 MPX 的占位页面，后续按业务继续填充交互和图表。</view>
+  </view>
+</template>
+<script>
+export default {}
+</script>

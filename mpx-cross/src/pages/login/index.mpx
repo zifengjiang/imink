@@ -1,0 +1,33 @@
+<template>
+  <view class="card">
+    <view class="title">登录 imink</view>
+    <input placeholder="用户名" model:value="form.username" />
+    <input password placeholder="密码" model:value="form.password" />
+    <button type="primary" @tap="handleLogin">登录</button>
+    <view wx:if="error" style="color:#d33;margin-top:12rpx;">{{error}}</view>
+  </view>
+</template>
+
+<script>
+  import { login } from '../../api/auth'
+  import { setToken } from '../../utils/storage'
+
+  export default {
+    data: {
+      form: { username: 'demo', password: 'demo123456' },
+      error: ''
+    },
+    methods: {
+      async handleLogin() {
+        this.error = ''
+        try {
+          const res = await login(this.form)
+          setToken(res.token)
+          mpx.switchTab({ url: '/pages/home/index' })
+        } catch (e) {
+          this.error = e.message || '登录失败'
+        }
+      }
+    }
+  }
+</script>
