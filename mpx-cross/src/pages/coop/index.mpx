@@ -1,0 +1,16 @@
+<template>
+  <view class="card">
+    <view class="title">鲑鱼跑记录（CoopListView.swift）</view>
+    <view wx:for="{{coops}}" wx:key="id">{{item.stage}} - {{item.dangerRate}}%</view>
+  </view>
+</template>
+<script>
+  import { fetchCoops } from '../../api/game'
+  export default {
+    data: { coops: [] },
+    async onShow() {
+      const data = await fetchCoops()
+      this.coops = data.items || []
+    }
+  }
+</script>
