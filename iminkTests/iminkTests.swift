@@ -82,4 +82,10 @@ final class iminkTests: XCTestCase {
         XCTAssertTrue(selection.selectedIds.isEmpty)
     }
 
+    func testRecordBatchOperationServiceBatchesIds() {
+        let batches = RecordBatchOperationService.batches([1, 2, 3, 4, 5], batchSize: 2)
+
+        XCTAssertEqual(batches, [[1, 2], [3, 4], [5]])
+    }
+
 }

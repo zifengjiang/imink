@@ -1,5 +1,4 @@
 import SwiftUI
-import SplatDatabase
 
 struct CoopListView: View {
     @EnvironmentObject var mainViewModel: MainViewModel
@@ -203,15 +202,7 @@ struct CoopListView: View {
 
         Task {
             do {
-                for coopId in selectedCoopIds {
-                    if let actualCoop = try await SplatDatabase.shared.dbQueue.read({ db in
-                        try Coop.fetchOne(db, key: coopId)
-                    }) {
-                        try actualCoop.toggleFavorite()
-                    }
-                }
-                
-                NotificationCenter.default.post(name: .coopDataChanged, object: nil)
+                try await viewModel.toggleFavorites(ids: selectedCoopIds)
                 selection.cancel()
             } catch {
                 print("Error batch toggling favorites: \(error)")
@@ -250,30 +241,13 @@ struct CoopListView: View {
                     ))
                 }
                 
-                // 批量处理，减少数据库操作次数
-                let batchSize = 50 // 每批处理50个
-                var processedCount = 0
-                
-                for i in stride(from: 0, to: selectedCoopIds.count, by: batchSize) {
-                    let endIndex = min(i + batchSize, selectedCoopIds.count)
-                    let batch = Array(selectedCoopIds[i..<endIndex])
-                    
-                    // 批量软删除 - 直接在事务内执行SQL更新
-                    try await SplatDatabase.shared.dbQueue.write { db in
-                        for coopId in batch {
-                            try db.execute(sql: "UPDATE coop SET isDeleted = 1 WHERE id = ?", arguments: [coopId])
-                        }
-                    }
-                    
-                    processedCount += batch.count
-                    
-                    // 更新进度
+                try await viewModel.softDelete(ids: selectedCoopIds) { processedCount in
                     await MainActor.run {
-                        Indicators.shared.updateSubtitle(for: indicatorId, subtitle: "\(processedCount)/\(totalCount)")
+                        Indicators.shared.updateSubtitle(
+                            for: indicatorId,
+                            subtitle: "\(processedCount)/\(totalCount)"
+                        )
                     }
-                    
-                    // 让出控制权，避免阻塞UI
-                    await Task.yield()
                 }
                 
                 await MainActor.run {
@@ -287,7 +261,6 @@ struct CoopListView: View {
                         dismissType: .after(2)
                     ))
                     
-                    NotificationCenter.default.post(name: .coopDataChanged, object: nil)
                     selection.cancel()
                 }
             } catch {

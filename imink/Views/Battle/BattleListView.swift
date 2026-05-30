@@ -1,7 +1,4 @@
 import SwiftUI
-import SplatDatabase
-import GRDB
-
 
 struct BattleListView: View {
     @EnvironmentObject var viewModel: BattleListViewModel
@@ -141,14 +138,7 @@ struct BattleListView: View {
 
         Task {
             do {
-                try await SplatDatabase.shared.dbQueue.write { db in
-                    for battleId in selectedBattleIds {
-                        if let actualBattle = try Battle.fetchOne(db, key: battleId) {
-                            try actualBattle.toggleFavorite()
-                        }
-                    }
-                }
-                NotificationCenter.default.post(name: .battleDataChanged, object: nil)
+                try await viewModel.toggleFavorites(ids: selectedBattleIds)
                 selection.cancel()
             } catch {
                 print("Error batch toggling favorites: \(error)")
@@ -175,32 +165,13 @@ struct BattleListView: View {
                     ))
                 }
 
-                    // 批量处理，减少数据库操作次数
-                let batchSize = 50 // 每批处理50个
-                var processedCount = 0
-
-                for i in stride(from: 0, to: selectedBattleIds.count, by: batchSize) {
-                    let endIndex = min(i + batchSize, selectedBattleIds.count)
-                    let batch = Array(selectedBattleIds[i..<endIndex])
-
-                        // 批量软删除 - 直接在事务内执行SQL更新
-                    try await SplatDatabase.shared.dbQueue.write { db in
-                            // Use a single UPDATE statement with IN clause for better performance
-                        let placeholders = batch.map { _ in "?" }.joined(separator: ",")
-                        let sql = "UPDATE battle SET isDeleted = 1 WHERE id IN (\(placeholders))"
-                        let args = StatementArguments(batch)
-                        try db.execute(sql: sql, arguments: args)
-                    }
-
-                    processedCount += batch.count
-
-                        // 更新进度
+                try await viewModel.softDelete(ids: selectedBattleIds) { processedCount in
                     await MainActor.run {
-                        Indicators.shared.updateSubtitle(for: indicatorId, subtitle: "\(processedCount)/\(totalCount)")
+                        Indicators.shared.updateSubtitle(
+                            for: indicatorId,
+                            subtitle: "\(processedCount)/\(totalCount)"
+                        )
                     }
-
-                        // 让出控制权，避免阻塞UI
-                    await Task.yield()
                 }
 
                 await MainActor.run {
@@ -214,7 +185,6 @@ struct BattleListView: View {
                         dismissType: .after(2)
                     ))
 
-                    NotificationCenter.default.post(name: .battleDataChanged, object: nil)
                     selection.cancel()
                 }
             } catch {

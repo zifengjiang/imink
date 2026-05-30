@@ -133,7 +133,6 @@
 		8BA30B082CAED80E0020D489 /* Operator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA30B072CAED80E0020D489 /* Operator.swift */; };
 		8BAADA552C11C382002D6370 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 8BAADA542C11C382002D6370 /* .swiftlint.yml */; };
 		8BAADA572C128DB6002D6370 /* RightCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAADA562C128DB6002D6370 /* RightCardView.swift */; };
-		8BAD2C672E5BEDB100DE9952 /* CoopBatchOperationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAD2C662E5BEDB100DE9952 /* CoopBatchOperationView.swift */; };
 		8BAD2C6E2E5BEE0200DE9952 /* TrashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAD2C6D2E5BEE0200DE9952 /* TrashView.swift */; };
 		8BAD2C702E5BEE0A00DE9952 /* TrashViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAD2C6F2E5BEE0A00DE9952 /* TrashViewModel.swift */; };
 		8BAD2C722E5BFB5D00DE9952 /* SelectableRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAD2C712E5BFB5D00DE9952 /* SelectableRowView.swift */; };
@@ -390,7 +389,6 @@
 		8BAADA562C128DB6002D6370 /* RightCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightCardView.swift; sourceTree = "<group>"; };
 		8BAD2C1A2E5B4FC600DE9952 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		8BAD2C1C2E5B4FC600DE9952 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
-		8BAD2C662E5BEDB100DE9952 /* CoopBatchOperationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopBatchOperationView.swift; sourceTree = "<group>"; };
 		8BAD2C6D2E5BEE0200DE9952 /* TrashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrashView.swift; sourceTree = "<group>"; };
 		8BAD2C6F2E5BEE0A00DE9952 /* TrashViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrashViewModel.swift; sourceTree = "<group>"; };
 		8BAD2C712E5BFB5D00DE9952 /* SelectableRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectableRowView.swift; sourceTree = "<group>"; };
@@ -557,7 +555,6 @@
 				8B0D149D2BFAC56100B82AD1 /* CoopListShiftCardView.swift */,
 				8B1925C92E3F4A5C00BCB851 /* CoopFilterView.swift */,
 				0A6035BE2E6AC02100B4B460 /* CoopDetailContainer.swift */,
-				8BAD2C662E5BEDB100DE9952 /* CoopBatchOperationView.swift */,
 				8B0851772BFB78D800AF22C5 /* CoopDetailWaveResultView.swift */,
 				8B0D14A52BFAD93A00B82AD1 /* CoopDetailView.swift */,
 				0A2C668B2E682CAF00F1FB81 /* CoopPlayerView.swift */,
@@ -1313,7 +1310,6 @@
 				8B0D14A62BFAD93A00B82AD1 /* CoopDetailView.swift in Sources */,
 				8B0D14A82BFAD9F200B82AD1 /* FixSafeareaBackgroundModifier.swift in Sources */,
 				8BA089322CCB8A6000BA7176 /* CoopRecordView.swift in Sources */,
-				8BAD2C672E5BEDB100DE9952 /* CoopBatchOperationView.swift in Sources */,
 				8BA017492C09A8CE001CFC72 /* FetchableFromDatabase.swift in Sources */,
 				8BC2B0AE2E6D46A0009ACFE8 /* BadgeSelectorView.swift in Sources */,
 				8B7059062C0C25A90076F680 /* TouchDownAndTouchUpGestureView.swift in Sources */,

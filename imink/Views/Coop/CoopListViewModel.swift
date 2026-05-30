@@ -70,6 +70,19 @@ class CoopListViewModel: ObservableObject {
         await SN3Client.shared.fetchCoops()
     }
 
+    func toggleFavorites(ids: [Int64]) async throws {
+        try await RecordBatchOperationService.toggleCoopFavorites(ids: ids)
+        NotificationCenter.default.post(name: .coopDataChanged, object: nil)
+    }
+
+    func softDelete(
+        ids: [Int64],
+        onProgress: @escaping (Int) async -> Void = { _ in }
+    ) async throws {
+        try await RecordBatchOperationService.softDeleteCoops(ids: ids, onProgress: onProgress)
+        NotificationCenter.default.post(name: .coopDataChanged, object: nil)
+    }
+
     func cancel() {
         cancelBag.forEach { $0.cancel() }
     }

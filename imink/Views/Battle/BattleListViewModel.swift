@@ -70,6 +70,19 @@ class BattleListViewModel: ObservableObject {
         await SN3Client.shared.fetchBattles()
     }
 
+    func toggleFavorites(ids: [Int64]) async throws {
+        try await RecordBatchOperationService.toggleBattleFavorites(ids: ids)
+        NotificationCenter.default.post(name: .battleDataChanged, object: nil)
+    }
+
+    func softDelete(
+        ids: [Int64],
+        onProgress: @escaping (Int) async -> Void = { _ in }
+    ) async throws {
+        try await RecordBatchOperationService.softDeleteBattles(ids: ids, onProgress: onProgress)
+        NotificationCenter.default.post(name: .battleDataChanged, object: nil)
+    }
+
     func cancel() {
         cancelBag.forEach { $0.cancel() }
     }

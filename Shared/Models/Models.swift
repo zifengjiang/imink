@@ -1,4 +1,5 @@
 import Foundation
+import GRDB
 import SplatDatabase
 
 struct RecordSelection<ID: Hashable> {
@@ -39,6 +40,76 @@ struct RecordSelection<ID: Hashable> {
 
     func contains(_ id: ID) -> Bool {
         selectedIds.contains(id)
+    }
+}
+
+enum RecordBatchOperationService {
+    static let defaultBatchSize = 50
+
+    static func batches<ID>(_ ids: [ID], batchSize: Int = defaultBatchSize) -> [[ID]] {
+        guard batchSize > 0 else { return [] }
+
+        return stride(from: 0, to: ids.count, by: batchSize).map { startIndex in
+            let endIndex = min(startIndex + batchSize, ids.count)
+            return Array(ids[startIndex..<endIndex])
+        }
+    }
+
+    static func toggleBattleFavorites(ids: [Int64]) async throws {
+        for id in ids {
+            if let battle = try await SplatDatabase.shared.dbQueue.read({ db in
+                try Battle.fetchOne(db, key: id)
+            }) {
+                try battle.toggleFavorite()
+            }
+        }
+    }
+
+    static func toggleCoopFavorites(ids: [Int64]) async throws {
+        for id in ids {
+            if let coop = try await SplatDatabase.shared.dbQueue.read({ db in
+                try Coop.fetchOne(db, key: id)
+            }) {
+                try coop.toggleFavorite()
+            }
+        }
+    }
+
+    static func softDeleteBattles(
+        ids: [Int64],
+        onProgress: @escaping (Int) async -> Void = { _ in }
+    ) async throws {
+        try await softDelete(table: "battle", ids: ids, onProgress: onProgress)
+    }
+
+    static func softDeleteCoops(
+        ids: [Int64],
+        onProgress: @escaping (Int) async -> Void = { _ in }
+    ) async throws {
+        try await softDelete(table: "coop", ids: ids, onProgress: onProgress)
+    }
+
+    private static func softDelete(
+        table: String,
+        ids: [Int64],
+        onProgress: @escaping (Int) async -> Void
+    ) async throws {
+        var processedCount = 0
+
+        for batch in batches(ids) {
+            let placeholders = batch.map { _ in "?" }.joined(separator: ",")
+
+            try await SplatDatabase.shared.dbQueue.write { db in
+                try db.execute(
+                    sql: "UPDATE \(table) SET isDeleted = 1 WHERE id IN (\(placeholders))",
+                    arguments: StatementArguments(batch)
+                )
+            }
+
+            processedCount += batch.count
+            await onProgress(processedCount)
+            await Task.yield()
+        }
     }
 }
 
