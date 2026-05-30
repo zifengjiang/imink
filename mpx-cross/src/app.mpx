@@ -1,7 +1,0 @@
-<script>
-  export default {
-    onLaunch() {
-      console.log('imink mpx app launched')
-    }
-  }
-</script>

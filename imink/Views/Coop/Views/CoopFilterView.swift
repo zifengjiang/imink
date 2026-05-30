@@ -34,8 +34,9 @@ class CoopFilterViewModel: ObservableObject {
     @Published var stages: [ImageMap] = [] // 新增地图数据
 
     func load() async {
-        let weapons = try! await SplatDatabase.shared.dbQueue.read { db in
-            try ImageMap.fetchAll(db, sql:"""
+        do {
+            let weapons = try await SplatDatabase.shared.dbQueue.read { db in
+                try ImageMap.fetchAll(db, sql:"""
                                 SELECT DISTINCT im.*
                                 FROM imageMap im
                                 INNER JOIN weapon w ON im.id = w.imageMapId
@@ -50,25 +51,32 @@ class CoopFilterViewModel: ObservableObject {
                                 AND im.name != 'Wst_Shooter_Normal_H'
                                 ORDER BY im.name ASC
                                 """, arguments: [AppUserDefaults.shared.accountId])
-        }
+            }
 
             // 加载地图数据
-        let stages = try! await SplatDatabase.shared.dbQueue.read { db in
-            try ImageMap.fetchAll(db, sql: """
+            let stages = try await SplatDatabase.shared.dbQueue.read { db in
+                try ImageMap.fetchAll(db, sql: """
                 SELECT DISTINCT im.*
                 FROM imageMap im
                 INNER JOIN coop c ON im.id = c.stageId
                 WHERE c.accountId = ?
                 ORDER BY im.name ASC
             """, arguments: [AppUserDefaults.shared.accountId])
-        }
+            }
 
             // 分组
-        let grouped = Dictionary(grouping: weapons, by: \.weaponType)
+            let grouped = Dictionary(grouping: weapons, by: \.weaponType)
 
-        await MainActor.run {
-            self.weaponsByType = grouped
-            self.stages = stages
+            await MainActor.run {
+                self.weaponsByType = grouped
+                self.stages = stages
+            }
+        } catch {
+            logError(error)
+            await MainActor.run {
+                self.weaponsByType = [:]
+                self.stages = []
+            }
         }
     }
 
@@ -85,8 +93,9 @@ class CoopFilterViewModel: ObservableObject {
             self.isSearching = true
         }
 
-        let results = try! await SplatDatabase.shared.dbQueue.read { db in
-            try Row.fetchAll(db, sql: """
+        do {
+            let results = try await SplatDatabase.shared.dbQueue.read { db in
+                try Row.fetchAll(db, sql: """
                 SELECT 
                     player.name,
                     player.byname,
@@ -103,18 +112,25 @@ class CoopFilterViewModel: ObservableObject {
                 ORDER BY playCount DESC, player.name ASC
                 LIMIT 20
             """, arguments: [AppUserDefaults.shared.accountId, "%\(query)%", "%\(query)%"])
-        }.map { row in
-            PlayerSearchResult(
-                name: row["name"],
-                byname: row["byname"],
-                nameId: row["nameId"],
-                playCount: row["playCount"]
-            )
-        }
+            }.map { row in
+                PlayerSearchResult(
+                    name: row["name"],
+                    byname: row["byname"],
+                    nameId: row["nameId"],
+                    playCount: row["playCount"]
+                )
+            }
 
-        await MainActor.run {
-            self.searchResults = results
-            self.isSearching = false
+            await MainActor.run {
+                self.searchResults = results
+                self.isSearching = false
+            }
+        } catch {
+            logError(error)
+            await MainActor.run {
+                self.searchResults = []
+                self.isSearching = false
+            }
         }
     }
 }

@@ -151,12 +151,12 @@ struct IndicatorView: View {
 								.onAppear { isIconVisible = true }
 								.onDisappear { isIconVisible = false }
                         case .success:
-                            Image(.checkmark)
+                            Image(.appTabCheckmark)
                                 .resizable()
                                 .scaledToFit()
                                 .overlay(Color(.accent))
                                 .mask{
-                                    Image(.checkmark)
+                                    Image(.appTabCheckmark)
                                         .resizable()
                                         .scaledToFit()
                                 }

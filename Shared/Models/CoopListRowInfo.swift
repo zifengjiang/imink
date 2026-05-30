@@ -120,7 +120,7 @@ func coops(filter:Filter = Filter(), limit:Int = 30, _ offset: Int = 0) -> AnyPu
         print("fetch_coop_list_item")
         return try Row.fetchAll(db, filter.buildCoopQuery(limit:limit, offset:offset))
             .map { row in
-                try! CoopListRowInfo(row: row)
+                try CoopListRowInfo(row: row)
             }
     }
     .publisher(in: SplatDatabase.shared.dbQueue, scheduling: .immediate)
@@ -128,11 +128,17 @@ func coops(filter:Filter = Filter(), limit:Int = 30, _ offset: Int = 0) -> AnyPu
 }
 
 func coops(filter:Filter = Filter(), limit:Int = 30, _ offset: Int = 0) async -> [CoopListRowInfo] {
-    let results = try! await SplatDatabase.shared.dbQueue.read { db in
-        try Row.fetchAll(db, filter.buildCoopQuery(limit:limit, offset:offset))
-            .map { row in
-                try! CoopListRowInfo(row: row)
-            }
+    let results: [CoopListRowInfo]
+    do {
+        results = try await SplatDatabase.shared.dbQueue.read { db in
+            try Row.fetchAll(db, filter.buildCoopQuery(limit:limit, offset:offset))
+                .map { row in
+                    try CoopListRowInfo(row: row)
+                }
+        }
+    } catch {
+        logError(error)
+        return []
     }
     
     // 先按rule排序，再按时间排序

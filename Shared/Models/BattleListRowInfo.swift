@@ -60,9 +60,9 @@ extension BattleListRowInfo: PreComputable{
     static func create(from db: Database, identifier: (Int,Filter,Int,Int)) throws ->[BattleListRowInfo]{
         let (accountId,filter, limit, offset) = identifier
         let rows = try Row.fetchAll(db, filter.buildBattleQuery(limit:limit, offset:offset))
-        return rows.compactMap{ row in
-            var info = try! BattleListRowInfo(row: row)
-            let computed = try! Row.fetchAll(db, sql: """
+        return try rows.map{ row in
+            var info = try BattleListRowInfo(row: row)
+            let computed = try Row.fetchAll(db, sql: """
                 SELECT 
                 vsTeam.color,
                 vsTeam.paintRatio as ratio,
@@ -94,12 +94,17 @@ extension BattleListRowInfo: PreComputable{
     }
 
     static func battles(filter:Filter = Filter(), limit:Int = 30, _ offset: Int = 0) async -> [BattleListRowInfo] {
-        return try! await SplatDatabase.shared.dbQueue.read { db in
+        do {
+            return try await SplatDatabase.shared.dbQueue.read { db in
                 //        try Row.fetchAll(db, filter.buildBattleQuery(limit:limit, offset:offset))
                 //            .compactMap { row in
                 //                try! BattleListRowInfo(row: row)
                 //            }
-            try BattleListRowInfo.create(from: db, identifier: (AppUserDefaults.shared.accountId, filter, limit, offset))
+                try BattleListRowInfo.create(from: db, identifier: (AppUserDefaults.shared.accountId, filter, limit, offset))
+            }
+        } catch {
+            logError(error)
+            return []
         }
     }
 

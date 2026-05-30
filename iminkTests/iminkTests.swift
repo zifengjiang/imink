@@ -39,4 +39,9 @@ final class iminkTests: XCTestCase {
 
     }
 
+    func testSplatNetSampleDataDoesNotCrash() {
+        XCTAssertEqual(SN3API.web().sampleData, Data())
+        XCTAssertEqual(LatestBattleHistoriesQuery().sampleData, Data())
+    }
+
 }

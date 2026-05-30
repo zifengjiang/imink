@@ -1,9 +1,0 @@
-<template>
-  <view class="card">
-    <view class="title">回收站（TrashView.swift）</view>
-    <view>可扩展已删除对战/打工记录恢复功能。</view>
-  </view>
-</template>
-<script>
-export default {}
-</script>

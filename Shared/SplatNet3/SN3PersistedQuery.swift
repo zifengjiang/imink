@@ -45,7 +45,7 @@ extension SN3PersistedQuery {
     }
     
     public var sampleData: Data {
-        return try! Data(contentsOf: URL(string: "22")!)
+        return Data()
     }
 }
 

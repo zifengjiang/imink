@@ -1,3 +1,28 @@
-*.db
-.
+# macOS
+.DS_Store
+
+# Xcode user/local state
+*.xcuserstate
+xcuserdata/
+*.moved-aside
+DerivedData/
+
+# Build output
+build/
+*.xcarchive
+*.ipa
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Local editor state
 .vscode/
+.idea/
+
+# Local app data / exports
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal

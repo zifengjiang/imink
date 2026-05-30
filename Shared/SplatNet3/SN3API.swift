@@ -47,7 +47,7 @@ extension SN3API: TargetType {
     public var sampleData: Data {
 //        let path = "/SampleData/\(sampleDataFileName)"
 //        let url = Bundle.module.url(forResource: path, withExtension: nil)!
-        return try! Data(contentsOf: URL(string: "22")!)
+        return Data()
     }
 }
 
