@@ -19,6 +19,7 @@ build/
 # Local editor state
 .vscode/
 .idea/
+.superpowers/
 
 # Local app data / exports
 *.db
