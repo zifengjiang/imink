@@ -104,4 +104,9 @@ final class iminkTests: XCTestCase {
         XCTAssertEqual(metrics.map(\.icon), ["paintpalette.fill", "drop.fill"])
     }
 
+    func testSessionTokenInputTrimsWhitespaceAndRejectsBlankValues() {
+        XCTAssertEqual(SessionTokenLoginInput.normalized("  abc.def \n"), "abc.def")
+        XCTAssertNil(SessionTokenLoginInput.normalized(" \n\t "))
+    }
+
 }

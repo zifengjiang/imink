@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftyJSON
 
 struct LoginViewModifier: ViewModifier {
+    @ObservedObject private var appState = AppState.shared
     
     var isLogin: Bool
     var iconName: String? = nil
@@ -17,9 +18,9 @@ struct LoginViewModifier: ViewModifier {
     func body(content: Content) -> some View {
         ZStack {
             content
-                .grayscale(isLogin ? 0 : 0.9999)
+                .grayscale(appState.isLogin ? 0 : 0.9999)
 
-            if !isLogin {
+            if !appState.isLogin {
                 LoginView(
                     iconName: iconName,
                     backgroundColor: backgroundColor
@@ -30,10 +31,27 @@ struct LoginViewModifier: ViewModifier {
 }
 
 struct LoginView: View {
+    private enum LoginMethod: String, CaseIterable, Identifiable {
+        case web
+        case sessionToken
+
+        var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .web:
+                return "网页登录"
+            case .sessionToken:
+                return "Token 登录"
+            }
+        }
+    }
     
     var iconName: String? = nil
     var backgroundColor: Color? = nil
     @StateObject var viewModel = LoginViewModel()
+    @State private var loginMethod: LoginMethod = .web
+    @State private var sessionToken = ""
 
     var body: some View {
         VStack(spacing: 14) {
@@ -55,21 +73,72 @@ struct LoginView: View {
             }
             .padding(.horizontal, 28)
 
-            Button {
-                Task {
-                    await viewModel.loginFlow()
+            Picker("登录方式", selection: $loginMethod) {
+                ForEach(LoginMethod.allCases) { method in
+                    Text(method.title).tag(method)
                 }
-            } label: {
-                Text("Log in with Nintendo Account")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 18)
             }
-            .frame(height: 44)
-            .frame(minWidth: 223)
-            .background(Color.accentColor)
-            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-            .disabled(viewModel.status == .loading)
+            .pickerStyle(.segmented)
+            .frame(maxWidth: 260)
+
+            if loginMethod == .web {
+                Button {
+                    Task {
+                        await viewModel.loginFlow()
+                    }
+                } label: {
+                    Text("任天堂账号登录")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 18)
+                }
+                .frame(height: 44)
+                .frame(minWidth: 223)
+                .background(Color.accentColor)
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .disabled(viewModel.status == .loading)
+            } else {
+                VStack(spacing: 10) {
+                    TextField("粘贴 Nintendo session token", text: $sessionToken)
+                        .font(.system(size: 13))
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .textContentType(.oneTimeCode)
+                        .padding(.horizontal, 12)
+                        .frame(height: 42)
+                        .background(Color.listItemBackground, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .stroke(Color(.separator), lineWidth: 0.5)
+                        }
+
+                    Button {
+                        Task {
+                            await viewModel.loginWithSessionToken(sessionToken)
+                        }
+                    } label: {
+                        Text("使用 Session Token 登录")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 18)
+                    }
+                    .frame(height: 44)
+                    .frame(maxWidth: .infinity)
+                    .background(SessionTokenLoginInput.normalized(sessionToken) == nil ? Color.secondary.opacity(0.45) : Color.accentColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .disabled(viewModel.status == .loading || SessionTokenLoginInput.normalized(sessionToken) == nil)
+                }
+                .frame(maxWidth: 300)
+            }
+
+            if let errorMessage = viewModel.errorMessage {
+                Text(errorMessage)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.red)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 28)
+            }
 
             Text("Authentication uses Nintendo's Coral API through nxapi-znca-api. Your session token is stored locally for sync.")
                 .font(.system(size: 11))
