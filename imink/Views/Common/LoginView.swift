@@ -36,26 +36,30 @@ struct LoginView: View {
     @StateObject var viewModel = LoginViewModel()
 
     var body: some View {
-        VStack {
+        VStack(spacing: 14) {
             if let iconName = iconName {
                 FixVectorImage(iconName, tintColor: Color.appLabel)
                     .frame(width: 52, height: 47)
             }
             
-            Text("Log in to sync your data")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(Color.appLabel)
-                .padding(.top, 4)
-                .padding(.bottom, 7)
-            
-            Text("Note: Data will be sent to a third-party API (nxapi-znca-api) for authentication with Nintendo's Coral API")
-                .font(.system(size: 12))
-                .foregroundColor(Color.appLabel.opacity(0.7))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 10)
-            
-            HStack {
+            VStack(spacing: 6) {
+                Text("Log in to sync your data")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(Color.appLabel)
+
+                Text("Connect your Nintendo Account to load SplatNet 3 records, schedules, and player data.")
+                    .font(.system(size: 13))
+                    .foregroundColor(Color.appLabel.opacity(0.72))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, 28)
+
+            Button {
+                Task {
+                    await viewModel.loginFlow()
+                }
+            } label: {
                 Text("Log in with Nintendo Account")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(.white)
@@ -65,11 +69,14 @@ struct LoginView: View {
             .frame(minWidth: 223)
             .background(Color.accentColor)
             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-            .onTapGesture {
-                Task{
-                    await viewModel.loginFlow()
-                }
-            }
+            .disabled(viewModel.status == .loading)
+
+            Text("Authentication uses Nintendo's Coral API through nxapi-znca-api. Your session token is stored locally for sync.")
+                .font(.system(size: 11))
+                .foregroundColor(Color.appLabel.opacity(0.55))
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 28)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(backgroundColor != nil ? backgroundColor : Color.listBackground.opacity(0.8))

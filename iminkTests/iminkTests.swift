@@ -88,4 +88,8 @@ final class iminkTests: XCTestCase {
         XCTAssertEqual(batches, [[1, 2], [3, 4], [5]])
     }
 
+    func testDebugBuildShowsDeveloperOptions() {
+        XCTAssertTrue(BuildConfiguration.showsDeveloperOptions)
+    }
+
 }

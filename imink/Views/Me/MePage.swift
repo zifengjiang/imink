@@ -5,37 +5,38 @@ struct MePage: View {
     var body: some View {
         NavigationStack{
             List {
-                AccountReviewView()
-                
-                
-                // 好友列表
-                if AppState.shared.isLogin {
-                    FriendsView()
-                        .padding(.horizontal)
-                        .padding(.top, 8)
+                Section {
+                    AccountReviewView()
+
+                    if AppState.shared.isLogin {
+                        FriendsView()
+                            .padding(.vertical, 6)
+                    }
                 }
-                
-                Section{
+
+                Section("我的记录") {
                     NavigationLink("打工记录", destination: CoopRecordView())
                     NavigationLink("祭典记录", destination: CoopRecordView())
                     NavigationLink("场地记录", destination: StageRecordView())
                     NavigationLink("武器记录", destination: WeaponRecordView())
                 }
                 
-                Section("个性化"){
+                Section("个性化") {
                     NavigationLink("铭牌编辑器", destination: NameplateEditorView())
                         .foregroundColor(.primary)
                 }
                 
-                Section("数据管理"){
+                Section("数据管理") {
                     NavigationLink("回收站", destination: TrashView())
                         .foregroundColor(.primary)
                 }
                 
-                Section("开发测试"){
+                #if DEBUG
+                Section("开发测试") {
                     NavigationLink("设备方向测试", destination: OrientationTestView())
                         .foregroundColor(.primary)
                 }
+                #endif
             }
             .navigationTitle("tab_me")
             .navigationBarTitleDisplayMode(.inline)
