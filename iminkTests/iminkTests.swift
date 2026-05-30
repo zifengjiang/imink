@@ -92,4 +92,16 @@ final class iminkTests: XCTestCase {
         XCTAssertTrue(BuildConfiguration.showsDeveloperOptions)
     }
 
+    func testMeSummaryMetricsFormatsRecordCounts() {
+        let metrics = MeSummaryMetric.recordCounts(
+            battleCount: 1234,
+            salmonRunCount: 56,
+            locale: Locale(identifier: "en_US_POSIX")
+        )
+
+        XCTAssertEqual(metrics.map(\.title), ["战斗记录", "鲑鱼跑记录"])
+        XCTAssertEqual(metrics.map(\.value), ["1,234", "56"])
+        XCTAssertEqual(metrics.map(\.icon), ["paintpalette.fill", "drop.fill"])
+    }
+
 }

@@ -1,17 +1,43 @@
 import SwiftUI
 
 struct MePage: View {
-    
+    @ObservedObject private var appState = AppState.shared
+
+    private let summaryColumns = [
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12)
+    ]
+
     var body: some View {
         NavigationStack{
             List {
                 Section {
                     AccountReviewView()
 
-                    if AppState.shared.isLogin {
+                    if appState.isLogin {
                         FriendsView()
                             .padding(.vertical, 6)
                     }
+                }
+
+                Section("记录概览") {
+                    LazyVGrid(columns: summaryColumns, spacing: 12) {
+                        ForEach(summaryMetrics) { metric in
+                            SWKPICard(
+                                title: LocalizedStringKey(metric.title),
+                                value: metric.value,
+                                icon: metric.icon,
+                                tint: tint(for: metric.kind)
+                            ) {
+                                Text(metric.caption)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    .padding(.vertical, 4)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                    .listRowBackground(Color.clear)
                 }
 
                 Section("我的记录") {
@@ -59,6 +85,22 @@ struct MePage: View {
                     }
                 }
             }
+        }
+    }
+
+    private var summaryMetrics: [MeSummaryMetric] {
+        MeSummaryMetric.recordCounts(
+            battleCount: appState.battleRecordsCount,
+            salmonRunCount: appState.salmonRunRecordsCount
+        )
+    }
+
+    private func tint(for kind: MeSummaryMetric.Kind) -> Color {
+        switch kind {
+        case .battle:
+            return .spOrange
+        case .salmonRun:
+            return .spGreen
         }
     }
 }

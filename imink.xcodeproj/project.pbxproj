@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		0A2C668C2E682CAF00F1FB81 /* CoopPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2C668B2E682CAF00F1FB81 /* CoopPlayerView.swift */; };
+		0B1000012EF2000000000001 /* SWShimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B1000042EF2000000000001 /* SWShimmer.swift */; };
+		0B1000022EF2000000000001 /* SWKPICard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B1000052EF2000000000001 /* SWKPICard.swift */; };
+		0B1000032EF2000000000001 /* MeSummaryMetric.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B1000062EF2000000000001 /* MeSummaryMetric.swift */; };
 		0A4B54C32EEEA74F003FDBF7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BAD2C1A2E5B4FC600DE9952 /* WidgetKit.framework */; };
 		0A4B54C42EEEA74F003FDBF7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BAD2C1C2E5B4FC600DE9952 /* SwiftUI.framework */; };
 		0A4B54D52EEEA750003FDBF7 /* liveWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 0A4B54C22EEEA74E003FDBF7 /* liveWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -242,6 +245,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0B1000042EF2000000000001 /* SWShimmer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SWShimmer.swift; sourceTree = "<group>"; };
+		0B1000052EF2000000000001 /* SWKPICard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SWKPICard.swift; sourceTree = "<group>"; };
+		0B1000062EF2000000000001 /* MeSummaryMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeSummaryMetric.swift; sourceTree = "<group>"; };
 		0A2C668B2E682CAF00F1FB81 /* CoopPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopPlayerView.swift; sourceTree = "<group>"; };
 		0A4B54C22EEEA74E003FDBF7 /* liveWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = liveWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		0A4B54FD2EEEA868003FDBF7 /* IndicatorTaskGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndicatorTaskGroup.swift; sourceTree = "<group>"; };
@@ -526,6 +532,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0B1000072EF2000000000001 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				0B1000082EF2000000000001 /* ShipSwift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		0B1000082EF2000000000001 /* ShipSwift */ = {
+			isa = PBXGroup;
+			children = (
+				0B1000042EF2000000000001 /* SWShimmer.swift */,
+				0B1000052EF2000000000001 /* SWKPICard.swift */,
+			);
+			path = ShipSwift;
+			sourceTree = "<group>";
+		};
 		8B0D146B2BF9772000B82AD1 /* Data */ = {
 			isa = PBXGroup;
 			children = (
@@ -638,6 +661,7 @@
 		8B7F295B2BF6E2CF0010A525 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				0B1000072EF2000000000001 /* Components */,
 				8BF3CB7A2CD4B9C900B0FCA9 /* InkMoya */,
 				8BF3CB4C2CD4B5FE00B0FCA9 /* SplatNet3 */,
 				8BF3CB452CD4B29300B0FCA9 /* IndicatorsKit */,
@@ -752,6 +776,7 @@
 			isa = PBXGroup;
 			children = (
 				8B3591442BF893D60066BCA3 /* MePage.swift */,
+				0B1000062EF2000000000001 /* MeSummaryMetric.swift */,
 				8BC2B0AB2E6D4697009ACFE8 /* EditableNameplateView.swift */,
 				8BC2B0AD2E6D46A0009ACFE8 /* BadgeSelectorView.swift */,
 				8BC2B0A92E6D468B009ACFE8 /* NameplateEditorViewModel.swift */,
@@ -1191,6 +1216,9 @@
 			files = (
 				0AA478DE2E74098600E8499D /* FriendStyles.swift in Sources */,
 				8B3591452BF893D60066BCA3 /* MePage.swift in Sources */,
+				0B1000032EF2000000000001 /* MeSummaryMetric.swift in Sources */,
+				0B1000012EF2000000000001 /* SWShimmer.swift in Sources */,
+				0B1000022EF2000000000001 /* SWKPICard.swift in Sources */,
 				8BFE91722C0D7CE000C12CBE /* Filter.swift in Sources */,
 				8B0D148D2BFA2CEF00B82AD1 /* CoopListRowInfo.swift in Sources */,
 				8BD548DD2E483C69005B8F27 /* TaskManager.swift in Sources */,
