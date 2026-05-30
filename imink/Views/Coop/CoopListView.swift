@@ -10,10 +10,12 @@ struct CoopListView: View {
     @State var showFilterSheet = false
     @State var selectedRow:String?
     @State var isFirstRow = true
-    @State var isSelectionMode = false
-    @State var selectedCoops: Set<Int64> = []
+    @State private var selection = RecordSelection<Int64>()
     @State private var navigationPath = NavigationPath()
 
+    private var visibleCoopIds: [Int64] {
+        viewModel.rows.compactMap { $0.coop?.id }
+    }
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -23,19 +25,15 @@ struct CoopListView: View {
                         LazyVStack{
                             ForEach(viewModel.rows, id:\.id){ row in
                                     SelectableRowView(
-                                        isSelectionMode: isSelectionMode,
-                                        isSelected: selectedCoops.contains(row.coop?.id ?? -1),
+                                        isSelectionMode: selection.isActive,
+                                        isSelected: row.coop.map { selection.contains($0.id) } ?? false,
                                         onTap: {
                                             if let coopId = row.coop?.id {
-                                                if selectedCoops.contains(coopId) {
-                                                    selectedCoops.remove(coopId)
-                                                } else {
-                                                    selectedCoops.insert(coopId)
-                                                }
+                                                selection.toggle(coopId)
                                             }
                                         }
                                     ) {
-                                        if !isSelectionMode {
+                                        if !selection.isActive {
                                             NavigationLink(value: row.id) {
                                                 CoopListRowView(row: row)
                                                     .id(row.id)
@@ -68,10 +66,7 @@ struct CoopListView: View {
                     .navigationBarTitle(viewModel.navigationTitle,displayMode: .inline)
 //                    .navigationBarTitleDisplayMode(.inline)
                     .onChange(of: activeID) { oldValue, newValue in
-                        print("🔍 activeID changed: \(oldValue ?? "nil") -> \(newValue ?? "nil"), isSelectionMode: \(isSelectionMode)")
-                        print("🔍 last row id: \(viewModel.rows.last?.id ?? "nil")")
                         if newValue == viewModel.rows.last?.id {
-                            print("🔍 Triggering loadMore in selection mode: \(isSelectionMode)")
                             Task{
                                 if viewModel.navigationTitle == "打工卡片"{
                                     await viewModel.loadMoreCards()
@@ -96,65 +91,19 @@ struct CoopListView: View {
                         }
                     })
                     .toolbar {
-                        ToolbarItem(placement: .navigationBarLeading) {
-                            if !isSelectionMode {
-                                Button("选择") {
-                                    isSelectionMode = true
-                                }
-                            } else {
-                                HStack(spacing: 12) {
-                                    Button {
-                                        if selectedCoops.count == viewModel.rows.compactMap({ $0.coop }).count {
-                                            selectedCoops.removeAll()
-                                        } else {
-                                            selectedCoops = Set(viewModel.rows.compactMap({ $0.coop }).map { $0.id })
-                                        }
-                                    } label: {
-                                        Image(systemName: selectedCoops.count == viewModel.rows.compactMap({ $0.coop }).count ? "checkmark.circle.fill" : "circle")
-                                            .foregroundColor(.accentColor)
-                                    }
-                                    
-                                    Text("\(selectedCoops.count)")
-                                        .font(.splatoonFont(size: 16))
-                                        .foregroundColor(.secondary)
-                                        .frame(minWidth: 20)
-                                }
-                            }
-                        }
-
-                        ToolbarItem(placement: .topBarTrailing) {
-                            if isSelectionMode {
-                                HStack(spacing: 16) {
-                                    Button {
-                                        batchToggleFavorite()
-                                    } label: {
-                                        Image(systemName: "heart")
-                                            .foregroundColor(.red)
-                                    }
-                                    .disabled(selectedCoops.isEmpty)
-                                    
-                                    Button {
-                                        batchDelete()
-                                    } label: {
-                                        Image(systemName: "trash")
-                                            .foregroundColor(.red)
-                                    }
-                                    .disabled(selectedCoops.isEmpty)
-                                    
-                                    Button("取消") {
-                                        isSelectionMode = false
-                                        selectedCoops.removeAll()
-                                    }
-                                    .foregroundColor(.accentColor)
-                                }
-                            } else {
-                                Button{
+                        RecordSelectionToolbar(
+                            selection: $selection,
+                            visibleIds: visibleCoopIds,
+                            onFavorite: batchToggleFavorite,
+                            onDelete: batchDelete,
+                            filterButton: AnyView(
+                                Button {
                                     showFilterSheet = true
                                 } label: {
                                     Label("筛选", systemImage: "line.horizontal.3.decrease.circle")
                                 }
-                            }
-                        }
+                            )
+                        )
                         .matchedTransitionSource(id: "filter", in: animation)
                     }
                     .toolbarTitleMenu {
@@ -250,9 +199,11 @@ struct CoopListView: View {
 
     
     private func batchToggleFavorite() {
+        let selectedCoopIds = Array(selection.selectedIds)
+
         Task {
             do {
-                for coopId in selectedCoops {
+                for coopId in selectedCoopIds {
                     if let actualCoop = try await SplatDatabase.shared.dbQueue.read({ db in
                         try Coop.fetchOne(db, key: coopId)
                     }) {
@@ -261,8 +212,7 @@ struct CoopListView: View {
                 }
                 
                 NotificationCenter.default.post(name: .coopDataChanged, object: nil)
-                isSelectionMode = false
-                selectedCoops.removeAll()
+                selection.cancel()
             } catch {
                 print("Error batch toggling favorites: \(error)")
             }
@@ -270,9 +220,7 @@ struct CoopListView: View {
     }
     
     private func checkForLoadMore(rowId: String) {
-        print("🔍 Row appeared: \(rowId), last row: \(viewModel.rows.last?.id ?? "nil"), isSelectionMode: \(isSelectionMode)")
         if rowId == viewModel.rows.last?.id {
-            print("🔍 Triggering loadMore from onAppear in selection mode: \(isSelectionMode)")
             Task {
                 if viewModel.navigationTitle == "打工卡片" {
                     await viewModel.loadMoreCards()
@@ -285,7 +233,8 @@ struct CoopListView: View {
     
     private func batchDelete() {
         let indicatorId = UUID().uuidString
-        let totalCount = selectedCoops.count
+        let selectedCoopIds = Array(selection.selectedIds)
+        let totalCount = selectedCoopIds.count
         
         Task {
             do {
@@ -302,13 +251,12 @@ struct CoopListView: View {
                 }
                 
                 // 批量处理，减少数据库操作次数
-                let coopIds = Array(selectedCoops)
                 let batchSize = 50 // 每批处理50个
                 var processedCount = 0
                 
-                for i in stride(from: 0, to: coopIds.count, by: batchSize) {
-                    let endIndex = min(i + batchSize, coopIds.count)
-                    let batch = Array(coopIds[i..<endIndex])
+                for i in stride(from: 0, to: selectedCoopIds.count, by: batchSize) {
+                    let endIndex = min(i + batchSize, selectedCoopIds.count)
+                    let batch = Array(selectedCoopIds[i..<endIndex])
                     
                     // 批量软删除 - 直接在事务内执行SQL更新
                     try await SplatDatabase.shared.dbQueue.write { db in
@@ -340,8 +288,7 @@ struct CoopListView: View {
                     ))
                     
                     NotificationCenter.default.post(name: .coopDataChanged, object: nil)
-                    isSelectionMode = false
-                    selectedCoops.removeAll()
+                    selection.cancel()
                 }
             } catch {
                 await MainActor.run {

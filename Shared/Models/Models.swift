@@ -1,6 +1,47 @@
 import Foundation
 import SplatDatabase
 
+struct RecordSelection<ID: Hashable> {
+    private(set) var selectedIds: Set<ID> = []
+    private(set) var isActive = false
+
+    var selectedCount: Int {
+        selectedIds.count
+    }
+
+    mutating func start() {
+        isActive = true
+    }
+
+    mutating func cancel() {
+        isActive = false
+        selectedIds.removeAll()
+    }
+
+    mutating func toggle(_ id: ID) {
+        start()
+        if selectedIds.contains(id) {
+            selectedIds.remove(id)
+        } else {
+            selectedIds.insert(id)
+        }
+    }
+
+    mutating func toggleAll(_ ids: [ID]) {
+        start()
+        let visibleIds = Set(ids)
+        if selectedIds == visibleIds {
+            selectedIds.removeAll()
+        } else {
+            selectedIds = visibleIds
+        }
+    }
+
+    func contains(_ id: ID) -> Bool {
+        selectedIds.contains(id)
+    }
+}
+
 
 extension Coop {
     var gradeName: String?{
@@ -50,4 +91,3 @@ extension Battle {
         try SplatDatabase.shared.restoreBattle(battleId: id ?? 0)
     }
 }
-

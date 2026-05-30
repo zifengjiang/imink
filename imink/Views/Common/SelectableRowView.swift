@@ -1,5 +1,70 @@
 import SwiftUI
 
+struct RecordSelectionToolbar<ID: Hashable>: ToolbarContent {
+    @Binding var selection: RecordSelection<ID>
+    let visibleIds: [ID]
+    let onFavorite: () -> Void
+    let onDelete: () -> Void
+    let filterButton: AnyView
+
+    private var isAllSelected: Bool {
+        !visibleIds.isEmpty && selection.selectedIds == Set(visibleIds)
+    }
+
+    var body: some ToolbarContent {
+        ToolbarItem(placement: .navigationBarLeading) {
+            if !selection.isActive {
+                Button("选择") {
+                    selection.start()
+                }
+            } else {
+                HStack(spacing: 12) {
+                    Button {
+                        selection.toggleAll(visibleIds)
+                    } label: {
+                        Image(systemName: isAllSelected ? "checkmark.circle.fill" : "circle")
+                            .foregroundColor(.accentColor)
+                    }
+
+                    Text("\(selection.selectedCount)")
+                        .font(.splatoonFont(size: 16))
+                        .foregroundColor(.secondary)
+                        .frame(minWidth: 20)
+                }
+            }
+        }
+
+        ToolbarItem(placement: .topBarTrailing) {
+            if selection.isActive {
+                HStack(spacing: 16) {
+                    Button {
+                        onFavorite()
+                    } label: {
+                        Image(systemName: "heart")
+                            .foregroundColor(.red)
+                    }
+                    .disabled(selection.selectedIds.isEmpty)
+
+                    Button {
+                        onDelete()
+                    } label: {
+                        Image(systemName: "trash")
+                            .foregroundColor(.red)
+                    }
+                    .disabled(selection.selectedIds.isEmpty)
+
+                    Button("取消") {
+                        selection.cancel()
+                    }
+                    .foregroundColor(.accentColor)
+                }
+            } else {
+                filterButton
+            }
+        }
+    }
+}
+
 struct SelectableRowView<Content: View>: View {
     let content: Content
     let isSelectionMode: Bool

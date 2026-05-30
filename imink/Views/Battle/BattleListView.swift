@@ -9,8 +9,12 @@ struct BattleListView: View {
     @Namespace private var animation
     @State var activeID:String?
     @State var showFilterSheet = false
-    @State var isSelectionMode = false
-    @State var selectedBattles: Set<Int64> = []
+    @State private var selection = RecordSelection<Int64>()
+
+    private var visibleBattleIds: [Int64] {
+        viewModel.rows.compactMap { $0.battle?.id }
+    }
+
     var body: some View {
         NavigationStack{
             ScrollViewReader{ proxy in
@@ -21,19 +25,15 @@ struct BattleListView: View {
                             ForEach(viewModel.rows,id: \.id){row in
                                 if row.isBattle {
                                     SelectableRowView(
-                                        isSelectionMode: isSelectionMode,
-                                        isSelected: selectedBattles.contains(row.battle?.id ?? -1),
+                                        isSelectionMode: selection.isActive,
+                                        isSelected: row.battle.map { selection.contains($0.id) } ?? false,
                                         onTap: {
                                             if let battleId = row.battle?.id {
-                                                if selectedBattles.contains(battleId) {
-                                                    selectedBattles.remove(battleId)
-                                                } else {
-                                                    selectedBattles.insert(battleId)
-                                                }
+                                                selection.toggle(battleId)
                                             }
                                         }
                                     ) {
-                                        if !isSelectionMode, let battle = row.battle {
+                                        if !selection.isActive, let battle = row.battle {
                                             NavigationLink{
                                                 BattleDetailView(id: battle.id)
                                             } label: {
@@ -67,65 +67,19 @@ struct BattleListView: View {
                 .navigationTitle(viewModel.navigationTitle)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        if !isSelectionMode {
-                            Button("选择") {
-                                isSelectionMode = true
-                            }
-                        } else {
-                            HStack(spacing: 12) {
-                                Button {
-                                    if selectedBattles.count == viewModel.rows.compactMap({ $0.battle }).count {
-                                        selectedBattles.removeAll()
-                                    } else {
-                                        selectedBattles = Set(viewModel.rows.compactMap({ $0.battle }).map { $0.id })
-                                    }
-                                } label: {
-                                    Image(systemName: selectedBattles.count == viewModel.rows.compactMap({ $0.battle }).count ? "checkmark.circle.fill" : "circle")
-                                        .foregroundColor(.accentColor)
-                                }
-
-                                Text("\(selectedBattles.count)")
-                                    .font(.splatoonFont(size: 16))
-                                    .foregroundColor(.secondary)
-                                    .frame(minWidth: 20)
-                            }
-                        }
-                    }
-
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        if isSelectionMode {
-                            HStack(spacing: 16) {
-                                Button {
-                                    batchToggleFavorite()
-                                } label: {
-                                    Image(systemName: "heart")
-                                        .foregroundColor(.red)
-                                }
-                                .disabled(selectedBattles.isEmpty)
-
-                                Button {
-                                    batchDelete()
-                                } label: {
-                                    Image(systemName: "trash")
-                                        .foregroundColor(.red)
-                                }
-                                .disabled(selectedBattles.isEmpty)
-
-                                Button("取消") {
-                                    isSelectionMode = false
-                                    selectedBattles.removeAll()
-                                }
-                                .foregroundColor(.accentColor)
-                            }
-                        } else {
-                            Button{
+                    RecordSelectionToolbar(
+                        selection: $selection,
+                        visibleIds: visibleBattleIds,
+                        onFavorite: batchToggleFavorite,
+                        onDelete: batchDelete,
+                        filterButton: AnyView(
+                            Button {
                                 showFilterSheet = true
                             } label: {
                                 Label("筛选", systemImage: "line.3.horizontal.decrease.circle")
                             }
-                        }
-                    }
+                        )
+                    )
                     .matchedTransitionSource(id: "filter", in: animation)
                 }
                 .sheet(isPresented: $showFilterSheet) {
@@ -183,18 +137,19 @@ struct BattleListView: View {
     }
 
     private func batchToggleFavorite() {
+        let selectedBattleIds = Array(selection.selectedIds)
+
         Task {
             do {
                 try await SplatDatabase.shared.dbQueue.write { db in
-                    for battleId in selectedBattles {
+                    for battleId in selectedBattleIds {
                         if let actualBattle = try Battle.fetchOne(db, key: battleId) {
                             try actualBattle.toggleFavorite()
                         }
                     }
                 }
                 NotificationCenter.default.post(name: .battleDataChanged, object: nil)
-                isSelectionMode = false
-                selectedBattles.removeAll()
+                selection.cancel()
             } catch {
                 print("Error batch toggling favorites: \(error)")
             }
@@ -203,7 +158,8 @@ struct BattleListView: View {
 
     private func batchDelete() {
         let indicatorId = UUID().uuidString
-        let totalCount = selectedBattles.count
+        let selectedBattleIds = Array(selection.selectedIds)
+        let totalCount = selectedBattleIds.count
 
         Task {
             do {
@@ -220,13 +176,12 @@ struct BattleListView: View {
                 }
 
                     // 批量处理，减少数据库操作次数
-                let battleIds = Array(selectedBattles)
                 let batchSize = 50 // 每批处理50个
                 var processedCount = 0
 
-                for i in stride(from: 0, to: battleIds.count, by: batchSize) {
-                    let endIndex = min(i + batchSize, battleIds.count)
-                    let batch = Array(battleIds[i..<endIndex])
+                for i in stride(from: 0, to: selectedBattleIds.count, by: batchSize) {
+                    let endIndex = min(i + batchSize, selectedBattleIds.count)
+                    let batch = Array(selectedBattleIds[i..<endIndex])
 
                         // 批量软删除 - 直接在事务内执行SQL更新
                     try await SplatDatabase.shared.dbQueue.write { db in
@@ -260,8 +215,7 @@ struct BattleListView: View {
                     ))
 
                     NotificationCenter.default.post(name: .battleDataChanged, object: nil)
-                    isSelectionMode = false
-                    selectedBattles.removeAll()
+                    selection.cancel()
                 }
             } catch {
                 await MainActor.run {

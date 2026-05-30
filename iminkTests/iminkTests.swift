@@ -44,4 +44,42 @@ final class iminkTests: XCTestCase {
         XCTAssertEqual(LatestBattleHistoriesQuery().sampleData, Data())
     }
 
+    func testRecordSelectionTracksModeAndSelectedIds() {
+        var selection = RecordSelection<Int64>()
+
+        XCTAssertFalse(selection.isActive)
+        XCTAssertTrue(selection.selectedIds.isEmpty)
+
+        selection.start()
+        selection.toggle(42)
+
+        XCTAssertTrue(selection.isActive)
+        XCTAssertEqual(selection.selectedIds, [42])
+
+        selection.toggle(42)
+
+        XCTAssertTrue(selection.isActive)
+        XCTAssertTrue(selection.selectedIds.isEmpty)
+
+        selection.cancel()
+
+        XCTAssertFalse(selection.isActive)
+        XCTAssertTrue(selection.selectedIds.isEmpty)
+    }
+
+    func testRecordSelectionSelectsAndClearsAllVisibleIds() {
+        var selection = RecordSelection<Int64>()
+        let visibleIds: [Int64] = [1, 2, 3]
+
+        selection.toggleAll(visibleIds)
+
+        XCTAssertTrue(selection.isActive)
+        XCTAssertEqual(selection.selectedIds, Set(visibleIds))
+
+        selection.toggleAll(visibleIds)
+
+        XCTAssertTrue(selection.isActive)
+        XCTAssertTrue(selection.selectedIds.isEmpty)
+    }
+
 }
