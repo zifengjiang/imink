@@ -28,12 +28,15 @@ struct CoopShiftDetailView: View {
                             cardView
                                 .padding(.top)
                             waveView
-                            weaponView
-                            playerView
+
+
                             kingView
                             enemyView
+
+                            weaponView
+                            playerView
                                 .padding(.bottom)
-                            
+
                         }
                         Spacer()
                     }
