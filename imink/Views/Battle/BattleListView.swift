@@ -45,8 +45,18 @@ struct BattleListView: View {
                                     }
                                 } else {
                                         // 非battle行（如统计卡片）直接显示，不参与选择
-                                    BattleListRowView(row: row)
-                                        .id(row.id)
+                                    if !selection.isActive, let card = row.card {
+                                        NavigationLink {
+                                            BattleShiftDetailView(groupId: Int(card.groupId))
+                                        } label: {
+                                            BattleListRowView(row: row)
+                                                .id(row.id)
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
+                                    } else {
+                                        BattleListRowView(row: row)
+                                            .id(row.id)
+                                    }
                                 }
                             }
                         }

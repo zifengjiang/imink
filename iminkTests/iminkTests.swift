@@ -109,4 +109,62 @@ final class iminkTests: XCTestCase {
         XCTAssertNil(SessionTokenLoginInput.normalized(" \n\t "))
     }
 
+    func testBattleShiftSummaryBuilderAggregatesShift() {
+        let battles = [
+            BattleShiftSummaryBuilder.BattleInput(
+                judgement: "WIN",
+                rule: "TURF_WAR",
+                stageName: "Vss_Stage_A",
+                weaponName: "Weapon_A",
+                kill: 6,
+                assist: 2,
+                death: 3
+            ),
+            BattleShiftSummaryBuilder.BattleInput(
+                judgement: "LOSE",
+                rule: "AREA",
+                stageName: "Vss_Stage_B",
+                weaponName: "Weapon_A",
+                kill: 2,
+                assist: 1,
+                death: 0
+            ),
+            BattleShiftSummaryBuilder.BattleInput(
+                judgement: "DRAW",
+                rule: "TURF_WAR",
+                stageName: "Vss_Stage_A",
+                weaponName: "Weapon_B",
+                kill: 1,
+                assist: 0,
+                death: 1
+            ),
+            BattleShiftSummaryBuilder.BattleInput(
+                judgement: "DEEMED_LOSE",
+                rule: "LOFT",
+                stageName: "Vss_Stage_C",
+                weaponName: nil,
+                kill: 0,
+                assist: 0,
+                death: 0
+            )
+        ]
+
+        let summary = BattleShiftSummaryBuilder.build(from: battles)
+
+        XCTAssertEqual(summary.totalCount, 4)
+        XCTAssertEqual(summary.winCount, 1)
+        XCTAssertEqual(summary.loseCount, 1)
+        XCTAssertEqual(summary.drawCount, 1)
+        XCTAssertEqual(summary.disconnectCount, 1)
+        XCTAssertEqual(summary.stageCount, 3)
+        XCTAssertEqual(summary.weaponCount, 2)
+        XCTAssertEqual(summary.kill, 9)
+        XCTAssertEqual(summary.assist, 3)
+        XCTAssertEqual(summary.death, 4)
+        XCTAssertEqual(summary.kd, 2.25, accuracy: 0.001)
+        XCTAssertEqual(summary.kad, 3.0, accuracy: 0.001)
+        XCTAssertEqual(summary.ruleBuckets.map(\.rule), ["TURF_WAR", "AREA", "LOFT"])
+        XCTAssertEqual(summary.ruleBuckets.map(\.count), [2, 1, 1])
+    }
+
 }
