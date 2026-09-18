@@ -80,11 +80,9 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
                 accessToken: nxapiZncaApiAccessToken,
                 step: 1,
                 idToken: loginToken.idToken,
-                encryptTokenRequest: EncryptTokenRequest(url: "https://api-lp1.znc.srv.nintendo.net/v3/Account/Login", parameter: [
+                encryptTokenRequest: EncryptTokenRequest(url: "https://api-lp1.znc.srv.nintendo.net/v4/Account/Login", parameter: [
                     "f":"",
                     "language": naUser.language,
-                    "naBirthday": naUser.birthday,
-                    "naCountry": naUser.country,
                     "naIdToken": loginToken.idToken,
                     "requestId": "",
                     "timestamp": 0,
@@ -240,11 +238,9 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
             accessToken: nxapiZncaApiAccessToken,
             step: 1,
             idToken: idToken,
-            encryptTokenRequest: EncryptTokenRequest(url: "https://api-lp1.znc.srv.nintendo.net/v3/Account/Login", parameter: [
+            encryptTokenRequest: EncryptTokenRequest(url: "https://api-lp1.znc.srv.nintendo.net/v4/Account/Login", parameter: [
                 "f":"",
                 "language": naUser.language,
-                "naBirthday": naUser.birthday,
-                "naCountry": naUser.country,
                 "naIdToken": idToken,
                 "requestId": "",
                 "timestamp": 0,
@@ -291,11 +287,9 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
             accessToken: nxapiZncaApiAccessToken,
             step: 1,
             idToken: loginToken.idToken,
-            encryptTokenRequest: EncryptTokenRequest(url: "https://api-lp1.znc.srv.nintendo.net/v3/Account/Login", parameter: [
+            encryptTokenRequest: EncryptTokenRequest(url: "https://api-lp1.znc.srv.nintendo.net/v4/Account/Login", parameter: [
                 "f":"",
                 "language": naUser.language,
-                "naBirthday": naUser.birthday,
-                "naCountry": naUser.country,
                 "naIdToken": loginToken.idToken,
                 "requestId": "",
                 "timestamp": 0,
@@ -541,7 +535,6 @@ extension NSOAuthorization {
 
 extension NSOAuthorization {
     struct NAUser:Codable {
-        var birthday: String
         var country: String
         var language: String
         var id: String

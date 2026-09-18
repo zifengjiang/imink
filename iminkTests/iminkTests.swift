@@ -44,6 +44,23 @@ final class iminkTests: XCTestCase {
         XCTAssertEqual(LatestBattleHistoriesQuery().sampleData, Data())
     }
 
+    func testNintendoLoginAcceptsUserWithoutBirthday() throws {
+        let user = try JSONDecoder().decode(
+            NSOAuthorization.NAUser.self,
+            from: Data(#"{"country":"US","language":"en-US","id":"123"}"#.utf8)
+        )
+        XCTAssertEqual(user.id, "123")
+        XCTAssertEqual(NSOAPI.login(encryptedTokenRequest: Data()).path, "/v4/Account/Login")
+        XCTAssertEqual(
+            AppAPI.nxapiZnca_f_advanced(
+                accessToken: "", step: .hash1, idToken: "", encryptTokenRequest: .init(url: "", parameter: [:]), naId: "", coralUserId: nil
+            ).headers?["X-znca-Client-Version"],
+            "d8fAZDPzwimzQ7c6"
+        )
+        let form = String(data: try XCTUnwrap(AppAPI.nxapiZnca_auth_token.request.httpBody), encoding: .utf8)
+        XCTAssertEqual(form?.components(separatedBy: "client_id=").count, 2)
+    }
+
     func testRecordSelectionTracksModeAndSelectedIds() {
         var selection = RecordSelection<Int64>()
 

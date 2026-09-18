@@ -21,6 +21,8 @@ enum AppAPI {
     // If you want to use this api, please check the documentation
     // Docs: https://github.com/JoneWang/imink/wiki/imink-API-Documentation
 extension AppAPI: TargetType {
+    private static let zncaClientVersion = "d8fAZDPzwimzQ7c6"
+
     var baseURL: URL { 
         switch self{
         case .config,.imink_f:
@@ -73,7 +75,7 @@ extension AppAPI: TargetType {
         case .nxapiZnca_f:
             return [
                 "User-Agent": "imink/1.0.0",
-                "X-znca-Client-Version": "hio87-mJks_e9GNF",
+                "X-znca-Client-Version": AppAPI.zncaClientVersion,
                 "X-znca-platform": "Android",
                 "x-znca-version": AppUserDefaults.shared.NSOVersion,
             ]
@@ -85,7 +87,7 @@ extension AppAPI: TargetType {
             return [
                 "Authorization": "Bearer \(accessToken)",
                 "User-Agent": "imink/1.0.0",
-                "X-znca-Client-Version": "hio87-mJks_e9GNF",
+                "X-znca-Client-Version": AppAPI.zncaClientVersion,
                 "x-znca-platform": "Android",
                 "X-znca-Version": AppUserDefaults.shared.NSOVersion,
             ]
@@ -97,7 +99,7 @@ extension AppAPI: TargetType {
             return [
                 "Authorization": "Bearer \(accessToken)",
                 "User-Agent": "imink/1.0.0",
-                "X-znca-Client-Version": "hio87-mJks_e9GNF",
+                "X-znca-Client-Version": AppAPI.zncaClientVersion,
                 "x-znca-platform": "Android",
                 "X-znca-Version": AppUserDefaults.shared.NSOVersion,
             ]
@@ -125,7 +127,6 @@ extension AppAPI: TargetType {
         case .nxapiZnca_auth_token:
             let params = [
                 ("client_id", "U2DFLOy1kFnkrvM6QslVVg"),
-                ("client_id", "imink_client"),
                 ("grant_type", "client_credentials"),
                 ("scope", "ca:gf ca:er ca:dr")
             ]

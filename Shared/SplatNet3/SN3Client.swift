@@ -8,6 +8,7 @@ public class SN3Client {
     public var webVersion: String
     private let graphQLHashMap: [String: String]
     private var gameServiceToken: String? = nil
+    private var hasLoadedWebVersion = false
 
     public var authorizationStorage: SN3AuthorizationStorage {
         internalAuthorizationStorage
@@ -29,6 +30,15 @@ public class SN3Client {
     }
 
     public func refreshBullet() async throws {
+        if !hasLoadedWebVersion {
+            let versionURL = URL(string: "https://cdn.jsdelivr.net/gh/nintendoapis/nintendo-app-versions/data/splatnet3-app.json")!
+            if let response = try? await URLSession.shared.data(for: URLRequest(url: versionURL, timeoutInterval: 10)),
+               let versionData = try? JSONSerialization.jsonObject(with: response.0) as? [String: Any],
+               let version = versionData["web_app_ver"] as? String, !version.isEmpty {
+                webVersion = version
+                hasLoadedWebVersion = true
+            }
+        }
         try await configureSession()
 
         if try await authorizationStorage.getBulletTokens() == nil {

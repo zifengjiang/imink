@@ -54,7 +54,7 @@ extension NSOAPI: TargetType {
         case .me:
             return "/users/me"
         case .login:
-            return "/v3/Account/Login"
+            return "/v4/Account/Login"
         case .getWebServiceToken, .getWebServiceTokenEncrypted:
             return "/v4/Game/GetWebServiceToken"
         }
