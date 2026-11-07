@@ -56,28 +56,3 @@ class CoopDetailViewModel: ObservableObject {
     }
 }
 
-func measureTime<T>(title: String, block: () async -> T) async -> T {
-    let startTime = DispatchTime.now()
-    let result = await block()
-    let endTime = DispatchTime.now()
-
-    let elapsedTime = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
-    let milliseconds = Double(elapsedTime) / 1_000_000
-
-    print("\(title) 执行时间：\(milliseconds) 毫秒")
-
-    return result
-}
-
-func measureTime<T>(title: String, block: ()  -> T)  -> T {
-    let startTime = DispatchTime.now()
-    let result = block()
-    let endTime = DispatchTime.now()
-
-    let elapsedTime = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
-    let milliseconds = Double(elapsedTime) / 1_000_000
-
-    print("\(title) 执行时间：\(milliseconds) 毫秒")
-
-    return result
-}

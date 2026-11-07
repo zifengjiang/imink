@@ -9,22 +9,16 @@ import SwiftUI
 
 struct BattleListShiftCardView: View {
     let status: BattleGroupStatus
-    
-    var timeSpanText: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MM/dd HH:mm"
-        // if status.startTime is not this year, show year
-        if Calendar.current.component(.year, from: status.startTime) != Calendar.current.component(.year, from: Date()){
-            formatter.dateFormat = "yyyy MM/dd HH:mm"
-        }
-        return "\(formatter.string(from: status.startTime)) - \(formatter.string(from: status.endTime))"
-    }
 
     var body: some View {
-        VStack(spacing: -1) {
+        ShiftCardChrome(
+            count: status.count,
+            unit: "场对战",
+            disconnectCount: status.disconnectCount
+        ) {
             VStack{
                 HStack{
-                    Text(timeSpanText)
+                    Text(status.startTime.toShiftTimeSpanString(end: status.endTime))
                         .font(.splatoonFont(size: 12))
                     Spacer()
                     Text(status.mode.localized)
@@ -32,11 +26,11 @@ struct BattleListShiftCardView: View {
                         .foregroundStyle(.secondary)
                 }
                 HStack {
-                    
+
                     StatusView(status: status)
 
                     Spacer()
-                    
+
                     // 显示对战模式图标
                     BattleMode(rawValue: status.mode)?.icon
                         .resizable()
@@ -49,66 +43,7 @@ struct BattleListShiftCardView: View {
 
                 }
             }
-            .padding([.leading, .top, .trailing], 13)
-            .padding(.bottom, 11)
-            .frame(height: 79)
-            .background(
-                GrayscaleTextureView(
-                    texture: .bubble,
-                    foregroundColor: Color.battleDetailStreakForeground,
-                    backgroundColor: Color.listItemBackground
-                )
-                .frame(height: 100),
-                alignment: .topLeading
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-
-            VStack { }
-                .frame(maxWidth: .infinity, minHeight: 19, maxHeight: 19)
-                .overlay(
-                    GrayscaleTextureView(
-                        texture: .bubble,
-                        foregroundColor: Color.battleDetailStreakForeground,
-                        backgroundColor: Color.listItemBackground
-                    )
-                    .frame(height: 100)
-                    .offset(y: -78)
-                    .mask(
-                        VStack {
-                            HStack {
-                                Spacer()
-                                Image(.jobShiftCardTail)
-                                    .resizable()
-                                    .frame(width: 33, height: 19)
-                            }
-                            Spacer()
-                        }
-                            .padding(.trailing, 24)
-                    ),
-                    alignment: .topLeading
-                )
-                .overlay {
-                    HStack(spacing:0){
-                        Text("\(status.count)场对战")
-                            .font(.splatoonFont(size: 12))
-                        if status.disconnectCount != 0{
-                            Text("<\(status.disconnectCount)场掉线>")
-                                .font(.splatoonFont(size: 10))
-                                .foregroundStyle(Color.waveDefeat)
-                        }
-                    }
-                    .foregroundStyle(Color.green)
-                    .offset(y:2)
-                }
-
         }
-        .frame(height: 97)
-        .padding(.top, 5)
-        .rotationEffect(.degrees(-1))
-        .clipped(antialiased: true)
-        .padding([.leading, .trailing])
-        .padding(.top, 15)
-        .padding(.bottom, 0.1)
     }
 
     struct StatusView: View {

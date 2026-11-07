@@ -266,13 +266,7 @@ struct BattleShiftDetailView: View {
 
     private var timeSpanText: String {
         guard let status = viewModel.status else { return "" }
-
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MM/dd HH:mm"
-        if Calendar.current.component(.year, from: status.startTime) != Calendar.current.component(.year, from: Date()) {
-            formatter.dateFormat = "yyyy MM/dd HH:mm"
-        }
-        return "\(formatter.string(from: status.startTime)) - \(formatter.string(from: status.endTime))"
+        return status.startTime.toShiftTimeSpanString(end: status.endTime)
     }
 
     private struct SummaryMetric: View {

@@ -1,4 +1,5 @@
 import XCTest
+import SplatDatabase
 @testable import imink
 
 final class iminkTests: XCTestCase {
@@ -99,10 +100,17 @@ final class iminkTests: XCTestCase {
         XCTAssertTrue(selection.selectedIds.isEmpty)
     }
 
-    func testRecordBatchOperationServiceBatchesIds() {
-        let batches = RecordBatchOperationService.batches([1, 2, 3, 4, 5], batchSize: 2)
+    func testRecordStoreBatchesIdsInChunks() {
+        let batches = SplatDatabase.batches([1, 2, 3, 4, 5], batchSize: 2)
 
         XCTAssertEqual(batches, [[1, 2], [3, 4], [5]])
+    }
+
+    func testRecordKindMapsToTableAndNotification() {
+        XCTAssertEqual(SplatRecordKind.coop.table, "coop")
+        XCTAssertEqual(SplatRecordKind.battle.table, "battle")
+        XCTAssertEqual(SplatRecordKind.coop.dataChangedNotification, .coopDataChanged)
+        XCTAssertEqual(SplatRecordKind.battle.dataChangedNotification, .battleDataChanged)
     }
 
     func testDebugBuildShowsDeveloperOptions() {
@@ -113,7 +121,7 @@ final class iminkTests: XCTestCase {
         let metrics = MeSummaryMetric.recordCounts(
             battleCount: 1234,
             salmonRunCount: 56,
-            locale: Locale(identifier: "en_US_POSIX")
+            locale: Locale(identifier: "en_US")
         )
 
         XCTAssertEqual(metrics.map(\.title), ["战斗记录", "鲑鱼跑记录"])

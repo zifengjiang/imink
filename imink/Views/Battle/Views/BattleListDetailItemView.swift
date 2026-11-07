@@ -17,7 +17,7 @@ struct BattleListDetailItemView: View {
     var rule:BattleRule{detail.rule}
     var species:Species{detail.species ? Species.INKLING : Species.OCTOLING}
     var ratios:[Double]{
-        let r = getRatio(scores: detail.scores, ratios: detail.ratios, count: detail.colors.count)
+        let r = normalizedRatios(scores: detail.scores, ratios: detail.ratios, count: detail.colors.count)
         var res = [Double]()
         _ = r.reduce(0){ sum, cur in
             let newSum = sum + cur

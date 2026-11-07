@@ -141,35 +141,19 @@ struct CoopPlayerView: View {
     
     private func loadPlayCount(player: Player) {
         isLoadingCount = true
-        Task {
+        Task { @MainActor in
+            defer { isLoadingCount = false }
+
             do {
-                let count = try await SplatDatabase.shared.dbQueue.read { db in
-                    try Int.fetchOne(db, sql: """
-                        SELECT COUNT(DISTINCT c.id)
-                        FROM coop_view c
-                        JOIN coopPlayerResult cpr1 ON cpr1.coopId = c.id
-                        JOIN coopPlayerResult cpr2 ON cpr2.coopId = c.id
-                        JOIN player p1 ON p1.coopPlayerResultId = cpr1.id
-                        JOIN player p2 ON p2.coopPlayerResultId = cpr2.id
-                        WHERE c.accountId = ?
-                        AND p2.name = ? AND p2.nameId = ?
-                    """, arguments: [AppUserDefaults.shared.accountId, player.name, player.nameId]) ?? 0
-                }
-                
-                await MainActor.run {
-                    self.playCount = count
-                    self.isLoadingCount = false
-                }
+                playCount = try await CoopRepository.playCount(
+                    withPlayerName: player.name,
+                    nameId: player.nameId,
+                    accountId: AppUserDefaults.shared.accountId
+                )
             } catch {
-                await MainActor.run {
-                    self.playCount = 0
-                    self.isLoadingCount = false
-                }
+                logError(error)
+                playCount = 0
             }
         }
     }
-}
-
-#Preview {
-    CoopPlayerView(result: nil)
 }
