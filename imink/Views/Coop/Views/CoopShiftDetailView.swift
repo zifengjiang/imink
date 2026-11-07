@@ -45,6 +45,7 @@ struct CoopShiftDetailView: View {
                 LoadingView(size: 100)
             }
         }
+        .edgeToEdgeScrollContent()
         .frame(maxWidth: .infinity)
         .fixSafeareaBackground()
         .modifier(Popup(isPresented: showPlayerDetail,

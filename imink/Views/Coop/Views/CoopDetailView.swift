@@ -7,7 +7,6 @@ struct CoopDetailView: View {
 
     @State var phase:Double = 0
     @StateObject var viewModel: CoopDetailViewModel
-    @State private var contentHeight: CGFloat = 0
     @State private var showPlayerDetail: Bool = false
     @State private var activePlayer: CoopPlayerResult? = nil
     @State private var hoveredMember: Bool = false
@@ -55,20 +54,8 @@ struct CoopDetailView: View {
                     Spacer()
                 }
                 .padding(.horizontal,8)
-                .background(
-                    GeometryReader { geometry in
-                        Color.clear
-                            .onAppear {
-                                contentHeight = geometry.size.height // 获取内容高度
-                            }
-                            .onChange(of: geometry.size.height) { _, newValue in
-                                contentHeight = newValue
-                                print("ScrollView 内容高度: \(contentHeight)")
-                            }
-                    }
-                )
             }
-            .scrollClipDisabled()
+            .edgeToEdgeScrollContent()
             .frame(maxWidth: .infinity)
             .fixSafeareaBackground()
             .modifier(Popup(isPresented: showPlayerDetail,

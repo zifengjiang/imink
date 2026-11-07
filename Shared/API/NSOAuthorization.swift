@@ -185,13 +185,35 @@ extension NSOAuthorization {
 }
 
 extension NSOAuthorization {
-    enum NSOAuthError:Error{
+    enum NSOAuthError: Error {
         case invalidCallbackURL
         case invalidSessionToken
         case invalidLoginToken
         case responseError(code: Int, url: URL? = nil, body: String? = nil)
         case nxapiError(message: String)
         case tooManyRequests
+    }
+}
+
+extension NSOAuthorization.NSOAuthError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .invalidCallbackURL:
+            return "登录回调地址无效，请重试或改用 Token 登录"
+        case .invalidSessionToken:
+            return "session token 无效或已过期"
+        case .invalidLoginToken:
+            return "登录凭证无效，请重试"
+        case let .responseError(code, _, body):
+            if let body, !body.isEmpty {
+                return "服务返回错误（HTTP \(code)）：\(body.prefix(120))"
+            }
+            return "服务返回错误（HTTP \(code)），请稍后重试"
+        case let .nxapiError(message):
+            return "nxapi 请求失败：\(message)"
+        case .tooManyRequests:
+            return "请求过于频繁，请稍后再试（可在设置里调整请求间隔）"
+        }
     }
 }
 

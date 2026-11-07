@@ -225,6 +225,7 @@
 		0B2001192EF3000000000001 /* CoopShiftDetailView+Sections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001182EF3000000000001 /* CoopShiftDetailView+Sections.swift */; };
 		0B20011B2EF3000000000001 /* NSOAuthorization+Requests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B20011A2EF3000000000001 /* NSOAuthorization+Requests.swift */; };
 		0B20011D2EF3000000000001 /* ScheduleSubscriptionManager+Filtering.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B20011C2EF3000000000001 /* ScheduleSubscriptionManager+Filtering.swift */; };
+		0B20011F2EF3000000000001 /* EdgeToEdgeScroll.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B20011E2EF3000000000001 /* EdgeToEdgeScroll.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -514,6 +515,7 @@
 		0B2001182EF3000000000001 /* CoopShiftDetailView+Sections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CoopShiftDetailView+Sections.swift"; sourceTree = "<group>"; };
 		0B20011A2EF3000000000001 /* NSOAuthorization+Requests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSOAuthorization+Requests.swift"; sourceTree = "<group>"; };
 		0B20011C2EF3000000000001 /* ScheduleSubscriptionManager+Filtering.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ScheduleSubscriptionManager+Filtering.swift"; sourceTree = "<group>"; };
+		0B20011E2EF3000000000001 /* EdgeToEdgeScroll.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EdgeToEdgeScroll.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -668,6 +670,7 @@
 		8B0D14A92BFADA0700B82AD1 /* Modifiers */ = {
 			isa = PBXGroup;
 			children = (
+				0B20011E2EF3000000000001 /* EdgeToEdgeScroll.swift */,
 				8B7059072C0C27980076F680 /* PopupModifier.swift */,
 				8B0851732BFB673000AF22C5 /* TextureBackGround.swift */,
 				8B0D14A72BFAD9F200B82AD1 /* FixSafeareaBackgroundModifier.swift */,
@@ -1315,6 +1318,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0B20011F2EF3000000000001 /* EdgeToEdgeScroll.swift in Sources */,
 				0B20011D2EF3000000000001 /* ScheduleSubscriptionManager+Filtering.swift in Sources */,
 				0B20011B2EF3000000000001 /* NSOAuthorization+Requests.swift in Sources */,
 				0B2001192EF3000000000001 /* CoopShiftDetailView+Sections.swift in Sources */,

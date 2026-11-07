@@ -23,9 +23,8 @@ struct CoopDetailContainer: View {
             }
         }
         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-//        .padding(.vertical,50) // leave space for toolbar
-        .edgesIgnoringSafeArea(.vertical)
-
+        // 页面铺满全屏，顶部工具栏与底部 Tab 栏以玻璃材质压在内容之上
+        .ignoresSafeArea(edges: .vertical)
         .fixSafeareaBackground()
 //        .onAppear {
 //            if let firstRow = rows.first {

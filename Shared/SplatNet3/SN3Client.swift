@@ -119,3 +119,21 @@ public extension SN3Client {
         case responseError(code: Int, url: URL? = nil, body: String? = nil)
     }
 }
+
+extension SN3Client.Error: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .invalidGameServiceToken:
+            return "游戏服务令牌无效或已过期，请重新登录"
+        case .tooManyRequests:
+            return "请求过于频繁，请稍后再试"
+        case .invalidBulletToken:
+            return "Bullet token 无效，请重新登录"
+        case let .responseError(code, _, body):
+            if let body, !body.isEmpty {
+                return "服务返回错误（HTTP \(code)）：\(body.prefix(120))"
+            }
+            return "服务返回错误（HTTP \(code)），请稍后重试"
+        }
+    }
+}

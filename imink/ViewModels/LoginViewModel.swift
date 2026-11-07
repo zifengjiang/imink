@@ -25,6 +25,20 @@ class LoginViewModel:ObservableObject{
 
     var cancelBag = Set<AnyCancellable>()
 
+    /// 把底层错误转成用户可以看懂的提示，避免所有失败都显示同一句笼统文案。
+    private static func describe(_ error: Error) -> String {
+        switch error {
+        case let error as NSOAuthorization.NSOAuthError:
+            return error.errorDescription ?? "\(error)"
+        case let error as SN3Client.Error:
+            return error.errorDescription ?? "\(error)"
+        case is URLError:
+            return "网络请求失败：\(error.localizedDescription)"
+        default:
+            return "登录失败：\(error.localizedDescription)"
+        }
+    }
+
     func loginFlow() async {
         errorMessage = nil
         status = .loading
@@ -71,10 +85,11 @@ class LoginViewModel:ObservableObject{
             AppUserDefaults.shared.gameServiceTokenRefreshTime = Int(Date().timeIntervalSince1970)
         } catch {
             logError(error)
-            self.status = .none
-            self.errorMessage = "登录失败，请检查网络连接或重试"
+            status = .none
+            let message = Self.describe(error)
+            errorMessage = message
             Toast.finish(id: loginIndicatorId, title: "登录失败", failed: true)
-            Toast.update(id: loginIndicatorId, subtitle: "请检查网络连接或重试")
+            Toast.update(id: loginIndicatorId, subtitle: message)
         }
     }
 
@@ -138,7 +153,7 @@ class LoginViewModel:ObservableObject{
         } catch {
             logError(error)
             status = .none
-            errorMessage = "Session token 无效或已无法换取游戏令牌"
+            errorMessage = Self.describe(error)
             Toast.finish(id: loginIndicatorId, title: "登录失败", failed: true)
             Toast.update(id: loginIndicatorId, subtitle: "请检查 session token 后重试")
             Indicators.shared.updateIcon(for: loginIndicatorId, icon: .image(Image(systemName: "xmark.icloud")))

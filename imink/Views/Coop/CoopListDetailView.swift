@@ -1,5 +1,10 @@
 import SwiftUI
 
+/// 打工翻页容器的单页内容。
+///
+/// 之前用上下两个固定高度的透明方块来"占位"，
+/// 会让滚动区域超出可视范围，内容顶到导航栏下方、底部被 Tab 栏遮住；
+/// 现在直接把页面交给内部视图，由各自的 ScrollView + 安全区处理留白。
 struct CoopListDetailView: View {
     let isCoop: Bool
     let coopId: Int64?
@@ -14,20 +19,14 @@ struct CoopListDetailView: View {
     }
 
     var body: some View {
-        VStack{
-            Rectangle()
-                .fill(Color.clear)
-                .frame(height: 70) // To avoid "EmptyView" error
-
-            if isCoop {
-                CoopDetailView(id: coopId!, navigationPath: $navigationPath)
+        Group {
+            if isCoop, let coopId {
+                CoopDetailView(id: coopId, navigationPath: $navigationPath)
+            } else if let shiftId {
+                CoopShiftDetailView(id: shiftId, navigationPath: $navigationPath)
             } else {
-                CoopShiftDetailView(id: shiftId!, navigationPath: $navigationPath)
+                Color.clear
             }
-
-            Rectangle()
-                .fill(Color.clear)
-                .frame(height: 80) // To avoid "EmptyView" error
         }
     }
 }
