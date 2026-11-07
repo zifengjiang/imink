@@ -11,8 +11,8 @@ struct CoopDetailContainer: View {
         TabView(selection: $selectedRow) {
             ForEach(rows, id: \.id) { row in
                 CoopListDetailView(
-                    isCoop: row.isCoop, 
-                    coopId: row.coop?.id, 
+                    isCoop: row.isDetail,
+                    coopId: row.detail?.id,
                     shiftId: row.card?.groupId,
                     navigationPath: $navigationPath
                 )
@@ -141,7 +141,7 @@ struct CoopDetailContainer: View {
     
     private func performSaveImage() {
         guard let rowId = selectedRow,
-              let coop = rows.first(where: { $0.id == rowId })?.coop else {
+              let coop = rows.first(where: { $0.id == rowId })?.detail else {
             return
         }
         
@@ -151,26 +151,11 @@ struct CoopDetailContainer: View {
         PHPhotoLibrary.shared().performChanges({
             PHAssetChangeRequest.creationRequestForAsset(from: image)
         }) { success, error in
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 if success {
-                    // 显示保存成功提示，2秒后自动关闭
-                    Indicators.shared.display(.init(
-                        id: UUID().uuidString,
-                        icon: .systemImage("checkmark.circle.fill"),
-                        title: "保存成功",
-                        subtitle: "图片已保存到相册",
-                        dismissType: .after(2)
-                    ))
-                } else if let error = error {
-                    // 显示保存失败提示
-                    Indicators.shared.display(.init(
-                        id: UUID().uuidString,
-                        icon: .systemImage("xmark.circle.fill"),
-                        title: "保存失败",
-                        subtitle: error.localizedDescription,
-                        dismissType: .after(3),
-                        style: .error
-                    ))
+                    Toast.success("保存成功", subtitle: "图片已保存到相册")
+                } else if let error {
+                    Toast.failure("保存失败", subtitle: error.localizedDescription)
                 }
                 // 清理视图模型
                 AppState.shared.viewModelDict[coop.id] = nil

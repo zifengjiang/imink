@@ -54,7 +54,7 @@ struct StageRecordView: View {
                         HStack {
                             Button {
                                 Task {
-                                    await viewModel.refreshData()
+                                    await viewModel.refreshRemote()
                                 }
                             } label: {
                                 Image(systemName: "arrow.clockwise")
@@ -80,7 +80,7 @@ struct StageRecordView: View {
         .frame(maxWidth: .infinity)
         .fixSafeareaBackground()
         .task {
-            await viewModel.loadData()
+            await viewModel.loadCachedThenRemote()
         }
         .onChange(of: viewModel.sortedBy) { oldValue, newValue in
             viewModel.sort()
@@ -188,9 +188,35 @@ struct StageRecordView: View {
     }
 }
 
-class StageRecordViewModel: ObservableObject {
+@MainActor
+final class StageRecordViewModel: ObservableObject, CachedRecordViewModel {
+    typealias Record = [StageRecord]
+
     @Published var stageRecords: [StageRecord] = []
     @Published var sortedBy: SortedBy = .time
+
+    var value: [StageRecord]? {
+        get { stageRecords.isEmpty ? nil : stageRecords }
+        set { stageRecords = newValue ?? [] }
+    }
+
+    func readCache() -> [StageRecord]? {
+        let cached = AppUserDefaults.shared.stageRecordsCache
+        return cached.isEmpty ? nil : cached
+    }
+
+    func writeCache(_ records: [StageRecord]) {
+        AppUserDefaults.shared.stageRecordsCache = records
+    }
+
+    func fetchRemote() async -> [StageRecord]? {
+        await SN3Client.shared.fetchRecord(.stageRecord)
+    }
+
+    func didUpdateValue() {
+        sort()
+    }
+
     var notPlayed: [StageRecord] {
         stageRecords.filter {
             switch sortedBy {
@@ -226,32 +252,6 @@ class StageRecordViewModel: ObservableObject {
             case .clam:
                 $0.stats?.winRateCl != nil
             }
-        }
-    }
-
-    func loadData() async {
-        // 首先尝试从缓存加载数据
-        let cachedRecords = AppUserDefaults.shared.stageRecordsCache
-        if !cachedRecords.isEmpty {
-            DispatchQueue.main.async {
-                self.stageRecords = cachedRecords
-                self.sort()
-            }
-        }
-        
-        // 如果没有缓存数据，则从网络获取
-        if cachedRecords.isEmpty {
-            await refreshData()
-        }
-    }
-    
-    func refreshData() async {
-        let records:[StageRecord] = await SN3Client.shared.fetchRecord(.stageRecord) ?? []
-        DispatchQueue.main.async {
-            self.stageRecords = records
-            self.sort()
-            // 保存到缓存
-            AppUserDefaults.shared.stageRecordsCache = records
         }
     }
 

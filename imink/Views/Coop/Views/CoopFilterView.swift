@@ -3,134 +3,46 @@ import SplatDatabase
 import GRDB
 
 
-extension ImageMap {
-    var weaponType: String {
-        let parts = name.split(separator: "_")
-        return parts.count > 1 ? String(parts[1]) : "Unknown"
-    }
-}
+/// 打工筛选页的选项与玩家搜索状态。
+@MainActor
+final class CoopFilterViewModel: ObservableObject {
+    @Published private(set) var weaponsByType: [String: [ImageMap]] = [:]
+    @Published private(set) var searchResults: [PlayerSearchResult] = []
+    @Published private(set) var isSearching = false
+    @Published private(set) var stages: [ImageMap] = []
 
-struct PlayerSearchResult: Identifiable, Hashable {
-    let id = UUID()
-    let name: String
-    let byname: String
-    let nameId: String
-    let playCount: Int
+    private var accountId: Int { AppUserDefaults.shared.accountId }
 
-    var displayName: String {
-        if byname.isEmpty {
-            return name
-        } else {
-            return "\(name) (\(byname))"
-        }
-    }
-}
-
-
-class CoopFilterViewModel: ObservableObject {
-    @Published var weaponsByType: [String: [ImageMap]] = [:]
-    @Published var searchResults: [PlayerSearchResult] = []
-    @Published var isSearching: Bool = false
-    @Published var stages: [ImageMap] = [] // 新增地图数据
-
+    /// 加载筛选用的地图与武器列表。
     func load() async {
         do {
-            let weapons = try await SplatDatabase.shared.dbQueue.read { db in
-                try ImageMap.fetchAll(db, sql:"""
-                                SELECT DISTINCT im.*
-                                FROM imageMap im
-                                INNER JOIN weapon w ON im.id = w.imageMapId
-                                INNER JOIN coopPlayerResult cpr ON w.coopPlayerResultId = cpr.id
-                                INNER JOIN coop c ON cpr.coopId = c.id
-                                WHERE cpr.'order' = 0
-                                AND c.accountId = ?
-                                AND im.name LIKE 'Wst%'
-                                AND im.name NOT LIKE '%_O'
-                                AND im.name NOT LIKE '%01'
-                                AND im.name NOT LIKE '%Scope_00'
-                                AND im.name != 'Wst_Shooter_Normal_H'
-                                ORDER BY im.name ASC
-                                """, arguments: [AppUserDefaults.shared.accountId])
-            }
-
-            // 加载地图数据
-            let stages = try await SplatDatabase.shared.dbQueue.read { db in
-                try ImageMap.fetchAll(db, sql: """
-                SELECT DISTINCT im.*
-                FROM imageMap im
-                INNER JOIN coop c ON im.id = c.stageId
-                WHERE c.accountId = ?
-                ORDER BY im.name ASC
-            """, arguments: [AppUserDefaults.shared.accountId])
-            }
-
-            // 分组
-            let grouped = Dictionary(grouping: weapons, by: \.weaponType)
-
-            await MainActor.run {
-                self.weaponsByType = grouped
-                self.stages = stages
-            }
+            async let weapons = CoopRepository.weaponsByType(accountId: accountId)
+            async let stages = CoopRepository.stages(accountId: accountId)
+            weaponsByType = try await weapons
+            self.stages = try await stages
         } catch {
             logError(error)
-            await MainActor.run {
-                self.weaponsByType = [:]
-                self.stages = []
-            }
+            weaponsByType = [:]
+            stages = []
         }
     }
 
+    /// 按关键词搜索一起打过工的玩家。
     func searchPlayers(query: String) async {
         guard !query.isEmpty else {
-            await MainActor.run {
-                self.searchResults = []
-                self.isSearching = false
-            }
+            searchResults = []
+            isSearching = false
             return
         }
 
-        await MainActor.run {
-            self.isSearching = true
-        }
+        isSearching = true
+        defer { isSearching = false }
 
         do {
-            let results = try await SplatDatabase.shared.dbQueue.read { db in
-                try Row.fetchAll(db, sql: """
-                SELECT 
-                    player.name,
-                    player.byname,
-                    player.nameId,
-                    COUNT(DISTINCT coop.id) as playCount
-                FROM player
-                INNER JOIN coopPlayerResult ON player.coopPlayerResultId = coopPlayerResult.id
-                INNER JOIN coop ON coopPlayerResult.coopId = coop.id
-                WHERE coop.accountId = ?
-                AND (player.name LIKE ? OR player.byname LIKE ?)
-                AND player.isMyself != 1
-                GROUP BY player.name, player.nameId
-                HAVING playCount > 0
-                ORDER BY playCount DESC, player.name ASC
-                LIMIT 20
-            """, arguments: [AppUserDefaults.shared.accountId, "%\(query)%", "%\(query)%"])
-            }.map { row in
-                PlayerSearchResult(
-                    name: row["name"],
-                    byname: row["byname"],
-                    nameId: row["nameId"],
-                    playCount: row["playCount"]
-                )
-            }
-
-            await MainActor.run {
-                self.searchResults = results
-                self.isSearching = false
-            }
+            searchResults = try await CoopRepository.searchPlayers(query: query, accountId: accountId)
         } catch {
             logError(error)
-            await MainActor.run {
-                self.searchResults = []
-                self.isSearching = false
-            }
+            searchResults = []
         }
     }
 }
@@ -177,7 +89,7 @@ struct CoopFilterView:View {
                             // 时间范围滑块
                         TimeRangeSlider(
                             lineWidth: UIScreen.main.bounds.width - 64,
-                            minDate: getCoopEarliestPlayedTime(),
+                            minDate: CoopRepository.earliestPlayedTime(),
                             maxDate: Date(),
                             startDate: $filter.start,
                             endDate: $filter.end
@@ -196,50 +108,8 @@ struct CoopFilterView:View {
                     Divider()
                         .padding(.vertical, 8)
 
-                        // 记录状态过滤
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("记录状态")
-                            .font(.splatoonFont(size: 18))
-
-                        Toggle("只显示收藏", isOn: $filter.showOnlyFavorites)
-
-                        HStack {
-                            Text("显示模式:")
-                            Spacer()
-                            Picker("显示模式", selection: Binding(
-                                get: {
-                                    if filter.showDeleted && !filter.showOnlyActive {
-                                        return 1 // 只显示已删除
-                                    } else if filter.showDeleted && filter.showOnlyActive {
-                                        return 2 // 显示全部
-                                    } else {
-                                        return 0 // 只显示活跃
-                                    }
-                                },
-                                set: { (value: Int) in
-                                    switch value {
-                                    case 0: // 只显示活跃
-                                        filter.showOnlyActive = true
-                                        filter.showDeleted = false
-                                    case 1: // 只显示已删除
-                                        filter.showOnlyActive = false
-                                        filter.showDeleted = true
-                                    case 2: // 显示全部
-                                        filter.showOnlyActive = true
-                                        filter.showDeleted = true
-                                    default:
-                                        break
-                                    }
-                                }
-                            )) {
-                                Text("活跃记录").tag(0)
-                                Text("已删除").tag(1)
-                                Text("全部记录").tag(2)
-                            }
-                            .pickerStyle(SegmentedPickerStyle())
-                        }
-                    }
-                    .padding(.bottom, 16)
+                    RecordStatusFilterSection(filter: $filter)
+                        .padding(.bottom, 16)
 
                     Divider()
                         .padding(.vertical, 8)

@@ -111,9 +111,7 @@ struct ScheduleSubscriptionRow: View {
     }
     
     private var timeText: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MM/dd HH:mm"
-        return formatter.string(from: schedule.startTime)
+        DateFormat.monthDayHourMinute.string(from: schedule.startTime)
     }
     
     var body: some View {

@@ -57,12 +57,6 @@ struct SubscriptionInfoRow: View {
     
     // 格式化时间范围
     private func formatTimeRange(start: Date, end: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MM/dd HH:mm"
-        
-        let startString = formatter.string(from: start)
-        let endString = formatter.string(from: end)
-        
-        return "\(startString) - \(endString)"
+        start.toShiftTimeSpanString(end: end)
     }
 }

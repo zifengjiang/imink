@@ -33,30 +33,15 @@ class NameplateEditorViewModel: ObservableObject {
     
     func loadAssets() async {
         isLoading = true
-        
+        defer { isLoading = false }
+
         do {
-            // 加载所有背景（Npl_开头）
-            let backgrounds = try await SplatDatabase.shared.dbQueue.read { db in
-                try ImageMap.fetchAll(db, sql: "SELECT * FROM imageMap WHERE name LIKE 'Npl_%' ORDER BY name")
-            }
-            
-            // 加载所有徽章（Badge_开头）
-            let badges = try await SplatDatabase.shared.dbQueue.read { db in
-                try ImageMap.fetchAll(db, sql: "SELECT * FROM imageMap WHERE name LIKE 'Badge_%' ORDER BY name")
-            }
-            
-            await MainActor.run {
-                self.availableBackgrounds = backgrounds
-                self.availableBadges = badges
-                
-                
-                self.isLoading = false
-            }
+            async let backgrounds = ImageMapRepository.nameplateBackgrounds()
+            async let badges = ImageMapRepository.nameplateBadges()
+            availableBackgrounds = try await backgrounds
+            availableBadges = try await badges
         } catch {
-            await MainActor.run {
-                self.isLoading = false
-            }
-            print("Error loading assets: \(error)")
+            logError(error)
         }
     }
     
@@ -146,24 +131,11 @@ class NameplateEditorViewModel: ObservableObject {
     }
     
     private func showSaveSuccess() {
-        Indicators.shared.display(.init(
-            id: UUID().uuidString,
-            icon: .systemImage("checkmark.circle.fill"),
-            title: "保存成功",
-            subtitle: "铭牌已保存到相册",
-            dismissType: .after(2)
-        ))
+        Toast.success("保存成功", subtitle: "铭牌已保存到相册")
     }
     
     private func showSaveError(_ message: String) {
-        Indicators.shared.display(.init(
-            id: UUID().uuidString,
-            icon: .systemImage("xmark.circle.fill"),
-            title: "保存失败",
-            subtitle: message,
-            dismissType: .after(3),
-            style: .error
-        ))
+        Toast.failure("保存失败", subtitle: message)
     }
     
     // 创建用于保存的铭牌视图（不使用 GeometryReader）

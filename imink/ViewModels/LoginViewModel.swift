@@ -27,32 +27,30 @@ class LoginViewModel:ObservableObject{
 
     func loginFlow() async {
         errorMessage = nil
-        DispatchQueue.main.async {
-            self.status = .loading
-        }
-        
+        status = .loading
+
         let loginIndicatorId = UUID().uuidString
         defer {
             Indicators.shared.dismiss(with: loginIndicatorId)
         }
         
         do {
-            Indicators.shared.display(Indicator(id: loginIndicatorId, icon: .progressIndicator, title: "登录中", subtitle: "获取sessionToken", dismissType: .manual, isUserDismissible: false))
+            Toast.progress(id: loginIndicatorId, title: "登录中", subtitle: "获取sessionToken")
             
             // 使用新的loginFlow方法，参考api.ts的实现
             let loginFlowResult = try await NSOAuthorization.shared.loginFlow(indicatorId: loginIndicatorId)
             
-            Indicators.shared.updateSubtitle(for: loginIndicatorId, subtitle: "设置游戏服务令牌")
+            Toast.update(id: loginIndicatorId, subtitle: "设置游戏服务令牌")
             try await SN3Client.shared.setToken(loginFlowResult.webServiceToken.result.accessToken)
             
-            Indicators.shared.updateSubtitle(for: loginIndicatorId, subtitle: "获取账户ID")
+            Toast.update(id: loginIndicatorId, subtitle: "获取账户ID")
             let sp3PrincipalId = try await getAccountId()?.extractUserId()
             
-            Indicators.shared.updateSubtitle(for: loginIndicatorId, subtitle: "下载头像")
+            Toast.update(id: loginIndicatorId, subtitle: "下载头像")
             let avatar = loginFlowResult.loginResult.result.user.imageUri
             let avatarData = try await downLoadImageData(url: URL(string: avatar)!)
             
-            Indicators.shared.updateSubtitle(for: loginIndicatorId, subtitle: "保存账户信息")
+            Toast.update(id: loginIndicatorId, subtitle: "保存账户信息")
             let account = Account(sp3Id: sp3PrincipalId, avatar: avatarData, name: loginFlowResult.loginResult.result.user.name, code: loginFlowResult.loginResult.result.user.friendCode, sessionToken: loginFlowResult.sessionToken, lastRefresh: Date())
             try updateORInsertAccount(account)
             
@@ -60,27 +58,23 @@ class LoginViewModel:ObservableObject{
                 return try Account.filter(Column("sp3Id") == sp3PrincipalId).fetchOne(db)?.id
             })!
             
-            Indicators.shared.updateTitle(for: loginIndicatorId, title: "登录成功")
-            Indicators.shared.updateSubtitle(for: loginIndicatorId, subtitle: "正在完成登录...")
-            Indicators.shared.updateIcon(for: loginIndicatorId, icon: .success)
-            
-            DispatchQueue.main.async {
-                self.status = .loginSuccess
-                MainViewModel.shared.isLogin = true
-                AppUserDefaults.shared.sessionToken = loginFlowResult.sessionToken
-                AppUserDefaults.shared.useManualGameServiceToken = false
-                AppUserDefaults.shared.manualGameServiceToken = nil
-                AppUserDefaults.shared.accountId = Int(accountId)
-                AppUserDefaults.shared.gameServiceToken = loginFlowResult.webServiceToken.result.accessToken
-                AppUserDefaults.shared.gameServiceTokenRefreshTime = Int(Date().timeIntervalSince1970)
-            }
+            Toast.finish(id: loginIndicatorId, title: "登录成功")
+            Toast.update(id: loginIndicatorId, subtitle: "正在完成登录...")
+
+            status = .loginSuccess
+            MainViewModel.shared.isLogin = true
+            AppUserDefaults.shared.sessionToken = loginFlowResult.sessionToken
+            AppUserDefaults.shared.useManualGameServiceToken = false
+            AppUserDefaults.shared.manualGameServiceToken = nil
+            AppUserDefaults.shared.accountId = Int(accountId)
+            AppUserDefaults.shared.gameServiceToken = loginFlowResult.webServiceToken.result.accessToken
+            AppUserDefaults.shared.gameServiceTokenRefreshTime = Int(Date().timeIntervalSince1970)
         } catch {
             logError(error)
             self.status = .none
             self.errorMessage = "登录失败，请检查网络连接或重试"
-            Indicators.shared.updateTitle(for: loginIndicatorId, title: "登录失败")
-            Indicators.shared.updateSubtitle(for: loginIndicatorId, subtitle: "请检查网络连接或重试")
-            Indicators.shared.updateIcon(for: loginIndicatorId, icon: .image(Image(systemName: "xmark.icloud")))
+            Toast.finish(id: loginIndicatorId, title: "登录失败", failed: true)
+            Toast.update(id: loginIndicatorId, subtitle: "请检查网络连接或重试")
         }
     }
 
@@ -99,31 +93,22 @@ class LoginViewModel:ObservableObject{
         }
 
         do {
-            Indicators.shared.display(
-                Indicator(
-                    id: loginIndicatorId,
-                    icon: .progressIndicator,
-                    title: "登录中",
-                    subtitle: "验证 session token",
-                    dismissType: .manual,
-                    isUserDismissible: false
-                )
-            )
+            Toast.progress(id: loginIndicatorId, title: "登录中", subtitle: "验证 session token")
 
             let webServiceToken = try await NSOAuthorization.shared.requestWebServiceToken(
                 sessionToken: sessionToken,
                 indicatorID: loginIndicatorId
             )
 
-            Indicators.shared.updateSubtitle(for: loginIndicatorId, subtitle: "设置游戏服务令牌")
+            Toast.update(id: loginIndicatorId, subtitle: "设置游戏服务令牌")
             try await SN3Client.shared.setToken(webServiceToken.result.accessToken)
 
-            Indicators.shared.updateSubtitle(for: loginIndicatorId, subtitle: "获取账户ID")
+            Toast.update(id: loginIndicatorId, subtitle: "获取账户ID")
             guard let sp3PrincipalId = try await getAccountId()?.extractUserId(), !sp3PrincipalId.isEmpty else {
                 throw NSOAuthorization.NSOAuthError.nxapiError(message: "Failed to resolve SplatNet account id")
             }
 
-            Indicators.shared.updateSubtitle(for: loginIndicatorId, subtitle: "保存账户信息")
+            Toast.update(id: loginIndicatorId, subtitle: "保存账户信息")
             let account = Account(
                 sp3Id: sp3PrincipalId,
                 sessionToken: sessionToken,
@@ -139,9 +124,8 @@ class LoginViewModel:ObservableObject{
                 throw NSOAuthorization.NSOAuthError.nxapiError(message: "Failed to persist account")
             }
 
-            Indicators.shared.updateTitle(for: loginIndicatorId, title: "登录成功")
-            Indicators.shared.updateSubtitle(for: loginIndicatorId, subtitle: "正在完成登录...")
-            Indicators.shared.updateIcon(for: loginIndicatorId, icon: .success)
+            Toast.finish(id: loginIndicatorId, title: "登录成功")
+            Toast.update(id: loginIndicatorId, subtitle: "正在完成登录...")
 
             status = .loginSuccess
             MainViewModel.shared.isLogin = true
@@ -155,8 +139,8 @@ class LoginViewModel:ObservableObject{
             logError(error)
             status = .none
             errorMessage = "Session token 无效或已无法换取游戏令牌"
-            Indicators.shared.updateTitle(for: loginIndicatorId, title: "登录失败")
-            Indicators.shared.updateSubtitle(for: loginIndicatorId, subtitle: "请检查 session token 后重试")
+            Toast.finish(id: loginIndicatorId, title: "登录失败", failed: true)
+            Toast.update(id: loginIndicatorId, subtitle: "请检查 session token 后重试")
             Indicators.shared.updateIcon(for: loginIndicatorId, icon: .image(Image(systemName: "xmark.icloud")))
         }
     }

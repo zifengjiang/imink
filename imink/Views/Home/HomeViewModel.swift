@@ -86,45 +86,27 @@ class HomeViewModel: ObservableObject {
     func updateStatus() {
         cancelBag = Set<AnyCancellable>()
         
-        SplatDatabase.shared.totalCoopCount()
+        RecordStatistics.totalCountPublisher(kind: .coop)
             .catch { error -> Just<Int> in
-                os_log("Database Error: [totalCount] \(error.localizedDescription)")
-                return Just<Int>(0)
+                logError(error)
+                return Just(0)
             }
             .assign(to: \.totalCoop, on: self)
             .store(in: &cancelBag)
-        
-        SplatDatabase.shared.totalBattleCount()
+
+        RecordStatistics.totalCountPublisher(kind: .battle)
             .catch { error -> Just<Int> in
-                os_log("Database Error: [totalCount] \(error.localizedDescription)")
-                return Just<Int>(0)
+                logError(error)
+                return Just(0)
             }
             .assign(to: \.totalBattle, on: self)
             .store(in: &cancelBag)
         
-        ValueObservation
-            .tracking { db in
-                try Int.fetchOne(db, sql: "SELECT MAX(GroupId) FROM coop_group_status_view WHERE accountId = ?", arguments: [AppUserDefaults.shared.accountId])
-            }
-            .publisher(in: SplatDatabase.shared.dbQueue, scheduling: .immediate)
-            .eraseToAnyPublisher()
-            .catch { error -> Just<Int?> in
-                logError(error)
-                return Just<Int?>(nil)
-            }
+        RecordStatistics.latestGroupIdPublisher(kind: .coop, accountId: AppUserDefaults.shared.accountId)
             .assign(to: \.lastCoopGroupId, on: self)
             .store(in: &cancelBag)
         
-        ValueObservation
-            .tracking { db in
-                try Int.fetchOne(db, sql: "SELECT MAX(GroupId) FROM battle_group_status_view WHERE accountId = ?", arguments: [AppUserDefaults.shared.accountId])
-            }
-            .publisher(in: SplatDatabase.shared.dbQueue, scheduling: .immediate)
-            .eraseToAnyPublisher()
-            .catch { error -> Just<Int?> in
-                logError(error)
-                return Just<Int?>(nil)
-            }
+        RecordStatistics.latestGroupIdPublisher(kind: .battle, accountId: AppUserDefaults.shared.accountId)
             .assign(to: \.lastBattleGroupId, on: self)
             .store(in: &cancelBag)
         
@@ -169,27 +151,18 @@ class HomeViewModel: ObservableObject {
             .store(in: &cancelBag)
         
         // 获取最新的 coop 时间
-        ValueObservation
-            .tracking { db in
-                try Date.fetchOne(db, sql: "SELECT MAX(playedTime) FROM coop WHERE accountId = ?", arguments: [AppUserDefaults.shared.accountId])
-            }
-            .publisher(in: SplatDatabase.shared.dbQueue, scheduling: .immediate)
-            .eraseToAnyPublisher()
-            .catch { error -> Just<Date?> in
-                logError(error)
-                return Just<Date?>(nil)
-            }
+        RecordStatistics.latestPlayedTimePublisher(kind: .coop, accountId: AppUserDefaults.shared.accountId)
             .assign(to: \.lastCoopTime, on: self)
             .store(in: &cancelBag)
     }
     
     
-    func loadSchedules(date:Date = Date()){
+    func loadSchedules(date: Date = Date()) {
         scheduleCancelBag = Set<AnyCancellable>()
-        DispatchQueue.main.async{
-            Schedule.fetchAll(identifier: SQLRequest(sql: "SELECT * FROM schedule WHERE startTime >= ? OR (startTime <= ? AND endTime >= ?) ORDER BY startTime ASC", arguments: [date, date, date]))
+        DispatchQueue.main.async {
+            ScheduleRepository.upcoming(at: date)
                 .catch { error -> Just<[Schedule]> in
-                    os_log("Database Error: [loadSchedules] \(error.localizedDescription)")
+                    logError(error)
                     return Just<[Schedule]>([])
                 }
                 .map{
@@ -206,20 +179,18 @@ class HomeViewModel: ObservableObject {
         let IndicatorId = UUID().uuidString
         do{
             print("fetchSchedules")
-            Indicators.shared.display(Indicator(id: IndicatorId, icon: .progressIndicator, title: "获取赛程中", dismissType: .manual, isUserDismissible: false))
+            Toast.progress(id: IndicatorId, title: "获取赛程中")
             let json = try await Splatoon3InkAPI.schedule.GetJSON()
             try await SplatDatabase.shared.dbQueue.write { db in
                 try insertSchedules(json: json, db: db)
             }
             loadSchedules()
-            Indicators.shared.updateTitle(for: IndicatorId, title: "获取赛程成功")
-            Indicators.shared.updateIcon(for: IndicatorId, icon: .success)
+            Toast.finish(id: IndicatorId, title: "获取赛程成功")
             AppUserDefaults.shared.scheduleRefreshTime = Int(Date().timeIntervalSince1970)
         }catch{
             loadSchedules()
             logError(error)
-            Indicators.shared.updateTitle(for: IndicatorId, title: "获取赛程失败")
-            Indicators.shared.updateIcon(for: IndicatorId, icon: .image(Image(systemName: "xmark.icloud")))
+            Toast.finish(id: IndicatorId, title: "获取赛程失败", failed: true)
         }
         Indicators.shared.dismiss(with: IndicatorId)
     }
@@ -326,23 +297,5 @@ extension SplatDatabase {
                 return nil
             }
         }
-    }
-    
-    func totalCoopCount() -> AnyPublisher<Int, Error> {
-        return ValueObservation
-            .tracking { db in
-                try Coop.filter(sql: "isDeleted = 0").fetchCount(db)
-            }
-            .publisher(in: dbQueue, scheduling: .immediate)
-            .eraseToAnyPublisher()
-    }
-    
-    func totalBattleCount() -> AnyPublisher<Int, Error> {
-        return ValueObservation
-            .tracking { db in
-                try Battle.filter(sql: "isDeleted = 0").fetchCount(db)
-            }
-            .publisher(in: dbQueue, scheduling: .immediate)
-            .eraseToAnyPublisher()
     }
 }

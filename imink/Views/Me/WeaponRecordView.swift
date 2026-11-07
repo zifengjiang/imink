@@ -28,7 +28,7 @@ struct WeaponRecordView: View {
                 HStack {
                     Button {
                         Task {
-                            await viewModel.refreshData()
+                            await viewModel.refreshRemote()
                         }
                     } label: {
                         Image(systemName: "arrow.clockwise")
@@ -116,8 +116,17 @@ struct WeaponRecordView: View {
     }
 }
 
-class WeaponRecordViewModel: ObservableObject {
+@MainActor
+final class WeaponRecordViewModel: ObservableObject, CachedRecordViewModel {
+    typealias Record = WeaponRecords
+
     @Published var weaponRecords: WeaponRecords?
+
+    var value: WeaponRecords? {
+        get { weaponRecords }
+        set { weaponRecords = newValue }
+    }
+
     @Published var sortBy: SortOption = .frequentlyUsed {
         didSet {
             objectWillChange.send()
@@ -158,33 +167,20 @@ class WeaponRecordViewModel: ObservableObject {
         }
     }
     
+    func readCache() -> WeaponRecords? {
+        AppUserDefaults.shared.weaponRecordsCache
+    }
+
+    func writeCache(_ record: WeaponRecords) {
+        AppUserDefaults.shared.weaponRecordsCache = record
+    }
+
+    func fetchRemote() async -> WeaponRecords? {
+        await SN3Client.shared.fetchRecord(.weaponRecord)
+    }
+
     init() {
-        Task{@MainActor in
-            await loadData()
-        }
-    }
-    
-    @MainActor
-    func loadData() async {
-        // 首先尝试从缓存加载数据
-        if let cachedRecords = AppUserDefaults.shared.weaponRecordsCache {
-            self.weaponRecords = cachedRecords
-        }
-        
-        // 如果没有缓存数据，则从网络获取
-        if weaponRecords == nil {
-            await refreshData()
-        }
-    }
-    
-    @MainActor
-    func refreshData() async {
-        let records: WeaponRecords? = await SN3Client.shared.fetchRecord(.weaponRecord)
-        self.weaponRecords = records
-        // 保存到缓存
-        if let records = records {
-            AppUserDefaults.shared.weaponRecordsCache = records
-        }
+        Task { await loadCachedThenRemote() }
     }
 }
 import SwiftyJSON

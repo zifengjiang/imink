@@ -439,10 +439,10 @@ extension DataBackup {
             }
             if let error = error {
                 Indicators.shared.dismiss(with: progressIndicatorId)
-                Indicators.shared.display(.init(id: UUID().uuidString, icon: .systemImage("xmark.circle.fill"), title: "导入失败",subtitle: error.localizedDescription, dismissType: .after(5),style: .error))
+                Toast.failure("导入失败", subtitle: error.localizedDescription, dismissAfter: 5)
             } else if progress.value == 1 {
                 Indicators.shared.dismiss(with: progressIndicatorId)
-                Indicators.shared.display(.init(id: UUID().uuidString, icon: .systemImage("checkmark.circle.fill"), title: "导入成功",subtitle: "成功导入\(progress.count)个记录", dismissType: .after(10)))
+                Toast.success("导入成功", subtitle: "成功导入\(progress.count)个记录", dismissAfter: 10)
             }
         }
     }

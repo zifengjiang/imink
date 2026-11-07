@@ -1,9 +1,7 @@
 import SwiftUI
 
 struct CoopListView: View {
-    @EnvironmentObject var mainViewModel: MainViewModel
     @EnvironmentObject var viewModel: CoopListViewModel
-    @Environment(\.scenePhase) var scenePhase
     @Namespace private var animation
     @State var activeID:String?
     @State var showFilterSheet = false
@@ -13,7 +11,7 @@ struct CoopListView: View {
     @State private var navigationPath = NavigationPath()
 
     private var visibleCoopIds: [Int64] {
-        viewModel.rows.compactMap { $0.coop?.id }
+        viewModel.rows.compactMap { $0.detail?.id }
     }
 
     var body: some View {
@@ -25,9 +23,9 @@ struct CoopListView: View {
                             ForEach(viewModel.rows, id:\.id){ row in
                                     SelectableRowView(
                                         isSelectionMode: selection.isActive,
-                                        isSelected: row.coop.map { selection.contains($0.id) } ?? false,
+                                        isSelected: row.detail.map { selection.contains($0.id) } ?? false,
                                         onTap: {
-                                            if let coopId = row.coop?.id {
+                                            if let coopId = row.detail?.id {
                                                 selection.toggle(coopId)
                                             }
                                         }
@@ -172,27 +170,11 @@ struct CoopListView: View {
             }
             .sheet(isPresented: $showFilterSheet){
                 CoopFilterView(showFilterView: $showFilterSheet, filter: $viewModel.filter){
-                    viewModel.cancel()
                     guard AppState.shared.isLogin else { return }
                     await viewModel.loadCoops()
                 }
                 .navigationTransition(.zoom(sourceID: "filter", in: animation))
             }
-        }
-    }
-
-    struct CustomTabView<Content: View>: View {
-        @Binding var selection: String?
-        @ViewBuilder var content: () -> Content
-        var body: some View {
-            ScrollView(.horizontal){
-                LazyHStack(spacing: 0){
-                    content()
-                }
-            }
-            .scrollPosition(id: $selection)
-            .scrollIndicators(.hidden)
-            .scrollTargetBehavior(.paging)
         }
     }
 
@@ -223,59 +205,21 @@ struct CoopListView: View {
     }
     
     private func batchDelete() {
-        let indicatorId = UUID().uuidString
         let selectedCoopIds = Array(selection.selectedIds)
-        let totalCount = selectedCoopIds.count
-        
+
         Task {
-            do {
-                // 显示进度提示
-                await MainActor.run {
-                    Indicators.shared.display(.init(
-                        id: indicatorId,
-                        icon: .progressIndicator,
-                        title: "正在删除",
-                        subtitle: "0/\(totalCount)",
-                        dismissType: .manual,
-                        isUserDismissible: false
-                    ))
-                }
-                
-                try await viewModel.softDelete(ids: selectedCoopIds) { processedCount in
-                    await MainActor.run {
-                        Indicators.shared.updateSubtitle(
-                            for: indicatorId,
-                            subtitle: "\(processedCount)/\(totalCount)"
-                        )
-                    }
-                }
-                
-                await MainActor.run {
-                    // 显示完成提示
-                    Indicators.shared.dismiss(with: indicatorId)
-                    Indicators.shared.display(.init(
-                        id: UUID().uuidString,
-                        icon: .systemImage("checkmark.circle.fill"),
-                        title: "删除完成",
-                        subtitle: "已删除 \(totalCount) 条记录",
-                        dismissType: .after(2)
-                    ))
-                    
-                    selection.cancel()
-                }
-            } catch {
-                await MainActor.run {
-                    Indicators.shared.dismiss(with: indicatorId)
-                    Indicators.shared.display(.init(
-                        id: UUID().uuidString,
-                        icon: .systemImage("xmark.circle.fill"),
-                        title: "删除失败",
-                        subtitle: error.localizedDescription,
-                        dismissType: .after(3),
-                        style: .error
-                    ))
-                }
-                print("Error batch deleting coops: \(error)")
+            let succeeded = await BatchOperation.run(
+                title: "正在删除",
+                totalCount: selectedCoopIds.count,
+                successTitle: "删除完成",
+                successSubtitle: { "已删除 \($0) 条记录" },
+                failureTitle: "删除失败"
+            ) { reportProgress in
+                try await viewModel.softDelete(ids: selectedCoopIds, onProgress: reportProgress)
+            }
+
+            if succeeded {
+                selection.cancel()
             }
         }
     }

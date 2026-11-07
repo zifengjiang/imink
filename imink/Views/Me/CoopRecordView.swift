@@ -71,7 +71,7 @@ struct CoopRecordView: View {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
                             Task {
-                                await model.refreshData()
+                                await model.refreshRemote()
                             }
                         } label: {
                             Image(systemName: "arrow.clockwise")
@@ -146,56 +146,32 @@ struct CoopRecordView: View {
 }
 
 
-class SalmonRunStatsViewModel:ObservableObject{
-    @Published var coopRecord:CoopRecord?
+@MainActor
+final class SalmonRunStatsViewModel: ObservableObject, CachedRecordViewModel {
+    typealias Record = CoopRecord
 
+    @Published var coopRecord: CoopRecord?
+
+    var value: CoopRecord? {
+        get { coopRecord }
+        set { coopRecord = newValue }
+    }
+
+    func readCache() -> CoopRecord? {
+        AppUserDefaults.shared.coopRecordCache
+    }
+
+    func writeCache(_ record: CoopRecord) {
+        AppUserDefaults.shared.coopRecordCache = record
+    }
+
+    func fetchRemote() async -> CoopRecord? {
+        await SN3Client.shared.fetchRecord(.coopRecord)
+    }
 
     init() {
-        Task{@MainActor in
-            await loadData()
-        }
-    }
-
-    @MainActor
-    func loadData() async {
-        // 首先尝试从缓存加载数据
-        if let cachedRecord = AppUserDefaults.shared.coopRecordCache {
-            self.coopRecord = cachedRecord
-        }
-        
-        // 如果没有缓存数据，则从网络获取
-        if coopRecord == nil {
-            await refreshData()
-        }
-    }
-    
-    @MainActor
-    func refreshData() async {
-        let record:CoopRecord? = await SN3Client.shared.fetchRecord(.coopRecord)
-        self.coopRecord = record
-        // 保存到缓存
-        if let record = record {
-            AppUserDefaults.shared.coopRecordCache = record
-        }
+        Task { await loadCachedThenRemote() }
     }
 }
 
 
-struct DividerViewBuilder<Content: View, Item>: View {
-    var items: [Item]
-    let content: (Item) -> Content
-
-    init(items: [Item], @ViewBuilder content: @escaping (Item) -> Content) {
-        self.items = items
-        self.content = content
-    }
-
-    var body: some View {
-        ForEach(Array(items.enumerated()), id: \.offset) { index, item in
-            content(item)
-            if index < items.count - 1 {
-                Divider()
-            }
-        }
-    }
-}

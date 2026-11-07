@@ -6,7 +6,7 @@ import SplatDatabase
 @main
 struct iminkApp: App {
     @StateObject var coopListViewModel = CoopListViewModel.shared
-    @StateObject var battleListViewModel = BattleListViewModel()
+    @StateObject var battleListViewModel = BattleListViewModel.shared
     @StateObject var backgroundTaskManager = BackgroundTaskManager.shared
     @StateObject var notificationManager = NotificationManager.shared
     @StateObject var subscriptionManager = ScheduleSubscriptionManager.shared

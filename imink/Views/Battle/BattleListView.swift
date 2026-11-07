@@ -2,35 +2,32 @@ import SwiftUI
 
 struct BattleListView: View {
     @EnvironmentObject var viewModel: BattleListViewModel
-    @Environment(\.scenePhase) var scenePhase
     @Namespace private var animation
     @State var activeID:String?
     @State var showFilterSheet = false
     @State private var selection = RecordSelection<Int64>()
 
     private var visibleBattleIds: [Int64] {
-        viewModel.rows.compactMap { $0.battle?.id }
+        viewModel.rows.compactMap { $0.detail?.id }
     }
 
     var body: some View {
         NavigationStack{
-            ScrollViewReader{ proxy in
+            ScrollViewReader { _ in
                 VStack {
 
                     ScrollView{
                         LazyVStack{
                             ForEach(viewModel.rows,id: \.id){row in
-                                if row.isBattle {
+                                if let battle = row.detail {
                                     SelectableRowView(
                                         isSelectionMode: selection.isActive,
-                                        isSelected: row.battle.map { selection.contains($0.id) } ?? false,
+                                        isSelected: selection.contains(battle.id),
                                         onTap: {
-                                            if let battleId = row.battle?.id {
-                                                selection.toggle(battleId)
-                                            }
+                                            selection.toggle(battle.id)
                                         }
                                     ) {
-                                        if !selection.isActive, let battle = row.battle {
+                                        if !selection.isActive {
                                             NavigationLink{
                                                 BattleDetailView(id: battle.id)
                                             } label: {
@@ -157,79 +154,22 @@ struct BattleListView: View {
     }
 
     private func batchDelete() {
-        let indicatorId = UUID().uuidString
         let selectedBattleIds = Array(selection.selectedIds)
-        let totalCount = selectedBattleIds.count
 
         Task {
-            do {
-                    // 显示进度提示
-                await MainActor.run {
-                    Indicators.shared.display(.init(
-                        id: indicatorId,
-                        icon: .progressIndicator,
-                        title: "正在删除",
-                        subtitle: "0/\(totalCount)",
-                        dismissType: .manual,
-                        isUserDismissible: false
-                    ))
-                }
-
-                try await viewModel.softDelete(ids: selectedBattleIds) { processedCount in
-                    await MainActor.run {
-                        Indicators.shared.updateSubtitle(
-                            for: indicatorId,
-                            subtitle: "\(processedCount)/\(totalCount)"
-                        )
-                    }
-                }
-
-                await MainActor.run {
-                        // 显示完成提示
-                    Indicators.shared.dismiss(with: indicatorId)
-                    Indicators.shared.display(.init(
-                        id: UUID().uuidString,
-                        icon: .systemImage("checkmark.circle.fill"),
-                        title: "删除完成",
-                        subtitle: "已删除 \(totalCount) 条记录",
-                        dismissType: .after(2)
-                    ))
-
-                    selection.cancel()
-                }
-            } catch {
-                await MainActor.run {
-                    Indicators.shared.dismiss(with: indicatorId)
-                    Indicators.shared.display(.init(
-                        id: UUID().uuidString,
-                        icon: .systemImage("xmark.circle.fill"),
-                        title: "删除失败",
-                        subtitle: error.localizedDescription,
-                        dismissType: .after(3),
-                        style: .error
-                    ))
-                }
-                print("Error batch deleting battles: \(error)")
+            let succeeded = await BatchOperation.run(
+                title: "正在删除",
+                totalCount: selectedBattleIds.count,
+                successTitle: "删除完成",
+                successSubtitle: { "已删除 \($0) 条记录" },
+                failureTitle: "删除失败"
+            ) { reportProgress in
+                try await viewModel.softDelete(ids: selectedBattleIds, onProgress: reportProgress)
             }
-        }
-    }
 
-    struct DetailTabView:View {
-        @Binding var selectedRow: String
-        @Binding var rows:[BattleListRowInfo]
-        var body: some View {
-
-            TabView(selection: $selectedRow) {
-                ForEach(rows, id:\.id){ row in
-                        //                    CoopListDetailView(isCoop: row.isCoop, coopId: row.coop?.id, shiftId: row.card?.groupId)
-                        //                        .tag(row.id)
-                    Rectangle()
-                        .fill(Color.red)
-                }
+            if succeeded {
+                selection.cancel()
             }
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-            .edgesIgnoringSafeArea(.vertical)
-            .fixSafeareaBackground()
         }
     }
 }
