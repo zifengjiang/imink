@@ -43,122 +43,43 @@ struct RecordSelection<ID: Hashable> {
     }
 }
 
-enum RecordBatchOperationService {
-    static let defaultBatchSize = 50
+/// 可软删除 / 可收藏的记录（对战与打工）。
+///
+/// 两类记录的收藏、软删除、恢复行为完全一致，差异只在所属类型，
+/// 因此统一由这个协议提供默认实现。
+protocol RecordStatusToggleable {
+    static var recordKind: SplatRecordKind { get }
+    var id: Int64? { get }
+    var isFavorite: Bool { get }
+}
 
-    static func batches<ID>(_ ids: [ID], batchSize: Int = defaultBatchSize) -> [[ID]] {
-        guard batchSize > 0 else { return [] }
-
-        return stride(from: 0, to: ids.count, by: batchSize).map { startIndex in
-            let endIndex = min(startIndex + batchSize, ids.count)
-            return Array(ids[startIndex..<endIndex])
-        }
+extension RecordStatusToggleable {
+    func toggleFavorite() throws {
+        try SplatDatabase.shared.setFavorite(!isFavorite, kind: Self.recordKind, ids: [id ?? 0])
     }
 
-    static func toggleBattleFavorites(ids: [Int64]) async throws {
-        for id in ids {
-            if let battle = try await SplatDatabase.shared.dbQueue.read({ db in
-                try Battle.fetchOne(db, key: id)
-            }) {
-                try battle.toggleFavorite()
-            }
-        }
+    func softDelete() throws {
+        try SplatDatabase.shared.setDeleted(true, kind: Self.recordKind, ids: [id ?? 0])
     }
 
-    static func toggleCoopFavorites(ids: [Int64]) async throws {
-        for id in ids {
-            if let coop = try await SplatDatabase.shared.dbQueue.read({ db in
-                try Coop.fetchOne(db, key: id)
-            }) {
-                try coop.toggleFavorite()
-            }
-        }
-    }
-
-    static func softDeleteBattles(
-        ids: [Int64],
-        onProgress: @escaping (Int) async -> Void = { _ in }
-    ) async throws {
-        try await softDelete(table: "battle", ids: ids, onProgress: onProgress)
-    }
-
-    static func softDeleteCoops(
-        ids: [Int64],
-        onProgress: @escaping (Int) async -> Void = { _ in }
-    ) async throws {
-        try await softDelete(table: "coop", ids: ids, onProgress: onProgress)
-    }
-
-    private static func softDelete(
-        table: String,
-        ids: [Int64],
-        onProgress: @escaping (Int) async -> Void
-    ) async throws {
-        var processedCount = 0
-
-        for batch in batches(ids) {
-            let placeholders = batch.map { _ in "?" }.joined(separator: ",")
-
-            try await SplatDatabase.shared.dbQueue.write { db in
-                try db.execute(
-                    sql: "UPDATE \(table) SET isDeleted = 1 WHERE id IN (\(placeholders))",
-                    arguments: StatementArguments(batch)
-                )
-            }
-
-            processedCount += batch.count
-            await onProgress(processedCount)
-            await Task.yield()
-        }
+    func restore() throws {
+        try SplatDatabase.shared.setDeleted(false, kind: Self.recordKind, ids: [id ?? 0])
     }
 }
 
+extension Coop: RecordStatusToggleable {
+    static let recordKind = SplatRecordKind.coop
 
-extension Coop {
-    var gradeName: String?{
-        if let afterGrade = afterGrade {
-            return "CoopGrade-\(afterGrade)".base64EncodedString
-        }
-        return nil
+    var gradeName: String? {
+        guard let afterGrade else { return nil }
+        return "CoopGrade-\(afterGrade)".base64EncodedString
     }
 
-    var clear:Bool{
+    var clear: Bool {
         wave == 3 && rule != "TEAM_CONTEST" || wave == 5 && rule == "TEAM_CONTEST"
     }
-    
-    // 软删除和喜爱功能扩展
-    func toggleFavorite() throws {
-        if isFavorite {
-            try SplatDatabase.shared.unmarkCoopAsFavorite(coopId: id ?? 0)
-        } else {
-            try SplatDatabase.shared.markCoopAsFavorite(coopId: id ?? 0)
-        }
-    }
-    
-    func softDelete() throws {
-        try SplatDatabase.shared.softDeleteCoop(coopId: id ?? 0)
-    }
-    
-    func restore() throws {
-        try SplatDatabase.shared.restoreCoop(coopId: id ?? 0)
-    }
 }
 
-extension Battle {
-    // 软删除和喜爱功能扩展
-    func toggleFavorite() throws {
-        if isFavorite {
-            try SplatDatabase.shared.unmarkBattleAsFavorite(battleId: id ?? 0)
-        } else {
-            try SplatDatabase.shared.markBattleAsFavorite(battleId: id ?? 0)
-        }
-    }
-    
-    func softDelete() throws {
-        try SplatDatabase.shared.softDeleteBattle(battleId: id ?? 0)
-    }
-    
-    func restore() throws {
-        try SplatDatabase.shared.restoreBattle(battleId: id ?? 0)
-    }
+extension Battle: RecordStatusToggleable {
+    static let recordKind = SplatRecordKind.battle
 }

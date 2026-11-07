@@ -1,20 +1,9 @@
 import Foundation
 import SplatDatabase
-import Combine
-import GRDB
 
-struct CoopListRowModel:Identifiable{
-    
-    let isCoop: Bool
-    var coop: CoopListRowInfo?
-    var card: CoopGroupStatus?
+extension CoopListRowInfo: GroupedRecord {}
 
-    var id: String {
-        if isCoop {
-            return "detail-\(coop!.id)"
-        }
-        return "card-\(card!.startTime)-\(card!.count)"
-    }
-}
+extension CoopGroupStatus: GroupStatusCard {}
 
-
+/// 打工列表的行模型（记录行 / 班次卡片行）。
+typealias CoopListRowModel = RecordListRow<CoopListRowInfo, CoopGroupStatus>

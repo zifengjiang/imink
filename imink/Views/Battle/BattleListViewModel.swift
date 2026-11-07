@@ -1,137 +1,43 @@
 import Foundation
-import Combine
 import SplatDatabase
 import GRDB
-import SwiftUI
 
+/// 对战列表：在通用分页视图模型之上提供对战数据源与批量操作。
 @MainActor
-class BattleListViewModel: ObservableObject {
+final class BattleListViewModel: PagedRecordListViewModel<BattleListRowInfo, BattleGroupStatus> {
     static let shared = BattleListViewModel()
 
-    @Published var rows: [BattleListRowModel] = []
-    @Published var navigationTitle = "全部对战"
-    @Published var filter = Filter()
-
-    private var offset: Int = 0
-    private var cancelBag = Set<AnyCancellable>()
-    private var cancellables: Set<AnyCancellable> = []
-
-    var groupId = 0
-
-    init() {
-        AppState.shared.$isLogin
-            .sink { [weak self] isLogin in
-                self?.handleLoginStateChange(isLogin: isLogin)
-            }
-            .store(in: &cancellables)
-        
-        // 监听数据变化通知
-        NotificationCenter.default.publisher(for: .battleDataChanged)
-            .sink { [weak self] _ in
-                Task { @MainActor in
-                    await self?.loadBattles()
-                }
-            }
-            .store(in: &cancellables)
+    private init() {
+        super.init(kind: .battle, navigationTitle: "全部对战")
     }
 
-    func handleLoginStateChange(isLogin:Bool) {
-        if isLogin{
-            Task{
-                await loadBattles()
-            }
-        }else{
-            self.rows = []
-        }
+    /// 重新加载对战列表（保留给视图层调用的语义化入口）。
+    func loadBattles(limit: Int = 50, offset: Int = 0) async {
+        await reload(limit: limit, offset: offset)
     }
 
-    func loadBattles(limit: Int = 50, offset: Int = 0) async{
-        self.groupId = 0
-        let battles:[BattleListRowInfo] = await measureTime(title: "loadBattles") {
-            await BattleListRowInfo.battles(filter: self.filter, limit: limit, offset)
-        }
-        let rows = measureTime(title: "processBattles") {
-            processBattles(battles)
-        }
-        DispatchQueue.main.async {
-            self.rows = rows
-        }
-    }
-
-    func loadMore() async{
-        let rows = processBattles(await BattleListRowInfo.battles(filter: self.filter, limit: 10, self.offset))
-        DispatchQueue.main.async {
-            self.rows.append(contentsOf: rows)
-        }
-    }
-
-    func fetchBattles() async{
+    func fetchBattles() async {
         guard AppState.shared.isLogin else { return }
         await SN3Client.shared.fetchBattles()
     }
 
-    func toggleFavorites(ids: [Int64]) async throws {
-        try await RecordBatchOperationService.toggleBattleFavorites(ids: ids)
-        NotificationCenter.default.post(name: .battleDataChanged, object: nil)
-    }
+    // MARK: - PagedRecordListViewModel
 
-    func softDelete(
-        ids: [Int64],
-        onProgress: @escaping (Int) async -> Void = { _ in }
-    ) async throws {
-        try await RecordBatchOperationService.softDeleteBattles(ids: ids, onProgress: onProgress)
-        NotificationCenter.default.post(name: .battleDataChanged, object: nil)
-    }
-
-    func cancel() {
-        cancelBag.forEach { $0.cancel() }
-    }
-
-    private func processBattles(_ battles: [BattleListRowInfo]) -> [BattleListRowModel] {
-        self.offset += battles.count
-        var rows = [BattleListRowModel]()
-        for battle in battles {
-            if battle.GroupId != self.groupId {
-                self.groupId = Int(battle.GroupId)
-                if let card = try? SplatDatabase.shared.dbQueue.read({ db in
-                    try BattleGroupStatus.create(from: db, identifier: (self.groupId, AppUserDefaults.shared.accountId))
-                }) {
-                    rows.append(BattleListRowModel(isBattle: false, battle: nil, card: card))
-                }
-            }
-            rows.append(BattleListRowModel(isBattle: true, battle: battle, card: nil))
-        }
-        return rows
-    }
-
-    func loadMoreCards() async {
-        do {
-                // 1) 在主 actor 上读取需要的状态
-            let offset = self.rows.count
-            let accountId = AppUserDefaults.shared.accountId
-
-                // 2) 传入纯值，read 闭包里不引用 self/rows
-            let cards: [BattleGroupStatus] = try await SplatDatabase.shared.dbQueue.read { db in
-                try BattleGroupStatus.create(from: db, identifier: (accountId, offset))
-            }
-
-                // 3) 回到主 actor（方法本身已在 MainActor），直接更新 UI 状态
-            self.rows.append(contentsOf: cards.map { BattleListRowModel(isBattle: false, battle: nil, card: $0) })
-        } catch {
-            logError(error)
+    override func fetchPage(filter: Filter, limit: Int, offset: Int) async -> [BattleListRowInfo] {
+        await measureTime(title: "loadBattles") {
+            await BattleListRowInfo.battles(filter: filter, limit: limit, offset)
         }
     }
 
-    func loadCards(limit: Int = 50, offset:Int = 0) async {
-        do{
-            let cards:[BattleGroupStatus] = try await SplatDatabase.shared.dbQueue.read { db in
-                try BattleGroupStatus.create(from: db, identifier: (AppUserDefaults.shared.accountId, offset))
-            }
-            DispatchQueue.main.async {
-                self.rows = cards.map { BattleListRowModel(isBattle: false, battle: nil, card: $0) }
-            }
-        }catch{
-            logError(error)
+    override func fetchCard(groupId: Int64, accountId: Int) async throws -> BattleGroupStatus? {
+        try await SplatDatabase.shared.dbQueue.read { db -> BattleGroupStatus? in
+            try BattleGroupStatus.create(from: db, identifier: (Int(groupId), accountId))
+        }
+    }
+
+    override func fetchCards(accountId: Int, offset: Int) async throws -> [BattleGroupStatus] {
+        try await SplatDatabase.shared.dbQueue.read { db -> [BattleGroupStatus] in
+            try BattleGroupStatus.create(from: db, identifier: (accountId, offset))
         }
     }
 }

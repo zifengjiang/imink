@@ -64,7 +64,6 @@
 		8B19CF2D2CB2464F00EF4424 /* BattleListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B19CF2C2CB2464F00EF4424 /* BattleListView.swift */; };
 		8B19CF2F2CB2466400EF4424 /* BattleListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B19CF2E2CB2466400EF4424 /* BattleListViewModel.swift */; };
 		8B19CF312CB2479B00EF4424 /* BattleListRowModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B19CF302CB2479B00EF4424 /* BattleListRowModel.swift */; };
-		8B19CF332CB2486B00EF4424 /* BattleListDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B19CF322CB2486B00EF4424 /* BattleListDetailView.swift */; };
 		8B19CF352CB2488200EF4424 /* BattleListRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B19CF342CB2488200EF4424 /* BattleListRowView.swift */; };
 		8B19CF882CB299F300EF4424 /* BattleMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B19CF872CB299F300EF4424 /* BattleMode.swift */; };
 		8B19CF8A2CB29BC500EF4424 /* BattleRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B19CF892CB29BC500EF4424 /* BattleRule.swift */; };
@@ -106,7 +105,6 @@
 		8B7059042C0B00510076F680 /* NameplateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7059032C0B00510076F680 /* NameplateView.swift */; };
 		8B7059062C0C25A90076F680 /* TouchDownAndTouchUpGestureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7059052C0C25A90076F680 /* TouchDownAndTouchUpGestureView.swift */; };
 		8B7059082C0C27980076F680 /* PopupModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7059072C0C27980076F680 /* PopupModifier.swift */; };
-		8B7AE6DF2CAED41B00E61735 /* BattleStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7AE6DE2CAED41B00E61735 /* BattleStatusView.swift */; };
 		8B7F292A2BF6E1B90010A525 /* iminkApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7F29292BF6E1B90010A525 /* iminkApp.swift */; };
 		8B7F292C2BF6E1B90010A525 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7F292B2BF6E1B90010A525 /* MainView.swift */; };
 		8B7F292E2BF6E1BB0010A525 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B7F292D2BF6E1BB0010A525 /* Assets.xcassets */; };
@@ -135,7 +133,6 @@
 		8BA1F3FC2CD45B2200E733EA /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA1F3FB2CD45B2200E733EA /* LoadingView.swift */; };
 		8BA30B082CAED80E0020D489 /* Operator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA30B072CAED80E0020D489 /* Operator.swift */; };
 		8BAADA552C11C382002D6370 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 8BAADA542C11C382002D6370 /* .swiftlint.yml */; };
-		8BAADA572C128DB6002D6370 /* RightCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAADA562C128DB6002D6370 /* RightCardView.swift */; };
 		8BAD2C6E2E5BEE0200DE9952 /* TrashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAD2C6D2E5BEE0200DE9952 /* TrashView.swift */; };
 		8BAD2C702E5BEE0A00DE9952 /* TrashViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAD2C6F2E5BEE0A00DE9952 /* TrashViewModel.swift */; };
 		8BAD2C722E5BFB5D00DE9952 /* SelectableRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAD2C712E5BFB5D00DE9952 /* SelectableRowView.swift */; };
@@ -183,7 +180,7 @@
 		8BF3CB7C2CD4B9D800B0FCA9 /* TargetType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB7B2CD4B9D800B0FCA9 /* TargetType.swift */; };
 		8BF3CB7E2CD4B9F700B0FCA9 /* PluginType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB7D2CD4B9F700B0FCA9 /* PluginType.swift */; };
 		8BF3CB802CD4BA7100B0FCA9 /* IMSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB7F2CD4BA7100B0FCA9 /* IMSession.swift */; };
-		8BF3CB822CD4BA9B00B0FCA9 /* URLSession+Polyfill.swift .swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB812CD4BA9B00B0FCA9 /* URLSession+Polyfill.swift .swift */; };
+		8BF3CB822CD4BA9B00B0FCA9 /* URLSession+Polyfill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB812CD4BA9B00B0FCA9 /* URLSession+Polyfill.swift */; };
 		8BF3CB852CD4BAEF00B0FCA9 /* MediaType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB832CD4BAEF00B0FCA9 /* MediaType.swift */; };
 		8BF3CB862CD4BAEF00B0FCA9 /* RequestMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB842CD4BAEF00B0FCA9 /* RequestMethod.swift */; };
 		8BF3CB882CD4BB3A00B0FCA9 /* SN3WebViewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB872CD4BB3A00B0FCA9 /* SN3WebViewData.swift */; };
@@ -194,6 +191,30 @@
 		8BFF73E52C0938330048F2A6 /* CoopListDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF73E42C0938330048F2A6 /* CoopListDetailView.swift */; };
 		8BFF73E72C0939160048F2A6 /* CoopListRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF73E62C0939160048F2A6 /* CoopListRowView.swift */; };
 		8BFFDF692CB40F43004F2390 /* BattlePlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFFDF682CB40F43004F2390 /* BattlePlayerView.swift */; };
+		0B2000112EF3000000000001 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000102EF3000000000001 /* Toast.swift */; };
+		0B2000212EF3000000000001 /* BatchOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000202EF3000000000001 /* BatchOperation.swift */; };
+		0B2000312EF3000000000001 /* RecordListRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000302EF3000000000001 /* RecordListRow.swift */; };
+		0B2000412EF3000000000001 /* PagedRecordListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000402EF3000000000001 /* PagedRecordListViewModel.swift */; };
+		0B2000512EF3000000000001 /* ShiftCardChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000502EF3000000000001 /* ShiftCardChrome.swift */; };
+		0B2000612EF3000000000001 /* CachedRecordViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000602EF3000000000001 /* CachedRecordViewModel.swift */; };
+		0B2000712EF3000000000001 /* RecordStatusFilterSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000702EF3000000000001 /* RecordStatusFilterSection.swift */; };
+		0B2000912EF3000000000001 /* CoopRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000902EF3000000000001 /* CoopRepository.swift */; };
+		0B2000A12EF3000000000001 /* RecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000A02EF3000000000001 /* RecordStore.swift */; };
+		0B2000B12EF3000000000001 /* SplatRecordKind+App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000B02EF3000000000001 /* SplatRecordKind+App.swift */; };
+		0B2000C12EF3000000000001 /* RecordStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000C02EF3000000000001 /* RecordStatistics.swift */; };
+		0B2000D12EF3000000000001 /* PlayerRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000D02EF3000000000001 /* PlayerRepository.swift */; };
+		0B2000E12EF3000000000001 /* ScheduleRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000E02EF3000000000001 /* ScheduleRepository.swift */; };
+		0B2000F12EF3000000000001 /* SalmonRunStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000F02EF3000000000001 /* SalmonRunStatusView.swift */; };
+		0B2000F32EF3000000000001 /* BattleStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000F22EF3000000000001 /* BattleStatusView.swift */; };
+		0B2000F52EF3000000000001 /* DeveloperSettingsPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000F42EF3000000000001 /* DeveloperSettingsPage.swift */; };
+		0B2000F72EF3000000000001 /* CoopDetailMemberView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000F62EF3000000000001 /* CoopDetailMemberView.swift */; };
+		0B2000F92EF3000000000001 /* CoopPlayerStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000F82EF3000000000001 /* CoopPlayerStatusView.swift */; };
+		0B2000FB2EF3000000000001 /* ProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000FA2EF3000000000001 /* ProgressBar.swift */; };
+		0B2001012EF3000000000001 /* CoopDetailView+Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001002EF3000000000001 /* CoopDetailView+Card.swift */; };
+		0B2001032EF3000000000001 /* CoopDetailView+Enemy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001022EF3000000000001 /* CoopDetailView+Enemy.swift */; };
+		0B2001052EF3000000000001 /* DividerViewBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001042EF3000000000001 /* DividerViewBuilder.swift */; };
+		0B2001072EF3000000000001 /* BynameBackfill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001062EF3000000000001 /* BynameBackfill.swift */; };
+		0B2001092EF3000000000001 /* Battle+ColorRatio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001082EF3000000000001 /* Battle+ColorRatio.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -311,7 +332,6 @@
 		8B19CF2C2CB2464F00EF4424 /* BattleListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleListView.swift; sourceTree = "<group>"; };
 		8B19CF2E2CB2466400EF4424 /* BattleListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleListViewModel.swift; sourceTree = "<group>"; };
 		8B19CF302CB2479B00EF4424 /* BattleListRowModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleListRowModel.swift; sourceTree = "<group>"; };
-		8B19CF322CB2486B00EF4424 /* BattleListDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleListDetailView.swift; sourceTree = "<group>"; };
 		8B19CF342CB2488200EF4424 /* BattleListRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleListRowView.swift; sourceTree = "<group>"; };
 		8B19CF872CB299F300EF4424 /* BattleMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleMode.swift; sourceTree = "<group>"; };
 		8B19CF892CB29BC500EF4424 /* BattleRule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleRule.swift; sourceTree = "<group>"; };
@@ -350,7 +370,6 @@
 		8B7059032C0B00510076F680 /* NameplateView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NameplateView.swift; sourceTree = "<group>"; };
 		8B7059052C0C25A90076F680 /* TouchDownAndTouchUpGestureView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TouchDownAndTouchUpGestureView.swift; sourceTree = "<group>"; };
 		8B7059072C0C27980076F680 /* PopupModifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopupModifier.swift; sourceTree = "<group>"; };
-		8B7AE6DE2CAED41B00E61735 /* BattleStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleStatusView.swift; sourceTree = "<group>"; };
 		8B7F29262BF6E1B90010A525 /* imink.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = imink.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8B7F29292BF6E1B90010A525 /* iminkApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iminkApp.swift; sourceTree = "<group>"; };
 		8B7F292B2BF6E1B90010A525 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
@@ -392,7 +411,6 @@
 		8BA1F3FB2CD45B2200E733EA /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		8BA30B072CAED80E0020D489 /* Operator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Operator.swift; sourceTree = "<group>"; };
 		8BAADA542C11C382002D6370 /* .swiftlint.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
-		8BAADA562C128DB6002D6370 /* RightCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightCardView.swift; sourceTree = "<group>"; };
 		8BAD2C1A2E5B4FC600DE9952 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		8BAD2C1C2E5B4FC600DE9952 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		8BAD2C6D2E5BEE0200DE9952 /* TrashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrashView.swift; sourceTree = "<group>"; };
@@ -441,7 +459,7 @@
 		8BF3CB7B2CD4B9D800B0FCA9 /* TargetType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TargetType.swift; sourceTree = "<group>"; };
 		8BF3CB7D2CD4B9F700B0FCA9 /* PluginType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginType.swift; sourceTree = "<group>"; };
 		8BF3CB7F2CD4BA7100B0FCA9 /* IMSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IMSession.swift; sourceTree = "<group>"; };
-		8BF3CB812CD4BA9B00B0FCA9 /* URLSession+Polyfill.swift .swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URLSession+Polyfill.swift .swift"; sourceTree = "<group>"; };
+		8BF3CB812CD4BA9B00B0FCA9 /* URLSession+Polyfill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URLSession+Polyfill.swift"; sourceTree = "<group>"; };
 		8BF3CB832CD4BAEF00B0FCA9 /* MediaType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaType.swift; sourceTree = "<group>"; };
 		8BF3CB842CD4BAEF00B0FCA9 /* RequestMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestMethod.swift; sourceTree = "<group>"; };
 		8BF3CB872CD4BB3A00B0FCA9 /* SN3WebViewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SN3WebViewData.swift; sourceTree = "<group>"; };
@@ -452,6 +470,30 @@
 		8BFF73E42C0938330048F2A6 /* CoopListDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopListDetailView.swift; sourceTree = "<group>"; };
 		8BFF73E62C0939160048F2A6 /* CoopListRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopListRowView.swift; sourceTree = "<group>"; };
 		8BFFDF682CB40F43004F2390 /* BattlePlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattlePlayerView.swift; sourceTree = "<group>"; };
+		0B2000102EF3000000000001 /* Toast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
+		0B2000202EF3000000000001 /* BatchOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatchOperation.swift; sourceTree = "<group>"; };
+		0B2000302EF3000000000001 /* RecordListRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordListRow.swift; sourceTree = "<group>"; };
+		0B2000402EF3000000000001 /* PagedRecordListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagedRecordListViewModel.swift; sourceTree = "<group>"; };
+		0B2000502EF3000000000001 /* ShiftCardChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShiftCardChrome.swift; sourceTree = "<group>"; };
+		0B2000602EF3000000000001 /* CachedRecordViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachedRecordViewModel.swift; sourceTree = "<group>"; };
+		0B2000702EF3000000000001 /* RecordStatusFilterSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordStatusFilterSection.swift; sourceTree = "<group>"; };
+		0B2000902EF3000000000001 /* CoopRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopRepository.swift; sourceTree = "<group>"; };
+		0B2000A02EF3000000000001 /* RecordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RecordStore.swift"; sourceTree = "<group>"; };
+		0B2000B02EF3000000000001 /* SplatRecordKind+App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SplatRecordKind+App.swift"; sourceTree = "<group>"; };
+		0B2000C02EF3000000000001 /* RecordStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordStatistics.swift; sourceTree = "<group>"; };
+		0B2000D02EF3000000000001 /* PlayerRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerRepository.swift; sourceTree = "<group>"; };
+		0B2000E02EF3000000000001 /* ScheduleRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleRepository.swift; sourceTree = "<group>"; };
+		0B2000F02EF3000000000001 /* SalmonRunStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SalmonRunStatusView.swift; sourceTree = "<group>"; };
+		0B2000F22EF3000000000001 /* BattleStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleStatusView.swift; sourceTree = "<group>"; };
+		0B2000F42EF3000000000001 /* DeveloperSettingsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperSettingsPage.swift; sourceTree = "<group>"; };
+		0B2000F62EF3000000000001 /* CoopDetailMemberView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopDetailMemberView.swift; sourceTree = "<group>"; };
+		0B2000F82EF3000000000001 /* CoopPlayerStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopPlayerStatusView.swift; sourceTree = "<group>"; };
+		0B2000FA2EF3000000000001 /* ProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressBar.swift; sourceTree = "<group>"; };
+		0B2001002EF3000000000001 /* CoopDetailView+Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CoopDetailView+Card.swift"; sourceTree = "<group>"; };
+		0B2001022EF3000000000001 /* CoopDetailView+Enemy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CoopDetailView+Enemy.swift"; sourceTree = "<group>"; };
+		0B2001042EF3000000000001 /* DividerViewBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DividerViewBuilder.swift"; sourceTree = "<group>"; };
+		0B2001062EF3000000000001 /* BynameBackfill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BynameBackfill.swift"; sourceTree = "<group>"; };
+		0B2001082EF3000000000001 /* Battle+ColorRatio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Battle+ColorRatio.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -552,6 +594,12 @@
 		8B0D146B2BF9772000B82AD1 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				0B2000E02EF3000000000001 /* ScheduleRepository.swift */,
+				0B2000D02EF3000000000001 /* PlayerRepository.swift */,
+				0B2000C02EF3000000000001 /* RecordStatistics.swift */,
+				0B2000B02EF3000000000001 /* SplatRecordKind+App.swift */,
+				0B2000A02EF3000000000001 /* RecordStore.swift */,
+				0B2000902EF3000000000001 /* CoopRepository.swift */,
 				8B0D146C2BF9773E00B82AD1 /* AppUserDefaults.swift */,
 			);
 			path = Data;
@@ -574,6 +622,10 @@
 		8B0D14902BFA2EC500B82AD1 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				0B2001022EF3000000000001 /* CoopDetailView+Enemy.swift */,
+				0B2001002EF3000000000001 /* CoopDetailView+Card.swift */,
+				0B2000F82EF3000000000001 /* CoopPlayerStatusView.swift */,
+				0B2000F62EF3000000000001 /* CoopDetailMemberView.swift */,
 				8B0D148E2BFA2EBE00B82AD1 /* CoopListDetailItemView.swift */,
 				8B0D149D2BFAC56100B82AD1 /* CoopListShiftCardView.swift */,
 				8B1925C92E3F4A5C00BCB851 /* CoopFilterView.swift */,
@@ -661,6 +713,7 @@
 		8B7F295B2BF6E2CF0010A525 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				0B2000012EF3000000000001 /* ViewModels */,
 				0B1000072EF2000000000001 /* Components */,
 				8BF3CB7A2CD4B9C900B0FCA9 /* InkMoya */,
 				8BF3CB4C2CD4B5FE00B0FCA9 /* SplatNet3 */,
@@ -694,6 +747,8 @@
 		8B7F29602BF6E5270010A525 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				0B2000202EF3000000000001 /* BatchOperation.swift */,
+				0B2000102EF3000000000001 /* Toast.swift */,
 				8BA30B072CAED80E0020D489 /* Operator.swift */,
 				8B7059052C0C25A90076F680 /* TouchDownAndTouchUpGestureView.swift */,
 				8B0D14932BFAB57100B82AD1 /* Date+Ext.swift */,
@@ -711,7 +766,7 @@
 				8BB719A62CAA2B54003C6909 /* ThreadSafeExecution.swift */,
 				8B5B7B1C2CCFAC5D0088069C /* Dictionary+Ext.swift */,
 				8BA1F3F92CD3382D00E733EA /* CommonUtils.swift */,
-				8BF3CB812CD4BA9B00B0FCA9 /* URLSession+Polyfill.swift .swift */,
+				8BF3CB812CD4BA9B00B0FCA9 /* URLSession+Polyfill.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -765,7 +820,6 @@
 				8B19CF2C2CB2464F00EF4424 /* BattleListView.swift */,
 				8B19CF2E2CB2466400EF4424 /* BattleListViewModel.swift */,
 				8B19CF302CB2479B00EF4424 /* BattleListRowModel.swift */,
-				8B19CF322CB2486B00EF4424 /* BattleListDetailView.swift */,
 				8B19CF342CB2488200EF4424 /* BattleListRowView.swift */,
 				8B19CF932CB3BD4000EF4424 /* Views */,
 			);
@@ -775,6 +829,8 @@
 		8B8B287D2BF88BCA00790809 /* Me */ = {
 			isa = PBXGroup;
 			children = (
+				0B2001062EF3000000000001 /* BynameBackfill.swift */,
+				0B2000F42EF3000000000001 /* DeveloperSettingsPage.swift */,
 				8B3591442BF893D60066BCA3 /* MePage.swift */,
 				0B1000062EF2000000000001 /* MeSummaryMetric.swift */,
 				8BC2B0AB2E6D4697009ACFE8 /* EditableNameplateView.swift */,
@@ -796,12 +852,12 @@
 		8B8B287E2BF88BE300790809 /* Home */ = {
 			isa = PBXGroup;
 			children = (
+				0B2000F22EF3000000000001 /* BattleStatusView.swift */,
+				0B2000F02EF3000000000001 /* SalmonRunStatusView.swift */,
 				8B3591422BF892130066BCA3 /* HomePage.swift */,
 				8B0D14672BF8BE8C00B82AD1 /* HomeViewModel.swift */,
 				8B0792082C1077DD0094EA57 /* BattleScheduleCardView.swift */,
 				8B07920A2C1078310094EA57 /* SalmonRunScheduleCardView.swift */,
-				8BAADA562C128DB6002D6370 /* RightCardView.swift */,
-				8B7AE6DE2CAED41B00E61735 /* BattleStatusView.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -809,6 +865,10 @@
 		8B8B287F2BF88BFB00790809 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				0B2001042EF3000000000001 /* DividerViewBuilder.swift */,
+				0B2000FA2EF3000000000001 /* ProgressBar.swift */,
+				0B2000702EF3000000000001 /* RecordStatusFilterSection.swift */,
+				0B2000502EF3000000000001 /* ShiftCardChrome.swift */,
 				0AC00D822E6710F500F82E5A /* TimeRangeSlider.swift */,
 				8B7059032C0B00510076F680 /* NameplateView.swift */,
 				8BE0950C2C0315C40089705F /* ActivityView.swift */,
@@ -892,6 +952,8 @@
 		8BB99B352BF77B1900470408 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				0B2001082EF3000000000001 /* Battle+ColorRatio.swift */,
+				0B2000302EF3000000000001 /* RecordListRow.swift */,
 				8BA089332CCB8AB000BA7176 /* CoopRecord.swift */,
 				8B1F74622CDB039D00BBC8E9 /* WeaponRecord.swift */,
 				8B5B7B1A2CCF9CE20088069C /* HistoryRecord.swift */,
@@ -998,6 +1060,15 @@
 				8BF3CB7F2CD4BA7100B0FCA9 /* IMSession.swift */,
 			);
 			path = InkMoya;
+			sourceTree = "<group>";
+		};
+		0B2000012EF3000000000001 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				0B2000602EF3000000000001 /* CachedRecordViewModel.swift */,
+				0B2000402EF3000000000001 /* PagedRecordListViewModel.swift */,
+			);
+			path = ViewModels;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1214,6 +1285,30 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0B2001092EF3000000000001 /* Battle+ColorRatio.swift in Sources */,
+				0B2001072EF3000000000001 /* BynameBackfill.swift in Sources */,
+				0B2001052EF3000000000001 /* DividerViewBuilder.swift in Sources */,
+				0B2001032EF3000000000001 /* CoopDetailView+Enemy.swift in Sources */,
+				0B2001012EF3000000000001 /* CoopDetailView+Card.swift in Sources */,
+				0B2000FB2EF3000000000001 /* ProgressBar.swift in Sources */,
+				0B2000F92EF3000000000001 /* CoopPlayerStatusView.swift in Sources */,
+				0B2000F72EF3000000000001 /* CoopDetailMemberView.swift in Sources */,
+				0B2000F52EF3000000000001 /* DeveloperSettingsPage.swift in Sources */,
+				0B2000F32EF3000000000001 /* BattleStatusView.swift in Sources */,
+				0B2000F12EF3000000000001 /* SalmonRunStatusView.swift in Sources */,
+				0B2000E12EF3000000000001 /* ScheduleRepository.swift in Sources */,
+				0B2000D12EF3000000000001 /* PlayerRepository.swift in Sources */,
+				0B2000C12EF3000000000001 /* RecordStatistics.swift in Sources */,
+				0B2000B12EF3000000000001 /* SplatRecordKind+App.swift in Sources */,
+				0B2000A12EF3000000000001 /* RecordStore.swift in Sources */,
+				0B2000912EF3000000000001 /* CoopRepository.swift in Sources */,
+				0B2000712EF3000000000001 /* RecordStatusFilterSection.swift in Sources */,
+				0B2000612EF3000000000001 /* CachedRecordViewModel.swift in Sources */,
+				0B2000512EF3000000000001 /* ShiftCardChrome.swift in Sources */,
+				0B2000112EF3000000000001 /* Toast.swift in Sources */,
+				0B2000212EF3000000000001 /* BatchOperation.swift in Sources */,
+				0B2000312EF3000000000001 /* RecordListRow.swift in Sources */,
+				0B2000412EF3000000000001 /* PagedRecordListViewModel.swift in Sources */,
 				0AA478DE2E74098600E8499D /* FriendStyles.swift in Sources */,
 				8B3591452BF893D60066BCA3 /* MePage.swift in Sources */,
 				0B1000032EF2000000000001 /* MeSummaryMetric.swift in Sources */,
@@ -1299,8 +1394,6 @@
 				8B19CF2D2CB2464F00EF4424 /* BattleListView.swift in Sources */,
 				8B0851782BFB78D800AF22C5 /* CoopDetailWaveResultView.swift in Sources */,
 				8B50DBE02C01BED40076AE6D /* SN3Client+Ext.swift in Sources */,
-				8B7AE6DF2CAED41B00E61735 /* BattleStatusView.swift in Sources */,
-				8BAADA572C128DB6002D6370 /* RightCardView.swift in Sources */,
 				8B0D14822BF9B85700B82AD1 /* GameMode.swift in Sources */,
 				8BF3CB712CD4B62700B0FCA9 /* Shared.swift in Sources */,
 				8BF3CB762CD4B62700B0FCA9 /* SplatNet3.swift in Sources */,
@@ -1355,7 +1448,6 @@
 				8B5B7B1B2CCF9CE20088069C /* HistoryRecord.swift in Sources */,
 				8BF3CB802CD4BA7100B0FCA9 /* IMSession.swift in Sources */,
 				8B1A7EEE2E687699009CDE79 /* CoopStagePreviewView.swift in Sources */,
-				8B19CF332CB2486B00EF4424 /* BattleListDetailView.swift in Sources */,
 				8B7F296C2BF711C40010A525 /* NSOAuthorization.swift in Sources */,
 				8B5276162BFC371300022D5B /* CoopListRowModel.swift in Sources */,
 				8B5B7B192CCF9C6B0088069C /* AccountReviewView.swift in Sources */,
@@ -1363,7 +1455,7 @@
 				8BB4A1F42BFDB4CE008DB764 /* FixVectorImage.swift in Sources */,
 				0A6035BF2E6AC02100B4B460 /* CoopDetailContainer.swift in Sources */,
 				8BB99B372BF77B3B00470408 /* Models.swift in Sources */,
-				8BF3CB822CD4BA9B00B0FCA9 /* URLSession+Polyfill.swift .swift in Sources */,
+				8BF3CB822CD4BA9B00B0FCA9 /* URLSession+Polyfill.swift in Sources */,
 				8B3591432BF892130066BCA3 /* HomePage.swift in Sources */,
 				8B1925CA2E3F4A5C00BCB851 /* CoopFilterView.swift in Sources */,
 				0AA478DC2E74097800E8499D /* FriendList.swift in Sources */,
@@ -1866,7 +1958,7 @@
 			repositoryURL = "https://github.com/zifengjiang/SplatDatabase.git";
 			requirement = {
 				kind = revision;
-				revision = a680ff6a334b19f6a79003fdbb77991a524f954c;
+				revision = 71b9846d5f940ce8207a9b542ae5ab888ac245a7;
 			};
 		};
 		8B93C0CA2C12EB1A00D7EFBC /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {

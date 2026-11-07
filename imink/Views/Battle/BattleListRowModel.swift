@@ -1,22 +1,8 @@
-//
-//  BattleListRowModel.swift
-//  imink
-//
-//  Created by 姜锋 on 10/6/24.
-//
-
 import Foundation
 
-struct BattleListRowModel:Identifiable {
-    let isBattle: Bool
-    var battle: BattleListRowInfo?
-    var card: BattleGroupStatus?
+extension BattleListRowInfo: GroupedRecord {}
 
-    var id: String {
-        if isBattle {
-            return "detail-\(battle!.id)"
-        }
-        return "card-\(card!.startTime)-\(card!.count)"
-    }
+extension BattleGroupStatus: GroupStatusCard {}
 
-}
+/// 对战列表的行模型（记录行 / 班次卡片行）。
+typealias BattleListRowModel = RecordListRow<BattleListRowInfo, BattleGroupStatus>

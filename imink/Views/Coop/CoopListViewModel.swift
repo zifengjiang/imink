@@ -1,68 +1,27 @@
 import Foundation
-import Combine
 import SplatDatabase
 import GRDB
-import SwiftUI
+import Combine
 
+/// 打工列表：在通用分页视图模型之上提供打工数据源、批量操作与详情页收藏态。
 @MainActor
-class CoopListViewModel: ObservableObject {
+final class CoopListViewModel: PagedRecordListViewModel<CoopListRowInfo, CoopGroupStatus> {
     static let shared = CoopListViewModel()
-    
-    @Published var rows: [CoopListRowModel] = []
-    @Published var filter: Filter = Filter()
-    @Published var navigationTitle = "全部打工"
-    @Published var detailViewModel:CoopDetailViewModel? = nil
-    @Published var detailId:Int64? = nil
-    @Published var currentCoopIsFavorite: Bool = false
 
-    private var cancellables: Set<AnyCancellable> = []
-
-    var groupId = 0
-
-    private var offset: Int = 0
-    private var cancelBag = Set<AnyCancellable>()
+    @Published var detailViewModel: CoopDetailViewModel?
+    @Published var detailId: Int64?
+    @Published var currentCoopIsFavorite = false
 
     private init() {
-        AppState.shared.$isLogin
-            .sink { [weak self] isLogin in
-                self?.handleLoginStateChange(isLogin: isLogin)
-            }
-            .store(in: &cancellables)
-        
-        // 监听数据变化通知
-        NotificationCenter.default.publisher(for: .coopDataChanged)
-            .sink { [weak self] _ in
-                Task { @MainActor in
-                    await self?.loadCoops()
-                }
-            }
-            .store(in: &cancellables)
+        super.init(kind: .coop, navigationTitle: "全部打工")
     }
 
-    func handleLoginStateChange(isLogin:Bool) {
-        if isLogin{
-            Task{
-                await loadCoops()
-            }
-        }else{
-            self.rows = []
+    /// 重新加载打工列表（保留给视图层调用的语义化入口）。
+    func loadCoops(limit: Int = 50, offset: Int = 0, loadRecent: Bool = false) async {
+        if loadRecent {
+            filter = Filter()
         }
-    }
-
-    func loadCoops(limit: Int = 50, offset: Int = 0, loadRecent:Bool = false) async{
-        self.groupId = 0
-        let coopss:[CoopListRowInfo] = await measureTime(title: #function) {
-            if loadRecent {
-                self.filter = Filter()
-            }
-            return await coops(filter: filter, limit: limit, offset)
-        }
-        let rows = measureTime(title: "processCoops") {
-            processCoops(coopss)
-        }
-        DispatchQueue.main.async {
-            self.rows = rows
-        }
+        await reload(limit: limit, offset: offset)
     }
 
     func fetchCoops() async {
@@ -70,113 +29,56 @@ class CoopListViewModel: ObservableObject {
         await SN3Client.shared.fetchCoops()
     }
 
-    func toggleFavorites(ids: [Int64]) async throws {
-        try await RecordBatchOperationService.toggleCoopFavorites(ids: ids)
-        NotificationCenter.default.post(name: .coopDataChanged, object: nil)
-    }
+    // MARK: - PagedRecordListViewModel
 
-    func softDelete(
-        ids: [Int64],
-        onProgress: @escaping (Int) async -> Void = { _ in }
-    ) async throws {
-        try await RecordBatchOperationService.softDeleteCoops(ids: ids, onProgress: onProgress)
-        NotificationCenter.default.post(name: .coopDataChanged, object: nil)
-    }
-
-    func cancel() {
-        cancelBag.forEach { $0.cancel() }
-    }
-
-    func loadMore() async{
-        let rows = processCoops(await coops(filter: filter, limit: 10, offset))
-        DispatchQueue.main.async {
-            self.rows.append(contentsOf: rows)
+    override func fetchPage(filter: Filter, limit: Int, offset: Int) async -> [CoopListRowInfo] {
+        await measureTime(title: "loadCoops") {
+            await coops(filter: filter, limit: limit, offset)
         }
     }
 
-
-
-    private func processCoops(_ coops: [CoopListRowInfo]) -> [CoopListRowModel] {
-        self.offset += coops.count
-        var rows = [CoopListRowModel]()
-        for coop in coops {
-            if coop.GroupId != self.groupId {
-                self.groupId = Int(coop.GroupId)
-                if let card = try? SplatDatabase.shared.dbQueue.read({ db in
-                    try CoopGroupStatus.create(from: db, identifier: (self.groupId, AppUserDefaults.shared.accountId))
-                }) {
-                    rows.append(CoopListRowModel(isCoop: false, card: card))
-                }
-            }
-            rows.append(CoopListRowModel(isCoop: true, coop: coop))
-        }
-        return rows
-    }
-
-    func loadMoreCards() async {
-        do {
-                // 1) 在主 actor 上读取需要的状态
-            let offset = self.rows.count
-            let accountId = AppUserDefaults.shared.accountId
-
-                // 2) 传入纯值，read 闭包里不引用 self/rows
-            let cards: [CoopGroupStatus] = try await SplatDatabase.shared.dbQueue.read { db in
-                try CoopGroupStatus.create(from: db, identifier: (accountId, offset))
-            }
-
-                // 3) 回到主 actor（方法本身已在 MainActor），直接更新 UI 状态
-            self.rows.append(contentsOf: cards.map { CoopListRowModel(isCoop: false, card: $0) })
-        } catch {
-            logError(error)
+    override func fetchCard(groupId: Int64, accountId: Int) async throws -> CoopGroupStatus? {
+        try await SplatDatabase.shared.dbQueue.read { db -> CoopGroupStatus? in
+            try CoopGroupStatus.create(from: db, identifier: (Int(groupId), accountId))
         }
     }
 
-    func loadCards(limit: Int = 50, offset:Int = 0) async {
-        do{
-            let cards:[CoopGroupStatus] = try await SplatDatabase.shared.dbQueue.read { db in
-                try CoopGroupStatus.create(from: db, identifier: (AppUserDefaults.shared.accountId, offset))
-            }
-            DispatchQueue.main.async {
-                self.rows = cards.map { CoopListRowModel(isCoop: false, card: $0) }
-            }
-        }catch{
-            logError(error)
+    override func fetchCards(accountId: Int, offset: Int) async throws -> [CoopGroupStatus] {
+        try await SplatDatabase.shared.dbQueue.read { db -> [CoopGroupStatus] in
+            try CoopGroupStatus.create(from: db, identifier: (accountId, offset))
         }
     }
-    
-    // MARK: - 收藏相关方法
-    
+
+    // MARK: - 详情页收藏态
+
     func toggleFavorite(for selectedRow: String?) async {
-        guard let rowId = selectedRow, let coop = rows.first(where: {$0.id == rowId})?.coop else { return }
-        
+        guard let coop = detail(for: selectedRow) else { return }
+
         do {
-            if let actualCoop = try await SplatDatabase.shared.dbQueue.read({ db in
-                try Coop.fetchOne(db, key: coop.id)
-            }) {
-                try actualCoop.toggleFavorite()
-                self.currentCoopIsFavorite.toggle()
+            if let isFavorite = try await RecordStore.toggleCoopFavorite(coopId: coop.id) {
+                currentCoopIsFavorite = isFavorite
             }
         } catch {
-            print("Error toggling favorite: \(error)")
+            logError(error)
         }
     }
-    
+
     func loadCurrentCoopFavoriteStatus(for selectedRow: String?) {
-        guard let rowId = selectedRow, let coop = rows.first(where: {$0.id == rowId})?.coop else { return }
-        
+        guard let coop = detail(for: selectedRow) else { return }
+
         Task {
             do {
-                if let actualCoop = try await SplatDatabase.shared.dbQueue.read({ db in
-                    try Coop.fetchOne(db, key: coop.id)
-                }) {
-                    await MainActor.run {
-                        self.currentCoopIsFavorite = actualCoop.isFavorite
-                    }
+                if let isFavorite = try await RecordStore.coopFavoriteState(coopId: coop.id) {
+                    currentCoopIsFavorite = isFavorite
                 }
             } catch {
-                print("Error loading coop favorite status: \(error)")
+                logError(error)
             }
         }
     }
 
+    private func detail(for rowId: String?) -> CoopListRowInfo? {
+        guard let rowId else { return nil }
+        return rows.first { $0.id == rowId }?.detail
+    }
 }
