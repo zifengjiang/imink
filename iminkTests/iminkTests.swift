@@ -113,6 +113,23 @@ final class iminkTests: XCTestCase {
         XCTAssertEqual(SplatRecordKind.battle.dataChangedNotification, .battleDataChanged)
     }
 
+
+    func testBadgeHierarchyMergesSingleBadgeNodes() {
+        let badges = [
+            ImageMap(nameId: "1", name: "Badge_Mode_Rainmaker_Lv1", hash: "h1"),
+            ImageMap(nameId: "2", name: "Badge_Mode_Rainmaker_Lv2", hash: "h2"),
+            ImageMap(nameId: "3", name: "Badge_Solo", hash: "h3"),
+            ImageMap(nameId: "4", name: "NotABadge", hash: "h4"),
+        ]
+
+        let hierarchy = BadgeHierarchy.build(from: badges)
+
+        XCTAssertEqual(hierarchy.map(\.name), ["Mode", BadgeHierarchy.singleLevelGroupName])
+        XCTAssertEqual(hierarchy[0].displayName, "Mode - Rainmaker")
+        XCTAssertEqual(hierarchy[0].badges.count, 2)
+        XCTAssertEqual(hierarchy[1].badges.map(\.nameId), ["3"])
+    }
+
     func testDebugBuildShowsDeveloperOptions() {
         XCTAssertTrue(BuildConfiguration.showsDeveloperOptions)
     }

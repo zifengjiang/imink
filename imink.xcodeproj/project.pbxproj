@@ -215,6 +215,12 @@
 		0B2001052EF3000000000001 /* DividerViewBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001042EF3000000000001 /* DividerViewBuilder.swift */; };
 		0B2001072EF3000000000001 /* BynameBackfill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001062EF3000000000001 /* BynameBackfill.swift */; };
 		0B2001092EF3000000000001 /* Battle+ColorRatio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001082EF3000000000001 /* Battle+ColorRatio.swift */; };
+		0B20010B2EF3000000000001 /* SN3Client+Records.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B20010A2EF3000000000001 /* SN3Client+Records.swift */; };
+		0B20010D2EF3000000000001 /* BadgeHierarchy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B20010C2EF3000000000001 /* BadgeHierarchy.swift */; };
+		0B20010F2EF3000000000001 /* BadgeSelectorSubviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B20010E2EF3000000000001 /* BadgeSelectorSubviews.swift */; };
+		0B2001112EF3000000000001 /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001102EF3000000000001 /* SearchBar.swift */; };
+		0B2001132EF3000000000001 /* NSOAuthorization+FAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001122EF3000000000001 /* NSOAuthorization+FAPI.swift */; };
+		0B2001152EF3000000000001 /* DataBackup+Import.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001142EF3000000000001 /* DataBackup+Import.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -494,6 +500,12 @@
 		0B2001042EF3000000000001 /* DividerViewBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DividerViewBuilder.swift"; sourceTree = "<group>"; };
 		0B2001062EF3000000000001 /* BynameBackfill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BynameBackfill.swift"; sourceTree = "<group>"; };
 		0B2001082EF3000000000001 /* Battle+ColorRatio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Battle+ColorRatio.swift"; sourceTree = "<group>"; };
+		0B20010A2EF3000000000001 /* SN3Client+Records.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SN3Client+Records.swift"; sourceTree = "<group>"; };
+		0B20010C2EF3000000000001 /* BadgeHierarchy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BadgeHierarchy.swift"; sourceTree = "<group>"; };
+		0B20010E2EF3000000000001 /* BadgeSelectorSubviews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BadgeSelectorSubviews.swift"; sourceTree = "<group>"; };
+		0B2001102EF3000000000001 /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SearchBar.swift"; sourceTree = "<group>"; };
+		0B2001122EF3000000000001 /* NSOAuthorization+FAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSOAuthorization+FAPI.swift"; sourceTree = "<group>"; };
+		0B2001142EF3000000000001 /* DataBackup+Import.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DataBackup+Import.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -680,6 +692,7 @@
 		8B7F29282BF6E1B90010A525 /* imink */ = {
 			isa = PBXGroup;
 			children = (
+				0B2001142EF3000000000001 /* DataBackup+Import.swift */,
 				8B0824D12BFEA7C10088A7BD /* imink.entitlements */,
 				8B8B286A2BF87A7000790809 /* ViewModels */,
 				8B8B28692BF85EF000790809 /* Views */,
@@ -736,6 +749,8 @@
 		8B7F295D2BF6E49D0010A525 /* API */ = {
 			isa = PBXGroup;
 			children = (
+				0B2001122EF3000000000001 /* NSOAuthorization+FAPI.swift */,
+				0B20010A2EF3000000000001 /* SN3Client+Records.swift */,
 				8B50DBDF2C01BED30076AE6D /* SN3Client+Ext.swift */,
 				8B7F29632BF6E7E80010A525 /* AppAPI.swift */,
 				8B7F295E2BF6E4A80010A525 /* NSOAPI.swift */,
@@ -829,6 +844,7 @@
 		8B8B287D2BF88BCA00790809 /* Me */ = {
 			isa = PBXGroup;
 			children = (
+				0B20010E2EF3000000000001 /* BadgeSelectorSubviews.swift */,
 				0B2001062EF3000000000001 /* BynameBackfill.swift */,
 				0B2000F42EF3000000000001 /* DeveloperSettingsPage.swift */,
 				8B3591442BF893D60066BCA3 /* MePage.swift */,
@@ -865,6 +881,7 @@
 		8B8B287F2BF88BFB00790809 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				0B2001102EF3000000000001 /* SearchBar.swift */,
 				0B2001042EF3000000000001 /* DividerViewBuilder.swift */,
 				0B2000FA2EF3000000000001 /* ProgressBar.swift */,
 				0B2000702EF3000000000001 /* RecordStatusFilterSection.swift */,
@@ -952,6 +969,7 @@
 		8BB99B352BF77B1900470408 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				0B20010C2EF3000000000001 /* BadgeHierarchy.swift */,
 				0B2001082EF3000000000001 /* Battle+ColorRatio.swift */,
 				0B2000302EF3000000000001 /* RecordListRow.swift */,
 				8BA089332CCB8AB000BA7176 /* CoopRecord.swift */,
@@ -1285,6 +1303,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0B2001152EF3000000000001 /* DataBackup+Import.swift in Sources */,
+				0B2001132EF3000000000001 /* NSOAuthorization+FAPI.swift in Sources */,
+				0B2001112EF3000000000001 /* SearchBar.swift in Sources */,
+				0B20010F2EF3000000000001 /* BadgeSelectorSubviews.swift in Sources */,
+				0B20010D2EF3000000000001 /* BadgeHierarchy.swift in Sources */,
+				0B20010B2EF3000000000001 /* SN3Client+Records.swift in Sources */,
 				0B2001092EF3000000000001 /* Battle+ColorRatio.swift in Sources */,
 				0B2001072EF3000000000001 /* BynameBackfill.swift in Sources */,
 				0B2001052EF3000000000001 /* DividerViewBuilder.swift in Sources */,
