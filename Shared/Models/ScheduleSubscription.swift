@@ -36,9 +36,7 @@ struct ScheduleSubscription: Codable, Identifiable, Hashable {
     
     // 生成唯一标识符
     static func generateId(type: ScheduleType, startTime: Date, mode: String? = nil, rule: String? = nil) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyyMMddHHmm"
-        let timeString = formatter.string(from: startTime)
+        let timeString = DateFormat.compactMinute.string(from: startTime)
         
         if let mode = mode, let rule = rule {
             return "\(type.rawValue)_\(mode)_\(rule)_\(timeString)"

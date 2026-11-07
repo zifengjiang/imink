@@ -75,7 +75,7 @@ extension SN3Client {
             // 向后兼容：使用原有的独立 Indicator 逻辑
             useTaskGroup = false
             IndicatorID = UUID().uuidString
-            await Indicators.shared.display(.init(id: IndicatorID, icon: .progressIndicator, title: "正在加载...", dismissType: .manual, isUserDismissible: false))
+            Toast.progress(id: IndicatorID, title: "正在加载...")
         }
         
         defer {
@@ -283,7 +283,7 @@ extension SN3Client {
         defer {
             Indicators.shared.dismiss(with: IndicatorID, after: 2)
         }
-        Indicators.shared.display(.init(id: IndicatorID, icon: .progressIndicator, title: "正在加载...", dismissType: .manual, isUserDismissible: false))
+        Toast.progress(id: IndicatorID, title: "正在加载...")
         while retryCount < maxRetries {
             do {
                 try await ensureToken()

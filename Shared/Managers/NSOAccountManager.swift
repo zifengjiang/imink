@@ -21,15 +21,13 @@ class NSOAccountManager:ObservableObject {
                 Indicators.shared.dismiss(with: IndicatorId)
             }
             do{
-                Indicators.shared.display(Indicator(id: IndicatorId, icon: .progressIndicator, title: "刷新游戏服务令牌", dismissType: .manual, isUserDismissible: false))
+                Toast.progress(id: IndicatorId, title: "刷新游戏服务令牌")
                 try await refreshGameServiceToken(sessionToken: sessionToken, indicatorId: IndicatorId)
-                Indicators.shared.updateTitle(for: IndicatorId, title: "刷新游戏服务令牌成功")
-                Indicators.shared.updateIcon(for: IndicatorId, icon: .success)
+                Toast.finish(id: IndicatorId, title: "刷新游戏服务令牌成功")
 
             }catch{
                 logError(error)
-                Indicators.shared.updateTitle(for: IndicatorId, title: "刷新游戏服务令牌失败")
-                Indicators.shared.updateIcon(for: IndicatorId, icon: .image(Image(systemName: "xmark.icloud")))
+                Toast.finish(id: IndicatorId, title: "刷新游戏服务令牌失败", failed: true)
             }
         }
     }

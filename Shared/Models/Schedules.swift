@@ -38,7 +38,7 @@ func performTaskEveryHourSince(startDate: Date, task: @escaping (Date) async thr
 func fetchHistorySchedules() async {
     let indicatorId = UUID().uuidString
     Indicators.shared.display(.init(id: indicatorId, title: "正在获取历史日程", progress: 0))
-    await performTaskEveryHourSince(startDate: getCoopEarliestPlayedTime()) { date in
+    await performTaskEveryHourSince(startDate: CoopRepository.earliestPlayedTime()) { date in
         let api = Splatoon3InkAPI.historySchedule(date)
         let (data, _) = try await URLSession.shared.data(for: api.request)
         let json = try JSON(data:data)
@@ -149,14 +149,6 @@ extension Schedule.Rule {
 extension Schedule {
     var formattedBattleTime: String {
         let calendar = Calendar.current
-        let dateFormatter = DateFormatter()
-
-            // 日期和时间格式化器
-        dateFormatter.dateFormat = "HH:mm"
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "HH:mm"
-        let dayFormatter = DateFormatter()
-        dayFormatter.dateFormat = "MM/dd"
 
             // 当前时间
         let now = Date()
@@ -168,28 +160,30 @@ extension Schedule {
         let tomorrow = calendar.date(byAdding: .day, value: 1, to: today)!
         let dayAfterTomorrow = calendar.date(byAdding: .day, value: 2, to: today)!
 
+        let hourMinute = DateFormat.hourMinute
+        let startTimeText = hourMinute.string(from: startTime)
+        let endTimeText = hourMinute.string(from: endTime)
+
         switch (startDay, endDay) {
         case (today, today):
-            return "\(dateFormatter.string(from: startTime)) - \(dateFormatter.string(from: endTime))"
+            return "\(startTimeText) - \(endTimeText)"
         case (today, tomorrow):
-            return "\(dateFormatter.string(from: startTime)) - 明天 \(dateFormatter.string(from: endTime))"
+            return "\(startTimeText) - 明天 \(endTimeText)"
         case (tomorrow, tomorrow):
-            return "明天 \(dateFormatter.string(from: startTime)) - \(dateFormatter.string(from: endTime))"
+            return "明天 \(startTimeText) - \(endTimeText)"
         case (tomorrow, dayAfterTomorrow):
-            return "明天 \(dateFormatter.string(from: startTime)) - 后天 \(dateFormatter.string(from: endTime))"
+            return "明天 \(startTimeText) - 后天 \(endTimeText)"
         case (dayAfterTomorrow, dayAfterTomorrow):
-            return "后天 \(dateFormatter.string(from: startTime)) - \(dateFormatter.string(from: endTime))"
+            return "后天 \(startTimeText) - \(endTimeText)"
         default:
-            let startDateString = dayFormatter.string(from: startTime)
-            let endDateString = dateFormatter.string(from: endTime)
-            return "\(startDateString) \(dateFormatter.string(from: startTime)) - \(endDateString)"
+            let startDateString = DateFormat.monthDay.string(from: startTime)
+            let endDateString = hourMinute.string(from: endTime)
+            return "\(startDateString) \(startTimeText) - \(endDateString)"
         }
     }
 
-    var formattedSalmonRunTime: String{
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MM/dd HH:mm"
-        return "\(dateFormatter.string(from: startTime)) - \(dateFormatter.string(from: endTime))"
+    var formattedSalmonRunTime: String {
+        startTime.toShiftTimeSpanString(end: endTime)
     }
 }
 

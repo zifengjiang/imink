@@ -116,9 +116,9 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
             Indicators.shared.updateSubtitle(for: indicatorId, subtitle: "获取web service token")
             let webServiceToken = try await requestWebServiceToken(encryptedTokenRequest: encryptedTokenRequest2, accessToken: loginResult.result.webApiServerCredential.accessToken)
 
-            Indicators.shared.updateTitle(for: indicatorId, title: "登录流程完成")
+            Toast.finish(id: indicatorId, title: "登录流程完成")
             Indicators.shared.updateSubtitle(for: indicatorId, subtitle: "正在返回结果...")
-            Indicators.shared.updateIcon(for: indicatorId, icon: .success)
+
 
             return LoginFlowResult(
                 sessionToken: sessionToken,
@@ -128,9 +128,9 @@ class NSOAuthorization:NSObject,ASWebAuthenticationPresentationContextProviding 
                 webServiceToken: webServiceToken
             )
         } catch {
-            Indicators.shared.updateTitle(for: indicatorId, title: "登录流程失败")
+            Toast.finish(id: indicatorId, title: "登录流程失败", failed: true)
             Indicators.shared.updateSubtitle(for: indicatorId, subtitle: "请检查网络连接或重试")
-            Indicators.shared.updateIcon(for: indicatorId, icon: .image(Image(systemName: "xmark.icloud")))
+
             throw error
         }
     }
