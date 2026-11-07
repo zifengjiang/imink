@@ -27,3 +27,6 @@ build/
 *.sqlite3
 *.db-shm
 *.db-wal
+
+# 本地调试残留
+.playwright-mcp/
