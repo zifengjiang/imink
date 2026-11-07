@@ -1,4 +1,5 @@
 import XCTest
+import SwiftUI
 import SplatDatabase
 @testable import imink
 
@@ -209,4 +210,31 @@ final class iminkTests: XCTestCase {
         XCTAssertEqual(summary.ruleBuckets.map(\.count), [2, 1, 1])
     }
 
+}
+
+@MainActor
+final class InkWaterBarSnapshotTests: XCTestCase {
+    /// 把墨水条在若干时刻渲染成 PNG，便于人工核对形态。
+    func testRenderInkWaterBarFrames() throws {
+        let segments: [InkWaterBar.Segment] = [
+            .init(color: .purple, ratio: 0.382),
+            .init(color: Color(red: 0.72, green: 0.92, blue: 0.16), ratio: 0.541)
+        ]
+
+        for (index, time) in [0.0, 1.5, 3.0, 4.5].enumerated() {
+            let view = InkWaterBar(segments: segments, fixedTime: time)
+                .frame(width: 360, height: 30)
+                .background(Color.black.opacity(0.5))
+                .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+
+            let renderer = ImageRenderer(content: view)
+            renderer.scale = 3
+            guard let image = renderer.uiImage else {
+                XCTFail("render failed at \(time)")
+                continue
+            }
+            let url = URL(fileURLWithPath: "/tmp/inkbar_\(index).png")
+            try XCTUnwrap(image.pngData()).write(to: url)
+        }
+    }
 }

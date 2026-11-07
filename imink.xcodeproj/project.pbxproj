@@ -226,6 +226,9 @@
 		0B20011B2EF3000000000001 /* NSOAuthorization+Requests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B20011A2EF3000000000001 /* NSOAuthorization+Requests.swift */; };
 		0B20011D2EF3000000000001 /* ScheduleSubscriptionManager+Filtering.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B20011C2EF3000000000001 /* ScheduleSubscriptionManager+Filtering.swift */; };
 		0B20011F2EF3000000000001 /* EdgeToEdgeScroll.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B20011E2EF3000000000001 /* EdgeToEdgeScroll.swift */; };
+		0B2001212EF3000000000001 /* InkWaterBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001202EF3000000000001 /* InkWaterBar.swift */; };
+		0B2001232EF3000000000001 /* InkWaterMetalBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001222EF3000000000001 /* InkWaterMetalBar.swift */; };
+		0B2001252EF3000000000001 /* InkWaterShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001242EF3000000000001 /* InkWaterShader.metal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -516,6 +519,9 @@
 		0B20011A2EF3000000000001 /* NSOAuthorization+Requests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSOAuthorization+Requests.swift"; sourceTree = "<group>"; };
 		0B20011C2EF3000000000001 /* ScheduleSubscriptionManager+Filtering.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ScheduleSubscriptionManager+Filtering.swift"; sourceTree = "<group>"; };
 		0B20011E2EF3000000000001 /* EdgeToEdgeScroll.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EdgeToEdgeScroll.swift"; sourceTree = "<group>"; };
+		0B2001202EF3000000000001 /* InkWaterBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InkWaterBar.swift"; sourceTree = "<group>"; };
+		0B2001222EF3000000000001 /* InkWaterMetalBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InkWaterMetalBar.swift"; sourceTree = "<group>"; };
+		0B2001242EF3000000000001 /* InkWaterShader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = "InkWaterShader.metal"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -896,6 +902,9 @@
 		8B8B287F2BF88BFB00790809 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				0B2001242EF3000000000001 /* InkWaterShader.metal */,
+				0B2001222EF3000000000001 /* InkWaterMetalBar.swift */,
+				0B2001202EF3000000000001 /* InkWaterBar.swift */,
 				0B2001102EF3000000000001 /* SearchBar.swift */,
 				0B2001042EF3000000000001 /* DividerViewBuilder.swift */,
 				0B2000FA2EF3000000000001 /* ProgressBar.swift */,
@@ -1318,6 +1327,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0B2001252EF3000000000001 /* InkWaterShader.metal in Sources */,
+				0B2001232EF3000000000001 /* InkWaterMetalBar.swift in Sources */,
+				0B2001212EF3000000000001 /* InkWaterBar.swift in Sources */,
 				0B20011F2EF3000000000001 /* EdgeToEdgeScroll.swift in Sources */,
 				0B20011D2EF3000000000001 /* ScheduleSubscriptionManager+Filtering.swift in Sources */,
 				0B20011B2EF3000000000001 /* NSOAuthorization+Requests.swift in Sources */,

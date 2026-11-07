@@ -1,32 +1,59 @@
 import SwiftUI
 import SplatDatabase
 
-struct BattleWaveOverlay:View {
-    let crt:([Color?],[Double?],[String?])
+struct BattleWaveOverlay: View {
+    let crt: ([Color?], [Double?], [String?])
+
+    /// 把三队颜色/比例整理成从左到右的液面分段。
+    private var segments: [InkWaterBar.Segment] {
+        var result: [InkWaterBar.Segment] = []
+        for index in 0..<3 {
+            guard
+                let color = (crt.0[safe: index] ?? nil),
+                let ratio = (crt.1[safe: index] ?? nil),
+                ratio > 0
+            else { continue }
+            result.append(.init(color: color, ratio: ratio))
+        }
+        // 单色时补一个占位，保证液面铺满
+        return result
+    }
 
     var body: some View {
-        WaveBarView(percent:0.1, rightColor: crt.0[2] ?? .accent ,middleColor:crt.0[1], middleRatio:crt.1[1], leftColor: crt.0[0],leftRatio: crt.1[0])
-            .overlay(
-                Text(crt.2[0] ?? "")
-                    .font(.splatoonFont1(size: 18))
-                    .foregroundStyle(.white)
-                    .padding(.leading,10)
-                ,
-                alignment: .leading)
-            .overlay(
-                Text(crt.2[2] ?? "")
-                    .font(.splatoonFont1(size: 18))
-                    .foregroundStyle(.white)
-                    .padding(.trailing,10)
-                ,
-                alignment: .trailing)
-            .background(.black.opacity(0.5))
-            .clipShape(RoundedRectangle(cornerRadius: 50.0))
+        InkWaterBar(segments: segments)
+            // 先定高：GeometryReader 会吃掉父级给的大尺寸，必须先收成 30pt
             .frame(height: 30)
-            .padding(.horizontal,10)
-            .padding(.bottom,10)
+            .overlay(
+                Text((crt.2[safe: 0] ?? nil) ?? "")
+                    .font(.splatoonFont1(size: 18))
+                    .foregroundStyle(.white)
+                    .padding(.leading, 10),
+                alignment: .leading
+            )
+            .overlay(
+                Text((crt.2[safe: 2] ?? nil) ?? "")
+                    .font(.splatoonFont1(size: 18))
+                    .foregroundStyle(.white)
+                    .padding(.trailing, 10),
+                alignment: .trailing
+            )
+            .overlay(alignment: .center) {
+                if let middleText = (crt.2[safe: 1] ?? nil), !middleText.isEmpty {
+                    Text(middleText)
+                        .font(.splatoonFont1(size: 18))
+                        .foregroundStyle(.white)
+                }
+            }
+            .background(.black.opacity(0.55))
+            .clipShape(RoundedRectangle(cornerRadius: 50.0))
+            .padding(.horizontal, 10)
+            .padding(.bottom, 10)
+    }
+}
 
-
+private extension Array {
+    subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
     }
 }
 
