@@ -18,6 +18,7 @@ struct CoopShiftDetailView: View {
     }
 
     var body: some View {
+        GeometryReader { proxy in
         VStack{
             if viewModel.initialized{
                 ScrollView{
@@ -40,14 +41,16 @@ struct CoopShiftDetailView: View {
                         Spacer()
                     }
                     .padding(.horizontal,8)
+                    .clearFloatingBars(currentInsets: proxy.safeAreaInsets)
                 }
             }else{
                 LoadingView(size: 100)
             }
         }
-        .edgeToEdgeScrollContent()
         .frame(maxWidth: .infinity)
         .fixSafeareaBackground()
+        }
+        .ignoresSafeArea(edges: .vertical)
         .modifier(Popup(isPresented: showPlayerDetail,
                        onDismiss: {
             showPlayerDetail = false

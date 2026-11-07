@@ -16,7 +16,6 @@
 		0A4B54D52EEEA750003FDBF7 /* liveWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 0A4B54C22EEEA74E003FDBF7 /* liveWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		0A4B54FE2EEEA868003FDBF7 /* IndicatorTaskGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A4B54FD2EEEA868003FDBF7 /* IndicatorTaskGroup.swift */; };
 		0A4B55002EEEA9F6003FDBF7 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A4B54FF2EEEA9F6003FDBF7 /* LiveActivityManager.swift */; };
-		0A6035BF2E6AC02100B4B460 /* CoopDetailContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A6035BE2E6AC02100B4B460 /* CoopDetailContainer.swift */; };
 		0AA478C32E72781D00E8499D /* OrientationTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA478C22E72781D00E8499D /* OrientationTestView.swift */; };
 		0AA478D62E74094700E8499D /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 0AA478D52E74094700E8499D /* Kingfisher */; };
 		0AA478D82E74096400E8499D /* FriendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA478D72E74096400E8499D /* FriendsView.swift */; };
@@ -190,7 +189,6 @@
 		8BFE91722C0D7CE000C12CBE /* Filter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFE91712C0D7CE000C12CBE /* Filter.swift */; };
 		8BFE91742C0DEA3D00C12CBE /* RangeSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFE91732C0DEA3D00C12CBE /* RangeSlider.swift */; };
 		8BFE91762C0EFCEA00C12CBE /* Schedules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFE91752C0EFCEA00C12CBE /* Schedules.swift */; };
-		8BFF73E52C0938330048F2A6 /* CoopListDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF73E42C0938330048F2A6 /* CoopListDetailView.swift */; };
 		8BFF73E72C0939160048F2A6 /* CoopListRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF73E62C0939160048F2A6 /* CoopListRowView.swift */; };
 		8BFFDF692CB40F43004F2390 /* BattlePlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFFDF682CB40F43004F2390 /* BattlePlayerView.swift */; };
 		0B2000112EF3000000000001 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000102EF3000000000001 /* Toast.swift */; };
@@ -227,10 +225,11 @@
 		0B2001192EF3000000000001 /* CoopShiftDetailView+Sections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001182EF3000000000001 /* CoopShiftDetailView+Sections.swift */; };
 		0B20011B2EF3000000000001 /* NSOAuthorization+Requests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B20011A2EF3000000000001 /* NSOAuthorization+Requests.swift */; };
 		0B20011D2EF3000000000001 /* ScheduleSubscriptionManager+Filtering.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B20011C2EF3000000000001 /* ScheduleSubscriptionManager+Filtering.swift */; };
-		0B20011F2EF3000000000001 /* EdgeToEdgeScroll.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B20011E2EF3000000000001 /* EdgeToEdgeScroll.swift */; };
 		0B2001212EF3000000000001 /* InkWaterBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001202EF3000000000001 /* InkWaterBar.swift */; };
 		0B2001232EF3000000000001 /* InkWaterMetalBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001222EF3000000000001 /* InkWaterMetalBar.swift */; };
 		0B2001252EF3000000000001 /* InkWaterShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001242EF3000000000001 /* InkWaterShader.metal */; };
+		0B2001272EF3000000000001 /* FloatingBarInsets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001262EF3000000000001 /* FloatingBarInsets.swift */; };
+		0B2001292EF3000000000001 /* CoopDetailPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001282EF3000000000001 /* CoopDetailPage.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -289,7 +288,6 @@
 		0A4B54C22EEEA74E003FDBF7 /* liveWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = liveWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		0A4B54FD2EEEA868003FDBF7 /* IndicatorTaskGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndicatorTaskGroup.swift; sourceTree = "<group>"; };
 		0A4B54FF2EEEA9F6003FDBF7 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
-		0A6035BE2E6AC02100B4B460 /* CoopDetailContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopDetailContainer.swift; sourceTree = "<group>"; };
 		0AA478C22E72781D00E8499D /* OrientationTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationTestView.swift; sourceTree = "<group>"; };
 		0AA478D72E74096400E8499D /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
 		0AA478D92E74096C00E8499D /* FriendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendView.swift; sourceTree = "<group>"; };
@@ -485,7 +483,6 @@
 		8BFE91712C0D7CE000C12CBE /* Filter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Filter.swift; sourceTree = "<group>"; };
 		8BFE91732C0DEA3D00C12CBE /* RangeSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RangeSlider.swift; sourceTree = "<group>"; };
 		8BFE91752C0EFCEA00C12CBE /* Schedules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Schedules.swift; sourceTree = "<group>"; };
-		8BFF73E42C0938330048F2A6 /* CoopListDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopListDetailView.swift; sourceTree = "<group>"; };
 		8BFF73E62C0939160048F2A6 /* CoopListRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopListRowView.swift; sourceTree = "<group>"; };
 		8BFFDF682CB40F43004F2390 /* BattlePlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattlePlayerView.swift; sourceTree = "<group>"; };
 		0B2000102EF3000000000001 /* Toast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
@@ -522,10 +519,11 @@
 		0B2001182EF3000000000001 /* CoopShiftDetailView+Sections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CoopShiftDetailView+Sections.swift"; sourceTree = "<group>"; };
 		0B20011A2EF3000000000001 /* NSOAuthorization+Requests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSOAuthorization+Requests.swift"; sourceTree = "<group>"; };
 		0B20011C2EF3000000000001 /* ScheduleSubscriptionManager+Filtering.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ScheduleSubscriptionManager+Filtering.swift"; sourceTree = "<group>"; };
-		0B20011E2EF3000000000001 /* EdgeToEdgeScroll.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EdgeToEdgeScroll.swift"; sourceTree = "<group>"; };
 		0B2001202EF3000000000001 /* InkWaterBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InkWaterBar.swift"; sourceTree = "<group>"; };
 		0B2001222EF3000000000001 /* InkWaterMetalBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InkWaterMetalBar.swift"; sourceTree = "<group>"; };
 		0B2001242EF3000000000001 /* InkWaterShader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = "InkWaterShader.metal"; sourceTree = "<group>"; };
+		0B2001262EF3000000000001 /* FloatingBarInsets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FloatingBarInsets.swift"; sourceTree = "<group>"; };
+		0B2001282EF3000000000001 /* CoopDetailPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CoopDetailPage.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -656,6 +654,7 @@
 		8B0D14902BFA2EC500B82AD1 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				0B2001282EF3000000000001 /* CoopDetailPage.swift */,
 				0B2001182EF3000000000001 /* CoopShiftDetailView+Sections.swift */,
 				0B2001022EF3000000000001 /* CoopDetailView+Enemy.swift */,
 				0B2001002EF3000000000001 /* CoopDetailView+Card.swift */,
@@ -664,7 +663,6 @@
 				8B0D148E2BFA2EBE00B82AD1 /* CoopListDetailItemView.swift */,
 				8B0D149D2BFAC56100B82AD1 /* CoopListShiftCardView.swift */,
 				8B1925C92E3F4A5C00BCB851 /* CoopFilterView.swift */,
-				0A6035BE2E6AC02100B4B460 /* CoopDetailContainer.swift */,
 				8B0851772BFB78D800AF22C5 /* CoopDetailWaveResultView.swift */,
 				8B0D14A52BFAD93A00B82AD1 /* CoopDetailView.swift */,
 				0A2C668B2E682CAF00F1FB81 /* CoopPlayerView.swift */,
@@ -680,7 +678,7 @@
 		8B0D14A92BFADA0700B82AD1 /* Modifiers */ = {
 			isa = PBXGroup;
 			children = (
-				0B20011E2EF3000000000001 /* EdgeToEdgeScroll.swift */,
+				0B2001262EF3000000000001 /* FloatingBarInsets.swift */,
 				8B7059072C0C27980076F680 /* PopupModifier.swift */,
 				8B0851732BFB673000AF22C5 /* TextureBackGround.swift */,
 				8B0D14A72BFAD9F200B82AD1 /* FixSafeareaBackgroundModifier.swift */,
@@ -847,7 +845,6 @@
 				8B0D14882BFA28F100B82AD1 /* CoopListView.swift */,
 				8B5276152BFC371300022D5B /* CoopListRowModel.swift */,
 				8B0D148A2BFA298A00B82AD1 /* CoopListViewModel.swift */,
-				8BFF73E42C0938330048F2A6 /* CoopListDetailView.swift */,
 				8BFF73E62C0939160048F2A6 /* CoopListRowView.swift */,
 				8B0D14902BFA2EC500B82AD1 /* Views */,
 			);
@@ -1333,10 +1330,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0B2001292EF3000000000001 /* CoopDetailPage.swift in Sources */,
+				0B2001272EF3000000000001 /* FloatingBarInsets.swift in Sources */,
 				0B2001252EF3000000000001 /* InkWaterShader.metal in Sources */,
 				0B2001232EF3000000000001 /* InkWaterMetalBar.swift in Sources */,
 				0B2001212EF3000000000001 /* InkWaterBar.swift in Sources */,
-				0B20011F2EF3000000000001 /* EdgeToEdgeScroll.swift in Sources */,
 				0B20011D2EF3000000000001 /* ScheduleSubscriptionManager+Filtering.swift in Sources */,
 				0B20011B2EF3000000000001 /* NSOAuthorization+Requests.swift in Sources */,
 				0B2001192EF3000000000001 /* CoopShiftDetailView+Sections.swift in Sources */,
@@ -1451,7 +1449,6 @@
 				8B5A77EF2CFDAD5700B34BDC /* SwiftyJSONDecodable.swift in Sources */,
 				8BA017472C099F23001CFC72 /* Precomputable.swift in Sources */,
 				8B19CF2F2CB2466400EF4424 /* BattleListViewModel.swift in Sources */,
-				8BFF73E52C0938330048F2A6 /* CoopListDetailView.swift in Sources */,
 				8B7F292C2BF6E1B90010A525 /* MainView.swift in Sources */,
 				8B4BF2042E59F17C007A8B05 /* ScheduleSubscriptionManager.swift in Sources */,
 				8B19CF902CB2CB0200EF4424 /* Judgement.swift in Sources */,
@@ -1517,7 +1514,6 @@
 				8B5B7B192CCF9C6B0088069C /* AccountReviewView.swift in Sources */,
 				8B0D14962BFAB8C100B82AD1 /* Font+Ext.swift in Sources */,
 				8BB4A1F42BFDB4CE008DB764 /* FixVectorImage.swift in Sources */,
-				0A6035BF2E6AC02100B4B460 /* CoopDetailContainer.swift in Sources */,
 				8BB99B372BF77B3B00470408 /* Models.swift in Sources */,
 				8BF3CB822CD4BA9B00B0FCA9 /* URLSession+Polyfill.swift in Sources */,
 				8B3591432BF892130066BCA3 /* HomePage.swift in Sources */,

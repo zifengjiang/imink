@@ -156,16 +156,14 @@ struct CoopListView: View {
 
             }
             .navigationDestination(for: String.self) { rowId in
-                CoopDetailContainer(
-                    rows: viewModel.rows,
-                    selectedRow: $selectedRow,
+                CoopDetailPage(
+                    rowId: rowId,
                     viewModel: viewModel,
                     navigationPath: $navigationPath
                 )
                 .environmentObject(viewModel)
-                .onAppear{
+                .onAppear {
                     selectedRow = rowId
-                    viewModel.loadCurrentCoopFavoriteStatus(for: rowId)
                 }
             }
             .sheet(isPresented: $showFilterSheet){

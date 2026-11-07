@@ -44,12 +44,13 @@ struct BattleDetailView: View {
                 Spacer()
             }
             .padding(.horizontal,8)
+            .clearFloatingBars()
         }
         .scrollIndicators(.hidden)
-        .scrollClipDisabled()
         .containerRelativeFrame(.horizontal)
         .frame(maxWidth: .infinity)
         .fixSafeareaBackground()
+        .ignoresSafeArea(edges: .vertical)
         .modifier(Popup(isPresented: showPlayerSkill,
                         onDismiss: {
             showPlayerSkill = false

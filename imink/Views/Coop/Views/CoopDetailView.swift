@@ -36,6 +36,7 @@ struct CoopDetailView: View {
     }
 
     var body: some View {
+        GeometryReader { proxy in
             ScrollView(.vertical){
                 HStack {
                     Spacer()
@@ -54,10 +55,11 @@ struct CoopDetailView: View {
                     Spacer()
                 }
                 .padding(.horizontal,8)
+                .clearFloatingBars(currentInsets: proxy.safeAreaInsets)
             }
-            .edgeToEdgeScrollContent()
             .frame(maxWidth: .infinity)
             .fixSafeareaBackground()
+        }
             .modifier(Popup(isPresented: showPlayerDetail,
                           onDismiss: {
                 showPlayerDetail = false

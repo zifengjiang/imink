@@ -28,15 +28,14 @@ struct BattleShiftDetailView: View {
                     }
                 }
                 .padding(.horizontal, 12)
-                .padding(.top, 12)
-                .padding(.bottom, 24)
+                .clearFloatingBars()
                 .frame(maxWidth: 560)
                 Spacer()
             }
         }
         .scrollIndicators(.hidden)
-        .scrollClipDisabled()
         .fixSafeareaBackground()
+        .ignoresSafeArea(edges: .vertical)
         .navigationTitle("Battle Shift")
         .navigationBarTitleDisplayMode(.inline)
         .modifier(Popup(
