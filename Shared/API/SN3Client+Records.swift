@@ -143,7 +143,7 @@ extension SN3Client {
             } catch SN3Client.Error.invalidGameServiceToken {
                 if AppUserDefaults.shared.useManualGameServiceToken {
                     Indicators.shared.updateTitle(for: IndicatorID, title: "手动令牌已过期，请在设置中更新")
-                    Indicators.shared.updateIcon(for: IndicatorID, icon: .image(Image(systemName: "exclamationmark.triangle")))
+                    Indicators.shared.updateIcon(for: IndicatorID, icon: .systemImage("exclamationmark.triangle"))
                     return nil
                 } else {
                     do{

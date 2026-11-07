@@ -80,7 +80,7 @@ enum Toast {
     static func finish(id: String, title: String, failed: Bool = false) {
         onMain {
             Indicators.shared.updateTitle(for: id, title: title)
-            Indicators.shared.updateIcon(for: id, icon: failed ? .image(Image(systemName: "xmark.icloud")) : .success)
+            Indicators.shared.updateIcon(for: id, icon: failed ? .systemImage("xmark.icloud") : .success)
         }
     }
 

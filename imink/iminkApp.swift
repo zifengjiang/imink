@@ -45,7 +45,7 @@ struct iminkApp: App {
                     .environmentObject(subscriptionManager)
             }
             .overlay(alignment: .top) {
-                IndicatorsOverlay(model: Indicators.shared)
+                SplatoonToastOverlay(model: Indicators.shared)
             }
             .onAppear{
                 getNsoVersion { version in
