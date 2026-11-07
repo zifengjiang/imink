@@ -33,7 +33,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/zifengjiang/SplatDatabase.git",
       "state" : {
-        "revision" : "2478e0cd177e1ade66354fbad90f0ff56235d5cc"
+        "revision" : "f6b81923be935ff6df84e727a8d8df8c7895bb6a"
       }
     },
     {
