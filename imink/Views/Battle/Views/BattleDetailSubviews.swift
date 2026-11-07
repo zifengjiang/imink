@@ -89,10 +89,13 @@ struct BattleTeamList:View {
                     .foregroundStyle(Color.memberArrow)
                     .position(x:center?.x ?? 0,y: (center?.y ?? 0) + (height ?? 0)/CGFloat(Double(playerCount)/Double(index+1))-offset)
                     .offset(x: -self.offset)
+                    .animation(
+                        Animation.linear(duration: 0.55).repeatForever(autoreverses: true),
+                        value: offset
+                    )
                     .onAppear {
-                        withAnimation(Animation.linear(duration: 0.55).repeatForever(autoreverses: true)) {
-                            self.offset = 7
-                        }
+                        // 由上面的 .animation(_:value:) 驱动来回摆动
+                        self.offset = 7
                     }
             }
         }

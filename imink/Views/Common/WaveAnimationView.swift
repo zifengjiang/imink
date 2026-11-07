@@ -193,9 +193,9 @@ struct WaveBarView: View {
 
             }
             .onAppear {
-                withAnimation(.linear(duration: 2).repeatForever(autoreverses: false)) {
-                    phase = .pi * 2
-                }
+                // 由 WaveBarUnit 内各形状的 .animation(_:value:) 驱动循环动画；
+                // 这里只赋值，避免 withAnimation(.repeatForever) 把动画事务扩散给兄弟视图
+                phase = .pi * 2
             }
         }
     }

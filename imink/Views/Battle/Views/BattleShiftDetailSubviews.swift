@@ -121,10 +121,13 @@ struct BattleShiftEncounterPlayerRow: View {
                         .foregroundStyle(Color.memberArrow)
                         .position(x: -10, y: geometry.size.height / 2)
                         .offset(x: -arrowOffset)
+                        .animation(
+                            Animation.linear(duration: 0.55).repeatForever(autoreverses: true),
+                            value: arrowOffset
+                        )
                         .onAppear {
-                            withAnimation(Animation.linear(duration: 0.55).repeatForever(autoreverses: true)) {
-                                arrowOffset = 7
-                            }
+                            // 由上面的 .animation(_:value:) 驱动来回摆动
+                            arrowOffset = 7
                         }
                 }
                 .allowsHitTesting(false)

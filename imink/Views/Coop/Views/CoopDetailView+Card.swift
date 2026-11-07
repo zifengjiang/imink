@@ -200,9 +200,10 @@ extension CoopDetailView {
                     .fill(Color.salmonRunTheme)
                     .animation(Animation.linear(duration: 3).repeatForever(autoreverses: false), value: self.phase)
                     .onAppear {
-                        withAnimation(.linear(duration: 2).repeatForever(autoreverses: false)) {
-                            phase = .pi * 2
-                        }
+                        // 交给上面的 .animation(_:value:) 驱动循环。
+                        // 不能用 withAnimation(.repeatForever)：它会开启一个永不结束的
+                        // 动画事务，同期渲染的工具栏等兄弟视图会不断继承该动画而反复闪烁。
+                        phase = .pi * 2
                     }
                     .frame(width: 60,height: 60)
                     .background {
