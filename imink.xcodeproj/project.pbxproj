@@ -153,6 +153,8 @@
 		8BDA845E2C0003D70038655C /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 8BDA845D2C0003D70038655C /* Algorithms */; };
 		8BDA84602C00A0290038655C /* NSOAccountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BDA845F2C00A0290038655C /* NSOAccountManager.swift */; };
 		8BE0950D2C0315C40089705F /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE0950C2C0315C40089705F /* ActivityView.swift */; };
+		0B3A00022F11000000000001 /* SplatoonToastCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3A00012F11000000000001 /* SplatoonToastCard.swift */; };
+		0B3A00042F11000000000001 /* SplatoonToastOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3A00032F11000000000001 /* SplatoonToastOverlay.swift */; };
 		8BE095112C035B000089705F /* CoopShiftDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE095102C035B000089705F /* CoopShiftDetailView.swift */; };
 		8BE095132C035B280089705F /* CoopShiftDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE095122C035B280089705F /* CoopShiftDetailViewModel.swift */; };
 		8BF3CB462CD4B29300B0FCA9 /* IndicatorsOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB432CD4B29300B0FCA9 /* IndicatorsOverlay.swift */; };
@@ -335,6 +337,8 @@
 		8B0D14982BFAB98E00B82AD1 /* Splatoon1.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Splatoon1.otf; sourceTree = "<group>"; };
 		8B0D149D2BFAC56100B82AD1 /* CoopListShiftCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopListShiftCardView.swift; sourceTree = "<group>"; };
 		8B0D14A12BFAC98D00B82AD1 /* GrayscaleTextureView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GrayscaleTextureView.swift; sourceTree = "<group>"; };
+		0B3A00012F11000000000001 /* SplatoonToastCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplatoonToastCard.swift; sourceTree = "<group>"; };
+		0B3A00032F11000000000001 /* SplatoonToastOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplatoonToastOverlay.swift; sourceTree = "<group>"; };
 		8B0D14A32BFACD8E00B82AD1 /* StringInterpolation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringInterpolation.swift; sourceTree = "<group>"; };
 		8B0D14A52BFAD93A00B82AD1 /* CoopDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopDetailView.swift; sourceTree = "<group>"; };
 		8B0D14A72BFAD9F200B82AD1 /* FixSafeareaBackgroundModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FixSafeareaBackgroundModifier.swift; sourceTree = "<group>"; };
@@ -920,6 +924,8 @@
 				8B0851752BFB6DB400AF22C5 /* WaveAnimationView.swift */,
 				8B0D147F2BF9908800B82AD1 /* FilePickerView.swift */,
 				8B0D14A12BFAC98D00B82AD1 /* GrayscaleTextureView.swift */,
+				0B3A00012F11000000000001 /* SplatoonToastCard.swift */,
+				0B3A00032F11000000000001 /* SplatoonToastOverlay.swift */,
 				8B5276132BFC228600022D5B /* SpecialWeaponImage.swift */,
 				8B83F9E32CCA35C6009B90FF /* UniversalOverlay.swift */,
 				8BFE91732C0DEA3D00C12CBE /* RangeSlider.swift */,
@@ -1373,6 +1379,8 @@
 				8B0D14942BFAB57100B82AD1 /* Date+Ext.swift in Sources */,
 				8BE095132C035B280089705F /* CoopShiftDetailViewModel.swift in Sources */,
 				8B0D14A22BFAC98D00B82AD1 /* GrayscaleTextureView.swift in Sources */,
+				0B3A00022F11000000000001 /* SplatoonToastCard.swift in Sources */,
+				0B3A00042F11000000000001 /* SplatoonToastOverlay.swift in Sources */,
 				0A2C668C2E682CAF00F1FB81 /* CoopPlayerView.swift in Sources */,
 				8BF3CB5D2CD4B61900B0FCA9 /* GraphQLPlugin.swift in Sources */,
 				8BF3CB5E2CD4B61900B0FCA9 /* SN3AuthorizationStorage.swift in Sources */,

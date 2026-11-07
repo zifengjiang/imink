@@ -17,7 +17,8 @@ public final class Indicators {
     public static let shared = Indicators()
 	public private(set) var indicators: [Indicator] = []
 
-	internal var timers: [Indicator.ID: Timer] = [:]
+	/// 自动消失任务。可取消，用于排队暂停与展开时停止倒计时。
+	internal var dismissWorkItems: [Indicator.ID: DispatchWorkItem] = [:]
 	
 	// MARK: - Task Group Management
 	internal var taskGroups: [String: IndicatorTaskGroup] = [:]
@@ -307,7 +308,7 @@ public extension Indicators {
         if success {
             updateIcon(for: taskGroup.indicatorId, icon: .success)
         } else {
-            updateIcon(for: taskGroup.indicatorId, icon: .image(Image(systemName: "xmark.circle.fill")))
+            updateIcon(for: taskGroup.indicatorId, icon: .systemImage("xmark.circle.fill"))
         }
         
         // 如果支持 Live Activity，结束 Live Activity
@@ -478,24 +479,22 @@ public extension Indicators {
 
 internal extension Indicators {
 	func setupTimerIfNeeded(for indicator: Indicator) {
-		self.timers[indicator.id]?.invalidate()
+		dismissTimer(for: indicator.id)
 
 		if case .after(let time) = indicator.dismissType {
-//			let timer = Timer.scheduledTimer(withTimeInterval: time, repeats: false) { _ in
-//				Task { @MainActor [weak self] in
-//					self?.dismiss(indicator)
-//				}
-//			}
-//			self.timers[indicator.id] = timer
-            DispatchQueue.main.asyncAfter(deadline: .now() + time) { [weak self] in
-                self?.dismiss(indicator)
-            }
+			let workItem = DispatchWorkItem { [weak self] in
+				MainActor.assumeIsolated {
+					self?.dismiss(indicator)
+				}
+			}
+			dismissWorkItems[indicator.id] = workItem
+			DispatchQueue.main.asyncAfter(deadline: .now() + time, execute: workItem)
 		}
 	}
 
 	func dismissTimer(for id: Indicator.ID) {
-		timers[id]?.invalidate()
-		timers[id] = nil
+		dismissWorkItems[id]?.cancel()
+		dismissWorkItems[id] = nil
 	}
 }
 

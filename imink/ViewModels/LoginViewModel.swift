@@ -156,7 +156,7 @@ class LoginViewModel:ObservableObject{
             errorMessage = Self.describe(error)
             Toast.finish(id: loginIndicatorId, title: "登录失败", failed: true)
             Toast.update(id: loginIndicatorId, subtitle: "请检查 session token 后重试")
-            Indicators.shared.updateIcon(for: loginIndicatorId, icon: .image(Image(systemName: "xmark.icloud")))
+            Indicators.shared.updateIcon(for: loginIndicatorId, icon: .systemImage("xmark.icloud"))
         }
     }
 

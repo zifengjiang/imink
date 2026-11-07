@@ -136,10 +136,10 @@ extension SN3Client {
                         if useTaskGroup, let groupId = groupId, let taskName = taskName {
                             await Indicators.shared.completeSubTask(groupId: groupId, taskName: taskName)
                             await Indicators.shared.updateTitle(for: IndicatorID, title: "手动令牌已过期，请更新令牌")
-                            await Indicators.shared.updateIcon(for: IndicatorID, icon: .image(Image(systemName: "exclamationmark.triangle")))
+                            await Indicators.shared.updateIcon(for: IndicatorID, icon: .systemImage("exclamationmark.triangle"))
                         } else {
                             await Indicators.shared.updateTitle(for: IndicatorID, title: "手动令牌已过期，请更新令牌")
-                            await Indicators.shared.updateIcon(for: IndicatorID, icon: .image(Image(systemName: "exclamationmark.triangle")))
+                            await Indicators.shared.updateIcon(for: IndicatorID, icon: .systemImage("exclamationmark.triangle"))
                             await Indicators.shared.dismiss(with: IndicatorID, after: 3)
                         }
                         return
