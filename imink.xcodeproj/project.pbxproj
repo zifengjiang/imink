@@ -222,6 +222,9 @@
 		0B2001132EF3000000000001 /* NSOAuthorization+FAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001122EF3000000000001 /* NSOAuthorization+FAPI.swift */; };
 		0B2001152EF3000000000001 /* DataBackup+Import.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001142EF3000000000001 /* DataBackup+Import.swift */; };
 		0B2001172EF3000000000001 /* RecordListQueries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001162EF3000000000001 /* RecordListQueries.swift */; };
+		0B2001192EF3000000000001 /* CoopShiftDetailView+Sections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001182EF3000000000001 /* CoopShiftDetailView+Sections.swift */; };
+		0B20011B2EF3000000000001 /* NSOAuthorization+Requests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B20011A2EF3000000000001 /* NSOAuthorization+Requests.swift */; };
+		0B20011D2EF3000000000001 /* ScheduleSubscriptionManager+Filtering.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B20011C2EF3000000000001 /* ScheduleSubscriptionManager+Filtering.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -508,6 +511,9 @@
 		0B2001122EF3000000000001 /* NSOAuthorization+FAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSOAuthorization+FAPI.swift"; sourceTree = "<group>"; };
 		0B2001142EF3000000000001 /* DataBackup+Import.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DataBackup+Import.swift"; sourceTree = "<group>"; };
 		0B2001162EF3000000000001 /* RecordListQueries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RecordListQueries.swift"; sourceTree = "<group>"; };
+		0B2001182EF3000000000001 /* CoopShiftDetailView+Sections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CoopShiftDetailView+Sections.swift"; sourceTree = "<group>"; };
+		0B20011A2EF3000000000001 /* NSOAuthorization+Requests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSOAuthorization+Requests.swift"; sourceTree = "<group>"; };
+		0B20011C2EF3000000000001 /* ScheduleSubscriptionManager+Filtering.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ScheduleSubscriptionManager+Filtering.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -623,6 +629,7 @@
 		8B0D14852BFA212400B82AD1 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				0B20011C2EF3000000000001 /* ScheduleSubscriptionManager+Filtering.swift */,
 				0A4B54FF2EEEA9F6003FDBF7 /* LiveActivityManager.swift */,
 				8BD548DC2E483C69005B8F27 /* TaskManager.swift */,
 				8B4BF1FF2E59ECDF007A8B05 /* NotificationManager.swift */,
@@ -637,6 +644,7 @@
 		8B0D14902BFA2EC500B82AD1 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				0B2001182EF3000000000001 /* CoopShiftDetailView+Sections.swift */,
 				0B2001022EF3000000000001 /* CoopDetailView+Enemy.swift */,
 				0B2001002EF3000000000001 /* CoopDetailView+Card.swift */,
 				0B2000F82EF3000000000001 /* CoopPlayerStatusView.swift */,
@@ -752,6 +760,7 @@
 		8B7F295D2BF6E49D0010A525 /* API */ = {
 			isa = PBXGroup;
 			children = (
+				0B20011A2EF3000000000001 /* NSOAuthorization+Requests.swift */,
 				0B2001122EF3000000000001 /* NSOAuthorization+FAPI.swift */,
 				0B20010A2EF3000000000001 /* SN3Client+Records.swift */,
 				8B50DBDF2C01BED30076AE6D /* SN3Client+Ext.swift */,
@@ -1306,6 +1315,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0B20011D2EF3000000000001 /* ScheduleSubscriptionManager+Filtering.swift in Sources */,
+				0B20011B2EF3000000000001 /* NSOAuthorization+Requests.swift in Sources */,
+				0B2001192EF3000000000001 /* CoopShiftDetailView+Sections.swift in Sources */,
 				0B2001172EF3000000000001 /* RecordListQueries.swift in Sources */,
 				0B2001152EF3000000000001 /* DataBackup+Import.swift in Sources */,
 				0B2001132EF3000000000001 /* NSOAuthorization+FAPI.swift in Sources */,
@@ -1986,7 +1998,7 @@
 			repositoryURL = "https://github.com/zifengjiang/SplatDatabase.git";
 			requirement = {
 				kind = revision;
-				revision = 71b9846d5f940ce8207a9b542ae5ab888ac245a7;
+				revision = 2478e0cd177e1ade66354fbad90f0ff56235d5cc;
 			};
 		};
 		8B93C0CA2C12EB1A00D7EFBC /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
