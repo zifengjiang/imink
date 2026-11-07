@@ -221,6 +221,7 @@
 		0B2001112EF3000000000001 /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001102EF3000000000001 /* SearchBar.swift */; };
 		0B2001132EF3000000000001 /* NSOAuthorization+FAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001122EF3000000000001 /* NSOAuthorization+FAPI.swift */; };
 		0B2001152EF3000000000001 /* DataBackup+Import.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001142EF3000000000001 /* DataBackup+Import.swift */; };
+		0B2001172EF3000000000001 /* RecordListQueries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001162EF3000000000001 /* RecordListQueries.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -506,6 +507,7 @@
 		0B2001102EF3000000000001 /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SearchBar.swift"; sourceTree = "<group>"; };
 		0B2001122EF3000000000001 /* NSOAuthorization+FAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSOAuthorization+FAPI.swift"; sourceTree = "<group>"; };
 		0B2001142EF3000000000001 /* DataBackup+Import.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DataBackup+Import.swift"; sourceTree = "<group>"; };
+		0B2001162EF3000000000001 /* RecordListQueries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RecordListQueries.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -606,6 +608,7 @@
 		8B0D146B2BF9772000B82AD1 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				0B2001162EF3000000000001 /* RecordListQueries.swift */,
 				0B2000E02EF3000000000001 /* ScheduleRepository.swift */,
 				0B2000D02EF3000000000001 /* PlayerRepository.swift */,
 				0B2000C02EF3000000000001 /* RecordStatistics.swift */,
@@ -1303,6 +1306,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0B2001172EF3000000000001 /* RecordListQueries.swift in Sources */,
 				0B2001152EF3000000000001 /* DataBackup+Import.swift in Sources */,
 				0B2001132EF3000000000001 /* NSOAuthorization+FAPI.swift in Sources */,
 				0B2001112EF3000000000001 /* SearchBar.swift in Sources */,
