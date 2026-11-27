@@ -31,15 +31,6 @@ enum TaskStatus: String, Codable {
     case failed
 }
 
-// MARK: - Legacy Attributes (保留用于兼容)
-
-struct liveWidgetAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
-        var emoji: String
-    }
-    var name: String
-}
-
 // MARK: - TaskGroupLiveActivity Widget
 
 struct TaskGroupLiveActivity: Widget {
@@ -194,61 +185,4 @@ struct TaskGroupExpandedView: View {
         }
         .padding()
     }
-}
-
-// MARK: - Legacy Widget (保留用于兼容)
-
-struct liveWidgetLiveActivity: Widget {
-    var body: some WidgetConfiguration {
-        ActivityConfiguration(for: liveWidgetAttributes.self) { context in
-            VStack {
-                Text("Hello \(context.state.emoji)")
-            }
-            .activityBackgroundTint(Color.cyan)
-            .activitySystemActionForegroundColor(Color.black)
-        } dynamicIsland: { context in
-            DynamicIsland {
-                DynamicIslandExpandedRegion(.leading) {
-                    Text("Leading")
-                }
-                DynamicIslandExpandedRegion(.trailing) {
-                    Text("Trailing")
-                }
-                DynamicIslandExpandedRegion(.bottom) {
-                    Text("Bottom \(context.state.emoji)")
-                }
-            } compactLeading: {
-                Text("L")
-            } compactTrailing: {
-                Text("T \(context.state.emoji)")
-            } minimal: {
-                Text(context.state.emoji)
-            }
-            .widgetURL(URL(string: "http://www.apple.com"))
-            .keylineTint(Color.red)
-        }
-    }
-}
-
-extension liveWidgetAttributes {
-    fileprivate static var preview: liveWidgetAttributes {
-        liveWidgetAttributes(name: "World")
-    }
-}
-
-extension liveWidgetAttributes.ContentState {
-    fileprivate static var smiley: liveWidgetAttributes.ContentState {
-        liveWidgetAttributes.ContentState(emoji: "😀")
-     }
-     
-     fileprivate static var starEyes: liveWidgetAttributes.ContentState {
-         liveWidgetAttributes.ContentState(emoji: "🤩")
-     }
-}
-
-#Preview("Notification", as: .content, using: liveWidgetAttributes.preview) {
-   liveWidgetLiveActivity()
-} contentStates: {
-    liveWidgetAttributes.ContentState.smiley
-    liveWidgetAttributes.ContentState.starEyes
 }

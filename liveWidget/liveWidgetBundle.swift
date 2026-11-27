@@ -11,9 +11,6 @@ import SwiftUI
 @main
 struct liveWidgetBundle: WidgetBundle {
     var body: some Widget {
-        liveWidget()
-        liveWidgetControl()
-        liveWidgetLiveActivity()
         TaskGroupLiveActivity()
     }
 }
