@@ -13,3 +13,16 @@
 "pay_grade" = "급여 등급";
 "clear_bonus" = "클리어 보너스";
 "your_points" = "획득 포인트";
+"Log in to sync your data" = "데이터 동기화를 위해 로그인";
+"Log in with Nintendo Account" = "닌텐도 어카운트로 로그인";
+"login_subtitle" = "닌텐도 어카운트를 연결하여 SplatNet 3 기록, 스케줄 및 플레이어 데이터를 불러옵니다.";
+"login_method_picker" = "로그인 방식";
+"login_method_web" = "웹 로그인";
+"login_method_token" = "토큰 로그인";
+"login_token_placeholder" = "Nintendo session token 붙여넣기";
+"login_with_session_token" = "Session Token으로 로그인";
+"login_coral_disclaimer" = "인증은 nxapi-znca-api를 통해 Nintendo Coral API를 사용하며, Session Token은 동기화 용도로 기기에만 저장됩니다.";
+"loading_text" = "불러오는 중...";
+"home_recent_50_hint" = "오른쪽 블록 = 최근 50경기";
+"vd_grid_empty_battle" = "최근 배틀 기록이 없습니다";
+"vd_grid_empty_coop" = "최근 연어 런 기록이 없습니다";

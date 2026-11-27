@@ -13,3 +13,16 @@
 "pay_grade" = "Bezahlungsgrad";
 "clear_bonus" = "Clear-Bonus";
 "your_points" = "Deine Punkte";
+"Log in to sync your data" = "Anmelden, um Daten zu synchronisieren";
+"Log in with Nintendo Account" = "Mit Nintendo-Account anmelden";
+"login_subtitle" = "Verbinde deinen Nintendo-Account, um SplatNet 3-Rekorde, Zeitpläne und Spielerdaten zu laden.";
+"login_method_picker" = "Anmeldemethode";
+"login_method_web" = "Web-Login";
+"login_method_token" = "Session Token";
+"login_token_placeholder" = "Nintendo Session Token einfügen";
+"login_with_session_token" = "Mit Session Token anmelden";
+"login_coral_disclaimer" = "Die Authentifizierung nutzt Nintendos Coral-API über nxapi-znca-api. Dein Session Token wird nur lokal für die Synchronisierung gespeichert.";
+"loading_text" = "Laden...";
+"home_recent_50_hint" = "Rechter Block = Letzte 50";
+"vd_grid_empty_battle" = "Keine aktuellen Kampfdaten";
+"vd_grid_empty_coop" = "Keine aktuellen Salmoniden-Run-Daten";

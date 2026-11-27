@@ -13,3 +13,16 @@
 "pay_grade" = "Betaalgraad";
 "clear_bonus" = "Clear Bonus";
 "your_points" = "Jouw Punten";
+"Log in to sync your data" = "Log in om je gegevens te synchroniseren";
+"Log in with Nintendo Account" = "Inloggen met Nintendo-account";
+"login_subtitle" = "Koppel je Nintendo-account om SplatNet 3-records, schema's en spelersgegevens te laden.";
+"login_method_picker" = "Inlogmethode";
+"login_method_web" = "Web-login";
+"login_method_token" = "Session Token";
+"login_token_placeholder" = "Plak Nintendo session token";
+"login_with_session_token" = "Inloggen met Session Token";
+"login_coral_disclaimer" = "Authenticatie gebruikt Nintendo's Coral-API via nxapi-znca-api. Je session token wordt lokaal bewaard voor synchronisatie.";
+"loading_text" = "Laden...";
+"home_recent_50_hint" = "Rechterblok = Laatste 50";
+"vd_grid_empty_battle" = "Geen recente gevechtsrecords";
+"vd_grid_empty_coop" = "Geen recente Salmon Run-records";

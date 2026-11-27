@@ -13,3 +13,16 @@
 "pay_grade" = "Niveau de Rémunération";
 "clear_bonus" = "Bonus de Nettoyage";
 "your_points" = "Tes Points";
+"Log in to sync your data" = "Connectez-vous pour synchroniser vos données";
+"Log in with Nintendo Account" = "Se connecter avec un compte Nintendo";
+"login_subtitle" = "Associez votre compte Nintendo pour charger vos archives, horaires et données SplatNet 3.";
+"login_method_picker" = "Méthode de connexion";
+"login_method_web" = "Connexion Web";
+"login_method_token" = "Session Token";
+"login_token_placeholder" = "Coller le session token Nintendo";
+"login_with_session_token" = "Se connecter avec le Session Token";
+"login_coral_disclaimer" = "L'authentification utilise l'API Coral de Nintendo via nxapi-znca-api. Votre session token est stocké localement pour la synchronisation.";
+"loading_text" = "Chargement...";
+"home_recent_50_hint" = "Bloc droit = 50 derniers";
+"vd_grid_empty_battle" = "Aucun match récent";
+"vd_grid_empty_coop" = "Aucune mission Salmon Run récente";

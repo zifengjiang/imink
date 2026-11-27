@@ -13,3 +13,16 @@
 "pay_grade" = "Grado di Pagamento";
 "clear_bonus" = "Bonus di Pulizia";
 "your_points" = "I Tuoi Punti";
+"Log in to sync your data" = "Accedi per sincronizzare i dati";
+"Log in with Nintendo Account" = "Accedi con account Nintendo";
+"login_subtitle" = "Collega il tuo account Nintendo per caricare record, programmi e dati giocatore di SplatNet 3.";
+"login_method_picker" = "Metodo di accesso";
+"login_method_web" = "Accesso Web";
+"login_method_token" = "Session Token";
+"login_token_placeholder" = "Incolla il session token Nintendo";
+"login_with_session_token" = "Accedi con Session Token";
+"login_coral_disclaimer" = "L'autenticazione utilizza l'API Coral di Nintendo tramite nxapi-znca-api. Il tuo session token è salvato localmente per la sincronizzazione.";
+"loading_text" = "Caricamento...";
+"home_recent_50_hint" = "Blocco destro = Ultimi 50";
+"vd_grid_empty_battle" = "Nessuna battaglia recente";
+"vd_grid_empty_coop" = "Nessun turno Salmon Run recente";
