@@ -118,16 +118,20 @@ struct SettingPage: View {
                         }
                         .background(ActivityView(isPresented: $isActivityPresented, item: $item))
 
-                        Button {
-                        
-                        } label: {
-                            Text("鲑鱼跑记录总数：\(AppState.shared.salmonRunRecordsCount)")
+                        HStack {
+                            Text("鲑鱼跑记录总数")
+                            Spacer()
+                            Text("\(AppState.shared.salmonRunRecordsCount)")
+                                .font(.appMono)
+                                .foregroundStyle(.secondary)
                         }
 
-                        Button {
-
-                        } label: {
-                            Text("战斗记录总数：\(AppState.shared.battleRecordsCount)")
+                        HStack {
+                            Text("战斗记录总数")
+                            Spacer()
+                            Text("\(AppState.shared.battleRecordsCount)")
+                                .font(.appMono)
+                                .foregroundStyle(.secondary)
                         }
 
                     }
@@ -262,17 +266,21 @@ struct SettingPage: View {
     }
 
     private var aboutSection: some View {
-                    Section(header: Text("关于Imink")){
-                        Button{
-
-                        } label: {
-                            Text("鲑鱼跑记录刷新时间： \(Date(timeIntervalSince1970: TimeInterval(AppUserDefaults.shared.coopsRefreshTime)).toPlayedTimeString(full: true))")
+                    Section(header: Text("关于 imink")){
+                        HStack {
+                            Text("鲑鱼跑记录刷新时间")
+                            Spacer()
+                            Text(formattedRefreshTime(AppUserDefaults.shared.coopsRefreshTime))
+                                .font(.appCaptionMono)
+                                .foregroundStyle(.secondary)
                         }
 
-                        Button{
-
-                        } label: {
-                            Text("战斗记录刷新时间： \(Date(timeIntervalSince1970: TimeInterval(AppUserDefaults.shared.battlesRefreshTime)).toPlayedTimeString(full: true))")
+                        HStack {
+                            Text("战斗记录刷新时间")
+                            Spacer()
+                            Text(formattedRefreshTime(AppUserDefaults.shared.battlesRefreshTime))
+                                .font(.appCaptionMono)
+                                .foregroundStyle(.secondary)
                         }
 
                         Button {
@@ -285,10 +293,19 @@ struct SettingPage: View {
                             HStack{
                                 Text("NSO版本")
                                 Spacer()
-                                Text("\(AppUserDefaults.shared.NSOVersion)").foregroundStyle(Color.secondary)
+                                Text("\(AppUserDefaults.shared.NSOVersion)")
+                                    .font(.appCaptionMono)
+                                    .foregroundStyle(Color.secondary)
                             }
                         }
                     }
+    }
+
+    private func formattedRefreshTime(_ timestamp: Int) -> String {
+        guard timestamp > 0 else {
+            return "从未刷新"
+        }
+        return Date(timeIntervalSince1970: TimeInterval(timestamp)).toPlayedTimeString(full: true)
     }
 
     #if DEBUG
