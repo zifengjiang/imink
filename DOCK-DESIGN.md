@@ -101,10 +101,11 @@ stateDiagram-v2
 
 ## 5. 动画参数与手感取舍
 
-- **面板展开 / 收起主动画**：采用带轻微自然回弹的系统弹簧 **`.spring(response: 0.34, dampingFraction: 0.82)`**，配合 `GlassEffectContainer` 连续形变，底部 4-Tab 胶囊保持不动作为面板底座向上生长出菜单区，杜绝「胶囊消失 + 卡片另起」的割裂感。
-- **手势跟手进度驱动**：下拉面板任意区域或头部把手时采用 **`.interactiveSpring(response: 0.26, dampingFraction: 0.84)`** 实时驱动面板位移与背景模糊半径插值，松手后按位移/预测速度回弹归位或收起。
-- **二次点击判定与单选自动收起**：`tabItemButton` 通过 `tabSelection == tab.rawValue` 精准判定是否属于「当前激活 Tab 的二次点击」——未选中 Tab 首次点击仅切换页面不弹窗，已在当前 Tab 再点一次才触发展开/收起；点选面板内任一单选模式行立即刷新 `Filter` 与底层列表，停留 `80ms` 让勾选态视觉确认后自动触发 `.spring(response: 0.34, dampingFraction: 0.82)` 带轻微回弹收回成胶囊。
-- **无障碍减弱动态效果（`UIAccessibility.isReduceMotionEnabled`）**：统一通过 `DockMotion` 检测 `UIAccessibility.isReduceMotionEnabled || reduceMotion`；开启时全部退化为 `.easeOut(duration: 0.2)`。
+- **非对称开合弹簧（`DockMotion`）**：展开采用 **`.spring(response: 0.35, dampingFraction: 0.72)`**（带轻快开弹张力），收起采用 **`.spring(response: 0.28, dampingFraction: 0.94)`**（高阻尼干脆落位、绝不穿底），保留 `GlassEffectContainer` + `glassEffectID` + `glassEffectTransition(.matchedGeometry)` 连续形变，且底部 4-Tab 胶囊底边始终锁死在 `bottomMargin` 零跳位。
+- **水平微收腰脉冲（SwiftUI `keyframeAnimator`）**：不缩放文字与圆角，直接通过 `KeyframeTrack(\.widthScale)` 驱动玻璃容器宽度——展开过程先在 `85ms` 内压至 **`0.80`** 再经弹簧回弹至 `1.0`；收起过程先在 `60ms` 内压至 **`0.82`** 再以 `0.94` 高阻尼归稳至 `1.0`，赋予玻璃液滴被向上拉扯与收回时的流体张力。
+- **逐行错峰上浮与反序快收（`staggeredRowTransition`）**：面板行取消整体位移，每行独立应用 `AnyTransition.asymmetric`——展开自底向上按 `delay: index * 0.030s` 执行 `opacity 0→1` + `offset(y: +10→0)` + `blur(radius: 3→0)`；收起反序自顶向下按 `0.011s` 阶梯 + `0.088s` 单行时长（9 槽位总时长 `0.176s <= 0.18s`）快速收拢。
+- **手势跟手与单选自动收起**：下拉面板时采用 `.interactiveSpring(response: 0.26, dampingFraction: 0.84)` 实时联动面板位移与背景模糊半径；点选单选模式行立刻刷新 `Filter` 重筛列表，停留 `80ms` 确认勾选后触发高阻尼收起曲线自动收回。
+- **无障碍减弱动态效果（`UIAccessibility.isReduceMotionEnabled`）**：开启时关闭水平收腰、逐行位移与模糊，全面降级为纯淡入淡出（`.easeOut(duration: 0.18)`）。
 
 ---
 

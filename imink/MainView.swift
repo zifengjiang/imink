@@ -24,7 +24,7 @@ struct MainView: View {
                 tabViewCore
                     .tabBarMinimizeBehavior(.never)
                     .blur(radius: backgroundBlurRadius)
-                    .animation(DockMotion.panelAnimation(reduceMotion: envReduceMotion), value: dockStore.isExpanded)
+                    .animation(DockMotion.transitionAnimation(to: dockStore.state, reduceMotion: envReduceMotion), value: dockStore.isExpanded)
                     .accessibilityHidden(dockStore.isExpanded)
 
                 ExpandingDockHost(tabSelection: $tabSelection)
@@ -42,7 +42,7 @@ struct MainView: View {
         .appLineHeight()
         .onChange(of: tabSelection) { _, newValue in
             Haptics.generateIfEnabled(.selectionChanged)
-            withAnimation(DockMotion.panelAnimation(reduceMotion: envReduceMotion)) {
+            withAnimation(DockMotion.closeAnimation(reduceMotion: envReduceMotion)) {
                 dockStore.collapse()
             }
             // remove all coopDetailViewModelDetail in case of memory leak

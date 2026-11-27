@@ -163,6 +163,72 @@ final class iminkUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 1.5)
     }
 
+    /// 真实登录态 + 种子库（761 场对战 / 12,257 场打工）穿透录屏专用流程（严禁出现登录页）：
+    /// 1) 滚动真实彩色对战卡片，展示底部 4-Tab 毛玻璃胶囊实时透色折射；
+    /// 2) 二次点击当前「对战」Tab -> 水平微收腰（0.80）+ 开弹（damping 0.72）+ 逐行 30ms 错峰上浮展开；
+    /// 3) 点选「蛮颓比赛」-> 列表当场切为真实蛮颓卡片，面板反序快收（<=0.18s）+ 收腰（0.82）+ 高阻尼（0.94）干净收起；
+    /// 4) 轻滑筛选后的蛮颓卡片展示筛选结果与底栏贴合。
+    func testSeededContentDemoFlowForRecording() throws {
+        let app = XCUIApplication()
+        app.launchArguments += [
+            "-imink.useCustomDock", "YES",
+            "-debugScrollToBottom", "NO"
+        ]
+        app.launch()
+
+        let battleTab = app.buttons["expandingDock.tab.1"]
+        XCTAssertTrue(battleTab.waitForExistence(timeout: 10))
+
+        // 切到「对战」Tab，并断言已处于真实数据登录态（绝不出现「任天堂账号登录」按钮）
+        if !battleTab.isSelected {
+            battleTab.tap()
+            Thread.sleep(forTimeInterval: 0.8)
+        } else {
+            Thread.sleep(forTimeInterval: 0.6)
+        }
+        XCTAssertFalse(app.buttons["任天堂账号登录"].exists, "录屏必须处于真实数据登录态，严禁录登录页")
+
+        // 先确保处于「全部对战」初始态
+        if !app.navigationBars["全部对战"].exists {
+            battleTab.tap()
+            let allRow = app.buttons["expandingDock.battleMode.ALL"]
+            if allRow.waitForExistence(timeout: 3) {
+                allRow.tap()
+                Thread.sleep(forTimeInterval: 0.8)
+            }
+        }
+
+        // 第 1 幕：滚动真实对战卡片，让彩色卡片在底部毛玻璃胶囊下方流动折射
+        let scrollView = app.scrollViews.firstMatch
+        if scrollView.waitForExistence(timeout: 3) {
+            let bottomCoord = scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.72))
+            let topCoord = scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.36))
+            bottomCoord.press(forDuration: 0.05, thenDragTo: topCoord)
+            Thread.sleep(forTimeInterval: 0.55)
+            topCoord.press(forDuration: 0.05, thenDragTo: bottomCoord)
+            Thread.sleep(forTimeInterval: 0.65)
+        }
+
+        // 第 2 幕：二次点击已选中的「对战」Tab -> 0.80 水平微收腰 + 0.72 开弹 + 30ms 逐行错峰上浮展开在彩色卡片之上
+        battleTab.tap()
+        let anarchyRow = app.buttons["expandingDock.battleMode.BANKARA"]
+        XCTAssertTrue(anarchyRow.waitForExistence(timeout: 3))
+        Thread.sleep(forTimeInterval: 1.15)
+
+        // 第 3 幕：点选「蛮颓比赛」-> 列表当场切为蛮颓卡片，面板 <=0.18s 反序收拢 + 0.82 收腰 + 0.94 高阻尼干脆收起
+        anarchyRow.tap()
+        XCTAssertTrue(app.navigationBars["蛮颓比赛"].waitForExistence(timeout: 3))
+        Thread.sleep(forTimeInterval: 0.85)
+
+        // 第 4 幕：轻滑筛选后的蛮颓比赛卡片，再次印证玻璃底栏下的真实卡片层次
+        if scrollView.exists {
+            let c1 = scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.70))
+            let c2 = scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.42))
+            c1.press(forDuration: 0.05, thenDragTo: c2)
+            Thread.sleep(forTimeInterval: 0.8)
+        }
+    }
+
     private func saveDesignScreenshot(named filename: String) throws {
         let shot = XCUIScreen.main.screenshot()
         let attachment = XCTAttachment(screenshot: shot)
