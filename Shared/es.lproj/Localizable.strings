@@ -23,6 +23,6 @@
 "login_with_session_token" = "Iniciar sesión con Session Token";
 "login_coral_disclaimer" = "La autenticación utiliza la API Coral de Nintendo mediante nxapi-znca-api. Tu session token se guarda localmente para la sincronización.";
 "loading_text" = "Cargando...";
-"home_recent_50_hint" = "Bloque derecho = Últimas 50";
+"home_recent_50_hint" = "50 partidas";
 "vd_grid_empty_battle" = "Sin registros recientes de combates";
 "vd_grid_empty_coop" = "Sin registros recientes de Salmon Run";

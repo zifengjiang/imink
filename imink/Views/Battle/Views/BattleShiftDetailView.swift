@@ -37,7 +37,6 @@ struct BattleShiftDetailView: View {
                     if !viewModel.summary.ruleBuckets.isEmpty {
                         ModeDetailSection(
                             title: "规则分布",
-                            trailing: "共 \(viewModel.summary.totalCount) 场",
                             accent: battleMode.color
                         ) {
                             ModeDetailCard {
@@ -110,7 +109,7 @@ struct BattleShiftDetailView: View {
             icon: battleMode.icon,
             resultText: "\(viewModel.summary.winCount)胜 \(viewModel.summary.loseCount)负",
             resultColor: .spLightGreen,
-            resultSubtext: "共 \(viewModel.summary.totalCount) 场对战"
+            resultSubtext: "\(viewModel.summary.totalCount) 场"
         )
     }
 
@@ -131,16 +130,14 @@ struct BattleShiftDetailView: View {
             ),
             ModeDetailMetric(
                 id: "kd",
-                label: "综合 KD",
+                label: "KD",
                 value: String(format: "%.2f", viewModel.summary.kd),
-                unit: "比值",
                 valueColor: battleMode.color
             ),
             ModeDetailMetric(
                 id: "kad",
-                label: "综合 KA/D",
-                value: String(format: "%.2f", viewModel.summary.kad),
-                unit: "含助攻"
+                label: "KA/D",
+                value: String(format: "%.2f", viewModel.summary.kad)
             ),
             ModeDetailMetric(
                 id: "total",

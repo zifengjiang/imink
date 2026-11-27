@@ -29,7 +29,7 @@ struct CoopShiftDetailView: View {
                 } bodyContent: {
                     if !viewModel.coopWaveStatus.isEmpty {
                         ModeDetailSection(
-                            title: "水位与特殊波统计",
+                            title: "水位与特殊波",
                             accent: .salmonRunTheme
                         ) {
                             ModeDetailCard {
@@ -54,7 +54,7 @@ struct CoopShiftDetailView: View {
                     let enemySorted = viewModel.coopEnemyStatus.filter { $0.nameId.order < 23 }
                     if !enemySorted.isEmpty {
                         ModeDetailSection(
-                            title: "巨大鲑鱼统计",
+                            title: "巨大鲑鱼",
                             trailing: "\(enemySorted.count) 种",
                             accent: .spOrange
                         ) {
@@ -64,7 +64,7 @@ struct CoopShiftDetailView: View {
 
                     if !viewModel.coopWeaponStatus.isEmpty {
                         ModeDetailSection(
-                            title: "使用武器统计",
+                            title: "使用武器",
                             trailing: "\(viewModel.coopWeaponStatus.count) 把",
                             accent: .spGreen
                         ) {
@@ -124,8 +124,8 @@ struct CoopShiftDetailView: View {
         let rule = CoopRule(rawValue: status.rule) ?? .REGULAR
         let stageName = status._stage?.nameId.localizedFromSplatNet ?? rule.name
         let subtext: String = status.disconnect > 0
-            ? "共 \(status.count) 场 · 掉线 \(status.disconnect)"
-            : "共 \(status.count) 场打工"
+            ? "\(status.count) 场 · 掉线 \(status.disconnect)"
+            : "\(status.count) 场"
 
         return ModeDetailHeaderConfig(
             modeBadge: "打工班次",

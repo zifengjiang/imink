@@ -27,10 +27,6 @@ struct SubscriptionOptionsSheet: View {
                     Text(stageId.localizedFromSplatNet)
                         .font(.splatoonFont(size: 16))
                         .multilineTextAlignment(.center)
-                    
-                    Text("选择要订阅的日程")
-                        .font(.splatoonFont(size: 14))
-                        .foregroundStyle(.secondary)
                 }
                 .padding()
                 
@@ -45,9 +41,6 @@ struct SubscriptionOptionsSheet: View {
                         Text("暂无该场地的日程安排")
                             .font(.splatoonFont(size: 16))
                             .foregroundStyle(.secondary)
-                        Text("请稍后再试")
-                            .font(.splatoonFont(size: 14))
-                            .foregroundStyle(.tertiary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {

@@ -23,6 +23,6 @@
 "login_with_session_token" = "Mit Session Token anmelden";
 "login_coral_disclaimer" = "Die Authentifizierung nutzt Nintendos Coral-API über nxapi-znca-api. Dein Session Token wird nur lokal für die Synchronisierung gespeichert.";
 "loading_text" = "Laden...";
-"home_recent_50_hint" = "Rechter Block = Letzte 50";
+"home_recent_50_hint" = "50 Kämpfe";
 "vd_grid_empty_battle" = "Keine aktuellen Kampfdaten";
 "vd_grid_empty_coop" = "Keine aktuellen Salmoniden-Run-Daten";

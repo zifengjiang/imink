@@ -56,9 +56,6 @@ struct CoopStagePreviewView: View {
                     Text("暂无该场地的打工记录")
                         .font(.splatoonFont(size: 14))
                         .foregroundStyle(.secondary)
-                    Text("开始打工后将显示详细数据")
-                        .font(.splatoonFont(size: 12))
-                        .foregroundStyle(.tertiary)
                 }
                 .frame(height: 100)
             }
@@ -240,12 +237,6 @@ struct CoopStageStatsView: View {
             .padding(.horizontal, 12)
             .background(Color.waveClear.opacity(0.1))
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            
-            // 提示文本
-            Text("继续打工以提高评价等级!")
-                .font(.splatoonFont(size: 10))
-                .foregroundStyle(.tertiary)
-                .multilineTextAlignment(.center)
         }
     }
 }

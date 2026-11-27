@@ -23,6 +23,6 @@
 "login_with_session_token" = "Sign In with Session Token";
 "login_coral_disclaimer" = "Authentication uses Nintendo's Coral API through nxapi-znca-api. Your session token is stored locally for sync.";
 "loading_text" = "Loading...";
-"home_recent_50_hint" = "Rightmost block = Last 50";
+"home_recent_50_hint" = "50 matches";
 "vd_grid_empty_battle" = "No recent battle records";
 "vd_grid_empty_coop" = "No recent Salmon Run records";

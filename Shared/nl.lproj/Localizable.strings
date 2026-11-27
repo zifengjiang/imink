@@ -23,6 +23,6 @@
 "login_with_session_token" = "Inloggen met Session Token";
 "login_coral_disclaimer" = "Authenticatie gebruikt Nintendo's Coral-API via nxapi-znca-api. Je session token wordt lokaal bewaard voor synchronisatie.";
 "loading_text" = "Laden...";
-"home_recent_50_hint" = "Rechterblok = Laatste 50";
+"home_recent_50_hint" = "50 gevechten";
 "vd_grid_empty_battle" = "Geen recente gevechtsrecords";
 "vd_grid_empty_coop" = "Geen recente Salmon Run-records";

@@ -23,6 +23,6 @@
 "login_with_session_token" = "Войти по Session Token";
 "login_coral_disclaimer" = "Аутентификация использует API Nintendo Coral через nxapi-znca-api. Ваш session token хранится локально для синхронизации.";
 "loading_text" = "Загрузка...";
-"home_recent_50_hint" = "Правый блок = Последние 50";
+"home_recent_50_hint" = "50 матчей";
 "vd_grid_empty_battle" = "Нет недавних записей боев";
 "vd_grid_empty_coop" = "Нет недавних записей Salmon Run";

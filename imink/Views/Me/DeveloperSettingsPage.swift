@@ -65,12 +65,6 @@ struct DeveloperSettingsPage: View {
                             .foregroundStyle(.secondary)
                     }
                 }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("此选项面向调试和临时排障。使用手动令牌时不会自动刷新，过期后需要重新设置。")
-                }
-                .font(.caption2)
-                .foregroundStyle(.secondary)
             }
         }
     }
@@ -176,12 +170,6 @@ struct DeveloperSettingsPage: View {
                     )
                 }
             }
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text("iOS 会严格控制后台任务执行，需要系统设置中启用后台应用刷新。充电和 Wi-Fi 环境下更容易执行。")
-            }
-            .font(.caption2)
-            .foregroundStyle(.secondary)
         }
     }
 

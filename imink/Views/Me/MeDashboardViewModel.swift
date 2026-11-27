@@ -453,7 +453,7 @@ final class MeDashboardViewModel: ObservableObject {
                     let prevStart = activeEnd.addingTimeInterval(-2 * thirtyDays)
                     let formatter = DateFormatter()
                     formatter.dateFormat = "MM/dd"
-                    windowTitle = "最近活跃 30 天（截至 \(formatter.string(from: maxBattleDate))）"
+                    windowTitle = "截至 \(formatter.string(from: maxBattleDate))"
                     currentStats = try queryBattleWindow(db: db, accountId: accountId, start: activeStart, end: activeEnd)
                     previousStats = try queryBattleWindow(db: db, accountId: accountId, start: prevStart, end: activeStart)
                 } else {
@@ -497,7 +497,7 @@ final class MeDashboardViewModel: ObservableObject {
                 let weaponRows: [Row]
                 let weaponSampleLabel: String
                 if use30dForWeapons {
-                    weaponSampleLabel = "周期内常用 Top 3"
+                    weaponSampleLabel = "主力武器"
                     weaponRows = try Row.fetchAll(
                         db,
                         sql: """
@@ -511,7 +511,7 @@ final class MeDashboardViewModel: ObservableObject {
                         arguments: [accountId, activeEnd.addingTimeInterval(-thirtyDays), activeEnd]
                     )
                 } else {
-                    weaponSampleLabel = "近 \(min(allBattleStats.matches, 60)) 场对战主力 Top 3"
+                    weaponSampleLabel = "主力武器 · \(min(allBattleStats.matches, 60))场"
                     weaponRows = try Row.fetchAll(
                         db,
                         sql: """

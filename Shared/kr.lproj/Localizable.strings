@@ -23,6 +23,6 @@
 "login_with_session_token" = "Session Token으로 로그인";
 "login_coral_disclaimer" = "인증은 nxapi-znca-api를 통해 Nintendo Coral API를 사용하며, Session Token은 동기화 용도로 기기에만 저장됩니다.";
 "loading_text" = "불러오는 중...";
-"home_recent_50_hint" = "오른쪽 블록 = 최근 50경기";
+"home_recent_50_hint" = "50경기";
 "vd_grid_empty_battle" = "최근 배틀 기록이 없습니다";
 "vd_grid_empty_coop" = "최근 연어 런 기록이 없습니다";

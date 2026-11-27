@@ -88,18 +88,6 @@ struct CoopPlayerStatusView:View {
                                 .foregroundColor(.accentColor)
                         }
                     }
-                    
-                    // 如果总次数与当前shift中的次数不一致，显示说明
-                    if totalPlayCount != status.count && totalPlayCount > 0 {
-                        HStack(spacing: 4) {
-                            Image(systemName: "info.circle.fill")
-                                .foregroundColor(.orange)
-                                .font(.system(size: 12))
-                            Text("在其他时段也遇到过该玩家")
-                                .font(.splatoonFont(size: 11))
-                                .foregroundColor(.orange)
-                        }
-                    }
                 }
                 .padding(.top, 8)
                 

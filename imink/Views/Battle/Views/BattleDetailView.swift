@@ -155,7 +155,7 @@ struct BattleDetailView: View {
         let stageName = resolvedStageLabel(battle: battle, stage: stage)
 
         return ModeDetailHeaderConfig(
-            modeBadge: "对战 · \(modeName)",
+            modeBadge: modeName,
             title: "\(ruleName) · \(stageName)",
             subtitle: battle.playedTime.toPlayedTimeString(full: true),
             accent: mode?.color ?? .spOrange,
@@ -177,9 +177,9 @@ struct BattleDetailView: View {
         return [
             ModeDetailMetric(
                 id: "kill",
-                label: "个人击倒",
+                label: "击倒",
                 value: "\(kill)",
-                unit: assist > 0 ? "+\(assist)助" : "次",
+                unit: assist > 0 ? "+\(assist)助" : nil,
                 valueColor: .spLightGreen
             ),
             ModeDetailMetric(
@@ -190,14 +190,13 @@ struct BattleDetailView: View {
             ),
             ModeDetailMetric(
                 id: "kd",
-                label: "击倒效率",
+                label: "KD",
                 value: String(format: "%.2f", kdValue),
-                unit: "KD",
                 valueColor: mode?.color ?? .spOrange
             ),
             ModeDetailMetric(
                 id: "paint",
-                label: "个人涂墨",
+                label: "涂墨",
                 value: "\(paint)",
                 unit: "p"
             )
@@ -269,7 +268,7 @@ struct BattleDetailView: View {
         ForEach(winTeam.indices, id: \.self) { index in
             let team = winTeam[index]
             ModeDetailSection(
-                title: "胜利队伍 · VICTORY",
+                title: "胜利队伍",
                 trailing: teamScoreText(team: team, rule: rule),
                 accent: team.color.toColor()
             ) {
@@ -287,7 +286,7 @@ struct BattleDetailView: View {
         ForEach(loseTeam.indices, id: \.self) { index in
             let team = loseTeam[index]
             ModeDetailSection(
-                title: "落败队伍 · DEFEAT",
+                title: "落败队伍",
                 trailing: teamScoreText(team: team, rule: rule),
                 accent: team.color.toColor()
             ) {

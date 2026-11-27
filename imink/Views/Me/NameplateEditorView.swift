@@ -10,20 +10,13 @@ struct NameplateEditorView: View {
         ScrollView {
             VStack(spacing: 20) {                
                 // 预览区域
-                VStack(spacing: 15) {
-                    Text("预览")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                    
-                    EditableNameplateView(
-                        viewModel: viewModel,
-                        showingBadgeSelector: $showingBadgeSelector,
-                        showingBackgroundSelector: $showingBackgroundSelector,
-                        selectedBadgeIndex: $selectedBadgeIndex
-                    )
-                    .frame(height: 120)
-                    .padding(.horizontal)
-                }
+                EditableNameplateView(
+                    viewModel: viewModel,
+                    showingBadgeSelector: $showingBadgeSelector,
+                    showingBackgroundSelector: $showingBackgroundSelector,
+                    selectedBadgeIndex: $selectedBadgeIndex
+                )
+                .frame(height: 120)
                 .padding()
                 .background(Color(.systemGray6))
                 .cornerRadius(12)

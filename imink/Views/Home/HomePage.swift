@@ -168,12 +168,6 @@ struct HomePage: View {
                         .font(.appTitle)
                         .foregroundStyle(Color.appLabel)
 
-                    Text("(\(NSLocalizedString("最近500场", comment: "")))")
-                        .font(.appCaption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.85)
-
                     Spacer(minLength: 8)
 
                     Text("home_recent_50_hint")
@@ -222,12 +216,6 @@ struct HomePage: View {
                     Text("近期战况")
                         .font(.appTitle)
                         .foregroundStyle(Color.appLabel)
-
-                    Text("(\(NSLocalizedString("最近500场", comment: "")))")
-                        .font(.appCaption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.85)
 
                     Spacer(minLength: 8)
 

@@ -47,8 +47,8 @@ struct CoopDetailView: View {
                 } bodyContent: {
                     if !viewModel.waveResults.isEmpty {
                         ModeDetailSection(
-                            title: "波次进展 · WAVES",
-                            trailing: "共 \(viewModel.waveResults.count) 波",
+                            title: "波次进展",
+                            trailing: "\(viewModel.waveResults.count) 波",
                             accent: .salmonRunTheme
                         ) {
                             waveView
@@ -57,7 +57,7 @@ struct CoopDetailView: View {
 
                     if !viewModel.playerResults.isEmpty {
                         ModeDetailSection(
-                            title: "参与工友 · CREW",
+                            title: "参与工友",
                             trailing: "\(viewModel.playerResults.count) 人",
                             accent: .spGreen
                         ) {
@@ -67,7 +67,7 @@ struct CoopDetailView: View {
 
                     if !viewModel.enemyResults.isEmpty {
                         ModeDetailSection(
-                            title: "巨大鲑鱼统计 · BOSSES",
+                            title: "巨大鲑鱼",
                             trailing: bossTrailingSummary,
                             accent: .spOrange
                         ) {
@@ -124,7 +124,7 @@ struct CoopDetailView: View {
         }()
 
         return ModeDetailHeaderConfig(
-            modeBadge: "打工 · \(rule.name)",
+            modeBadge: rule.name,
             title: coop.stageName?.localizedFromSplatNet ?? rule.name,
             subtitle: coop.playedTime.toPlayedTimeString(full: true),
             accent: .salmonRunTheme,

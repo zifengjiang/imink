@@ -78,13 +78,12 @@ struct MePage: View {
         }
     }
 
-    // MARK: - 1. 身份卡（我是谁：铭牌/等级/称号 + 当前赛季标识）
+    // MARK: - 1. 身份卡
 
     private var identitySection: some View {
         VStack(alignment: .leading, spacing: 8) {
             sectionHeader(
                 title: "身份卡",
-                subtitle: "我是谁：当前铭牌、称号段位与赛季状态",
                 accent: .spYellow,
                 badge: dashboard.identity?.seasonLabel
             )
@@ -254,13 +253,12 @@ struct MePage: View {
         .background(Color.listItemBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
-    // MARK: - 2. 近期表现（我最近打得怎么样：近30天胜率、KD、常用武器 Top3）
+    // MARK: - 2. 近期表现
 
     private var recentPerformanceSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             sectionHeader(
                 title: "近期表现",
-                subtitle: "我最近打得怎么样：胜率、击倒效率与主力武器",
                 accent: .spLightGreen,
                 badge: appState.isLogin && dashboard.recent.matchCount > 0 ? dashboard.recent.windowTitle : nil
             )
@@ -295,7 +293,7 @@ struct MePage: View {
                                 value: dashboard.recent.kd.map { String(format: "%.2f", $0) } ?? "--",
                                 deltaText: formatNumberDelta(dashboard.recent.kdDelta),
                                 isPositive: (dashboard.recent.kdDelta ?? 0) >= 0,
-                                detail: dashboard.recent.kad.map { String(format: "KA/D %.2f", $0) } ?? "击倒/阵亡比",
+                                detail: dashboard.recent.kad.map { String(format: "KA/D %.2f", $0) },
                                 tint: .spOrange
                             )
                         }
@@ -400,7 +398,7 @@ struct MePage: View {
         value: String,
         deltaText: String?,
         isPositive: Bool,
-        detail: String,
+        detail: String?,
         tint: Color
     ) -> some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -428,23 +426,24 @@ struct MePage: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
 
-            Text(detail)
-                .font(.appSubCaptionMono)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
+            if let detail, !detail.isEmpty {
+                Text(detail)
+                    .font(.appSubCaptionMono)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.listBackground.opacity(0.65), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
-    // MARK: - 3. 分模式入口（对战 / 打工 关键指标 + 一键进入）
+    // MARK: - 3. 分模式入口
 
     private var modeEntrySection: some View {
         VStack(alignment: .leading, spacing: 8) {
             sectionHeader(
                 title: "分模式战绩",
-                subtitle: "核心模式总览：一眼确认对战与打工累计实力",
                 accent: .spOrange
             )
 
@@ -560,20 +559,18 @@ struct MePage: View {
         }
     }
 
-    // MARK: - 4. 深度数据入口（我的长期趋势/擅长什么：武器榜 / 场地榜 / 历史记录）
+    // MARK: - 4. 深度数据入口
 
     private var deepArchiveSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             sectionHeader(
                 title: "深度数据",
-                subtitle: "我擅长什么：按武器、场地与模式查阅长期档案",
                 accent: .spPink
             )
 
             LazyVGrid(columns: twoColumns, spacing: 12) {
                 archiveLinkCard(
                     title: "武器榜",
-                    subtitle: "熟练度星级与胜场排行",
                     systemIcon: "scope",
                     tint: .spOrange,
                     destination: WeaponRecordView()
@@ -581,7 +578,6 @@ struct MePage: View {
 
                 archiveLinkCard(
                     title: "场地榜",
-                    subtitle: "全地图五规则胜率分布",
                     systemIcon: "map.fill",
                     tint: .spLightGreen,
                     destination: StageRecordView()
@@ -589,7 +585,6 @@ struct MePage: View {
 
                 archiveLinkCard(
                     title: "打工记录",
-                    subtitle: "工地最高分与头目击倒",
                     systemIcon: "drop.fill",
                     tint: .spGreen,
                     destination: CoopRecordView()
@@ -597,9 +592,7 @@ struct MePage: View {
 
                 archiveLinkCard(
                     title: "祭典记录",
-                    subtitle: dashboard.battleOverview.festCount > 0
-                        ? "累计 \(dashboard.battleOverview.festCount) 场祭典档案"
-                        : "祭典胜率与贡献度汇总",
+                    badge: dashboard.battleOverview.festCount > 0 ? "\(dashboard.battleOverview.festCount) 场" : nil,
                     systemIcon: "sparkles",
                     tint: .spPink,
                     destination: FestRecordView()
@@ -610,13 +603,13 @@ struct MePage: View {
 
     private func archiveLinkCard<Destination: View>(
         title: String,
-        subtitle: String,
+        badge: String? = nil,
         systemIcon: String,
         tint: Color,
         destination: Destination
     ) -> some View {
         NavigationLink(destination: destination) {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Image(systemName: systemIcon)
                         .font(.system(size: 14, weight: .semibold))
@@ -626,6 +619,12 @@ struct MePage: View {
 
                     Spacer()
 
+                    if let badge {
+                        Text(badge)
+                            .font(.appSubCaptionMono)
+                            .foregroundStyle(.secondary)
+                    }
+
                     Image(systemName: "chevron.right")
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(.tertiary)
@@ -634,12 +633,6 @@ struct MePage: View {
                 Text(title)
                     .font(.appBody)
                     .foregroundStyle(.appLabel)
-
-                Text(subtitle)
-                    .font(.appCaption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.85)
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -648,13 +641,12 @@ struct MePage: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: - 5. 账户与设置（去哪改设置：账号、同步、通知、回收站、关于）
+    // MARK: - 5. 账户与设置
 
     private var accountAndSettingsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             sectionHeader(
                 title: "账户与设置",
-                subtitle: "账号管理、通知提醒、回收站与版本信息",
                 accent: .spPurple
             )
 
@@ -675,7 +667,6 @@ struct MePage: View {
                     icon: "person.text.rectangle.fill",
                     tint: .spYellow,
                     title: "自定义铭牌编辑器",
-                    subtitle: "调整称号、徽章与导出铭牌图片",
                     trailingBadge: nil,
                     destination: NameplateEditorView()
                 )
@@ -687,7 +678,6 @@ struct MePage: View {
                     icon: "trash.fill",
                     tint: .spPink,
                     title: "记录回收站",
-                    subtitle: "恢复误删记录或永久清理",
                     trailingBadge: dashboard.trashCount > 0 ? "\(dashboard.trashCount)" : nil,
                     destination: TrashView()
                 )
@@ -700,7 +690,6 @@ struct MePage: View {
                     icon: "wrench.and.screwdriver.fill",
                     tint: .spOrange,
                     title: "高级与开发者选项",
-                    subtitle: "后台任务诊断与 FAPI 配置",
                     trailingBadge: nil,
                     destination: DeveloperSettingsPage()
                 )
@@ -712,7 +701,6 @@ struct MePage: View {
                     icon: "iphone.gen3.landscape",
                     tint: .secondary,
                     title: "设备方向测试",
-                    subtitle: "调试横竖屏方向锁定",
                     trailingBadge: nil,
                     destination: OrientationTestView()
                 )
@@ -726,7 +714,7 @@ struct MePage: View {
         icon: String,
         tint: Color,
         title: String,
-        subtitle: String,
+        subtitle: String? = nil,
         trailingBadge: String?,
         destination: Destination
     ) -> some View {
@@ -742,10 +730,12 @@ struct MePage: View {
                     Text(title)
                         .font(.appBody)
                         .foregroundStyle(.appLabel)
-                    Text(subtitle)
-                        .font(.appCaption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                    if let subtitle, !subtitle.isEmpty {
+                        Text(subtitle)
+                            .font(.appCaption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
                 }
 
                 Spacer()
@@ -774,36 +764,28 @@ struct MePage: View {
 
     private func sectionHeader(
         title: String,
-        subtitle: String,
         accent: Color,
         badge: String? = nil
     ) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            HStack(alignment: .center, spacing: 6) {
-                RoundedRectangle(cornerRadius: 2, style: .continuous)
-                    .fill(accent)
-                    .frame(width: 4, height: 16)
+        HStack(alignment: .center, spacing: 6) {
+            RoundedRectangle(cornerRadius: 2, style: .continuous)
+                .fill(accent)
+                .frame(width: 4, height: 16)
 
-                Text(title)
-                    .font(.appHeadline)
-                    .foregroundStyle(.appLabel)
+            Text(title)
+                .font(.appHeadline)
+                .foregroundStyle(.appLabel)
 
-                Spacer()
+            Spacer()
 
-                if let badge {
-                    Text(badge)
-                        .font(.appSubCaptionMono)
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(Color.listItemBackground, in: Capsule())
-                }
+            if let badge {
+                Text(badge)
+                    .font(.appSubCaptionMono)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color.listItemBackground, in: Capsule())
             }
-
-            Text(subtitle)
-                .font(.appCaption)
-                .foregroundStyle(.secondary)
-                .padding(.leading, 10)
         }
     }
 

@@ -56,9 +56,6 @@ struct StagePreviewView: View {
                     Text("暂无该场地的游戏记录")
                         .font(.splatoonFont(size: 14))
                         .foregroundStyle(.secondary)
-                    Text("开始游戏后将显示详细数据")
-                        .font(.splatoonFont(size: 12))
-                        .foregroundStyle(.tertiary)
                 }
                 .frame(height: 100)
             }
