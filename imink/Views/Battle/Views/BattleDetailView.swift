@@ -2,165 +2,254 @@ import SwiftUI
 import SplatDatabase
 
 struct BattleDetailView: View {
-    @State var phase:Double = 0
+    @State var phase: Double = 0
     @StateObject var viewModel: BattleDetailViewModel
 
-    @State private var myselfPosition:CGFloat = 0
+    @State private var myselfPosition: CGFloat = 0
     @State private var hidePlayerNames: Bool = false
     @State private var showPlayerSkill: Bool = false
     @State private var activePlayer: Player? = nil
     @State private var activePlayerVictory: Bool = false
     @State private var hoveredMember: Bool = false
 
-
-    init(id:Int64) {
+    init(id: Int64) {
         _viewModel = StateObject(wrappedValue: BattleDetailViewModel(id: id))
     }
 
-    var winTeam:[VsTeam]{
-        viewModel.battle?.teams.filter{$0.judgement == "WIN" || $0.order == 1} ?? []
+    var winTeam: [VsTeam] {
+        viewModel.battle?.teams.filter { $0.judgement == "WIN" || $0.order == 1 } ?? []
     }
 
-    var loseTeam:[VsTeam]{
-        viewModel.battle?.teams.filter{$0.judgement == "LOSE"} ?? []
+    var loseTeam: [VsTeam] {
+        viewModel.battle?.teams.filter { $0.judgement == "LOSE" } ?? []
+    }
+
+    private var myPlayer: Player? {
+        viewModel.battle?.teams
+            .flatMap(\.players)
+            .first(where: { $0.isMyself == true })
     }
 
     var body: some View {
-        ScrollView{
-            HStack {
-                Spacer()
-                VStack(spacing:20){
-                    if viewModel.initialized{
-                        cardView
-                            .padding(.top,10)
-                        winTeamView
-                        loseTeamView
-                            .padding(.bottom, 10)
-
-                    }else{
-                        LoadingView(size: 100)
-                    }
+        Group {
+            if viewModel.initialized,
+               let battle = viewModel.battle,
+               let mode = BattleMode(rawValue: battle.mode),
+               let rule = BattleRule(rawValue: battle.rule),
+               let stage = battle.stage {
+                ModeDetailScaffold(
+                    header: makeHeader(battle: battle, mode: mode, rule: rule, stage: stage),
+                    metrics: makeMetrics(battle: battle, mode: mode),
+                    shareSummary: makeShareSummary(battle: battle, mode: mode, rule: rule, stage: stage)
+                ) {
+                    heroStageView(battle: battle, rule: rule, stage: stage)
+                } bodyContent: {
+                    winTeamSections(rule: rule)
+                    loseTeamSections(rule: rule)
                 }
-                Spacer()
+            } else {
+                LoadingView(size: 100)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .fixSafeareaBackground()
             }
-            .padding(.horizontal,8)
-            .clearFloatingBars()
         }
-        .scrollIndicators(.hidden)
-        .containerRelativeFrame(.horizontal)
-        .frame(maxWidth: .infinity)
-        .fixSafeareaBackground()
-        .ignoresSafeArea(edges: .vertical)
-        .modifier(Popup(isPresented: showPlayerSkill,
-                        onDismiss: {
-            showPlayerSkill = false
-        }, content: {
-            BattlePlayerView(player: activePlayer)
-        }))
-        .onAppear  {
+        .navigationTitle("对战详情")
+        .navigationBarTitleDisplayMode(.inline)
+        .modifier(Popup(
+            isPresented: showPlayerSkill,
+            onDismiss: {
+                showPlayerSkill = false
+            },
+            content: {
+                BattlePlayerView(player: activePlayer)
+            }
+        ))
+        .onAppear {
             viewModel.load()
         }
     }
-    var cardView:some View{
-        VStack(spacing: 0) {
-            if let battle = viewModel.battle,let mode = BattleMode(rawValue: battle.mode), let rule = BattleRule(rawValue: battle.rule),let stage = battle.stage{
-                HStack{
-                    if rule == .triColor{
-                        FestIcon(colors: battle.getColors())
-                            //                            .resizable()
-                            .frame(width: 30, height: 30)
-                            .mask(                                 // 再把整体裁小一圈
-                                GeometryReader { geo in
-                                    let w = geo.size.width  * 0.75
-                                    let h = geo.size.height * 0.75
-                                    Rectangle()
-                                        .frame(width: w, height: h)
-                                        .position(x: geo.size.width / 2, y: geo.size.height / 2)
-                                }
-                            )
-                    }else{
-                        mode.icon
-                            .resizable()
-                            .frame(width: 30, height: 30)
-                            .padding(.top, -0.5)
-                            .padding(.bottom, -1.5)
-                    }
-                    Text(rule.name)
-                        .font(.appTitle)
-                        .foregroundStyle(mode.color)
-                    Spacer()
-                    Text(battle.playedTime.toPlayedTimeString(full: true))
-                        .font(.appCaptionMono)
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.all,12)
-                Image(stage.name)
-                    .resizable()
-                    .scaledToFit()
-                    .overlay (
-                        BattleWaveOverlay(crt: battle.getColorRatioText()),
-                        alignment: .bottom
-                    )
-                    .overlay(
-                        Text(battle.judgement == "DEEMED_LOSE" ? "对战未能正常结束" : "")
-                            .font(.appHeadline),
-                        alignment: .bottom
-                    )
 
+    // MARK: - Header & Metrics
+
+    private func makeHeader(
+        battle: Battle,
+        mode: BattleMode,
+        rule: BattleRule,
+        stage: ImageMap
+    ) -> ModeDetailHeaderConfig {
+        let isWin = battle.judgement == "WIN"
+        let isLose = battle.judgement.contains("LOSE")
+        let stamp: String = {
+            if isWin {
+                return battle.knockout == "WIN" ? "VICTORY · KO" : "VICTORY"
+            } else if battle.judgement == "DEEMED_LOSE" {
+                return "DEEMED LOSE"
+            } else if isLose {
+                return "DEFEAT"
+            } else {
+                return "DRAW"
+            }
+        }()
+        let stampColor: Color = isWin ? .spLightGreen : (isLose ? .spPink : .spYellow)
+
+        var metaParts: [String] = []
+        if let udemae = battle.udemae, !udemae.isEmpty {
+            if let pt = battle.earnedUdemaePoint {
+                metaParts.append("\(udemae) +\(pt)p")
+            } else {
+                metaParts.append(udemae)
             }
         }
-        .textureBackground(texture: .streak, radius: 18)
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        if let xPower = battle.lastXPower, xPower > 0 {
+            metaParts.append(String(format: "XP %.1f", xPower))
+        } else if let leaguePower = battle.myLeaguePower, leaguePower > 0 {
+            metaParts.append("LP \(leaguePower)")
+        } else if let festContribution = battle.festContribution, festContribution > 0 {
+            metaParts.append("贡献 \(festContribution)")
+        }
+        metaParts.append("\(battle.duration)s")
+
+        return ModeDetailHeaderConfig(
+            modeBadge: "对战 · \(mode.name)",
+            title: "\(rule.name) · \(stage.nameId.localizedFromSplatNet)",
+            subtitle: battle.playedTime.toPlayedTimeString(full: true),
+            accent: mode.color,
+            icon: mode.icon,
+            resultText: stamp,
+            resultColor: stampColor,
+            resultSubtext: metaParts.joined(separator: " · ")
+        )
     }
 
+    private func makeMetrics(battle: Battle, mode: BattleMode) -> [ModeDetailMetric] {
+        let kill = myPlayer?.kill ?? 0
+        let assist = myPlayer?.assist ?? 0
+        let death = myPlayer?.death ?? 0
+        let special = myPlayer?.special ?? 0
+        let paint = myPlayer?.paint ?? 0
+        let kdValue = Double(kill) / Double(max(death, 1))
 
+        return [
+            ModeDetailMetric(
+                id: "kill",
+                label: "个人击倒",
+                value: "\(kill)",
+                unit: assist > 0 ? "+\(assist)助" : "次",
+                valueColor: .spLightGreen
+            ),
+            ModeDetailMetric(
+                id: "death",
+                label: "阵亡 / 大招",
+                value: "\(death)",
+                unit: "· \(special)SP"
+            ),
+            ModeDetailMetric(
+                id: "kd",
+                label: "击倒效率",
+                value: String(format: "%.2f", kdValue),
+                unit: "KD",
+                valueColor: mode.color
+            ),
+            ModeDetailMetric(
+                id: "paint",
+                label: "个人涂墨",
+                value: "\(paint)",
+                unit: "p"
+            )
+        ]
+    }
 
-
-    var winTeamView:some View{
-        VStack{
-            ForEach(0..<winTeam.count,id: \.self){ index in
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("VICTORY")
-                        .font(.appGameSubhead)
-                        .padding(.leading,10)
-                        .foregroundStyle(winTeam[index].color.toColor())
-
-                    BattleTeamList(
-                        team: winTeam[index],
-                        activePlayer: $activePlayer,
-                        showPlayerSkill:$showPlayerSkill,
-                        hoveredMember: $hoveredMember
-                    )
+    private func heroStageView(battle: Battle, rule: BattleRule, stage: ImageMap) -> some View {
+        Image(stage.name)
+            .resizable()
+            .aspectRatio(16 / 9, contentMode: .fill)
+            .frame(maxWidth: .infinity)
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .overlay(alignment: .topLeading) {
+                if rule == .triColor {
+                    FestIcon(colors: battle.getColors())
+                        .frame(width: 28, height: 28)
+                        .padding(6)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                        .padding(8)
                 }
+            }
+            .overlay(alignment: .topTrailing) {
+                if battle.judgement == "DEEMED_LOSE" {
+                    Text("对战未能正常结束")
+                        .font(.appCaption)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.spPink.opacity(0.88), in: Capsule())
+                        .padding(8)
+                }
+            }
+            .overlay(alignment: .bottom) {
+                BattleWaveOverlay(crt: battle.getColorRatioText())
+            }
+    }
+
+    // MARK: - Team Sections
+
+    private func winTeamSections(rule: BattleRule) -> some View {
+        ForEach(winTeam.indices, id: \.self) { index in
+            let team = winTeam[index]
+            ModeDetailSection(
+                title: "胜利队伍 · VICTORY",
+                trailing: teamScoreText(team: team, rule: rule),
+                accent: team.color.toColor()
+            ) {
+                BattleTeamList(
+                    team: team,
+                    activePlayer: $activePlayer,
+                    showPlayerSkill: $showPlayerSkill,
+                    hoveredMember: $hoveredMember
+                )
             }
         }
     }
 
-    var loseTeamView:some View{
-        VStack{
-            ForEach(0..<loseTeam.count,id: \.self){ index in
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("DEFEAT")
-                        .font(.appGameSubhead)
-                        .padding(.leading,10)
-                        .foregroundStyle(loseTeam[index].color.toColor())
-
-                    BattleTeamList(
-                        team: loseTeam[index],
-                        activePlayer: $activePlayer,
-                        showPlayerSkill:$showPlayerSkill,
-                        hoveredMember: $hoveredMember
-                    )
-                }
+    private func loseTeamSections(rule: BattleRule) -> some View {
+        ForEach(loseTeam.indices, id: \.self) { index in
+            let team = loseTeam[index]
+            ModeDetailSection(
+                title: "落败队伍 · DEFEAT",
+                trailing: teamScoreText(team: team, rule: rule),
+                accent: team.color.toColor()
+            ) {
+                BattleTeamList(
+                    team: team,
+                    activePlayer: $activePlayer,
+                    showPlayerSkill: $showPlayerSkill,
+                    hoveredMember: $hoveredMember
+                )
             }
         }
     }
 
+    private func teamScoreText(team: VsTeam, rule: BattleRule) -> String? {
+        if rule == .turfWar || rule == .triColor {
+            if let ratio = team.paintRatio {
+                return String(format: "%.1f%%", ratio * 100)
+            }
+        } else if let score = team.score {
+            return "\(score) 计数"
+        }
+        return nil
+    }
 
+    private func makeShareSummary(
+        battle: Battle,
+        mode: BattleMode,
+        rule: BattleRule,
+        stage: ImageMap
+    ) -> String {
+        let kill = myPlayer?.kill ?? 0
+        let assist = myPlayer?.assist ?? 0
+        let death = myPlayer?.death ?? 0
+        let paint = myPlayer?.paint ?? 0
+        let result = battle.judgement == "WIN" ? "胜利" : (battle.judgement.contains("LOSE") ? "落败" : "平局")
+        return "【imink 对战战报】\(mode.name) · \(rule.name) | \(stage.nameId.localizedFromSplatNet) | \(result) | 击倒 \(kill)(\(assist)助) / 阵亡 \(death) | 涂墨 \(paint)p | \(battle.playedTime.toPlayedTimeString(full: true))"
+    }
 }
-
-    //#Preview {
-    //    BattleDetailView()
-    //}
-
-

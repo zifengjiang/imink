@@ -103,9 +103,9 @@ struct BattleTeamList:View {
                 }
             }
         }
-        .padding(.all,10)
+        .padding(.all, 12)
         .background(Color.listItemBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .overlay {
             if let index{
                 var offset:CGFloat{

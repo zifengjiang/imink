@@ -86,6 +86,7 @@ struct ModeDetailScaffold<HeroContent: View, BodyContent: View>: View {
         }
         .scrollIndicators(.hidden)
         .fixSafeareaBackground()
+        .ignoresSafeArea(edges: .vertical)
     }
 
     // MARK: - 1. 统一页头卡

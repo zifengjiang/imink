@@ -64,8 +64,9 @@ struct CoopDetailWaveResultView:View {
                             Text("-")
                         }else{
                             Text("\(result.eventName!.localizedFromSplatNet)")
+                                .font(.appSubCaptionMono)
                                 .lineLimit(1)
-                                .minimumScaleFactor(0.3)
+                                .minimumScaleFactor(0.75)
                         }
                         HStack(spacing:0){
                             Image(.golden)
@@ -83,12 +84,13 @@ struct CoopDetailWaveResultView:View {
                     Spacer()
                 }
             }
-            .frame(width: 85, height: 110)
-            .background(Color.listItemBackground)
+            .frame(maxWidth: .infinity)
+            .frame(height: 114)
+            .background(Color.listBackground.opacity(0.72))
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .overlay {
+            .overlay(alignment: .topTrailing) {
                 Image(pass ? .jobWaveClear : .jobWaveDefeat)
-                    .position(x:80,y:3)
+                    .offset(x: 4, y: -6)
             }
             if let usedSpecialWeapons = result.usedSpecialWeapons{
                 let columns = Array(repeating: GridItem(.fixed(13)), count: min(usedSpecialWeapons.count, 4))

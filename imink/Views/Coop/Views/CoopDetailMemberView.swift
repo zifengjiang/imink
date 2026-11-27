@@ -75,10 +75,10 @@ struct CoopDetailMemberView:View {
                     .font(.appCaptionMono)
                 }
                 .lineLimit(1)
-                .minimumScaleFactor(0.3)
+                .minimumScaleFactor(0.75)
             }
         }
-        .frame(height: 45)
+        .frame(minHeight: 48)
         .overlay {
             TouchDownAndTouchUpGestureView {
                 activePlayer = result

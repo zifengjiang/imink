@@ -27,11 +27,10 @@ extension CoopDetailView {
     }
 
     func waveResultsView(range: Range<Int>) -> some View {
-        HStack(alignment: .top, spacing: 7) {
+        HStack(alignment: .top, spacing: 8) {
             ForEach(range, id: \.self) { waveIndex in
                 let waveResult = viewModel.waveResults[waveIndex]
                 CoopDetailWaveResultView(result: waveResult, pass: isWavePassed(waveResult), bossName: viewModel.coop?.bossName)
-                    .rotationEffect(.degrees(-2))
             }
         }
     }
