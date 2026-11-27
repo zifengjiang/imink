@@ -3,10 +3,9 @@ import Photos
 
 /// 打工详情页（单页）。
 ///
-/// 先前这里用 page 风格 `TabView` 支持左右滑动切换记录，但该容器会把子页
-/// 重新压回安全区，导致内容无法伸到导航栏/标签栏之下（顶部被挡、留白异常），
-/// 且在 iOS 27 上行为与 iOS 26 不一致。滑动切换的收益远小于这些代价，故改为
-/// 与对战详情一致的单页结构。
+/// 区分「单局打工详情」与「班次汇总详情」上下文：
+/// 收藏（心形）与保存单局快照到相册仅在 `row?.detail != nil` 时展示，
+/// 避免在班次汇总页显示上一个打工遗留的收藏态或点击无响应。
 struct CoopDetailPage: View {
     let rowId: String
     @ObservedObject var viewModel: CoopListViewModel
@@ -16,6 +15,10 @@ struct CoopDetailPage: View {
         viewModel.rows.first { $0.id == rowId }
     }
 
+    private var isSingleCoopDetail: Bool {
+        row?.detail != nil
+    }
+
     var body: some View {
         Group {
             if let detail = row?.detail {
@@ -23,35 +26,48 @@ struct CoopDetailPage: View {
             } else if let card = row?.card {
                 CoopShiftDetailView(id: card.groupId, navigationPath: $navigationPath)
             } else {
-                Color.clear
+                VStack(spacing: 10) {
+                    Image(systemName: "exclamationmark.magnifyingglass")
+                        .font(.system(size: 32, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                    Text("未找到该打工记录")
+                        .font(.appHeadline)
+                        .foregroundStyle(.appLabel)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .fixSafeareaBackground()
             }
         }
         .toolbar {
-            HStack(alignment: .center, spacing: 10) {
-                Button {
-                    Task { await viewModel.toggleFavorite(for: rowId) }
-                    Haptics.generateIfEnabled(.light)
-                } label: {
-                    Image(systemName: viewModel.currentCoopIsFavorite ? "heart.fill" : "heart")
-                        .foregroundColor(viewModel.currentCoopIsFavorite ? .red : .accentColor)
-                        .font(.system(size: 18))
-                }
+            if isSingleCoopDetail {
+                ToolbarItem(placement: .topBarTrailing) {
+                    HStack(alignment: .center, spacing: 10) {
+                        Button {
+                            Task { await viewModel.toggleFavorite(for: rowId) }
+                            Haptics.generateIfEnabled(.light)
+                        } label: {
+                            Image(systemName: viewModel.currentCoopIsFavorite ? "heart.fill" : "heart")
+                                .foregroundColor(viewModel.currentCoopIsFavorite ? .red : .accentColor)
+                                .font(.system(size: 18))
+                        }
 
-                Button {
-                    Haptics.generateIfEnabled(.medium)
-                    saveImageToPhotos()
-                } label: {
-                    Image("share")
-                        .resizable()
-                        .scaledToFit()
-                        .overlay(Color(.accent))
-                        .mask {
+                        Button {
+                            Haptics.generateIfEnabled(.medium)
+                            saveImageToPhotos()
+                        } label: {
                             Image("share")
                                 .resizable()
                                 .scaledToFit()
+                                .overlay(Color(.accent))
+                                .mask {
+                                    Image("share")
+                                        .resizable()
+                                        .scaledToFit()
+                                }
+                                .frame(width: 20 * 1.2)
+                                .offset(y: -4)
                         }
-                        .frame(width: 20 * 1.2)
-                        .offset(y: -4)
+                    }
                 }
             }
         }
@@ -63,6 +79,7 @@ struct CoopDetailPage: View {
     // MARK: - 保存为图片
 
     private func saveImageToPhotos() {
+        guard row?.detail != nil else { return }
         PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
             DispatchQueue.main.async {
                 switch status {
@@ -94,7 +111,6 @@ struct CoopDetailPage: View {
                 } else if let error {
                     Toast.failure("保存失败", subtitle: error.localizedDescription)
                 }
-                // 清理视图模型
                 AppState.shared.viewModelDict[coop.id] = nil
             }
         }

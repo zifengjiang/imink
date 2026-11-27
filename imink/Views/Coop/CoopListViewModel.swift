@@ -64,7 +64,10 @@ final class CoopListViewModel: PagedRecordListViewModel<CoopListRowInfo, CoopGro
     }
 
     func loadCurrentCoopFavoriteStatus(for selectedRow: String?) {
-        guard let coop = detail(for: selectedRow) else { return }
+        guard let coop = detail(for: selectedRow) else {
+            currentCoopIsFavorite = false
+            return
+        }
 
         Task {
             do {

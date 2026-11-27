@@ -8,23 +8,22 @@ class BattleDetailViewModel: ObservableObject {
 
     var cancelBag = Set<AnyCancellable>()
 
-    var id:Int64 = 0
-    init(id: Int64){
+    var id: Int64 = 0
+    init(id: Int64) {
         self.id = id
     }
 
     func load() {
-        Battle.fetchOne(identifier: (Int)(self.id))
-            .catch { error -> Just<Battle?> in
-                return Just<Battle?>(nil)
+        cancelBag.removeAll()
+        Battle.fetchOne(identifier: Int(self.id))
+            .catch { _ -> Just<Battle?> in
+                Just<Battle?>(nil)
             }
-            .assign(to: \.battle, on: self)
-            .store(in: &cancelBag)
-        $battle
-            .map{_ in
-                self.battle != nil
+            .sink { [weak self] fetched in
+                guard let self else { return }
+                self.battle = fetched
+                self.initialized = true
             }
-            .assign(to: \.initialized, on: self)
             .store(in: &cancelBag)
     }
 }
