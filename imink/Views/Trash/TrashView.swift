@@ -54,6 +54,7 @@ struct TrashView: View {
             }
             .navigationTitle("回收站")
             .navigationBarTitleDisplayMode(.inline)
+            .floatingTabBarInset()
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {

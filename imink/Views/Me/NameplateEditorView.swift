@@ -180,6 +180,7 @@ struct NameplateEditorView: View {
         }
         .navigationTitle("铭牌编辑器")
         .navigationBarTitleDisplayMode(.inline)
+        .floatingTabBarInset()
         .sheet(isPresented: $showingBadgeSelector) {
             BadgeSelectorView(viewModel: viewModel, selectedIndex: selectedBadgeIndex)
         }

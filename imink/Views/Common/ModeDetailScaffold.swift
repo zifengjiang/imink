@@ -85,6 +85,7 @@ struct ModeDetailScaffold<HeroContent: View, BodyContent: View>: View {
             .clearFloatingBars()
         }
         .scrollIndicators(.hidden)
+        .environment(\.hasFloatingTabBarInset, true)
         .fixSafeareaBackground()
         .ignoresSafeArea(edges: .vertical)
     }
