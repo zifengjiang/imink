@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct MePage: View {
     @ObservedObject private var appState = AppState.shared
@@ -285,7 +286,7 @@ struct MePage: View {
                                 value: dashboard.recent.winRate.map { String(format: "%.1f%%", $0) } ?? "--",
                                 deltaText: formatPercentDelta(dashboard.recent.winRateDelta),
                                 isPositive: (dashboard.recent.winRateDelta ?? 0) >= 0,
-                                detail: "\(dashboard.recent.winCount)胜 \(dashboard.recent.loseCount)负 · 共\(dashboard.recent.matchCount)场",
+                                detail: dashboard.recent.recordSummaryText,
                                 tint: .spLightGreen
                             )
 
@@ -349,14 +350,22 @@ struct MePage: View {
                                             .foregroundStyle(idx == 0 ? Color.spOrange : .secondary)
                                             .frame(width: 22, alignment: .leading)
 
-                                        Image(weapon.imageName)
-                                            .resizable()
-                                            .scaledToFit()
-                                            .padding(4)
-                                            .frame(width: 34, height: 34)
-                                            .background(Color.black.opacity(0.78), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                        if let imageName = weapon.imageName, !imageName.isEmpty, UIImage(named: imageName) != nil {
+                                            Image(imageName)
+                                                .resizable()
+                                                .scaledToFit()
+                                                .padding(4)
+                                                .frame(width: 34, height: 34)
+                                                .background(Color.black.opacity(0.78), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                        } else {
+                                            Image(systemName: "scope")
+                                                .font(.appCaption)
+                                                .foregroundStyle(.white.opacity(0.8))
+                                                .frame(width: 34, height: 34)
+                                                .background(Color.black.opacity(0.78), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                        }
 
-                                        Text(weapon.nameId.localizedFromSplatNet)
+                                        Text(weapon.displayTitle)
                                             .font(.appBody)
                                             .foregroundStyle(.appLabel)
                                             .lineLimit(1)
