@@ -1,0 +1,66 @@
+<h2>登录 / 我 / 设置页的小范围打磨方案</h2>
+<p class="subtitle">保持现有结构，不重做信息架构；目标是让普通用户看到的东西更少、更准、更像产品界面。</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">我 · 当前感受</div>
+    <div class="mockup-body">
+      <div class="placeholder" style="height:76px;margin-bottom:10px;">账号卡片：信息挤，未登录状态不明确</div>
+      <div class="placeholder" style="height:38px;margin-bottom:8px;">好友列表</div>
+      <div class="placeholder" style="height:38px;margin-bottom:8px;">打工 / 祭典 / 场地 / 武器记录</div>
+      <div class="placeholder" style="height:38px;margin-bottom:8px;">个性化</div>
+      <div class="placeholder" style="height:38px;">开发测试入口直接暴露</div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">我 · 打磨后</div>
+    <div class="mockup-body">
+      <div style="border:1px solid #dbe3ea;border-radius:10px;padding:12px;margin-bottom:10px;">
+        <strong>玩家账号</strong>
+        <div style="font-size:12px;color:#64748b;margin-top:4px;">已登录 / 未登录状态清楚，刷新入口更自然</div>
+      </div>
+      <div class="placeholder" style="height:38px;margin-bottom:8px;">我的记录：打工 / 祭典 / 场地 / 武器</div>
+      <div class="placeholder" style="height:38px;margin-bottom:8px;">个性化：铭牌编辑器</div>
+      <div class="placeholder" style="height:38px;">数据管理：回收站</div>
+      <div style="font-size:12px;color:#94a3b8;margin-top:10px;">Debug 包才显示：开发测试</div>
+    </div>
+  </div>
+</div>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">设置 · 普通用户默认看到</div>
+    <div class="mockup-body">
+      <div class="placeholder" style="height:42px;margin-bottom:8px;">账号：登录状态 / 复制会话令牌 / 退出登录</div>
+      <div class="placeholder" style="height:42px;margin-bottom:8px;">数据：导入 / 导出 / 记录数量</div>
+      <div class="placeholder" style="height:42px;margin-bottom:8px;">通知：权限 / 日程提醒</div>
+      <div class="placeholder" style="height:42px;margin-bottom:8px;">偏好：振动</div>
+      <div class="placeholder" style="height:42px;">关于：版本 / 刷新时间</div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">设置 · Debug 才出现</div>
+    <div class="mockup-body">
+      <div style="border:1px dashed #94a3b8;border-radius:10px;padding:12px;margin-bottom:10px;">
+        <strong>高级与开发者选项</strong>
+        <div style="font-size:12px;color:#64748b;margin-top:4px;">Release 不显示这个入口</div>
+      </div>
+      <div class="placeholder" style="height:34px;margin-bottom:8px;">FAPI 请求间隔 / 重置请求时间</div>
+      <div class="placeholder" style="height:34px;margin-bottom:8px;">手动游戏服务令牌</div>
+      <div class="placeholder" style="height:34px;margin-bottom:8px;">后台任务诊断 / 测试通知</div>
+      <div class="placeholder" style="height:34px;">危险操作：删除所有战斗数据</div>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="approve-small-polish" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>按这个小范围方案做</h3>
+      <p>先整理登录、“我”、设置页，把 Debug 专用内容收进 Debug-only 高级入口。</p>
+    </div>
+  </div>
+</div>

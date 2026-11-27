@@ -1,0 +1,91 @@
+<h2>先选一个最值得做的用户体验方向</h2>
+<p class="subtitle">我看了一圈当前主界面、Battle/Coop 列表和选择工具栏。下面这三个方向都能从真实使用感上减乱，但第一刀最好只选一个。</p>
+
+<div class="cards">
+  <div class="card" data-choice="list-flow" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">A · 记录列表更顺手</div>
+        <div class="mockup-body">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <strong>对战记录</strong>
+            <span style="font-size:12px;color:#64748b;">筛选中 · 42 条</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <button class="mock-button">全部</button>
+            <button class="mock-button">真格</button>
+            <button class="mock-button">收藏</button>
+          </div>
+          <div class="placeholder" style="height:42px;margin-bottom:8px;">今天 · 胜 · 鱼虎 · 鬼头刀</div>
+          <div class="placeholder" style="height:42px;margin-bottom:8px;">昨天 · 败 · 区域 · 海女</div>
+          <div class="placeholder" style="height:42px;">更明确的空状态 / 加载 / 筛选摘要</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. 列表流体验</h3>
+      <p>优化 Battle/Coop 的列表读取、筛选反馈、空状态、加载更多和选择模式。高频路径，收益最直接。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="navigation-home" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">B · 首页和导航更像一个控制台</div>
+        <div class="mockup-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+            <div class="placeholder" style="height:58px;">最近刷新</div>
+            <div class="placeholder" style="height:58px;">账号状态</div>
+          </div>
+          <div class="placeholder" style="height:46px;margin-bottom:8px;">继续查看：最近一场对战</div>
+          <div class="placeholder" style="height:46px;margin-bottom:8px;">继续查看：最近一次打工</div>
+          <div class="placeholder" style="height:46px;">同步 / 设置入口更清楚</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. 首页/导航心智</h3>
+      <p>让用户打开 App 先知道“数据是否新、下一步看什么、哪里处理异常”。整体感更好，但涉及面更广。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="detail-polish" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">C · 详情页阅读层次</div>
+        <div class="mockup-body">
+          <div class="placeholder" style="height:64px;margin-bottom:10px;">结果摘要 · 队伍/模式/地图</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">
+            <div class="placeholder" style="height:50px;">击杀</div>
+            <div class="placeholder" style="height:50px;">助攻</div>
+            <div class="placeholder" style="height:50px;">死亡</div>
+          </div>
+          <div class="placeholder" style="height:78px;">玩家列表/波次详情更容易扫读</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C. 详情页信息架构</h3>
+      <p>减少详情页视觉噪音，突出战绩和打工的关键判断信息。适合做精致，但需要更多界面判断。</p>
+    </div>
+  </div>
+</div>
+
+<div class="pros-cons">
+  <div class="pros">
+    <h4>我的推荐</h4>
+    <ul>
+      <li>先做 A：列表流体验。</li>
+      <li>它是最高频路径，也刚好接上我们前面做的选择/批量操作重构。</li>
+      <li>可以小步交付，不容易把 UI 又搅成一锅。</li>
+    </ul>
+  </div>
+  <div class="cons">
+    <h4>先不碰太多</h4>
+    <ul>
+      <li>不先重做整套视觉风格。</li>
+      <li>不先大改首页信息架构。</li>
+      <li>不把 Battle/Coop 两套详情页同时拆开。</li>
+    </ul>
+  </div>
+</div>
