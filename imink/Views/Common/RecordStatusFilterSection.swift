@@ -9,6 +9,14 @@ enum FilterSheetLayout {
     static let itemCornerRadius: CGFloat = 10
     static let innerCornerRadius: CGFloat = 8
 
+    /// 顶部概览卡几何常量：整卡高度只由常量决定（12 * 2 + 40 + 10 + 26 = 100pt）。
+    static let bannerHeaderHeight: CGFloat = 40
+    static let bannerRowSpacing: CGFloat = 10
+    static let bannerTagRowHeight: CGFloat = 26
+    static let bannerTagChipHeight: CGFloat = 22
+    static let summaryBannerHeight: CGFloat =
+        cardPadding * 2 + bannerHeaderHeight + bannerRowSpacing + bannerTagRowHeight
+
     /// 实心 `Color.accentColor` 上的高对比前景色：
     /// 浅色模式 `AccentColor` 为深紫 `#5639D6` 用白字；深色模式为荧光黄绿 `#DCE149` 用深墨黑字。
     static func onAccent(for colorScheme: ColorScheme) -> Color {
@@ -21,7 +29,7 @@ enum FilterSheetLayout {
     }
 }
 
-/// 筛选页顶部气泡贴纸概览卡（复用 `ModeDetailScaffold` 的 `.bubble` 贴纸纹理与模式色顶边胶囊）。
+/// 筛选页顶部气泡贴纸概览卡（复用 `ModeDetailScaffold` 的 `.bubble` 贴纸纹理，整卡高度锁死为 `FilterSheetLayout.summaryBannerHeight`）。
 struct FilterSummaryBanner: View {
     let modeBadge: String
     let title: String
@@ -29,57 +37,113 @@ struct FilterSummaryBanner: View {
     let icon: Image
     let activeTags: [String]
 
+    private static let badgePillHeight: CGFloat = 18
+    private static let titleLineHeight: CGFloat = 19
+    private static let headerTextSpacing: CGFloat = 3
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: FilterSheetLayout.bannerRowSpacing) {
             HStack(alignment: .center, spacing: 12) {
                 icon
                     .resizable()
                     .scaledToFit()
                     .frame(width: 22, height: 22)
-                    .frame(width: 40, height: 40)
+                    .frame(
+                        width: FilterSheetLayout.bannerHeaderHeight,
+                        height: FilterSheetLayout.bannerHeaderHeight
+                    )
                     .background(accent.opacity(0.16), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
-                VStack(alignment: .leading, spacing: 3) {
+                VStack(alignment: .leading, spacing: Self.headerTextSpacing) {
                     HStack(alignment: .center, spacing: 6) {
                         Text(modeBadge)
                             .font(.appSubCaptionMono)
                             .foregroundStyle(accent)
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
                             .padding(.horizontal, 8)
-                            .padding(.vertical, 2)
+                            .frame(height: Self.badgePillHeight)
                             .background(accent.opacity(0.14), in: Capsule())
 
-                        Text(activeTags.isEmpty ? "默认展示全部" : "已启用 \(activeTags.count) 项条件")
+                        Text(activeTags.isEmpty ? "未设筛选条件" : "已启用 \(activeTags.count) 项条件")
                             .font(.appCaptionMono)
                             .foregroundStyle(activeTags.isEmpty ? Color.secondary : accent)
                             .lineLimit(1)
+                            .frame(
+                                maxWidth: .infinity,
+                                minHeight: Self.badgePillHeight,
+                                maxHeight: Self.badgePillHeight,
+                                alignment: .leading
+                            )
                     }
+                    .frame(height: Self.badgePillHeight)
 
                     Text(title)
                         .font(.appHeadline)
                         .foregroundStyle(.appLabel)
                         .lineLimit(1)
+                        .frame(
+                            maxWidth: .infinity,
+                            minHeight: Self.titleLineHeight,
+                            maxHeight: Self.titleLineHeight,
+                            alignment: .leading
+                        )
                 }
-
-                Spacer(minLength: 4)
+                .frame(maxWidth: .infinity, maxHeight: FilterSheetLayout.bannerHeaderHeight, alignment: .leading)
             }
+            .frame(height: FilterSheetLayout.bannerHeaderHeight)
 
-            if !activeTags.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 6) {
-                        ForEach(activeTags, id: \.self) { tag in
-                            Text(tag)
-                                .font(.appSubCaptionMono)
-                                .foregroundStyle(accent)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(accent.opacity(0.14), in: Capsule())
-                        }
-                    }
-                }
-            }
+            tagRow
+                .frame(
+                    maxWidth: .infinity,
+                    minHeight: FilterSheetLayout.bannerTagRowHeight,
+                    maxHeight: FilterSheetLayout.bannerTagRowHeight,
+                    alignment: .leading
+                )
         }
         .padding(FilterSheetLayout.cardPadding)
+        .frame(
+            maxWidth: .infinity,
+            minHeight: FilterSheetLayout.summaryBannerHeight,
+            maxHeight: FilterSheetLayout.summaryBannerHeight,
+            alignment: .topLeading
+        )
         .textureBackground(texture: .bubble, radius: 16)
+        .frame(height: FilterSheetLayout.summaryBannerHeight)
+    }
+
+    @ViewBuilder
+    private var tagRow: some View {
+        if activeTags.isEmpty {
+            HStack(spacing: 6) {
+                Text("默认展示全部")
+                    .font(.appSubCaptionMono)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
+                    .padding(.horizontal, 8)
+                    .frame(height: FilterSheetLayout.bannerTagChipHeight)
+                    .background(Color.primary.opacity(0.06), in: Capsule())
+            }
+            .frame(height: FilterSheetLayout.bannerTagRowHeight, alignment: .leading)
+        } else {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    ForEach(activeTags, id: \.self) { tag in
+                        Text(tag)
+                            .font(.appSubCaptionMono)
+                            .foregroundStyle(accent)
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
+                            .padding(.horizontal, 8)
+                            .frame(height: FilterSheetLayout.bannerTagChipHeight)
+                            .background(accent.opacity(0.14), in: Capsule())
+                    }
+                }
+                .frame(height: FilterSheetLayout.bannerTagRowHeight)
+            }
+            .frame(height: FilterSheetLayout.bannerTagRowHeight)
+        }
     }
 }
 
