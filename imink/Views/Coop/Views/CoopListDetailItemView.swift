@@ -25,9 +25,9 @@ struct CoopListDetailItemView: View {
             HStack(spacing: 6) {
                 if let gradeName = coop.gradeName, let gradePoint = coop.gradePoint {
                     Text(gradeName.localizedFromSplatNet)
-                        .font(.appCaption)
+                        .font(.appGameCaption)
                     Text("\(gradePoint)")
-                        .font(.appCaptionMono)
+                        .font(.appGameCaptionMono)
                     Rectangle()
                         .foregroundColor(.clear)
                         .overlay(
@@ -42,14 +42,14 @@ struct CoopListDetailItemView: View {
                             .scaledToFit()
                             .frame(width: 13, height: 13)
                         Text("\(coop.goldenEgg)")
-                            .font(.appCaptionMono)
+                            .font(.appGameCaptionMono)
                 }else {
                     Text("-")
-                        .font(.appCaption)
+                        .font(.appGameCaption)
                         .foregroundStyle(Color(.clear))
 
                     Text("-")
-                        .font(.appCaptionMono)
+                        .font(.appGameCaptionMono)
                         .foregroundStyle(Color(.clear))
                     Rectangle()
                         .foregroundColor(.clear)
@@ -69,7 +69,7 @@ struct CoopListDetailItemView: View {
                     }) {
                         Image(systemName: "heart.fill")
                             .foregroundColor(.red)
-                            .font(.appBody)
+                            .font(.appGameBody)
                     }
                     .buttonStyle(PlainButtonStyle())
                     .padding(.trailing, 8)
@@ -77,10 +77,10 @@ struct CoopListDetailItemView: View {
 
                 HStack {
                     Text(coop.stage.localizedFromSplatNet)
-                        .font(.appCaption)
+                        .font(.appGameCaption)
                     if let boss = coop.boss,let defeated = coop.haveBossDefeated {
                         Text("/\(boss.localizedFromSplatNet)")
-                            .font(.appCaption)
+                            .font(.appGameCaption)
                             .foregroundStyle(defeated ? Color.green : Color.orange)
                     }
                 }
@@ -100,7 +100,7 @@ struct CoopListDetailItemView: View {
                             .scaledToFit()
                             .frame(width: 12, height: 12)
                         Text("\(coop.enemyDefeatCount)")
-                            .font(.appCaptionMono)
+                            .font(.appGameCaptionMono)
 
                     }
 
@@ -110,7 +110,7 @@ struct CoopListDetailItemView: View {
                             .scaledToFit()
                             .frame(width: 20, height: 20)
                         Text("\(coop.rescue)")
-                            .font(.appCaptionMono)
+                            .font(.appGameCaptionMono)
 
                     }
 
@@ -120,7 +120,7 @@ struct CoopListDetailItemView: View {
                             .scaledToFit()
                             .frame(width: 20, height: 20)
                         Text("\(coop.rescued)")
-                            .font(.appCaptionMono)
+                            .font(.appGameCaptionMono)
 
                     }
 
@@ -131,7 +131,7 @@ struct CoopListDetailItemView: View {
                                 .scaledToFit()
                                 .frame(width: 12, height: 12)
                             Text("\(coop.goldenEgg)")
-                                .font(.appCaptionMono)
+                                .font(.appGameCaptionMono)
                         }
                     }
 
@@ -141,7 +141,7 @@ struct CoopListDetailItemView: View {
                             .scaledToFit()
                             .frame(width: 12, height: 12)
                         Text("\(coop.powerEgg)")
-                            .font(.appCaptionMono)
+                            .font(.appGameCaptionMono)
                     }
 
                 }
@@ -159,11 +159,11 @@ struct CoopListDetailItemView: View {
             }
 
             HStack {
-                Text("危险度 ").font(.appCaption) + Text(dangerRateText)
-                    .font(.appCaptionMono)
+                Text("危险度 ").font(.appGameCaption) + Text(dangerRateText)
+                    .font(.appGameCaptionMono)
                 Spacer()
                 Text("\(coop.time.toPlayedTimeString())")
-                    .font(.appCaptionMono)
+                    .font(.appGameCaptionMono)
             }
             .foregroundColor(Color(.systemGray2))
             .padding(.top, 1)

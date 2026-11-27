@@ -53,6 +53,7 @@ struct SubscriptionOptionsSheet: View {
                             .environmentObject(subscriptionManager)
                         }
                     }
+                    .appGameTypography()
                     .listStyle(PlainListStyle())
                 }
             }

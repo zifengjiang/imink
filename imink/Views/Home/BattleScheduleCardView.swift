@@ -15,11 +15,11 @@ struct BattleScheduleCardView: View {
             VStack{
                 if let startTime = schedules.first?.startTime, startTime < Date(){
                     Text("Now")
-                        .font(.appBodyMono)
+                        .font(.appGameBodyMono)
                         .colorInvert()
                 }else{
                     Text(schedules.first!.formattedBattleTime)
-                        .font(.appBodyMono)
+                        .font(.appGameBodyMono)
                         .colorInvert()
                 }
             }

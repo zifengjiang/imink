@@ -41,6 +41,7 @@ struct SettingPage: View {
             }
             .navigationTitle("setting_page_title")
             .navigationBarTitleDisplayMode(.inline)
+            .appGameTypography()
             .floatingTabBarInset()
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

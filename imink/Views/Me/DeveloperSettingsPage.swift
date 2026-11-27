@@ -23,6 +23,11 @@ struct DeveloperSettingsPage: View {
         }
         .navigationTitle("高级与开发者选项")
         .navigationBarTitleDisplayMode(.inline)
+        .appGameTypography()
+        // 游戏字体行盒比 SF Pro 矮（中文字体 1.0× vs 1.19×），列表行统一抬到 52pt、分组间距 16pt，避免行与行贴住
+        .environment(\.defaultMinListRowHeight, 52)
+        .listSectionSpacing(16)
+        .appLineHeight(AppFontScale.body)
         .onAppear {
             fapiIntervalMinutes = String(AppUserDefaults.shared.fapiRequestInterval / 60000)
         }
@@ -71,12 +76,18 @@ struct DeveloperSettingsPage: View {
 
     private var backgroundDiagnosticsSection: some View {
         Section(header: Text("后台任务诊断")) {
-            HStack {
+            HStack(alignment: .firstTextBaseline) {
                 Text("后台刷新状态")
                 Spacer()
-                Text(backgroundTaskManager.backgroundTaskStatus)
-                    .foregroundStyle(backgroundTaskManager.backgroundTaskStatus.contains("可用") ? .green : .orange)
-                    .font(.caption)
+                // 多行长句用 GameText：Splatfont 1 / 日文这类 1.6~2.0× 行高的字体也能精确压到 12pt × 1.2
+                GameText(
+                    backgroundTaskManager.backgroundTaskStatus,
+                    size: AppFontScale.caption,
+                    color: backgroundTaskManager.backgroundTaskStatus.contains("可用") ? .systemGreen : .systemOrange,
+                    lineLimit: 0,
+                    alignment: .right
+                )
+                .frame(maxWidth: 200, alignment: .trailing)
             }
 
             if let lastRefresh = backgroundTaskManager.lastBackgroundRefreshTime {

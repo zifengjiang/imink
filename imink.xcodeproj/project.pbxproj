@@ -235,6 +235,8 @@
 		0B2001232EF3000000000001 /* InkWaterMetalBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001222EF3000000000001 /* InkWaterMetalBar.swift */; };
 		0B2001252EF3000000000001 /* InkWaterShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001242EF3000000000001 /* InkWaterShader.metal */; };
 		0B2001272EF3000000000001 /* FloatingBarInsets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001262EF3000000000001 /* FloatingBarInsets.swift */; };
+		0BA1A0042F0A000000000001 /* AppLineHeight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA1A0032F0A000000000001 /* AppLineHeight.swift */; };
+		0BA1A0022F0A000000000001 /* AppTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA1A0012F0A000000000001 /* AppTypography.swift */; };
 		0B2001292EF3000000000001 /* CoopDetailPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001282EF3000000000001 /* CoopDetailPage.swift */; };
 /* End PBXBuildFile section */
 
@@ -534,6 +536,8 @@
 		0B2001222EF3000000000001 /* InkWaterMetalBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InkWaterMetalBar.swift"; sourceTree = "<group>"; };
 		0B2001242EF3000000000001 /* InkWaterShader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = "InkWaterShader.metal"; sourceTree = "<group>"; };
 		0B2001262EF3000000000001 /* FloatingBarInsets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FloatingBarInsets.swift"; sourceTree = "<group>"; };
+		0BA1A0032F0A000000000001 /* AppLineHeight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLineHeight.swift; sourceTree = "<group>"; };
+		0BA1A0012F0A000000000001 /* AppTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTypography.swift; sourceTree = "<group>"; };
 		0B2001282EF3000000000001 /* CoopDetailPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CoopDetailPage.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -690,6 +694,8 @@
 			isa = PBXGroup;
 			children = (
 				0B2001262EF3000000000001 /* FloatingBarInsets.swift */,
+				0BA1A0032F0A000000000001 /* AppLineHeight.swift */,
+				0BA1A0012F0A000000000001 /* AppTypography.swift */,
 				8B7059072C0C27980076F680 /* PopupModifier.swift */,
 				8B0851732BFB673000AF22C5 /* TextureBackGround.swift */,
 				8B0D14A72BFAD9F200B82AD1 /* FixSafeareaBackgroundModifier.swift */,
@@ -1349,6 +1355,8 @@
 			files = (
 				0B2001292EF3000000000001 /* CoopDetailPage.swift in Sources */,
 				0B2001272EF3000000000001 /* FloatingBarInsets.swift in Sources */,
+				0BA1A0042F0A000000000001 /* AppLineHeight.swift in Sources */,
+				0BA1A0022F0A000000000001 /* AppTypography.swift in Sources */,
 				0B2001252EF3000000000001 /* InkWaterShader.metal in Sources */,
 				0B2001232EF3000000000001 /* InkWaterMetalBar.swift in Sources */,
 				0B2001212EF3000000000001 /* InkWaterBar.swift in Sources */,

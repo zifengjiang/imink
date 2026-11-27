@@ -18,11 +18,18 @@ struct MePage: View {
         GridItem(.flexible(), spacing: 12)
     ]
 
+    /// 「我」页纵向节奏（4pt 栅格）：分区之间 16pt，分区标题自己再补 8pt，
+    /// 所以「卡片底 → 下一个分区标题」实际是 24pt、「标题 → 本分区卡片」是 8pt，视觉上不会像同一张卡的两段。
+    private enum MeLayout {
+        static let sectionSpacing: CGFloat = 16
+        static let sectionHeaderTopPadding: CGFloat = 8
+    }
+
     var body: some View {
         NavigationStack {
             ScrollViewReader { scrollProxy in
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: MeLayout.sectionSpacing) {
                     identitySection
                     if appState.isLogin {
                         toolsSection
@@ -32,6 +39,8 @@ struct MePage: View {
                     deepArchiveSection
                     accountAndSettingsSection
                         .id("me_bottom_section")
+                        // 最底部卡与浮动 Tab 栏之间留 16pt，滑到底不贴住胶囊
+                        .padding(.bottom, MeLayout.sectionSpacing)
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
@@ -903,6 +912,7 @@ struct MePage: View {
                     .background(Color.listItemBackground, in: Capsule())
             }
         }
+        .padding(.top, MeLayout.sectionHeaderTopPadding)
     }
 
     private func emptyBlockCard(icon: String, title: String, detail: String) -> some View {

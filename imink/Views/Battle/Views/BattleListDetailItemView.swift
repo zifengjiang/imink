@@ -54,7 +54,7 @@ struct BattleListDetailItemView: View {
                     }
 
                     Text(rule.name)
-                        .font(.appCaption)
+                        .font(.appGameCaption)
                         .foregroundStyle(mode.color)
                     Spacer()
                     
@@ -65,7 +65,7 @@ struct BattleListDetailItemView: View {
                         }) {
                             Image(systemName: "heart.fill")
                                 .foregroundColor(.red)
-                                .font(.appBody)
+                                .font(.appGameBody)
                         }
                         .buttonStyle(PlainButtonStyle())
                         .padding(.trailing, 8)
@@ -74,10 +74,10 @@ struct BattleListDetailItemView: View {
                     if mode == .anarchy{
                         HStack(alignment: .firstTextBaseline, spacing: 1){
                             Text(detail.udemae ?? "C-")
-                                .font(.appCaptionMono)
+                                .font(.appGameCaptionMono)
                             if let plus = detail.earnedUdemaePoint{
                                 Text("\(plus)")
-                                    .font(.appSubCaptionMono)
+                                    .font(.appGameSubCaptionMono)
                                     .padding(.leading,0.6)
                                     //                  .padding(.bottom, 0)
                             }
@@ -96,11 +96,11 @@ struct BattleListDetailItemView: View {
                             .foregroundStyle(.spYellow)
                     }else if rule != .turfWar && rule != .triColor{
                         Text("\(detail.point)计数")
-                            .font(.appMono)
+                            .font(.appGameMono)
                             .foregroundStyle(detail.judgement == .LOSE ? Color.secondary : .spGreen)
                     }else {
                         Text("\(detail.point)p")
-                            .font(.appMono)
+                            .font(.appGameMono)
                             .foregroundStyle(detail.judgement == .LOSE ? Color.secondary : .spGreen)
                     }
                     Spacer()
@@ -112,9 +112,9 @@ struct BattleListDetailItemView: View {
                                 .foregroundColor(.gray)
                             HStack(alignment: .firstTextBaseline, spacing: 0){
                                 Text("\((detail.kill) + (detail.assist))")
-                                    .font(.appCaptionMono)
+                                    .font(.appGameCaptionMono)
                                 Text("(\(detail.assist))")
-                                    .font(.appSubCaptionMono)
+                                    .font(.appGameSubCaptionMono)
                                     .foregroundStyle(.secondary)
                             }
                         }
@@ -125,7 +125,7 @@ struct BattleListDetailItemView: View {
                                 .frame(width: 14, height: 14)
                                 .foregroundColor(.gray)
                             Text("\(detail.death)")
-                                .font(.appCaptionMono)
+                                .font(.appGameCaptionMono)
                         }
 
                         HStack(spacing: 3) {
@@ -135,7 +135,7 @@ struct BattleListDetailItemView: View {
                                 .foregroundColor(.gray)
                             let death = detail.death
                             Text("\(Double(detail.kill) -/ Double(death == 0 ? 1 : death), places: 1)")
-                                .font(.appCaptionMono)
+                                .font(.appGameCaptionMono)
                         }
                     }
                 }
@@ -163,11 +163,11 @@ struct BattleListDetailItemView: View {
 
                 HStack{
                     Text(detail.stage.localizedFromSplatNet)
-                        .font(.appCaption)
+                        .font(.appGameCaption)
                         .foregroundStyle(Color.secondary)
                     Spacer()
                     Text(detail.playedTime.toPlayedTimeString(full: true))
-                        .font(.appCaptionMono)
+                        .font(.appGameCaptionMono)
                         .foregroundStyle(Color.secondary)
                 }
             }

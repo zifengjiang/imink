@@ -18,6 +18,9 @@ struct iminkApp: App {
         
         // 注册后台任务
         BackgroundTaskManager.shared.registerBackgroundTasks()
+
+        // 全站排版收口：导航栏标题 / 返回按钮统一成游戏字体
+        AppTypography.install()
         
         // Fix the problem that NavgationView and TabBar has no background when Stack style.
 //        if #available(iOS 15.0, *) {

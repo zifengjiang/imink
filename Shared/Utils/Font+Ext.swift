@@ -7,7 +7,8 @@ import UIKit
 /// 规则：
 /// 1. 最小字号严格不低于 `11pt`（彻底杜绝 7pt~10pt 糊字）。
 /// 2. 17pt 及以上（`display` 28pt、`title` 20pt、`headline` 17pt、大号战绩指标）与短促战绩印章使用按语种路由的游戏展示字体，并通过 `relativeTo:` 支持系统 Dynamic Type 缩放。
-/// 3. 15pt 及以下正文、辅助说明与常规数值统一使用语义化 SF Pro（自动响应 Dynamic Type），且数值强制启用 `.monospacedDigit()`。
+/// 3. 15pt 及以下正文、辅助说明与常规数值同样使用按语种路由的游戏字体（`appBody` / `appBodyMono` / `appMono` / `appCaption` / `appCaptionMono` / `appSubCaptionMono`），尺寸基准与 `.relativeTo:` 字阶不变，数值强制 `.monospacedDigit()`。
+/// 4. 全站不再保留 SF Pro 的「正文/小字」层级：字形不混用，避免标题与正文突兀；小尺寸仍走同一套字体，靠字号与字重拉开层级。
 enum AppFontScale {
     static let display: CGFloat = 28
     static let title: CGFloat = 20
@@ -89,35 +90,46 @@ extension Font {
         gameDisplayFont(size: AppFontScale.headline, relativeTo: .headline).monospacedDigit()
     }
 
-    /// 15pt 基准 SF Pro Medium（正文 / 玩家昵称 / 列表主文案，随 `.subheadline` 动态缩放）。
+    // MARK: - 正文 / 辅助字阶入口（全站游戏字体：不再使用 SF Pro，避免与标题字形突兀）
+
+    /// 15pt 基准游戏字体（正文 / 玩家昵称 / 列表主文案，随 `.subheadline` 动态缩放）。
     static var appBody: Font {
-        .system(.subheadline, weight: .medium)
+        gameDisplayFont(size: AppFontScale.body, relativeTo: .subheadline)
     }
 
-    /// 15pt 基准 SF Pro Semibold 等宽数值（涂地点数 / 关键战绩值，随 `.subheadline` 动态缩放）。
+    /// 15pt 基准游戏字体等宽数值（涂地点数 / 关键战绩值，随 `.subheadline` 动态缩放）。
     static var appBodyMono: Font {
-        .system(.subheadline, weight: .semibold).monospacedDigit()
+        gameDisplayFont(size: AppFontScale.body, relativeTo: .subheadline).monospacedDigit()
     }
 
-    /// 13pt 基准 SF Pro Semibold 等宽数值（列表行/详情行常规数值、KDA、胜率，随 `.footnote` 动态缩放）。
+    /// 13pt 基准游戏字体等宽数值（列表行/详情行常规数值、KDA、胜率，随 `.footnote` 动态缩放）。
     static var appMono: Font {
-        .system(.footnote, weight: .semibold).monospacedDigit()
+        gameDisplayFont(size: AppFontScale.mono, relativeTo: .footnote).monospacedDigit()
     }
 
-    /// 12pt 基准 SF Pro Medium（辅助说明 / 地图名 / 模式名，随 `.caption` 动态缩放）。
+    /// 12pt 基准游戏字体（辅助说明 / 地图名 / 模式名，随 `.caption` 动态缩放）。
     static var appCaption: Font {
-        .system(.caption, weight: .medium)
+        gameDisplayFont(size: AppFontScale.caption, relativeTo: .caption)
     }
 
-    /// 12pt 基准 SF Pro Medium 等宽数值（时间戳 / 次级计数 / 危险度，随 `.caption` 动态缩放）。
+    /// 12pt 基准游戏字体等宽数值（时间戳 / 次级计数 / 危险度，随 `.caption` 动态缩放）。
     static var appCaptionMono: Font {
-        .system(.caption, weight: .medium).monospacedDigit()
+        gameDisplayFont(size: AppFontScale.caption, relativeTo: .caption).monospacedDigit()
     }
 
-    /// 11pt 基准 SF Pro Medium 等宽数值（全局字号下限，随 `.caption2` 动态缩放）。
+    /// 11pt 基准游戏字体等宽数值（全局字号下限，随 `.caption2` 动态缩放）。
     static var appSubCaptionMono: Font {
-        .system(.caption2, weight: .medium).monospacedDigit()
+        gameDisplayFont(size: AppFontScale.minimum, relativeTo: .caption2).monospacedDigit()
     }
+
+    // MARK: - 小号游戏字体语义别名（表达式可读性 / 卡片语境用，全部指向上面的同一实现）
+
+    static var appGameBody: Font { appBody }
+    static var appGameBodyMono: Font { appBodyMono }
+    static var appGameMono: Font { appMono }
+    static var appGameCaption: Font { appCaption }
+    static var appGameCaptionMono: Font { appCaptionMono }
+    static var appGameSubCaptionMono: Font { appSubCaptionMono }
 
     // MARK: - 语种路由与底层加载
 
@@ -184,13 +196,40 @@ extension Font {
         return customFont(cachedPreferredGameFont, size: clampedSize, relativeTo: textStyle)
     }
 
-    // MARK: - 兼容收敛入口（强制 >= 11pt、支持 Dynamic Type 且小字自动走 SF Pro 等宽）
+    // MARK: - UIKit 侧游戏字体（`UINavigationBar` / `UITabBarItem` 只接受 `UIFont`）
+
+    /// 返回 `UIFont` 形态的游戏字体，供 `UIAppearance` 使用（导航栏标题、标签栏标题）。
+    ///
+    /// 说明：
+    /// - 与 SwiftUI 侧共用同一套语种路由（`.zhHant` 缺失时回退 `.zhHans`）；
+    /// - 游戏字体只有单一字重，`weight` 通过 descriptor 尝试调整，若被系统换族（即真的回退成
+    ///   系统字体）则丢弃该次调整、保留游戏字体，避免字形意外变回 SF Pro；
+    /// - 唯一允许的 SF Pro 兜底：字体文件未注册（资源缺失 / 越狱裁剪）时退回系统字体，
+    ///   否则 `UIAppearance` 里拿不到字体会让整个导航栏、标签栏变成空白。
+    static func gameUIFont(size: CGFloat, weight: UIFont.Weight = .regular) -> UIFont {
+        let clampedSize = max(size, AppFontScale.minimum)
+        var postScriptName = resolvedName(for: cachedPreferredGameFont)
+        if postScriptName == nil, cachedPreferredGameFont == .zhHant {
+            postScriptName = resolvedName(for: .zhHans)
+        }
+        guard let postScriptName, let base = UIFont(name: postScriptName, size: clampedSize) else {
+            return .systemFont(ofSize: clampedSize, weight: weight)
+        }
+        guard weight != .regular else { return base }
+        let descriptor = base.fontDescriptor.addingAttributes([
+            .traits: [UIFontDescriptor.TraitKey.weight: weight]
+        ])
+        let weighted = UIFont(descriptor: descriptor, size: clampedSize)
+        return weighted.familyName == base.familyName ? weighted : base
+    }
+
+    // MARK: - 兼容收敛入口（强制 >= 11pt、支持 Dynamic Type，小字同样走游戏字体）
 
     static func splatoonFont1(size: CGFloat) -> Font {
         let clampedSize = max(size, AppFontScale.minimum)
         let style = semanticTextStyle(for: clampedSize)
         guard clampedSize >= 14 else {
-            return scaledSystemFont(size: clampedSize, weight: .semibold, relativeTo: style).monospacedDigit()
+            return gameDisplayFont(size: clampedSize, relativeTo: style).monospacedDigit()
         }
         return customFont(.splatoon1, size: clampedSize, relativeTo: style)
     }
@@ -198,11 +237,7 @@ extension Font {
     static func splatoonFont(size: CGFloat) -> Font {
         let clampedSize = max(size, AppFontScale.minimum)
         let style = semanticTextStyle(for: clampedSize)
-        if clampedSize >= AppFontScale.headline {
-            return gameDisplayFont(size: clampedSize, relativeTo: style)
-        }
-        let weight: UIFont.Weight = clampedSize >= AppFontScale.body ? .semibold : .medium
-        return scaledSystemFont(size: clampedSize, weight: weight, relativeTo: style).monospacedDigit()
+        return gameDisplayFont(size: clampedSize, relativeTo: style)
     }
 
     private static func semanticTextStyle(for size: CGFloat) -> Font.TextStyle {

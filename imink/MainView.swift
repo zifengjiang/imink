@@ -37,6 +37,9 @@ struct MainView: View {
                 .tag(3)
         }
         .tabBarMinimizeBehavior(.onScrollDown)
+        .appGameTypography()
+        // 游戏字体（尤其中文 DFPZongYiW7 只有 1.0× 行高）比 SF Pro 更紧，页面根统一把多行文本行高补到 15pt × 1.2
+        .appLineHeight()
         .onChange(of: tabSelection){ _, newValue in
             Haptics.generateIfEnabled(.selectionChanged)
             // remove all coopDetailViewModelDetail in case of memory leak
