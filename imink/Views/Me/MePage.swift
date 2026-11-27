@@ -7,6 +7,7 @@ struct MePage: View {
     @AppStorage("mainViewTabSelection") private var tabSelection: Int = 3
     #if DEBUG
     @AppStorage("debugMeDestination") private var debugMeDestination: String = ""
+    @AppStorage("debugScrollToBottom") private var debugScrollToBottom: Bool = false
     #endif
     @State private var expandedFriendId: String?
     @State private var showLoginSheet = false
@@ -19,6 +20,7 @@ struct MePage: View {
 
     var body: some View {
         NavigationStack {
+            ScrollViewReader { scrollProxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     identitySection
@@ -29,16 +31,27 @@ struct MePage: View {
                     modeEntrySection
                     deepArchiveSection
                     accountAndSettingsSection
+                        .id("me_bottom_section")
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
-                .padding(.bottom, 12)
             }
+            #if DEBUG
+            .defaultScrollAnchor(debugScrollToBottom ? .bottom : nil)
+            .task(id: "\(debugScrollToBottom)-\(dashboard.isLoaded)") {
+                guard debugScrollToBottom else { return }
+                for delay in [250_000_000 as UInt64, 600_000_000 as UInt64] {
+                    try? await Task.sleep(nanoseconds: delay)
+                    scrollProxy.scrollTo("me_bottom_section", anchor: .bottom)
+                }
+            }
+            #endif
             .refreshable {
                 await dashboard.reload(forceRemote: true)
             }
             .scrollIndicators(.hidden)
             .fixSafeareaBackground()
+            }
             .navigationTitle("tab_me")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -360,15 +373,14 @@ struct MePage: View {
         VStack(alignment: .leading, spacing: 8) {
             sectionHeader(
                 title: "近期表现",
-                accent: .spLightGreen,
-                badge: appState.isLogin && dashboard.recent.matchCount > 0 ? dashboard.recent.windowTitle : nil
+                accent: .spLightGreen
             )
 
             if !appState.isLogin {
                 emptyBlockCard(
                     icon: "chart.line.uptrend.xyaxis",
                     title: "登录后生成近期战力画像",
-                    detail: "自动统计近 30 天胜率涨跌、KD 变化与最常使用的 Top 3 武器。"
+                    detail: "自动统计近 50 场对战趋势、近 30 天打工表现与 Top 3 主力武器。"
                 )
             } else if dashboard.recent.matchCount == 0 && dashboard.recent.recentCoopMatches == 0 {
                 emptyBlockCard(
@@ -381,7 +393,7 @@ struct MePage: View {
                     if dashboard.recent.matchCount > 0 {
                         LazyVGrid(columns: twoColumns, spacing: 10) {
                             recentMetricTile(
-                                label: "周期胜率",
+                                label: "\(dashboard.recent.battleScopeLabel)胜率",
                                 value: dashboard.recent.winRate.map { String(format: "%.1f%%", $0) } ?? "--",
                                 deltaText: formatPercentDelta(dashboard.recent.winRateDelta),
                                 isPositive: (dashboard.recent.winRateDelta ?? 0) >= 0,
@@ -390,7 +402,7 @@ struct MePage: View {
                             )
 
                             recentMetricTile(
-                                label: "周期 KD",
+                                label: "\(dashboard.recent.battleScopeLabel) KD",
                                 value: dashboard.recent.kd.map { String(format: "%.2f", $0) } ?? "--",
                                 deltaText: formatNumberDelta(dashboard.recent.kdDelta),
                                 isPositive: (dashboard.recent.kdDelta ?? 0) >= 0,
@@ -406,7 +418,7 @@ struct MePage: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 18, height: 18)
-                            Text("近 30 天鲑鱼跑")
+                            Text(dashboard.recent.coopScopeLabel)
                                 .font(.appCaption)
                                 .foregroundStyle(.secondary)
                             Spacer()
@@ -507,6 +519,8 @@ struct MePage: View {
                 Text(label)
                     .font(.appCaption)
                     .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
                 Spacer(minLength: 4)
                 if let deltaText {
                     Text(deltaText)
@@ -532,6 +546,7 @@ struct MePage: View {
                     .font(.appSubCaptionMono)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
         }
         .padding(12)

@@ -167,8 +167,6 @@ struct NameplateEditorView: View {
                 .background(Color(.systemBackground))
                 .cornerRadius(12)
                 .padding(.horizontal)
-                
-                Spacer(minLength: 50)
             }
         }
         .navigationTitle("铭牌编辑器")

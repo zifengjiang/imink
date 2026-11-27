@@ -79,7 +79,6 @@ struct ModeDetailScaffold<HeroContent: View, BodyContent: View>: View {
             }
             .padding(.horizontal, 16)
             .padding(.top, 12)
-            .padding(.bottom, 24)
             .frame(maxWidth: 560)
             .frame(maxWidth: .infinity)
             .clearFloatingBars()

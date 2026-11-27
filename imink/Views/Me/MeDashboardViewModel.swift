@@ -54,8 +54,20 @@ final class MeDashboardViewModel: ObservableObject {
         }
     }
 
+    /// 「我」页「近期表现」卡片的数据模型。
+    ///
+    /// 三项子模块的统计窗口严格定义且各自在 UI 上显式标注，避免口径混淆：
+    /// 1. **对战近期窗口（`battleScopeLabel`）**：对齐 SplatNet 3 官方战绩总览与首页 `VDGridView` 的标准口径——
+    ///    取当前账号**最近 50 场对战**（不足 50 场时取全部 `N` 场，显示为 `近 N 场`）；涨跌对比紧邻的前序 50 场（第 51~100 场）。
+    ///    SplatNet 3 上游并无“周期”字段，按自然 30 天切分会在间歇游玩账号上截断同一次游玩序列（如仅剩 2 场残片）。
+    /// 2. **鲑鱼跑近期窗口（`coopScopeLabel`）**：优先取**近 30 天**自然日内的打工场次与通关率（显示 `近 30 天鲑鱼跑`）；
+    ///    若近 30 天为 0 场但本地存在历史打工记录，则回退至**最近 50 场打工**并显式切换标签为 `近 N 场鲑鱼跑`。
+    /// 3. **主力武器样本（`weaponSampleLabel`）**：与上方对战胜率/KD **完全同源**——直接聚合同一批最近 50 场对战中的主武器，
+    ///    标题显式写作 `近 N 场主力武器（共 N 场）`，杜绝总场次与单把武器场次之间的歧义。
     struct RecentPerformance {
-        var windowTitle: String
+        static let standardBattleWindowSize = 50
+
+        var battleScopeLabel: String
         var matchCount: Int
         var winCount: Int
         var loseCount: Int
@@ -66,21 +78,15 @@ final class MeDashboardViewModel: ObservableObject {
         var kd: Double?
         var kdDelta: Double?
         var kad: Double?
+        var coopScopeLabel: String
         var recentCoopMatches: Int
         var recentCoopClearRate: Double?
         var topWeapons: [TopWeaponItem]
         var weaponSampleLabel: String
 
-        /// 胜/负/平/掉线四桶之和严格等于 `matchCount`，避免页面出现数字加不起来的情况。
+        /// 胜 / 负（含豁免负）/ 平 / 掉线四个互斥完备桶始终全部展示，四项之和恒等于 `matchCount`。
         var recordSummaryText: String {
-            var parts = ["\(winCount)胜", "\(loseCount)负"]
-            if drawCount > 0 {
-                parts.append("\(drawCount)平")
-            }
-            if disconnectCount > 0 {
-                parts.append("\(disconnectCount)掉")
-            }
-            return "\(parts.joined(separator: " ")) · 共\(matchCount)场"
+            "\(winCount)胜 \(loseCount)负 \(drawCount)平 \(disconnectCount)掉"
         }
     }
 
@@ -102,7 +108,7 @@ final class MeDashboardViewModel: ObservableObject {
     @Published private(set) var isLoaded = false
     @Published private(set) var identity: IdentitySummary?
     @Published private(set) var recent = RecentPerformance(
-        windowTitle: "近 30 天",
+        battleScopeLabel: "近 50 场",
         matchCount: 0,
         winCount: 0,
         loseCount: 0,
@@ -113,10 +119,11 @@ final class MeDashboardViewModel: ObservableObject {
         kd: nil,
         kdDelta: nil,
         kad: nil,
+        coopScopeLabel: "近 30 天鲑鱼跑",
         recentCoopMatches: 0,
         recentCoopClearRate: nil,
         topWeapons: [],
-        weaponSampleLabel: "近 30 天"
+        weaponSampleLabel: "近 50 场主力武器（共 0 场）"
     )
     @Published private(set) var battleOverview = BattleOverview()
     @Published private(set) var coopOverview = CoopOverview()
@@ -427,53 +434,43 @@ final class MeDashboardViewModel: ObservableObject {
                     maxGoldenEgg: coopRow?["maxEgg"]
                 )
 
-                // Recent 30-day window
-                let thirtyDays: TimeInterval = 30 * 86_400
-                let calendarStart = now.addingTimeInterval(-thirtyDays)
-                let calendarPrevStart = now.addingTimeInterval(-2 * thirtyDays)
-                let live30Stats = try queryBattleWindow(db: db, accountId: accountId, start: calendarStart, end: now)
-
-                let activeEnd: Date
-                let windowTitle: String
-                let currentStats: WindowStats
-                let previousStats: WindowStats
-
-                if live30Stats.matches > 0 {
-                    activeEnd = now
-                    windowTitle = "近 30 天"
-                    currentStats = live30Stats
-                    previousStats = try queryBattleWindow(db: db, accountId: accountId, start: calendarPrevStart, end: calendarStart)
-                } else if let maxBattleDate = try Date.fetchOne(
-                    db,
-                    sql: "SELECT MAX(playedTime) FROM battle WHERE accountId = ? AND isDeleted = 0",
-                    arguments: [accountId]
-                ) {
-                    activeEnd = maxBattleDate.addingTimeInterval(1)
-                    let activeStart = activeEnd.addingTimeInterval(-thirtyDays)
-                    let prevStart = activeEnd.addingTimeInterval(-2 * thirtyDays)
-                    let formatter = DateFormatter()
-                    formatter.dateFormat = "MM/dd"
-                    windowTitle = "截至 \(formatter.string(from: maxBattleDate))"
-                    currentStats = try queryBattleWindow(db: db, accountId: accountId, start: activeStart, end: activeEnd)
-                    previousStats = try queryBattleWindow(db: db, accountId: accountId, start: prevStart, end: activeStart)
-                } else {
-                    activeEnd = now
-                    windowTitle = "近 30 天"
-                    currentStats = live30Stats
-                    previousStats = .zero
-                }
+                // MARK: - 近期表现三项明确口径
+                // 口径 1（对战）：最近 50 场对战（对齐 SplatNet 3 官方战绩总览口径），涨跌对比第 51~100 场
+                let windowSize = RecentPerformance.standardBattleWindowSize
+                let currentSlice = try queryRecentBattleSlice(
+                    db: db,
+                    accountId: accountId,
+                    limit: windowSize,
+                    offset: 0
+                )
+                let previousSlice = try queryRecentBattleSlice(
+                    db: db,
+                    accountId: accountId,
+                    limit: windowSize,
+                    offset: windowSize
+                )
+                let currentStats = currentSlice.stats
+                let previousStats = previousSlice.stats
+                let sampleCount = currentStats.matches
+                let battleScopeLabel = sampleCount > 0 ? "近 \(sampleCount) 场" : "近 \(windowSize) 场"
 
                 let winRateDelta: Double? = {
-                    guard let cur = currentStats.winRate, let prev = previousStats.winRate else { return nil }
+                    guard previousStats.matches > 0,
+                          let cur = currentStats.winRate,
+                          let prev = previousStats.winRate else { return nil }
                     return cur - prev
                 }()
 
                 let kdDelta: Double? = {
-                    guard let cur = currentStats.kd, let prev = previousStats.kd else { return nil }
+                    guard previousStats.matches > 0,
+                          let cur = currentStats.kd,
+                          let prev = previousStats.kd else { return nil }
                     return cur - prev
                 }()
 
-                // Recent 30d Salmon Run pulse
+                // 口径 2（鲑鱼跑）：优先取近 30 天自然日；若近 30 天为 0 场但存在历史记录，回退至最近 50 场并显式切换标签
+                let thirtyDays: TimeInterval = 30 * 86_400
+                let calendarStart = now.addingTimeInterval(-thirtyDays)
                 let coop30Row = try Row.fetchOne(
                     db,
                     sql: """
@@ -486,54 +483,48 @@ final class MeDashboardViewModel: ObservableObject {
                     """,
                     arguments: [accountId, calendarStart]
                 )
-                let recentCoopCnt: Int = coop30Row?["cnt"] ?? 0
-                let recentCoopClears: Int = coop30Row?["clears"] ?? 0
-                let recentCoopRate: Double? = recentCoopCnt > 0
-                    ? Double(recentCoopClears) / Double(recentCoopCnt) * 100
-                    : nil
+                let coop30Cnt: Int = coop30Row?["cnt"] ?? 0
+                let coop30Clears: Int = coop30Row?["clears"] ?? 0
 
-                // Top 3 Weapons — 安全批量查询 imageMap 并提供缺失降级，严禁调用可能触发 try! 崩溃的 Player.Weapon(with:db:)
-                let use30dForWeapons = currentStats.matches >= 6
-                let weaponRows: [Row]
-                let weaponSampleLabel: String
-                if use30dForWeapons {
-                    weaponSampleLabel = "主力武器"
-                    weaponRows = try Row.fetchAll(
-                        db,
-                        sql: """
-                        SELECT p.weapon AS weapon, b.judgement AS judgement
-                        FROM battle b
-                        JOIN vsTeam t ON t.battleId = b.id
-                        JOIN player p ON p.vsTeamId = t.id AND p.isMyself = 1 AND p.isCoop = 0
-                        WHERE b.accountId = ? AND b.isDeleted = 0 AND b.playedTime >= ? AND b.playedTime <= ?
-                        ORDER BY b.playedTime DESC
-                        """,
-                        arguments: [accountId, activeEnd.addingTimeInterval(-thirtyDays), activeEnd]
-                    )
+                let coopScopeLabel: String
+                let recentCoopCnt: Int
+                let recentCoopRate: Double?
+                if coop30Cnt > 0 || coopTotal == 0 {
+                    coopScopeLabel = "近 30 天鲑鱼跑"
+                    recentCoopCnt = coop30Cnt
+                    recentCoopRate = coop30Cnt > 0
+                        ? Double(coop30Clears) / Double(coop30Cnt) * 100
+                        : nil
                 } else {
-                    weaponSampleLabel = "主力武器 · \(min(allBattleStats.matches, 60))场"
-                    weaponRows = try Row.fetchAll(
+                    let fallbackCoopRow = try Row.fetchOne(
                         db,
                         sql: """
-                        SELECT p.weapon AS weapon, b.judgement AS judgement
-                        FROM battle b
-                        JOIN vsTeam t ON t.battleId = b.id
-                        JOIN player p ON p.vsTeamId = t.id AND p.isMyself = 1 AND p.isCoop = 0
-                        WHERE b.accountId = ? AND b.isDeleted = 0
-                        ORDER BY b.playedTime DESC
-                        LIMIT 60
+                        SELECT COUNT(*) AS cnt,
+                               SUM(CASE WHEN (rule = 'TEAM_CONTEST' AND wave >= 5 AND COALESCE(bossDefeated, 1) != 0)
+                                          OR (rule != 'TEAM_CONTEST' AND wave >= 3)
+                                        THEN 1 ELSE 0 END) AS clears
+                        FROM (
+                            SELECT rule, wave, bossDefeated
+                            FROM coop
+                            WHERE accountId = ? AND isDeleted = 0
+                            ORDER BY playedTime DESC, id DESC
+                            LIMIT ?
+                        )
                         """,
-                        arguments: [accountId]
+                        arguments: [accountId, windowSize]
                     )
+                    let fbCnt: Int = fallbackCoopRow?["cnt"] ?? 0
+                    let fbClears: Int = fallbackCoopRow?["clears"] ?? 0
+                    coopScopeLabel = "近 \(fbCnt) 场鲑鱼跑"
+                    recentCoopCnt = fbCnt
+                    recentCoopRate = fbCnt > 0
+                        ? Double(fbClears) / Double(fbCnt) * 100
+                        : nil
                 }
 
-                let parsedEntries: [(mainWeaponId: UInt16, judgement: String)] = weaponRows.compactMap { row in
-                    guard let packed = PackableNumbers.fromDatabaseValue(row["weapon"]) else { return nil }
-                    let mainWeaponId = packed[0]
-                    guard mainWeaponId != 0 else { return nil }
-                    let judgement: String = row["judgement"] ?? ""
-                    return (mainWeaponId, judgement)
-                }
+                // 口径 3（主力武器）：严格复用上方同一批最近 N（<=50）场对战样本，安全批量查询 imageMap 并提供缺失降级
+                let weaponSampleLabel = "近 \(sampleCount) 场主力武器（共 \(sampleCount) 场）"
+                let parsedEntries = currentSlice.weaponEntries
 
                 // 一次性批量查询所有出现过的主武器 ID，若新赛季武器或半恢复数据库缺失对应行则优雅降级为占位图标与编号
                 let uniqueWeaponIds = Array(Set(parsedEntries.map(\.mainWeaponId)))
@@ -593,7 +584,8 @@ final class MeDashboardViewModel: ObservableObject {
                 let topWeapons = weaponBuckets.values
                     .sorted {
                         if $0.count != $1.count { return $0.count > $1.count }
-                        return $0.wins > $1.wins
+                        if $0.wins != $1.wins { return $0.wins > $1.wins }
+                        return $0.bucketKey < $1.bucketKey
                     }
                     .prefix(3)
                     .map { bucket in
@@ -609,7 +601,7 @@ final class MeDashboardViewModel: ObservableObject {
                     }
 
                 let recent = RecentPerformance(
-                    windowTitle: windowTitle,
+                    battleScopeLabel: battleScopeLabel,
                     matchCount: currentStats.matches,
                     winCount: currentStats.wins,
                     loseCount: currentStats.losses,
@@ -620,6 +612,7 @@ final class MeDashboardViewModel: ObservableObject {
                     kd: currentStats.kd,
                     kdDelta: kdDelta,
                     kad: currentStats.kad,
+                    coopScopeLabel: coopScopeLabel,
                     recentCoopMatches: recentCoopCnt,
                     recentCoopClearRate: recentCoopRate,
                     topWeapons: Array(topWeapons),
@@ -681,7 +674,7 @@ final class MeDashboardViewModel: ObservableObject {
             return LocalSnapshot(
                 identity: fallbackIdentity,
                 recent: RecentPerformance(
-                    windowTitle: "近 30 天",
+                    battleScopeLabel: "近 50 场",
                     matchCount: 0,
                     winCount: 0,
                     loseCount: 0,
@@ -692,10 +685,11 @@ final class MeDashboardViewModel: ObservableObject {
                     kd: nil,
                     kdDelta: nil,
                     kad: nil,
+                    coopScopeLabel: "近 30 天鲑鱼跑",
                     recentCoopMatches: 0,
                     recentCoopClearRate: nil,
                     topWeapons: [],
-                    weaponSampleLabel: "近 30 天"
+                    weaponSampleLabel: "近 50 场主力武器（共 0 场）"
                 ),
                 battleOverview: BattleOverview(),
                 coopOverview: CoopOverview(),
@@ -703,6 +697,91 @@ final class MeDashboardViewModel: ObservableObject {
                 lastSyncText: "尚未同步记录"
             )
         }
+    }
+
+    private struct BattleSliceResult {
+        let stats: WindowStats
+        let weaponEntries: [(mainWeaponId: UInt16, judgement: String)]
+    }
+
+    /// 按对战发生时间倒序取固定场次切片（如最近 1~50 场、前序 51~100 场），
+    /// 同时返回聚合统计与主武器明细，保证「胜率 / KD / 主力武器」100% 同源。
+    nonisolated private static func queryRecentBattleSlice(
+        db: Database,
+        accountId: Int,
+        limit: Int,
+        offset: Int
+    ) throws -> BattleSliceResult {
+        let rows = try Row.fetchAll(
+            db,
+            sql: """
+            SELECT b.judgement AS judgement,
+                   COALESCE(p.kill, 0) AS kill,
+                   COALESCE(p.death, 0) AS death,
+                   COALESCE(p.assist, 0) AS assist,
+                   p.weapon AS weapon
+            FROM battle b
+            JOIN vsTeam t ON t.battleId = b.id
+            JOIN player p ON p.vsTeamId = t.id AND p.isMyself = 1 AND p.isCoop = 0
+            WHERE b.accountId = ? AND b.isDeleted = 0
+            ORDER BY b.playedTime DESC, b.id DESC
+            LIMIT ? OFFSET ?
+            """,
+            arguments: [accountId, limit, offset]
+        )
+
+        var wins = 0
+        var losses = 0
+        var draws = 0
+        var disconnects = 0
+        var decidedMatches = 0
+        var kills = 0
+        var deaths = 0
+        var assists = 0
+        var weaponEntries: [(mainWeaponId: UInt16, judgement: String)] = []
+        weaponEntries.reserveCapacity(rows.count)
+
+        for row in rows {
+            let judgement: String = row["judgement"] ?? ""
+            switch judgement {
+            case "WIN":
+                wins += 1
+                decidedMatches += 1
+            case "DRAW":
+                draws += 1
+                decidedMatches += 1
+            case "DEEMED_LOSE":
+                disconnects += 1
+                decidedMatches += 1
+            case "LOSE":
+                losses += 1
+                decidedMatches += 1
+            default:
+                // EXEMPTED_LOSE 等不计入胜率分母（对齐 SQL.swift:193-196），但归入负场桶保证四桶完备相加等于 matches
+                losses += 1
+            }
+
+            kills += (row["kill"] as Int?) ?? 0
+            deaths += (row["death"] as Int?) ?? 0
+            assists += (row["assist"] as Int?) ?? 0
+
+            if let packed = PackableNumbers.fromDatabaseValue(row["weapon"]), packed[0] != 0 {
+                weaponEntries.append((mainWeaponId: packed[0], judgement: judgement))
+            }
+        }
+
+        let stats = WindowStats(
+            matches: rows.count,
+            wins: wins,
+            losses: losses,
+            draws: draws,
+            disconnects: disconnects,
+            decidedMatches: decidedMatches,
+            kills: kills,
+            deaths: deaths,
+            assists: assists
+        )
+        return BattleSliceResult(stats: stats, weaponEntries: weaponEntries)
     }
 
     nonisolated private static func queryBattleWindow(

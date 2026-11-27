@@ -78,6 +78,11 @@ class PagedRecordListViewModel<Detail: GroupedRecord, Card: GroupStatusCard>: Ob
 
     /// 追加下一页。
     func loadMore(limit: Int = 10) async {
+        #if DEBUG
+        if UserDefaults.standard.bool(forKey: "debugScrollToBottom") {
+            return
+        }
+        #endif
         let page = await fetchPage(filter: filter, limit: limit, offset: offset)
         rows.append(contentsOf: await makeRows(from: page))
     }
@@ -93,6 +98,11 @@ class PagedRecordListViewModel<Detail: GroupedRecord, Card: GroupStatusCard>: Ob
 
     /// 追加更多班次卡片。
     func loadMoreCards() async {
+        #if DEBUG
+        if UserDefaults.standard.bool(forKey: "debugScrollToBottom") {
+            return
+        }
+        #endif
         do {
             let cards = try await fetchCards(accountId: AppUserDefaults.shared.accountId, offset: rows.count)
             rows.append(contentsOf: cards.map(RecordListRow.init(card:)))

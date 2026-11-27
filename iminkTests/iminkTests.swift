@@ -74,6 +74,60 @@ final class iminkTests: XCTestCase {
         XCTAssertEqual(Font.resolvedName(for: .ja), "KurokaneStd-EB")
     }
 
+    @MainActor
+    func testRecentPerformanceFourBucketSummaryAndFloatingBarInsets() {
+        let perf50 = MeDashboardViewModel.RecentPerformance(
+            battleScopeLabel: "近 50 场",
+            matchCount: 50,
+            winCount: 28,
+            loseCount: 20,
+            drawCount: 1,
+            disconnectCount: 1,
+            winRate: 57.1,
+            winRateDelta: 16.3,
+            kd: 1.22,
+            kdDelta: 0.07,
+            kad: 1.57,
+            coopScopeLabel: "近 30 天鲑鱼跑",
+            recentCoopMatches: 251,
+            recentCoopClearRate: 62.5,
+            topWeapons: [],
+            weaponSampleLabel: "近 50 场主力武器（共 50 场）"
+        )
+        XCTAssertEqual(
+            perf50.winCount + perf50.loseCount + perf50.drawCount + perf50.disconnectCount,
+            perf50.matchCount
+        )
+        XCTAssertEqual(perf50.recordSummaryText, "28胜 20负 1平 1掉")
+
+        let perfZeroDrawDisc = MeDashboardViewModel.RecentPerformance(
+            battleScopeLabel: "近 18 场",
+            matchCount: 18,
+            winCount: 10,
+            loseCount: 8,
+            drawCount: 0,
+            disconnectCount: 0,
+            winRate: 55.6,
+            winRateDelta: nil,
+            kd: 1.25,
+            kdDelta: nil,
+            kad: 1.51,
+            coopScopeLabel: "近 30 天鲑鱼跑",
+            recentCoopMatches: 0,
+            recentCoopClearRate: nil,
+            topWeapons: [],
+            weaponSampleLabel: "近 18 场主力武器（共 18 场）"
+        )
+        XCTAssertEqual(perfZeroDrawDisc.recordSummaryText, "10胜 8负 0平 0掉")
+
+        // FloatingBarInsets.bottom 不得把 tabBarHeight 重复叠加到 safeArea.bottom 之上
+        XCTAssertEqual(
+            FloatingBarInsets.bottom,
+            FloatingBarInsets.tabBarTopFromScreenBottom + FloatingBarInsets.breathingSpacing
+        )
+        XCTAssertEqual(FloatingBarInsets.breathingSpacing, 16)
+    }
+
     func testNintendoLoginAcceptsUserWithoutBirthday() throws {
         let user = try JSONDecoder().decode(
             NSOAuthorization.NAUser.self,

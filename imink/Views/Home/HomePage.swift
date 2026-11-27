@@ -25,12 +25,15 @@ struct HomePage: View {
 
     @AppStorage("home_page_selectedScheduleType")
     var selectedScheduleType = 0
+    #if DEBUG
+    @AppStorage("debugScrollToBottom") private var debugScrollToBottom: Bool = false
+    #endif
 
     var timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
         NavigationStack {
-
+            ScrollViewReader { scrollProxy in
             ScrollView{
                 VStack{
 
@@ -101,8 +104,28 @@ struct HomePage: View {
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal)
             }
+            #if DEBUG
+            .defaultScrollAnchor(debugScrollToBottom ? .bottom : nil)
+            .task(id: "\(debugScrollToBottom)-\(selectedScheduleType)-\(viewModel.scheduleGroups.count)-\(viewModel.salmonRunSchedules.count)") {
+                guard debugScrollToBottom else { return }
+                for delay in [350_000_000 as UInt64, 900_000_000 as UInt64, 1_500_000_000 as UInt64] {
+                    try? await Task.sleep(nanoseconds: delay)
+                    if selectedScheduleType == 0 {
+                        let groups = showSubscribedOnly
+                            ? subscriptionManager.filterSubscribedBattleSchedules(viewModel.scheduleGroups)
+                            : viewModel.scheduleGroups
+                        if let lastKey = groups.keys.sorted().last {
+                            scrollProxy.scrollTo(lastKey, anchor: .bottom)
+                        }
+                    } else if !viewModel.salmonRunSchedules.isEmpty {
+                        scrollProxy.scrollTo("salmon_schedule_\(viewModel.salmonRunSchedules.count - 1)", anchor: .bottom)
+                    }
+                }
+            }
+            #endif
             .frame(maxWidth: .infinity)
             .fixSafeareaBackground()
+            }
             .navigationBarTitle("tab_home", displayMode: .inline)
             .modifier(Popup(isPresented: showCoopStagePreview, onDismiss: {
                 showCoopStagePreview = false
@@ -253,9 +276,9 @@ struct HomePage: View {
                         activeStage: $activeStage,
                         hoveredStage: $hoveredStage
                     )
+                    .id(key)
                 }
             }
-            .padding(.bottom, 10)
         }
     }
 
@@ -274,9 +297,9 @@ struct HomePage: View {
                         activeCoopStage: $activeCoopStage,
                         hoveredCoopStage: $hoveredCoopStage
                     )
+                    .id("salmon_schedule_\(index)")
                 }
             }
-            .padding(.bottom, 10)
         }
     }
 }

@@ -6,6 +6,9 @@ struct BattleListView: View {
     @State var activeID:String?
     @State var showFilterSheet = false
     @State private var selection = RecordSelection<Int64>()
+    #if DEBUG
+    @AppStorage("debugScrollToBottom") private var debugScrollToBottom: Bool = false
+    #endif
 
     private var visibleBattleIds: [Int64] {
         viewModel.rows.compactMap { $0.detail?.id }
@@ -13,7 +16,7 @@ struct BattleListView: View {
 
     var body: some View {
         NavigationStack{
-            ScrollViewReader { _ in
+            ScrollViewReader { proxy in
                 VStack {
 
                     ScrollView{
@@ -59,6 +62,20 @@ struct BattleListView: View {
                         }
                         .scrollTargetLayout()
                     }
+                    #if DEBUG
+                    .defaultScrollAnchor(debugScrollToBottom ? .bottom : nil)
+                    .onChange(of: viewModel.rows.count) { _, _ in
+                        guard debugScrollToBottom else { return }
+                        Task { @MainActor in
+                            for delay in [300_000_000 as UInt64, 500_000_000 as UInt64] {
+                                try? await Task.sleep(nanoseconds: delay)
+                                if let lastId = viewModel.rows.last?.id {
+                                    proxy.scrollTo(lastId, anchor: .bottom)
+                                }
+                            }
+                        }
+                    }
+                    #endif
                 }
                 .refreshable {
                     TaskManager.shared.start(named: String(describing: Self.self)) {
