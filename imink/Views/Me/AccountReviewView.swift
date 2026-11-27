@@ -35,28 +35,28 @@ struct AccountReviewView: View {
                 avatar(for: historyRecord)
 
                 VStack(alignment: .leading, spacing: 3) {
-                    HStack(alignment: .lastTextBaseline) {
+                    HStack(alignment: .lastTextBaseline, spacing: 8) {
                         Text(historyRecord.account.name ?? "----")
                             .font(.appTitle)
                             .lineLimit(1)
-                            .minimumScaleFactor(0.3)
+                            .minimumScaleFactor(0.75)
                             .foregroundStyle(.appLabel)
-                            .frame(width: 50, height: 20)
 
-                        HStack(alignment: .lastTextBaseline, spacing: 0) {
+                        HStack(alignment: .lastTextBaseline, spacing: 2) {
                             Text("★")
                                 .font(.appGameSubhead)
                                 .foregroundStyle(.spYellow)
                             Text("\(historyRecord.rank)")
                                 .font(.appMono)
                         }
-                        HStack(alignment: .bottom, spacing: 0) {
+                        HStack(alignment: .bottom, spacing: 2) {
                             Text("\(historyRecord.udemae ?? "-")")
                                 .font(.appMono)
                             Text("\(historyRecord.udemaeMax ?? "-")")
                                 .font(.appSubCaptionMono)
                                 .foregroundStyle(.secondary)
                         }
+                        Spacer(minLength: 0)
                     }
 
                     NameplateView(nameplate: historyRecord.nameplate)
@@ -69,7 +69,7 @@ struct AccountReviewView: View {
                     .tag(0)
                 MedalRow(icon: Image(.event), description: "活动比赛", history: historyRecord.leagueMatchPlayHistory)
                     .tag(1)
-                MedalRow(icon: Image(.coopTeamContest), description: "打工竞赛", history: historyRecord.leagueMatchPlayHistory)
+                MedalRow(icon: Image(.coopTeamContest), description: "打工竞赛", history: historyRecord.teamContestPlayHistory)
                     .tag(2)
             }
             .frame(height: 55)
