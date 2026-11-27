@@ -3,6 +3,7 @@ import UIKit
 
 struct MePage: View {
     @ObservedObject private var appState = AppState.shared
+    @ObservedObject private var dockStore = DockVisibilityStore.shared
     @StateObject private var dashboard = MeDashboardViewModel()
     @AppStorage("mainViewTabSelection") private var tabSelection: Int = 3
     #if DEBUG
@@ -59,6 +60,7 @@ struct MePage: View {
                 await dashboard.reload(forceRemote: true)
             }
             .scrollIndicators(.hidden)
+            .dockScrollMinimizeObserver()
             .fixSafeareaBackground()
             }
             .navigationTitle("tab_me")
@@ -111,6 +113,27 @@ struct MePage: View {
             }
             .task(id: "\(appState.isLogin)-\(appState.battleRecordsCount)-\(appState.salmonRunRecordsCount)") {
                 await dashboard.reload()
+            }
+            .navigationDestination(
+                isPresented: Binding(
+                    get: { !dockStore.meDestination.isEmpty },
+                    set: { if !$0 { dockStore.meDestination = "" } }
+                )
+            ) {
+                switch dockStore.meDestination {
+                case "weapon":
+                    WeaponRecordView()
+                case "stage":
+                    StageRecordView()
+                case "coop":
+                    CoopRecordView()
+                case "trash":
+                    TrashView()
+                case "settings":
+                    SettingPage()
+                default:
+                    EmptyView()
+                }
             }
             #if DEBUG
             .navigationDestination(

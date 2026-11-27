@@ -3,48 +3,45 @@ import os
 
 struct MainView: View {
     @AppStorage("mainViewTabSelection")
-    var tabSelection:Int = 0
+    var tabSelection: Int = 0
+
+    @AppStorage(DockConfig.storageKey)
+    private var useCustomDock: Bool = true
 
     @StateObject var mainViewModel = MainViewModel.shared
+    @ObservedObject private var dockStore = DockVisibilityStore.shared
+
     var body: some View {
-        TabView(selection:$tabSelection){
-            
-            HomePage(viewModel: HomeViewModel())
-                .tabItem {
-                    Label("tab_home", image: "TabBarHome")
-                }
-                .tag(0)
+        ZStack(alignment: .bottom) {
+            if useCustomDock {
+                tabViewCore
+                    .tabBarMinimizeBehavior(.never)
+                    .accessibilityHidden(dockStore.isExpanded)
 
-            BattleListView()
-                .environmentObject(mainViewModel)
-                .tabItem {
-                    Label("tab_battle", image: "TabBarBattle")
-                }
-                .tag(1)
-
-            CoopListView()
-                .environmentObject(mainViewModel)
-                .tabItem {
-                    Label("tab_salmon_run", image: "TabBarSalmonRun")
-                }
-                .tag(2)
-
-            MePage()
-                .environmentObject(mainViewModel)
-                .tabItem {
-                    Label("tab_me", image: "TabBarMe")
-                }
-                .tag(3)
+                ExpandingDockHost(tabSelection: $tabSelection)
+                    .ignoresSafeArea()
+                    .zIndex(10)
+            } else {
+                // 兜底旧路径：完整保留原有系统浮动胶囊 TabView 与滚动收缩行为
+                tabViewCore
+                    .tabBarMinimizeBehavior(.onScrollDown)
+            }
         }
-        .tabBarMinimizeBehavior(.onScrollDown)
+        .ignoresSafeArea(.keyboard)
         .appGameTypography()
         // 游戏字体（尤其中文 DFPZongYiW7 只有 1.0× 行高）比 SF Pro 更紧，页面根统一把多行文本行高补到 15pt × 1.2
         .appLineHeight()
-        .onChange(of: tabSelection){ _, newValue in
+        .onChange(of: tabSelection) { _, newValue in
             Haptics.generateIfEnabled(.selectionChanged)
+            dockStore.collapse()
             // remove all coopDetailViewModelDetail in case of memory leak
-            if newValue != 2{
+            if newValue != 2 {
                 AppState.shared.viewModelDict.removeAll()
+            }
+        }
+        .onChange(of: useCustomDock) { _, enabled in
+            if !enabled {
+                dockStore.collapse()
             }
         }
         .task {
@@ -53,6 +50,39 @@ struct MainView: View {
             await SN3Client.shared.fetchBattles()
         }
     }
+
+    private var tabViewCore: some View {
+        TabView(selection: $tabSelection) {
+            HomePage(viewModel: HomeViewModel())
+                .toolbar(useCustomDock ? .hidden : .visible, for: .tabBar)
+                .tabItem {
+                    Label("tab_home", image: "TabBarHome")
+                }
+                .tag(0)
+
+            BattleListView()
+                .environmentObject(mainViewModel)
+                .toolbar(useCustomDock ? .hidden : .visible, for: .tabBar)
+                .tabItem {
+                    Label("tab_battle", image: "TabBarBattle")
+                }
+                .tag(1)
+
+            CoopListView()
+                .environmentObject(mainViewModel)
+                .toolbar(useCustomDock ? .hidden : .visible, for: .tabBar)
+                .tabItem {
+                    Label("tab_salmon_run", image: "TabBarSalmonRun")
+                }
+                .tag(2)
+
+            MePage()
+                .environmentObject(mainViewModel)
+                .toolbar(useCustomDock ? .hidden : .visible, for: .tabBar)
+                .tabItem {
+                    Label("tab_me", image: "TabBarMe")
+                }
+                .tag(3)
+        }
+    }
 }
-
-

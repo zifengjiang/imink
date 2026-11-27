@@ -124,6 +124,7 @@ struct HomePage: View {
             }
             #endif
             .frame(maxWidth: .infinity)
+            .dockScrollMinimizeObserver()
             .fixSafeareaBackground()
             }
             .navigationBarTitle("tab_home", displayMode: .inline)

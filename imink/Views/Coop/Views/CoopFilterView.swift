@@ -121,8 +121,15 @@ struct CoopFilterView: View {
         }
     }
 
+    private var selectableRules: [CoopRule] {
+        CoopRule.allCases.filter { $0 != .ALL }
+    }
+
     private var activeSummaryTags: [String] {
         var tags: [String] = []
+        for rule in selectableRules where filter.rules.contains(rule.rawValue) {
+            tags.append(rule.name)
+        }
         if isCustomTimeRange {
             tags.append("自定义时段")
         }
@@ -155,6 +162,8 @@ struct CoopFilterView: View {
                         icon: Image(.salmonRun),
                         activeTags: activeSummaryTags
                     )
+
+                    coopRuleSection
 
                     timeRangeSection
 
@@ -206,6 +215,90 @@ struct CoopFilterView: View {
         }
         .appGameTypography()
         .appLineHeight()
+    }
+
+    // MARK: - 0. 打工规则（与底部 ExpandingDock 双向同步）
+
+    private var coopRuleSection: some View {
+        let trailing = filter.rules.isEmpty
+            ? "全部打工"
+            : "已选 \(filter.rules.count)/\(selectableRules.count)"
+
+        return ModeDetailSection(
+            title: "打工规则",
+            trailing: trailing,
+            accent: .spGreen
+        ) {
+            ModeDetailCard(padding: FilterSheetLayout.cardPadding) {
+                VStack(alignment: .leading, spacing: 10) {
+                    FilterAllOptionRow(
+                        title: "全部打工",
+                        trailingHint: "不限规则",
+                        isSelected: filter.rules.isEmpty
+                    ) {
+                        filter.rules.removeAll()
+                    }
+
+                    LazyVGrid(columns: stageColumns, spacing: 10) {
+                        ForEach(selectableRules, id: \.rawValue) { rule in
+                            coopRuleTile(rule)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func coopRuleTile(_ rule: CoopRule) -> some View {
+        let isSelected = filter.rules.contains(rule.rawValue)
+
+        return Button {
+            Haptics.generateIfEnabled(.selectionChanged)
+            if isSelected {
+                filter.rules.remove(rule.rawValue)
+            } else {
+                filter.rules.insert(rule.rawValue)
+            }
+        } label: {
+            HStack(spacing: 8) {
+                rule.icon
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 22, height: 22)
+                    .frame(width: 32, height: 32)
+                    .background(
+                        isSelected
+                            ? Color.black.opacity(colorScheme == .dark ? 0.16 : 0.24)
+                            : Color.spGreen.opacity(0.16),
+                        in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    )
+
+                Text(rule.name)
+                    .font(.appBody)
+                    .foregroundStyle(isSelected ? onAccent : .appLabel)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+
+                Spacer(minLength: 2)
+
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.appBody)
+                    .foregroundStyle(isSelected ? onAccent : Color.secondary.opacity(0.4))
+            }
+            .padding(.horizontal, 10)
+            .frame(minHeight: 52)
+            .background(
+                isSelected
+                    ? Color.accentColor
+                    : FilterSheetLayout.unselectedFill(for: colorScheme),
+                in: RoundedRectangle(
+                    cornerRadius: FilterSheetLayout.itemCornerRadius,
+                    style: .continuous
+                )
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(rule.name)
     }
 
     // MARK: - 1. 时间范围

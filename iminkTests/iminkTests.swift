@@ -125,7 +125,66 @@ final class iminkTests: XCTestCase {
             FloatingBarInsets.bottom,
             FloatingBarInsets.tabBarTopFromScreenBottom + FloatingBarInsets.breathingSpacing
         )
-        XCTAssertEqual(FloatingBarInsets.breathingSpacing, 16)
+        XCTAssertEqual(FloatingBarInsets.breathingSpacing, 8)
+        XCTAssertLessThanOrEqual(DockConfig.collapsedHeight, 49)
+        XCTAssertEqual(DockConfig.defaultCustomDockTop(safeAreaBottom: 34), 68)
+    }
+
+    @MainActor
+    func testExpandingDockBidirectionalFilterSyncAndFallbackToggle() async {
+        let defaults = UserDefaults.standard
+        let previousToggle = defaults.object(forKey: DockConfig.storageKey)
+        defer {
+            if let previousToggle {
+                defaults.set(previousToggle, forKey: DockConfig.storageKey)
+            } else {
+                defaults.removeObject(forKey: DockConfig.storageKey)
+            }
+        }
+
+        // 默认开启新版自绘 Dock（48pt）
+        defaults.removeObject(forKey: DockConfig.storageKey)
+        XCTAssertTrue(DockConfig.isCustomDockEnabled)
+        XCTAssertEqual(FloatingBarInsets.tabBarHeight, 48)
+
+        // 兜底开关切回 false 时恢复系统 62pt 浮动胶囊计算
+        defaults.set(false, forKey: DockConfig.storageKey)
+        XCTAssertFalse(DockConfig.isCustomDockEnabled)
+        XCTAssertEqual(FloatingBarInsets.tabBarHeight, 62)
+
+        // 验证对战 Dock 模式切换与现有 Filter 双向同步且不覆盖收藏条件
+        let battleVM = BattleListViewModel.shared
+        let savedBattleFilter = battleVM.filter
+        defer {
+            battleVM.filter = savedBattleFilter
+            battleVM.syncNavigationTitle()
+        }
+        battleVM.filter = Filter()
+        battleVM.filter.showOnlyFavorites = true
+        await battleVM.selectModeFromDock(.anarchy)
+        XCTAssertEqual(battleVM.filter.modes, [BattleMode.anarchy.rawValue])
+        XCTAssertTrue(battleVM.filter.showOnlyFavorites)
+        XCTAssertEqual(battleVM.navigationTitle, BattleMode.anarchy.name)
+
+        // 模拟在 BattleFilterView 中多选模式后，标题与状态同步
+        battleVM.filter.modes = [BattleMode.anarchy.rawValue, BattleMode.xMatch.rawValue]
+        battleVM.syncNavigationTitle()
+        XCTAssertEqual(battleVM.navigationTitle, "对战 (2种模式)")
+
+        // 验证打工 Dock 规则切换与现有 Filter 双向同步
+        let coopVM = CoopListViewModel.shared
+        let savedCoopFilter = coopVM.filter
+        defer {
+            coopVM.filter = savedCoopFilter
+            coopVM.isShowingShiftCards = false
+            coopVM.syncNavigationTitle()
+        }
+        coopVM.filter = Filter()
+        coopVM.filter.showOnlyFavorites = true
+        await coopVM.selectRuleFromDock(.BIG_RUN)
+        XCTAssertEqual(coopVM.filter.rules, [CoopRule.BIG_RUN.rawValue])
+        XCTAssertTrue(coopVM.filter.showOnlyFavorites)
+        XCTAssertEqual(coopVM.navigationTitle, CoopRule.BIG_RUN.name)
     }
 
     func testNintendoLoginAcceptsUserWithoutBirthday() throws {
