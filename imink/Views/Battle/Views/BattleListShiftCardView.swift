@@ -48,52 +48,50 @@ struct BattleListShiftCardView: View {
 
     struct StatusView: View {
         let status: BattleGroupStatus
-        var hSpace: CGFloat = 5
+        var hSpace: CGFloat = 8
         var vSpace: CGFloat = 8
         
         var body: some View {
-            VStack(alignment: .leading, spacing: vSpace){
-                HStack(spacing: hSpace){
-                    HStack(spacing: 3){
-                        Image(.turfWar)
-                            .resizable()
-                            .bold()
-                            .foregroundStyle(Color.green)
-                            .frame(width: 12, height: 12)
-                        Text("\(status.victoryRate, places: 1)")
+            VStack(alignment: .leading, spacing: vSpace) {
+                HStack(spacing: hSpace) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "trophy.fill")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(.spLightGreen)
+                            .frame(width: 14, height: 14)
+                        Text("\(status.victoryRate * 100, places: 1)%")
                             .font(.appMono)
                     }
-                    .frame(width: 45, alignment: .leading)
+                    .frame(width: 72, alignment: .leading)
 
-                    HStack(spacing: 3){
-                        Image(.anarchy)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 12, height: 12)
+                    HStack(spacing: 4) {
+                        Image(systemName: "scope")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(.spOrange)
+                            .frame(width: 14, height: 14)
                         Text("\(status.kd, places: 1)")
                             .font(.appMono) + Text("<\(status.kad, places: 1)>")
                             .font(.appSubCaptionMono).foregroundColor(.secondary)
                     }
                 }
 
-                HStack(spacing: hSpace){
-                    HStack(spacing: 3){
-                        Image(.xBattle)
-                            .resizable()
-                            .bold()
-                            .foregroundStyle(Color.green)
-                            .frame(width: 12, height: 12)
-                        Text("\(status.winCount)")
+                HStack(spacing: hSpace) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(.spLightGreen)
+                            .frame(width: 14, height: 14)
+                        Text("\(status.winCount)胜")
                             .font(.appMono)
                     }
-                    .frame(width: 45, alignment: .leading)
+                    .frame(width: 72, alignment: .leading)
 
-                    HStack(spacing: 3){
-                        Image(.event)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 12, height: 12)
-                        Text("\(status.loseCount)")
+                    HStack(spacing: 4) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(.spPink)
+                            .frame(width: 14, height: 14)
+                        Text("\(status.loseCount)负")
                             .font(.appMono)
                     }
                 }
