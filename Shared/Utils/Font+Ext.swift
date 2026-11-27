@@ -6,8 +6,8 @@ import UIKit
 ///
 /// 规则：
 /// 1. 最小字号严格不低于 `11pt`（彻底杜绝 7pt~10pt 糊字）。
-/// 2. 标题、胜负印章与核心战绩大字允许使用按语种路由的游戏展示字体，并通过 `relativeTo:` 支持系统 Dynamic Type 缩放。
-/// 3. 正文、辅助说明与所有常规数值统一使用语义化 SF Pro（自动响应 Dynamic Type），且数值强制启用 `.monospacedDigit()`。
+/// 2. 17pt 及以上（`display` 28pt、`title` 20pt、`headline` 17pt、大号战绩指标）与短促战绩印章使用按语种路由的游戏展示字体，并通过 `relativeTo:` 支持系统 Dynamic Type 缩放。
+/// 3. 15pt 及以下正文、辅助说明与常规数值统一使用语义化 SF Pro（自动响应 Dynamic Type），且数值强制启用 `.monospacedDigit()`。
 enum AppFontScale {
     static let display: CGFloat = 28
     static let title: CGFloat = 20
@@ -49,7 +49,7 @@ extension Font {
 
     /// 大号战绩展示数字（>= 20pt，默认 24pt，随 `.title2` 动态缩放）。
     static func appGameMetric(size: CGFloat = 24) -> Font {
-        gameDisplayFont(size: max(size, AppFontScale.title), relativeTo: .title2)
+        gameDisplayFont(size: max(size, AppFontScale.title), relativeTo: .title2).monospacedDigit()
     }
 
     /// 15pt 基准游戏徽章体（仅用于 `WIN! / LOSE... / Clear!! / VICTORY` 等短促战绩口号，随 `.subheadline` 动态缩放）。
@@ -57,14 +57,14 @@ extension Font {
         gameDisplayFont(size: AppFontScale.body, relativeTo: .subheadline)
     }
 
-    /// 17pt 基准 SF Pro Semibold（卡片副标题 / 分组主标签，随 `.headline` 动态缩放）。
+    /// 17pt 基准游戏标题体（卡片标题 / 分组主标签，随 `.headline` 动态缩放）。
     static var appHeadline: Font {
-        .system(.headline, weight: .semibold)
+        gameDisplayFont(size: AppFontScale.headline, relativeTo: .headline)
     }
 
-    /// 17pt 基准 SF Pro Semibold 等宽数值（汇总指标大数字，随 `.headline` 动态缩放）。
+    /// 17pt 基准游戏标题等宽数值体（汇总指标大数字，随 `.headline` 动态缩放）。
     static var appHeadlineMono: Font {
-        .system(.headline, weight: .semibold).monospacedDigit()
+        gameDisplayFont(size: AppFontScale.headline, relativeTo: .headline).monospacedDigit()
     }
 
     /// 15pt 基准 SF Pro Medium（正文 / 玩家昵称 / 列表主文案，随 `.subheadline` 动态缩放）。
@@ -176,7 +176,7 @@ extension Font {
     static func splatoonFont(size: CGFloat) -> Font {
         let clampedSize = max(size, AppFontScale.minimum)
         let style = semanticTextStyle(for: clampedSize)
-        if clampedSize >= AppFontScale.title {
+        if clampedSize >= AppFontScale.headline {
             return gameDisplayFont(size: clampedSize, relativeTo: style)
         }
         let weight: UIFont.Weight = clampedSize >= AppFontScale.body ? .semibold : .medium
