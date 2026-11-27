@@ -11,9 +11,9 @@ struct CoopDetailMemberView:View {
         HStack{
             VStack(alignment: .leading, spacing:5){
                 Text(result.player!.name)
-                    .font(.splatoonFont(size: 15))
+                    .font(.appBody)
                 Text("\("boss_salmonids".localized) x\(result.defeatEnemyCount)")
-                    .font(.splatoonFont(size: 10))
+                    .font(.appCaptionMono)
                     .foregroundStyle(.secondary)
             }
             Spacer()
@@ -44,7 +44,7 @@ struct CoopDetailMemberView:View {
                             .resizable()
                             .scaledToFit()
                             .frame(height: 12)
-                        Text("\(result.goldenDeliverCount)").font(.splatoonFont(size: 12))+Text("+\(result.goldenAssistCount)").font(.splatoonFont(size: 9))
+                        Text("\(result.goldenDeliverCount)").font(.appCaptionMono)+Text("+\(result.goldenAssistCount)").font(.appSubCaptionMono)
                     }
 
                     Group{
@@ -72,7 +72,7 @@ struct CoopDetailMemberView:View {
                             Text("\(result.rescuedCount)")
                         }
                     }
-                    .font(.splatoonFont(size: 12))
+                    .font(.appCaptionMono)
                 }
                 .lineLimit(1)
                 .minimumScaleFactor(0.3)

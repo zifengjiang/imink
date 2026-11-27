@@ -27,12 +27,12 @@ struct BattleStatusView: View {
                     .frame(width: 25, height: 25)
 
                     Text("胜率")
-                        .font(.splatoonFont(size: 16))
+                        .font(.appBody)
                         .foregroundStyle(.appLabel)
                         .minimumScaleFactor(0.5)
 
-                    Text("\(today.victoryRate*100, places: 2)%")
-                        .font(.splatoonFont(size: 16))
+                    Text("\(today.victoryRate*100, places: 1)%")
+                        .font(.appBodyMono)
                         .foregroundStyle(.secondary)
 
                 }
@@ -44,11 +44,11 @@ struct BattleStatusView: View {
                     VStack(spacing: 4) {
 
                         Text("胜利")
-                            .font(.splatoonFont(size: 10))
+                            .font(.appCaption)
                             .foregroundStyle(.secondary)
 
                         Text("\(today.winCount)")
-                            .font(.splatoonFont(size: 24))
+                            .font(.appGameMetric(size: 24))
                             .foregroundStyle(.waveClear)
                             .minimumScaleFactor(0.5)
 
@@ -60,11 +60,11 @@ struct BattleStatusView: View {
                     VStack(spacing: 4) {
 
                         Text("失败")
-                            .font(.splatoonFont(size: 10))
+                            .font(.appCaption)
                             .foregroundStyle(.secondary)
 
                         Text("\(today.loseCount)")
-                            .font(.splatoonFont(size: 24))
+                            .font(.appGameMetric(size: 24))
                             .foregroundStyle(Color.pink.opacity(0.8))
                             .minimumScaleFactor(0.5)
 
@@ -75,11 +75,11 @@ struct BattleStatusView: View {
                     VStack(spacing: 4) {
 
                         Text("平局")
-                            .font(.splatoonFont(size: 10))
+                            .font(.appCaption)
                             .foregroundStyle(.secondary)
 
                         Text("\(today.drawCount)")
-                            .font(.splatoonFont(size: 24))
+                            .font(.appGameMetric(size: 24))
                             .foregroundStyle(Color.pink.opacity(0.8))
                             .minimumScaleFactor(0.5)
 
@@ -90,11 +90,11 @@ struct BattleStatusView: View {
                     VStack(spacing: 4) {
 
                         Text("掉线")
-                            .font(.splatoonFont(size: 10))
+                            .font(.appCaption)
                             .foregroundStyle(.secondary)
 
                         Text("\(today.disconnectCount)")
-                            .font(.splatoonFont(size: 24))
+                            .font(.appGameMetric(size: 24))
                             .foregroundStyle(Color.pink.opacity(0.8))
                             .minimumScaleFactor(0.5)
 
@@ -126,11 +126,11 @@ struct BattleStatusView: View {
                             .frame(width: 25, height: 25)
 
                             Text("K/D:")
-                                .font(.splatoonFont(size: 16))
+                                .font(.appBody)
                                 .foregroundStyle(.appLabel)
 
                             Text("\(today.kd, places: 1)")
-                                .font(.splatoonFont(size: 16))
+                                .font(.appBodyMono)
                                 .foregroundStyle(.secondary)
                         } else {
 
@@ -146,11 +146,11 @@ struct BattleStatusView: View {
                             .frame(width: 25, height: 25)
 
                             Text("KA/D:")
-                                .font(.splatoonFont(size: 16))
+                                .font(.appBody)
                                 .foregroundStyle(.appLabel)
 
                             Text("\(today.kad, places: 1)")
-                                .font(.splatoonFont(size: 16))
+                                .font(.appBodyMono)
                                 .foregroundStyle(.secondary)
                         }
 
@@ -164,20 +164,20 @@ struct BattleStatusView: View {
 
                             if showKD {
                                 Text("KILL")
-                                    .font(.splatoonFont(size: 10))
+                                    .font(.appCaption)
                                     .foregroundStyle(.secondary)
 
                                 Text("\(today.kill)")
-                                    .font(.splatoonFont(size: 24))
+                                    .font(.appGameMetric(size: 24))
                                     .foregroundStyle(.red)
                                     .minimumScaleFactor(0.5)
                             } else {
                                 Text("KILL+ASSIST")
-                                    .font(.splatoonFont(size: 10))
+                                    .font(.appCaption)
                                     .foregroundStyle(.secondary)
 
                                 Text("\(today.kill + today.assist)")
-                                    .font(.splatoonFont(size: 24))
+                                    .font(.appGameMetric(size: 24))
                                     .foregroundStyle(.red)
                                     .minimumScaleFactor(0.5)
                             }
@@ -189,11 +189,11 @@ struct BattleStatusView: View {
                         VStack(spacing: 4) {
 
                             Text("DEATH")
-                                .font(.splatoonFont(size: 10))
+                                .font(.appCaption)
                                 .foregroundStyle(.secondary)
 
                             Text("\(today.death)")
-                                .font(.splatoonFont(size: 24))
+                                .font(.appGameMetric(size: 24))
                                 .foregroundStyle(.gray.opacity(0.5))
                                 .minimumScaleFactor(0.5)
 

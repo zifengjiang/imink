@@ -11,14 +11,14 @@ extension CoopDetailView {
             }
             if let enemyName = result.enemyName{
                 Text(enemyName.localizedFromSplatNet)
-                    .font(.splatoonFont(size: 15))
+                    .font(.appBody)
             }
             Spacer()
             Group {
-                Text("\(result.teamDefeatCount)").font(.splatoonFont(size: 15)) + Text(result.defeatCount == 0 ? "" : "(\(result.defeatCount))").font(.splatoonFont(size: 12))
+                Text("\(result.teamDefeatCount)").font(.appBodyMono) + Text(result.defeatCount == 0 ? "" : "(\(result.defeatCount))").font(.appCaptionMono)
                 Text("/")
-                    .font(.splatoonFont(size: 16))
-                Text("\("appearances_number".localized)x").font(.splatoonFont(size: 12)) + Text("\(result.popCount)").font(.splatoonFont(size: 15))
+                    .font(.appBodyMono)
+                Text("\("appearances_number".localized)x").font(.appCaption) + Text("\(result.popCount)").font(.appBodyMono)
             }
             .foregroundStyle(result.popCount == result.teamDefeatCount ? Color.waveClear : Color.coopEnemyNotAllClear)
 

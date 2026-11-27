@@ -105,14 +105,14 @@ struct SplatoonToastCard: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(indicator.title)
-                    .font(.splatoonFont(size: 15))
+                    .font(.appBody)
                     .foregroundStyle(Color.appLabel)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
 
                 if let subtitle = indicator.subtitle, !subtitle.isEmpty {
                     Text(subtitle)
-                        .font(.splatoonFont(size: 12))
+                        .font(.appCaption)
                         .foregroundStyle(Color.appLabel.opacity(0.62))
                         .lineLimit(2)
                 }
@@ -123,7 +123,7 @@ struct SplatoonToastCard: View {
 
                 if let expandedText = indicator.expandedText, !expandedText.isEmpty {
                     Text(expandedText)
-                        .font(.splatoonFont(size: 11))
+                        .font(.appSubCaptionMono)
                         .foregroundStyle(Color.appLabel.opacity(0.5))
                         .lineLimit(3)
                 }
@@ -197,7 +197,7 @@ private extension SplatoonToastCard {
 
     var queuedTaskBadge: some View {
         Text("+\(queuedTaskCount)")
-            .font(.splatoonFont(size: 11))
+            .font(.appSubCaptionMono)
             .foregroundStyle(Color.listItemBackground)
             .frame(minWidth: 20, minHeight: 20)
             .background(Color.appLabel.opacity(0.8), in: Capsule())

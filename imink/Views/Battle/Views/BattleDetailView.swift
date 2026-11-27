@@ -86,11 +86,11 @@ struct BattleDetailView: View {
                             .padding(.bottom, -1.5)
                     }
                     Text(rule.name)
-                        .font(.splatoonFont(size: 20))
+                        .font(.appTitle)
                         .foregroundStyle(mode.color)
                     Spacer()
                     Text(battle.playedTime.toPlayedTimeString(full: true))
-                        .font(.splatoonFont(size: 18))
+                        .font(.appCaptionMono)
                         .foregroundStyle(.secondary)
                 }
                 .padding(.all,12)
@@ -103,7 +103,7 @@ struct BattleDetailView: View {
                     )
                     .overlay(
                         Text(battle.judgement == "DEEMED_LOSE" ? "对战未能正常结束" : "")
-                            .font(.splatoonFont(size: 18)),
+                            .font(.appHeadline),
                         alignment: .bottom
                     )
 
@@ -121,7 +121,7 @@ struct BattleDetailView: View {
             ForEach(0..<winTeam.count,id: \.self){ index in
                 VStack(alignment: .leading, spacing: 3) {
                     Text("VICTORY")
-                        .font(.splatoonFont1(size: 12))
+                        .font(.appGameSubhead)
                         .padding(.leading,10)
                         .foregroundStyle(winTeam[index].color.toColor())
 
@@ -141,7 +141,7 @@ struct BattleDetailView: View {
             ForEach(0..<loseTeam.count,id: \.self){ index in
                 VStack(alignment: .leading, spacing: 3) {
                     Text("DEFEAT")
-                        .font(.splatoonFont1(size: 12))
+                        .font(.appGameSubhead)
                         .padding(.leading,10)
                         .foregroundStyle(loseTeam[index].color.toColor())
 

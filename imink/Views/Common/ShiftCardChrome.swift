@@ -75,12 +75,12 @@ struct ShiftCardChrome<Content: View>: View {
     }
 
     private var countLabel: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 2) {
             Text("\(count)\(unit)")
-                .font(.splatoonFont(size: 12))
+                .font(.appCaptionMono)
             if disconnectCount != 0 {
                 Text("<\(disconnectCount)场掉线>")
-                    .font(.splatoonFont(size: 10))
+                    .font(.appSubCaptionMono)
                     .foregroundStyle(Color.waveDefeat)
             }
         }

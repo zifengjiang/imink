@@ -25,7 +25,7 @@ struct EditableNameplateView: View {
                 // 称号文本
                 VStack(alignment: .leading) {
                     Text(viewModel.customByname)
-                        .font(.splatoonFont(size: geometryWidth * 12/284))
+                        .font(.nameplateCanvasFont(size: geometryWidth * 12/284))
                         .foregroundColor(viewModel.selectedTextColor)
                         .padding(.top, geometryWidth * 5/284)
                         .padding(.leading, geometryWidth * 10/284)
@@ -37,7 +37,7 @@ struct EditableNameplateView: View {
 
                 // 玩家名称 - 居中
                 Text(viewModel.customName)
-                    .font(.splatoonFont1(size: geometryWidth * 26/284))
+                    .font(.nameplateCanvasTitleFont(size: geometryWidth * 26/284))
                     .foregroundColor(viewModel.selectedTextColor)
                     .position(x: geometryWidth / 2, y: geometryHeight / 2)
                     .onTapGesture {
@@ -70,7 +70,7 @@ struct EditableNameplateView: View {
                     Spacer()
                     HStack {
                         Text("#\(viewModel.customNameId)")
-                            .font(.splatoonFont(size: geometryWidth*10/284))
+                            .font(.nameplateCanvasFont(size: geometryWidth*10/284))
                             .foregroundColor(viewModel.selectedTextColor)
                             .padding(.leading, geometryWidth * 10/284)
                             .padding(.bottom, geometryWidth * 5/284)

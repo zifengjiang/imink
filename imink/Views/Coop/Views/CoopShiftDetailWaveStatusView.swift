@@ -56,13 +56,13 @@ struct CoopShiftDetailWaveStatusView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 10, height: 10)
-                            Text("x\(result.goldenPopCount)").font(.splatoonFont(size: 10))
+                            Text("x\(result.goldenPopCount)").font(.appCaptionMono)
                         }
-                        Text("appearances_number").font(.splatoonFont(size: 8))
+                        Text("appearances_number").font(.appSubCaptionMono)
                             .foregroundStyle(.secondary)
 
                     }
-                    .font(.splatoonFont(size: 15))
+                    .font(.appMono)
                     .padding(.top,10)
                     Spacer()
                 }

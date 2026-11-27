@@ -54,7 +54,7 @@ struct BattleListDetailItemView: View {
                     }
 
                     Text(rule.name)
-                        .font(.splatoonFont(size: 12))
+                        .font(.appCaption)
                         .foregroundStyle(mode.color)
                     Spacer()
                     
@@ -72,12 +72,12 @@ struct BattleListDetailItemView: View {
                     }
 
                     if mode == .anarchy{
-                        HStack(alignment: .firstTextBaseline, spacing: 0){
+                        HStack(alignment: .firstTextBaseline, spacing: 1){
                             Text(detail.udemae ?? "C-")
-                                .font(.splatoonFont(size: 12))
+                                .font(.appCaptionMono)
                             if let plus = detail.earnedUdemaePoint{
                                 Text("\(plus)")
-                                    .font(.splatoonFont(size: 8))
+                                    .font(.appSubCaptionMono)
                                     .padding(.leading,0.6)
                                     //                  .padding(.bottom, 0)
                             }
@@ -88,19 +88,19 @@ struct BattleListDetailItemView: View {
 
                 HStack {
                     Text(detail.judgement.name)
-                        .font(.splatoonFont(size: 14))
+                        .font(.appGameSubhead)
                         .foregroundStyle(detail.judgement.color)
                     if let k = detail.knockout, k == .WIN {
                         Text("完胜!")
-                            .font(.splatoonFont(size: 14))
+                            .font(.appGameSubhead)
                             .foregroundStyle(.spYellow)
                     }else if rule != .turfWar && rule != .triColor{
                         Text("\(detail.point)计数")
-                            .font(.splatoonFont(size: 14))
+                            .font(.appMono)
                             .foregroundStyle(detail.judgement == .LOSE ? Color.secondary : .spGreen)
                     }else {
                         Text("\(detail.point)p")
-                            .font(.splatoonFont(size: 14))
+                            .font(.appMono)
                             .foregroundStyle(detail.judgement == .LOSE ? Color.secondary : .spGreen)
                     }
                     Spacer()
@@ -112,9 +112,10 @@ struct BattleListDetailItemView: View {
                                 .foregroundColor(.gray)
                             HStack(alignment: .firstTextBaseline, spacing: 0){
                                 Text("\((detail.kill) + (detail.assist))")
-                                    .font(.splatoonFont(size: 10))
+                                    .font(.appCaptionMono)
                                 Text("(\(detail.assist))")
-                                    .font(.splatoonFont(size: 7))
+                                    .font(.appSubCaptionMono)
+                                    .foregroundStyle(.secondary)
                             }
                         }
 
@@ -124,7 +125,7 @@ struct BattleListDetailItemView: View {
                                 .frame(width: 14, height: 14)
                                 .foregroundColor(.gray)
                             Text("\(detail.death)")
-                                .font(.splatoonFont(size: 10))
+                                .font(.appCaptionMono)
                         }
 
                         HStack(spacing: 3) {
@@ -134,7 +135,7 @@ struct BattleListDetailItemView: View {
                                 .foregroundColor(.gray)
                             let death = detail.death
                             Text("\(Double(detail.kill) -/ Double(death == 0 ? 1 : death), places: 1)")
-                                .font(.splatoonFont(size: 10))
+                                .font(.appCaptionMono)
                         }
                     }
                 }
@@ -162,11 +163,11 @@ struct BattleListDetailItemView: View {
 
                 HStack{
                     Text(detail.stage.localizedFromSplatNet)
-                        .font(.splatoonFont(size: 10))
+                        .font(.appCaption)
                         .foregroundStyle(Color.secondary)
                     Spacer()
                     Text(detail.playedTime.toPlayedTimeString(full: true))
-                        .font(.splatoonFont(size: 10))
+                        .font(.appCaptionMono)
                         .foregroundStyle(Color.secondary)
                 }
             }

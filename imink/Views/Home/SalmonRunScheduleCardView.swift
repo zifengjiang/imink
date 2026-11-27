@@ -29,7 +29,7 @@ struct SalmonRunScheduleCardView: View {
             VStack{
                 VStack{
                     Text(schedule.formattedSalmonRunTime)
-                        .font(.splatoonFont(size: 15))
+                        .font(.appBodyMono)
                         .colorInvert()
                 }
                 .padding(3)
@@ -42,9 +42,9 @@ struct SalmonRunScheduleCardView: View {
                     if schedule._stage.count >= 1{
                         VStack{
                             Text(schedule._stage[0].nameId.localizedFromSplatNet)
-                                .font(.splatoonFont(size: 15))
+                                .font(.appBody)
                                 .lineLimit(1)
-                                .minimumScaleFactor(0.3)
+                                .minimumScaleFactor(0.75)
                             
                             Image(schedule._stage[0].name)
                                 .resizable()
@@ -64,9 +64,9 @@ struct SalmonRunScheduleCardView: View {
                                 .frame(width: 30, height: 30, alignment: .center)
                             
                             Text(schedule.rule1.localized)
-                                .font(.splatoonFont(size: 20))
+                                .font(.appTitle)
                                 .lineLimit(1)
-                                .minimumScaleFactor(0.3)
+                                .minimumScaleFactor(0.75)
                         }
                         
                         HStack{
@@ -78,9 +78,9 @@ struct SalmonRunScheduleCardView: View {
                                     .frame(width: 20, height: 20)
                                 
                                 Text(_boss.nameId.localizedFromSplatNet)
-                                    .font(.splatoonFont(size: 15))
+                                    .font(.appBody)
                                     .lineLimit(1)
-                                    .minimumScaleFactor(0.3)
+                                    .minimumScaleFactor(0.75)
                             }
                         }
                         

@@ -44,7 +44,7 @@ struct HomePage: View {
                     VStack(spacing:0){
                         HStack {
                             Text("home_schedule_title")
-                                .font(.splatoonFont(size: 22))
+                                .font(.appTitle)
                             
                             Spacer()
                             
@@ -149,10 +149,10 @@ struct HomePage: View {
             VStack(spacing: 10) {
                 HStack(alignment: .firstTextBaseline) {
                     Text("最近工况")
-                        .font(.splatoonFont(size: 22))
+                        .font(.appTitle)
                     if let lastCoopTime = viewModel.lastCoopTime{
                         Text("更新于: \(lastCoopTime.toPlayedTimeString())")
-                            .font(.splatoonFont(size: 10))
+                            .font(.appCaptionMono)
                             .foregroundStyle(.secondary)
                     }
                     Spacer()
@@ -165,11 +165,11 @@ struct HomePage: View {
             VStack(spacing: 0) {
                 HStack(alignment: .firstTextBaseline) {
                     Text("近期工况")
-                        .font(.splatoonFont(size: 22))
+                        .font(.appTitle)
                         .foregroundStyle(Color.appLabel)
 
                     Text("(\(NSLocalizedString("最近500场", comment: "")))")
-                        .font(.splatoonFont(size: 12))
+                        .font(.appCaption)
                         .foregroundStyle(.secondary)
 
                     Spacer()
@@ -178,10 +178,10 @@ struct HomePage: View {
                 HStack {
                     Spacer()
                     Text("最近50场")
-                        .font(.splatoonFont(size: 8))
+                        .font(.appSubCaptionMono)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.2)
+                        .minimumScaleFactor(0.75)
                         .frame(width: vdChartLastBlockWidth)
                 }
                 .frame(height: 20)
@@ -198,10 +198,10 @@ struct HomePage: View {
             VStack(spacing: 10) {
                 HStack(alignment: .firstTextBaseline) {
                     Text("最近战况")
-                        .font(.splatoonFont(size: 22))
+                        .font(.appTitle)
                     if let lastPlayTime = viewModel.battleStatus?.endTime{
                         Text("更新于: \(lastPlayTime.toPlayedTimeString())")
-                            .font(.splatoonFont(size: 10))
+                            .font(.appCaptionMono)
                             .foregroundStyle(.secondary)
                     }
                     Spacer()
@@ -215,11 +215,11 @@ struct HomePage: View {
             VStack(spacing: 0) {
                 HStack(alignment: .firstTextBaseline) {
                     Text("近期战况")
-                        .font(.splatoonFont(size: 22))
+                        .font(.appTitle)
                         .foregroundStyle(Color.appLabel)
 
                     Text("(\(NSLocalizedString("最近500场", comment: "")))")
-                        .font(.splatoonFont(size: 12))
+                        .font(.appCaption)
                         .foregroundStyle(.secondary)
 
                     Spacer()
@@ -228,10 +228,10 @@ struct HomePage: View {
                 HStack {
                     Spacer()
                     Text("最近50场")
-                        .font(.splatoonFont(size: 8))
+                        .font(.appSubCaptionMono)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.2)
+                        .minimumScaleFactor(0.75)
                         .frame(width: vdChartLastBlockWidth)
                 }
                 .frame(height: 20)

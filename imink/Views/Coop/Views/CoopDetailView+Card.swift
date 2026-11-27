@@ -11,10 +11,10 @@ extension CoopDetailView {
                             CoopRule(rawValue: coop.rule)?.icon
 
                             Text(coop.playedTime.toPlayedTimeString(full: true))
-                                .font(.splatoonFont1(size: 15))
+                                .font(.appCaptionMono)
                                 .foregroundStyle(.orange)
                                 .lineLimit(1)
-                                .minimumScaleFactor(0.3)
+                                .minimumScaleFactor(0.75)
                         }
                         .padding(.bottom, 7)
                         
@@ -28,7 +28,7 @@ extension CoopDetailView {
 
                     VStack {
                         Text(coop.clear ? "Clear!!" : "Failure")
-                            .font(.splatoonFont1(size: 30))
+                            .font(.splatoonFont1(size: AppFontScale.display))
                             .foregroundStyle(coop.clear ? Color.waveClear : Color.waveDefeat)
                             .offset(y:10)
                         Spacer()
@@ -36,13 +36,13 @@ extension CoopDetailView {
                             VStack(spacing:5) {
                                 HStack {
                                     Text("your_points")
-                                        .font(.splatoonFont(size: 10))
+                                        .font(.appSubCaptionMono)
                                         .foregroundStyle(.secondary)
                                         .lineLimit(1)
-                                        .minimumScaleFactor(0.3)
+                                        .minimumScaleFactor(0.75)
                                     Spacer()
                                     Text("\(coop.jobPoint ?? 0)p")
-                                        .font(.splatoonFont(size: 20))
+                                        .font(.appHeadlineMono)
                                 }
                                 GeometryReader { geo in
                                     Path { path in
@@ -57,32 +57,32 @@ extension CoopDetailView {
                                     VStack(spacing:4){
                                         Text("\(coop.jobScore ?? 0)")
                                         Text("job_score")
-                                            .font(.splatoonFont(size: 8))
+                                            .font(.appSubCaptionMono)
                                             .foregroundStyle(.secondary)
                                             .lineLimit(1)
-                                            .minimumScaleFactor(0.3)
+                                            .minimumScaleFactor(0.75)
                                     }
                                     Text("x")
-                                        .font(.splatoonFont(size: 12))
+                                        .font(.appCaptionMono)
                                     VStack(spacing:4){
                                         Text("\(coop.jobRate ?? 0,places: 2)")
                                         Text("pay_grade")
-                                            .font(.splatoonFont(size: 8))
+                                            .font(.appSubCaptionMono)
                                             .foregroundStyle(.secondary)
                                             .lineLimit(1)
-                                            .minimumScaleFactor(0.3)
+                                            .minimumScaleFactor(0.75)
                                     }
                                     Text("+")
                                     VStack(spacing:4){
                                         Text("\(coop.jobBonus ?? 0)")
                                         Text("clear_bonus")
-                                            .font(.splatoonFont(size: 8))
+                                            .font(.appSubCaptionMono)
                                             .foregroundStyle(.secondary)
                                             .lineLimit(1)
-                                            .minimumScaleFactor(0.3)
+                                            .minimumScaleFactor(0.75)
                                     }
                                 }
-                                .font(.splatoonFont(size: 16))
+                                .font(.appMono)
                             }
                             .padding([.leading, .trailing], 3)
                             .padding([.top, .bottom], 3)
@@ -101,7 +101,7 @@ extension CoopDetailView {
                                 VStack(alignment: .leading,spacing: 2){
                                     if let gradeName = coop.gradeName, let gradePoint = coop.afterGradePoint{
                                         Text("\(gradeName.localizedFromSplatNet) \(gradePoint)")
-                                            .font(.splatoonFont(size: 12))
+                                            .font(.appCaptionMono)
                                             .foregroundStyle(Color.waveClear)
                                         ProgressBar(fillPercentage: gradePoint >= 100 ? 1 : Double(gradePoint)/Double(100))
                                             .padding([.bottom,.top],2)
@@ -121,7 +121,7 @@ extension CoopDetailView {
                                                     .resizable()
                                                     .frame(width: 18, height: 18)
                                                 Text(scales[i])
-                                                    .font(.splatoonFont(size: 12))
+                                                    .font(.appCaptionMono)
                                             }
                                             if i != 2{
                                                 Spacer()
@@ -143,7 +143,7 @@ extension CoopDetailView {
                 HStack {
                     if let stageName = coop.stageName{
                         Text(stageName.localizedFromSplatNet)
-                            .font(.splatoonFont(size: 13))
+                            .font(.appCaption)
                             .foregroundStyle(.secondary)
                     }
                     Spacer()
@@ -153,7 +153,7 @@ extension CoopDetailView {
                             .scaledToFit()
                             .frame(width: 12, height: 12)
                         Text("\(coop.egg)")
-                            .font(.splatoonFont(size: 15))
+                            .font(.appBodyMono)
                     }
 
 
@@ -163,7 +163,7 @@ extension CoopDetailView {
                             .scaledToFit()
                             .frame(width: 12, height: 12)
                         Text("\(coop.powerEgg)")
-                            .font(.splatoonFont(size: 15))
+                            .font(.appBodyMono)
                     }
                 }
 
@@ -188,7 +188,7 @@ extension CoopDetailView {
                     }
                     Spacer()
                     Text(dangerRateText)
-                        .font(.splatoonFont(size: 12))
+                        .font(.appCaptionMono)
                         .foregroundStyle(.secondary)
                 }
             }

@@ -146,14 +146,14 @@ struct BattleDetailPlayerRow:View {
             }
             VStack(alignment: .leading, spacing: 4){
                 Text(viewModel.formattedByname ?? player.byname)
-                    .font(.splatoonFont(size: 9))
+                    .font(.appCaption)
                     .foregroundStyle(.secondary)
                 Text(player.name)
-                    .font(.splatoonFont(size: 15))
+                    .font(.appBody)
             }
             Spacer()
             Text("\(player.paint ?? 0)p")
-                .font(.splatoonFont(size: 15))
+                .font(.appMono)
             kda
                 .padding(.horizontal,5)
                 .padding(.vertical, 3)
@@ -190,23 +190,21 @@ struct BattleDetailPlayerRow:View {
 
     var kda:some View{
         HStack{
-            HStack(alignment: .bottom, spacing: 0){
+            HStack(alignment: .firstTextBaseline, spacing: 0){
                 Text("x\(player.kill ?? 0)")
-                    .font(.splatoonFont(size: 15))
+                    .font(.appMono)
                 Text("<\(player.assist ?? 0)>")
-                    .font(.splatoonFont(size: 12))
+                    .font(.appSubCaptionMono)
                     .foregroundStyle(.secondary)
             }
             Text("x\(player.death ?? 0)")
-                .font(.splatoonFont(size: 15))
+                .font(.appMono)
             VStack(spacing:1){
                 if let weapon = player._weapon{
                     SpecialWeaponImage(imageName: weapon.specialWeapon.name, color: color, size: 12)
-                        //                            .scaledToFit()
-                        //                            .frame(width: 12, height: 12)
                 }
                 Text("x\(player.special ?? 0)")
-                    .font(.splatoonFont(size: 12))
+                    .font(.appSubCaptionMono)
             }
         }
     }

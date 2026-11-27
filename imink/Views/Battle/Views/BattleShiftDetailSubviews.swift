@@ -9,15 +9,15 @@ struct BattleShiftSummaryMetric: View {
     var body: some View {
         VStack(spacing: 2) {
             Text(title)
-                .font(.splatoonFont(size: 9))
+                .font(.appCaption)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .minimumScaleFactor(0.75)
             Text(value)
-                .font(.splatoonFont(size: 17))
+                .font(.appHeadlineMono)
                 .foregroundStyle(color)
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .minimumScaleFactor(0.75)
         }
         .frame(maxWidth: .infinity, minHeight: 46)
         .background(Color.black.opacity(0.14))
@@ -41,10 +41,10 @@ struct BattleShiftRuleChartRow: View {
                 .frame(width: 24, height: 24)
 
             Text(rule?.name ?? bucket.rule)
-                .font(.splatoonFont(size: 13))
+                .font(.appCaption)
                 .frame(width: 92, alignment: .leading)
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .minimumScaleFactor(0.75)
 
             GeometryReader { proxy in
                 Capsule()
@@ -58,7 +58,7 @@ struct BattleShiftRuleChartRow: View {
             .frame(height: 12)
 
             Text("\(bucket.count)")
-                .font(.splatoonFont(size: 13))
+                .font(.appMono)
                 .frame(width: 26, alignment: .trailing)
         }
     }
@@ -91,23 +91,23 @@ struct BattleShiftEncounterPlayerRow: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(viewModel.formattedByname ?? player.byname)
-                    .font(.splatoonFont(size: 9))
+                    .font(.appCaption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
                 Text(player.name)
-                    .font(.splatoonFont(size: 15))
+                    .font(.appBody)
                     .lineLimit(1)
             }
 
             Spacer(minLength: 6)
 
             Text("x\(encounter.count)")
-                .font(.splatoonFont(size: 13))
+                .font(.appMono)
                 .foregroundStyle(teamColor)
                 .frame(width: 38, alignment: .trailing)
 
             Text("\(encounter.averagePaint)p")
-                .font(.splatoonFont(size: 12))
+                .font(.appCaptionMono)
                 .foregroundStyle(.secondary)
                 .frame(width: 52, alignment: .trailing)
 
@@ -142,19 +142,19 @@ struct BattleShiftEncounterPlayerRow: View {
         HStack(spacing: 4) {
             HStack(alignment: .firstTextBaseline, spacing: 0) {
                 Text("\(encounter.kill)")
-                    .font(.splatoonFont(size: 13))
+                    .font(.appMono)
                 Text("<\(encounter.assist)>")
-                    .font(.splatoonFont(size: 9))
+                    .font(.appSubCaptionMono)
                     .foregroundStyle(.secondary)
             }
 
             Text("/\(encounter.death)")
-                .font(.splatoonFont(size: 13))
+                .font(.appMono)
 
             if let weapon = player._weapon {
                 SpecialWeaponImage(imageName: weapon.specialWeapon.name, color: teamColor, size: 12)
                 Text("x\(encounter.special)")
-                    .font(.splatoonFont(size: 10))
+                    .font(.appSubCaptionMono)
             }
         }
         .padding(.horizontal, 6)

@@ -91,7 +91,7 @@ struct NameplateView: View {
                 
                 if let bynameFormatted = bynameFormatted{
                     Text("\(bynameFormatted.adjective.localizedFromSplatNet)\(bynameFormatted.male == nil ? bynameFormatted.subject.localizedFromSplatNet : (bynameFormatted.male! ? "\(bynameFormatted.subject.localizedFromSplatNet.split(separator: "/").first!)" : "\(bynameFormatted.subject.localizedFromSplatNet.split(separator: "/").last!)"))")
-                        .font(.splatoonFont(size: geometryWidth * 12/284))
+                        .font(.nameplateCanvasFont(size: geometryWidth * 12/284))
                         .foregroundColor(textColor)
                         .padding(.top, geometryWidth * 5/284)
                         .padding(.leading, geometryWidth * 10/284)
@@ -100,7 +100,7 @@ struct NameplateView: View {
                 
 
                 Text(name)
-                    .font(.splatoonFont1(size: geometryWidth * 26/284))
+                    .font(.nameplateCanvasTitleFont(size: geometryWidth * 26/284))
                     .foregroundColor(textColor)
                     .position(x: geometryWidth / 2, y: geometryHeight / 2)
 
@@ -136,7 +136,7 @@ struct NameplateView: View {
                     Spacer()
                     HStack {
                         Text("#\(nameId)")
-                            .font(.splatoonFont(size: geometryWidth*10/284))
+                            .font(.nameplateCanvasFont(size: geometryWidth*10/284))
                             .foregroundColor(textColor)
                             .padding(.leading, geometryWidth * 10/284)
                             .padding(.bottom, geometryWidth * 5/284)

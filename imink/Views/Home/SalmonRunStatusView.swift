@@ -25,10 +25,10 @@ struct SalmonRunStatusView:View {
                             .frame(width: 25, height: 25)
 
                             Text("通关率")
-                                .font(.splatoonFont(size: 16))
+                                .font(.appBody)
 
-                            Text("\(status.clearRate*100, places: 3)%")
-                                .font(.splatoonFont(size: 16))
+                            Text("\(status.clearRate*100, places: 1)%")
+                                .font(.appBodyMono)
                                 .foregroundStyle(.secondary)
                         }
 
@@ -37,10 +37,10 @@ struct SalmonRunStatusView:View {
 
                             VStack{
                                 Text("Clear")
-                                    .font(.splatoonFont(size: 10))
+                                    .font(.appCaption)
                                     .foregroundStyle(.secondary)
                                 Text("\(status.clear)")
-                                    .font(.splatoonFont(size: 24))
+                                    .font(.appGameMetric(size: 24))
                                     .foregroundStyle(.waveClear)
                             }
 
@@ -48,10 +48,10 @@ struct SalmonRunStatusView:View {
 
                             VStack{
                                 Text("Failure")
-                                    .font(.splatoonFont(size: 10))
+                                    .font(.appCaption)
                                     .foregroundStyle(.secondary)
                                 Text("\(status.failure)")
-                                    .font(.splatoonFont(size: 24))
+                                    .font(.appGameMetric(size: 24))
                                     .foregroundStyle(.waveDefeat)
                             }
 
@@ -60,10 +60,10 @@ struct SalmonRunStatusView:View {
                             if status.disconnect != 0 {
                                 VStack{
                                     Text("Disconnect")
-                                        .font(.splatoonFont(size: 10))
+                                        .font(.appCaption)
                                         .foregroundStyle(.secondary)
                                     Text("\(status.disconnect)")
-                                        .font(.splatoonFont(size: 24))
+                                        .font(.appGameMetric(size: 24))
                                         .foregroundStyle(.waveDefeat)
                                 }
 
@@ -96,7 +96,7 @@ struct SalmonRunStatusView:View {
 
                         if let point = coopSummary?.pointCard.regularPoint{
                             Text("现有点数 \(point)p")
-                                .font(.splatoonFont(size: 16))
+                                .font(.appBodyMono)
                                 .foregroundStyle(.waveClear)
                         }
                     }
@@ -114,7 +114,7 @@ struct SalmonRunStatusView:View {
                 HStack(spacing:8){
                     VStack(spacing:1){
                         Text("鳞片")
-                            .font(.splatoonFont(size: 16))
+                            .font(.appBody)
                             .foregroundStyle(Color(.spGreen))
                             .frame(maxWidth: .infinity, alignment: .topLeading)
                             .padding(.leading, 8)
@@ -125,7 +125,7 @@ struct SalmonRunStatusView:View {
                                     .scaledToFit()
                                     .frame(width: 30, height: 30)
                                 Text("x\(coopSummary?.scale.bronze ?? 0)")
-                                    .font(.splatoonFont(size: 16))
+                                    .font(.appBodyMono)
                             }
                             VStack(spacing: 1){
                                 Image(.scale2)
@@ -133,7 +133,7 @@ struct SalmonRunStatusView:View {
                                     .scaledToFit()
                                     .frame(width: 30, height: 30)
                                 Text("x\(coopSummary?.scale.silver ?? 0)")
-                                    .font(.splatoonFont(size: 16))
+                                    .font(.appBodyMono)
                             }
 
                             VStack(spacing: 1){
@@ -142,7 +142,7 @@ struct SalmonRunStatusView:View {
                                     .scaledToFit()
                                     .frame(width: 30, height: 30)
                                 Text("x\(coopSummary?.scale.gold ?? 0)")
-                                    .font(.splatoonFont(size: 16))
+                                    .font(.appBodyMono)
                             }
                         }
                     }
@@ -155,7 +155,7 @@ struct SalmonRunStatusView:View {
                     VStack(alignment: .leading,spacing: 2){
                         if let gradeName = coopSummary?.regularGrade, let gradePoint = coopSummary?.regularGradePoint{
                             Text("\(gradeName.localizedFromSplatNet) \(gradePoint)")
-                                .font(.splatoonFont(size: 16))
+                                .font(.appBodyMono)
                                 .foregroundStyle(Color.waveClear)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.leading, 6)
@@ -165,12 +165,12 @@ struct SalmonRunStatusView:View {
                         }
 
                         Text("平均通关的WAVE数")
-                            .font(.splatoonFont(size: 12))
+                            .font(.appCaption)
                             .foregroundStyle(.secondary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.leading, 4)
                         Text("\(coopSummary?.regularAverageClearWave ?? 0, places: 1)")
-                            .font(.splatoonFont(size: 20))
+                            .font(.appTitle)
                             .foregroundStyle(.waveClear)
                             .frame(maxWidth: .infinity, alignment: .trailing)
                             .padding(.trailing, 8)
@@ -192,17 +192,17 @@ struct SalmonRunStatusView:View {
                                 Spacer()
                                 VStack(alignment: .leading, spacing: 10) {
                                     Text("打工次数")
-                                        .font(.splatoonFont(size: 12))
+                                        .font(.appCaption)
                                         .lineLimit(1)
                                         .minimumScaleFactor(0.7)
                                         .foregroundColor(.secondary)
                                     Text("已收集的金鲑鱼卵")
-                                        .font(.splatoonFont(size: 12))
+                                        .font(.appCaption)
                                         .lineLimit(1)
                                         .minimumScaleFactor(0.7)
                                         .foregroundColor(.secondary)
                                     Text("已收集的鲑鱼卵")
-                                        .font(.splatoonFont(size: 12))
+                                        .font(.appCaption)
                                         .lineLimit(1)
                                         .minimumScaleFactor(0.7)
                                         .foregroundColor(.secondary)
@@ -212,11 +212,11 @@ struct SalmonRunStatusView:View {
 
                                 VStack(alignment: .trailing, spacing: 10) {
                                     Text("\(pointCard.playCount)")
-                                        .font(.splatoonFont(size: 12))
+                                        .font(.appCaptionMono)
                                     Text("\(pointCard.goldenDeliverCount)")
-                                        .font(.splatoonFont(size: 12))
+                                        .font(.appCaptionMono)
                                     Text("\(pointCard.deliverCount)")
-                                        .font(.splatoonFont(size: 12))
+                                        .font(.appCaptionMono)
                                 }
                                 Spacer()
                             }
@@ -233,17 +233,17 @@ struct SalmonRunStatusView:View {
                                 Spacer()
                                 VStack(alignment: .leading, spacing: 10) {
                                     Text("击退头目鲑鱼的次数")
-                                        .font(.splatoonFont(size: 12))
+                                        .font(.appCaption)
                                         .lineLimit(1)
                                         .minimumScaleFactor(0.7)
                                         .foregroundColor(.secondary)
                                     Text("救援次数")
-                                        .font(.splatoonFont(size: 12))
+                                        .font(.appCaption)
                                         .lineLimit(1)
                                         .minimumScaleFactor(0.7)
                                         .foregroundColor(.secondary)
                                     Text("累计点数")
-                                        .font(.splatoonFont(size: 12))
+                                        .font(.appCaption)
                                         .lineLimit(1)
                                         .minimumScaleFactor(0.7)
                                         .foregroundColor(.secondary)
@@ -253,11 +253,11 @@ struct SalmonRunStatusView:View {
 
                                 VStack(alignment: .trailing, spacing: 10) {
                                     Text("\(pointCard.defeatBossCount)")
-                                        .font(.splatoonFont(size: 12))
+                                        .font(.appCaptionMono)
                                     Text("\(pointCard.rescueCount)")
-                                        .font(.splatoonFont(size: 12))
+                                        .font(.appCaptionMono)
                                     Text("\(pointCard.totalPoint)")
-                                        .font(.splatoonFont(size: 12))
+                                        .font(.appCaptionMono)
                                 }
                                 Spacer()
                             }

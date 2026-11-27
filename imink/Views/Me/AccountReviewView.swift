@@ -37,7 +37,7 @@ struct AccountReviewView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(alignment: .lastTextBaseline) {
                         Text(historyRecord.account.name ?? "----")
-                            .font(.splatoonFont(size: 20))
+                            .font(.appTitle)
                             .lineLimit(1)
                             .minimumScaleFactor(0.3)
                             .foregroundStyle(.appLabel)
@@ -45,16 +45,16 @@ struct AccountReviewView: View {
 
                         HStack(alignment: .lastTextBaseline, spacing: 0) {
                             Text("★")
-                                .font(.splatoonFont(size: 15))
+                                .font(.appGameSubhead)
                                 .foregroundStyle(.spYellow)
                             Text("\(historyRecord.rank)")
-                                .font(.splatoonFont(size: 13))
+                                .font(.appMono)
                         }
                         HStack(alignment: .bottom, spacing: 0) {
                             Text("\(historyRecord.udemae ?? "-")")
-                                .font(.splatoonFont(size: 13))
+                                .font(.appMono)
                             Text("\(historyRecord.udemaeMax ?? "-")")
-                                .font(.splatoonFont(size: 10))
+                                .font(.appSubCaptionMono)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -101,11 +101,11 @@ struct AccountReviewView: View {
 
             VStack(alignment: .leading, spacing: 5) {
                 Text("尚未登录")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.appHeadline)
                     .foregroundStyle(.appLabel)
 
                 Text("登录后同步 SplatNet 3 账号资料与记录。")
-                    .font(.caption)
+                    .font(.appCaption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -165,7 +165,7 @@ struct AccountReviewView: View {
                                 .scaledToFit()
                                 .frame(width: 32)
                             Text(description)
-                                .font(.splatoonFont(size: 8))
+                                .font(.appCaption)
                                 .foregroundStyle(.secondary)
                         }
                         Spacer()
@@ -177,11 +177,11 @@ struct AccountReviewView: View {
 
                         HStack(spacing: 5) {
                             Text("参加次数")
-                                .font(.system(size: 10))
+                                .font(.appCaption)
                                 .foregroundColor(Color(.secondaryLabel))
 
                             Text("\(history?.attend ?? 0)")
-                                .font(.system(size: 10, weight: .semibold).monospacedDigit())
+                                .font(.appCaptionMono)
                                 .foregroundColor(.appLabel)
                         }
                     }
@@ -207,7 +207,7 @@ struct AccountReviewView: View {
                             .scaledToFit()
                             .frame(width:25, height: 25)
                         Text("x\(history.gold)")
-                            .font(.splatoonFont(size: 12))
+                            .font(.appCaptionMono)
                     }
                     HStack(alignment:.bottom, spacing:0){
                         Image(.trophySilver)
@@ -216,7 +216,7 @@ struct AccountReviewView: View {
                             .frame(width:25, height: 25)
 
                         Text("x\(history.silver)")
-                            .font(.splatoonFont(size: 12))
+                            .font(.appCaptionMono)
                     }
                     HStack(alignment:.bottom, spacing:0){
                         Image(.trophyBronze)
@@ -225,7 +225,7 @@ struct AccountReviewView: View {
                             .frame(width:25, height: 25)
 
                         Text("x\(history.bronze)")
-                            .font(.splatoonFont(size: 12))
+                            .font(.appCaptionMono)
                     }
                 }
             }

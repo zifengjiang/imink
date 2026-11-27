@@ -17,9 +17,9 @@ extension CoopShiftDetailView {
                                     .frame(width: 30)
 
                                 Text(timeSpanText!)
-                                    .font(.splatoonFont(size: 15))
+                                    .font(.appCaptionMono)
                                     .lineLimit(2)
-                                    .minimumScaleFactor(0.3)
+                                    .minimumScaleFactor(0.75)
                                     .foregroundStyle(Color.orange)
 
 
@@ -31,24 +31,24 @@ extension CoopShiftDetailView {
                                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
                                 Text(stage.nameId.localizedFromSplatNet)
-                                    .font(.splatoonFont(size: 15))
+                                    .font(.appBody)
                                     .foregroundStyle(.secondary)
                             }
                         }
 
                         VStack{
                             Text("Summary")
-                                .font(.splatoonFont(size: 30))
+                                .font(.appDisplay)
                                 .foregroundStyle(Color.orange)
                             if let highestScore = coopGroupStatus.highestScore{
-                                Text("最高分\(highestScore)")
-                                    .font(.splatoonFont(size: 18))
+                                Text("最高分 \(highestScore)")
+                                    .font(.appHeadlineMono)
                                     .foregroundStyle(Color.orange)
                             }
                             HStack{
                                 Image(.golden)
                                 Text("\(coopGroupStatus.highestEgg)")
-                                    .font(.splatoonFont(size: 18))
+                                    .font(.appHeadlineMono)
                                     .foregroundStyle(Color.green)
                             }
 
@@ -64,24 +64,24 @@ extension CoopShiftDetailView {
                                             .resizable()
                                             .frame(width: 18, height: 18)
                                         Text("\(scales[i])")
-                                            .font(.splatoonFont(size: 12))
+                                            .font(.appCaptionMono)
                                     }
                                 }
                             }
 
                             VStack(alignment: .center){
                                 HStack{
-                                    Text("Clear:\(coopGroupStatus.clear)")
+                                    Text("Clear: \(coopGroupStatus.clear)")
                                         .foregroundStyle(.waveClear)
-                                    Text("Failure:\(coopGroupStatus.failure)")
+                                    Text("Failure: \(coopGroupStatus.failure)")
                                         .foregroundStyle(.waveDefeat)
                                 }
                                 if coopGroupStatus.disconnect > 0{
-                                    Text("Disconnect:\(coopGroupStatus.disconnect)")
+                                    Text("Disconnect: \(coopGroupStatus.disconnect)")
                                         .foregroundStyle(.secondary)
                                 }
                             }
-                            .font(.splatoonFont(size: 13))
+                            .font(.appMono)
                             Spacer()
                         }
                     }
@@ -90,7 +90,7 @@ extension CoopShiftDetailView {
 
                     HStack{
                         Text("发放武器")
-                            .font(.splatoonFont(size: 15))
+                            .font(.appBody)
                             .foregroundStyle(.secondary)
 
                         Spacer()
@@ -141,12 +141,7 @@ extension CoopShiftDetailView {
                     .overlay {
                         HStack(spacing:0){
                             Text("\(coopGroupStatus.count)场打工")
-                                .font(.splatoonFont(size: 12))
-                                //                        if stats.count != details.count{
-                                //                            Text("<\(details.count-stats.count)场掉线>")
-                                //                                .inkFont(.font1, size: 10, relativeTo: .body)
-                                //                                .foregroundStyle(Color.waveDefeat)
-                                //                        }
+                                .font(.appCaptionMono)
                         }
                         .foregroundStyle(Color.green)
                         .offset(y:2)
@@ -201,7 +196,7 @@ extension CoopShiftDetailView {
                             .scaledToFit()
                             .frame(width: 30,height: 30)
                         Text("x\(weapon.count)")
-                            .font(.splatoonFont(size: 15))
+                            .font(.appCaptionMono)
                     }
                 }
             }
@@ -242,7 +237,7 @@ extension CoopShiftDetailView {
             }
         } label: {
             Text("遇到过的工友")
-                .font(.splatoonFont(size: 15))
+                .font(.appBody)
         }
     }
 
@@ -256,7 +251,7 @@ extension CoopShiftDetailView {
                             .scaledToFit()
                             .frame(width: 50, height: 50)
                         Text("\(king.totalTeamDefeatCount)/\(king.totalPopCount)")
-                            .font(.splatoonFont(size: 12))
+                            .font(.appCaptionMono)
                     }
 
             }
@@ -276,19 +271,19 @@ extension CoopShiftDetailView {
                         .resizable()
                         .scaledToFit()
                     Text(boss.nameId.localizedFromSplatNet)
-                        .font(.splatoonFont(size: 15))
+                        .font(.appBody)
                     Spacer()
 
                     Text("\(boss.totalTeamDefeatCount)")
-                        .font(.splatoonFont(size: 15)) +
+                        .font(.appBodyMono) +
                     Text(boss.totalDefeatCount == 0 ? "" : "(\(boss.totalDefeatCount))")
-                        .font(.splatoonFont(size: 12))
+                        .font(.appCaptionMono)
                     Text("/")
-                        .font(.splatoonFont(size: 16))
+                        .font(.appBodyMono)
                     Text("\("appearances_number".localized)x")
-                        .font(.splatoonFont(size: 12)) +
+                        .font(.appCaption) +
                     Text("\(boss.totalPopCount)")
-                        .font(.splatoonFont(size: 15))
+                        .font(.appBodyMono)
                 }
                 .frame(height: 40)
 

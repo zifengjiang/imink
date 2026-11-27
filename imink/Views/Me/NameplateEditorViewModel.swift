@@ -155,7 +155,7 @@ class NameplateEditorViewModel: ObservableObject {
             // 称号文本
             VStack(alignment: .leading) {
                 Text(customByname)
-                    .font(.splatoonFont(size: width * 12/284))
+                    .font(.nameplateCanvasFont(size: width * 12/284))
                     .foregroundColor(selectedTextColor)
                     .padding(.top, width * 5/284)
                     .padding(.leading, width * 10/284)
@@ -164,7 +164,7 @@ class NameplateEditorViewModel: ObservableObject {
 
             // 玩家名称 - 居中
             Text(customName)
-                .font(.splatoonFont1(size: width * 26/284))
+                .font(.nameplateCanvasTitleFont(size: width * 26/284))
                 .foregroundColor(selectedTextColor)
                 .position(x: width / 2, y: height / 2)
 
@@ -195,7 +195,7 @@ class NameplateEditorViewModel: ObservableObject {
                 Spacer()
                 HStack {
                     Text("#\(customNameId)")
-                        .font(.splatoonFont(size: width * 10/284))
+                        .font(.nameplateCanvasFont(size: width * 10/284))
                         .foregroundColor(selectedTextColor)
                         .padding(.leading, width * 10/284)
                         .padding(.bottom, width * 5/284)

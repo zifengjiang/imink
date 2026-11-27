@@ -19,10 +19,10 @@ struct BattleListShiftCardView: View {
             VStack{
                 HStack{
                     Text(status.startTime.toShiftTimeSpanString(end: status.endTime))
-                        .font(.splatoonFont(size: 12))
+                        .font(.appCaptionMono)
                     Spacer()
                     Text(status.mode.localized)
-                        .font(.splatoonFont(size: 10))
+                        .font(.appCaption)
                         .foregroundStyle(.secondary)
                 }
                 HStack {
@@ -61,7 +61,7 @@ struct BattleListShiftCardView: View {
                             .foregroundStyle(Color.green)
                             .frame(width: 12, height: 12)
                         Text("\(status.victoryRate, places: 1)")
-                            .font(.splatoonFont(size: 12))
+                            .font(.appMono)
                     }
                     .frame(width: 45, alignment: .leading)
 
@@ -71,8 +71,8 @@ struct BattleListShiftCardView: View {
                             .scaledToFit()
                             .frame(width: 12, height: 12)
                         Text("\(status.kd, places: 1)")
-                            .font(.splatoonFont(size: 12)) + Text("<\(status.kad, places: 1)>")
-                            .font(.splatoonFont(size: 9)).foregroundColor(.secondary)
+                            .font(.appMono) + Text("<\(status.kad, places: 1)>")
+                            .font(.appSubCaptionMono).foregroundColor(.secondary)
                     }
                 }
 
@@ -84,7 +84,7 @@ struct BattleListShiftCardView: View {
                             .foregroundStyle(Color.green)
                             .frame(width: 12, height: 12)
                         Text("\(status.winCount)")
-                            .font(.splatoonFont(size: 12))
+                            .font(.appMono)
                     }
                     .frame(width: 45, alignment: .leading)
 
@@ -94,7 +94,7 @@ struct BattleListShiftCardView: View {
                             .scaledToFit()
                             .frame(width: 12, height: 12)
                         Text("\(status.loseCount)")
-                            .font(.splatoonFont(size: 12))
+                            .font(.appMono)
                     }
                 }
             }

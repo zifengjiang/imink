@@ -12,11 +12,11 @@ struct CoopListShiftCardView: View {
             VStack{
                 HStack{
                     Text(status.startTime.toShiftTimeSpanString(end: status.endTime))
-                        .font(.splatoonFont(size: 12))
+                        .font(.appCaptionMono)
                     Spacer()
                     if let stage = status._stage{
                         Text(stage.nameId.localizedFromSplatNet)
-                            .font(.splatoonFont(size: 10))
+                            .font(.appCaption)
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -68,9 +68,9 @@ struct CoopListShiftCardView: View {
                             .foregroundStyle(Color.green)
                             .frame(width: 12,height: 12)
                         Text("\(status.avg_defeatEnemyCount, places: 1)")
-                            .font(.splatoonFont(size: 12))
+                            .font(.appMono)
                     }
-                    .frame(width: 45, alignment: .leading)
+                    .frame(width: 48, alignment: .leading)
 
                     HStack(spacing: 3){
                         Image(.golden)
@@ -78,8 +78,8 @@ struct CoopListShiftCardView: View {
                             .scaledToFit()
                             .frame(width: 12, height: 12)
                         Text("\(status.avg_goldenDeliverCount, places:1)")
-                            .font(.splatoonFont(size: 12)) + Text("<\(status.avg_goldenAssistCount, places:1)>")
-                            .font(.splatoonFont(size: 9)).foregroundColor(.secondary)
+                            .font(.appMono) + Text("<\(status.avg_goldenAssistCount, places:1)>")
+                            .font(.appSubCaptionMono).foregroundColor(.secondary)
                     }
                 }
 
@@ -91,9 +91,9 @@ struct CoopListShiftCardView: View {
                             .foregroundStyle(Color.green)
                             .frame(width: 12,height: 12)
                         Text("\(status.avg_rescueCount, places: 1)")
-                            .font(.splatoonFont(size: 12))
+                            .font(.appMono)
                     }
-                    .frame(width: 45, alignment: .leading)
+                    .frame(width: 48, alignment: .leading)
 
                     HStack(spacing: 3){
                         Image(.jobShiftCardDead)
@@ -101,7 +101,7 @@ struct CoopListShiftCardView: View {
                             .scaledToFit()
                             .frame(width: 12, height: 12)
                         Text("\(status.avg_rescuedCount, places:1)")
-                            .font(.splatoonFont(size: 12))
+                            .font(.appMono)
                     }
                 }
             }

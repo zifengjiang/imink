@@ -15,11 +15,11 @@ struct BattleScheduleCardView: View {
             VStack{
                 if let startTime = schedules.first?.startTime, startTime < Date(){
                     Text("Now")
-                        .font(.splatoonFont(size: 15))
+                        .font(.appBodyMono)
                         .colorInvert()
                 }else{
                     Text(schedules.first!.formattedBattleTime)
-                        .font(.splatoonFont(size: 15))
+                        .font(.appBodyMono)
                         .colorInvert()
                 }
             }
@@ -145,14 +145,14 @@ struct BattleScheduleCardView: View {
 
                         if mode == .event{
                             Text(event!.localizedFromSplatNet)
-                                .font(.splatoonFont(size: 12))
+                                .font(.appCaption)
                                 .lineLimit(1)
-                                .minimumScaleFactor(0.1)
+                                .minimumScaleFactor(0.75)
                         }else{
                             Text(mode.localized(open: isOpen))
-                                .font(.splatoonFont(size: 12))
+                                .font(.appCaption)
                                 .lineLimit(1)
-                                .minimumScaleFactor(0.1)
+                                .minimumScaleFactor(0.75)
                         }
                     }
 
@@ -160,9 +160,9 @@ struct BattleScheduleCardView: View {
 
                         VStack{
                             Text(stages[index].nameId.localizedFromSplatNet)
-                                .font(.splatoonFont(size: 12))
+                                .font(.appCaption)
                                 .lineLimit(1)
-                                .minimumScaleFactor(0.1)
+                                .minimumScaleFactor(0.75)
 
                             Image(stages[index].name)
                                 .resizable()

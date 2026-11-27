@@ -30,6 +30,7 @@
 		8B07920B2C1078310094EA57 /* SalmonRunScheduleCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B07920A2C1078310094EA57 /* SalmonRunScheduleCardView.swift */; };
 		8B07920F2C112D310094EA57 /* KurokaneStd-EB.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8B07920E2C112D310094EA57 /* KurokaneStd-EB.ttf */; };
 		8B0792112C112D370094EA57 /* KoreanERIN-M.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8B0792102C112D370094EA57 /* KoreanERIN-M.ttf */; };
+		8B0792152C1131590094EA57 /* DFHuaZong-W5-WINP-BF.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8B0792122C112D3B0094EA57 /* DFHuaZong-W5-WINP-BF.ttf */; };
 		8B0792142C1131590094EA57 /* DFPZongYiW7-GB.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8B0792132C1131590094EA57 /* DFPZongYiW7-GB.ttf */; };
 		8B0851722BFB5FE100AF22C5 /* CoopRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0851712BFB5FE100AF22C5 /* CoopRule.swift */; };
 		8B0851742BFB673000AF22C5 /* TextureBackGround.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0851732BFB673000AF22C5 /* TextureBackGround.swift */; };
@@ -1295,6 +1296,7 @@
 				8B0D14742BF98B4E00B82AD1 /* Localizable.strings in Resources */,
 				8B8B286D2BF887D400790809 /* Preview Assets.xcassets in Resources */,
 				8B401C252CD65729008B05DE /* Launch Screen.storyboard in Resources */,
+				8B0792152C1131590094EA57 /* DFHuaZong-W5-WINP-BF.ttf in Resources */,
 				8B0792142C1131590094EA57 /* DFPZongYiW7-GB.ttf in Resources */,
 				8B0D149B2BFAB98E00B82AD1 /* Splatoon1.otf in Resources */,
 				8B07920F2C112D310094EA57 /* KurokaneStd-EB.ttf in Resources */,

@@ -66,14 +66,14 @@ struct BattleShiftDetailView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
 
                         Text(mode.name)
-                            .font(.splatoonFont(size: 18))
+                            .font(.appTitle)
                             .foregroundStyle(mode.color)
                     }
 
                     Spacer()
 
                     Text(timeSpanText)
-                        .font(.splatoonFont(size: 12))
+                        .font(.appCaptionMono)
                         .foregroundStyle(.secondary)
                 }
 
@@ -168,10 +168,10 @@ struct BattleShiftDetailView: View {
             if let stage = activeStage {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(stage.nameId.localizedFromSplatNet)
-                        .font(.splatoonFont(size: 18))
+                        .font(.appHeadline)
                         .foregroundStyle(.white)
                     Text("x\(stage.count)")
-                        .font(.splatoonFont(size: 13))
+                        .font(.appMono)
                         .foregroundStyle(.white.opacity(0.72))
                 }
                 .padding(12)
@@ -182,7 +182,7 @@ struct BattleShiftDetailView: View {
     private var battleRuleChart: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("BATTLE TYPE")
-                .font(.splatoonFont1(size: 14))
+                .font(.appGameSubhead)
                 .foregroundStyle(.secondary)
                 .padding(.leading, 4)
 
@@ -199,7 +199,7 @@ struct BattleShiftDetailView: View {
     private var weaponsView: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("WEAPONS")
-                .font(.splatoonFont1(size: 14))
+                .font(.appGameSubhead)
                 .foregroundStyle(.secondary)
                 .padding(.leading, 4)
 
@@ -214,7 +214,7 @@ struct BattleShiftDetailView: View {
                             .background(Color.black.opacity(0.72))
                             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                         Text("x\(weapon.count)")
-                            .font(.splatoonFont(size: 11))
+                            .font(.appCaptionMono)
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -228,10 +228,10 @@ struct BattleShiftDetailView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Text(title)
-                    .font(.splatoonFont1(size: 16))
+                    .font(.appTitle)
                 Spacer()
                 Text("\(players.count)")
-                    .font(.splatoonFont(size: 14))
+                    .font(.appMono)
                     .foregroundStyle(.secondary)
             }
             .padding(.horizontal, 4)

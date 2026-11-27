@@ -140,7 +140,7 @@ struct CoopDetailView: View {
                                 .scaledToFit()
                                 .frame(width: 50, height: 50)
                             Text(viewModel.enemyResults[i].defeatCount == 1 ? "成功击倒！" : "未能击倒...")
-                                .font(.splatoonFont(size: 12))
+                                .font(.appCaption)
                             
                         }
                     }
