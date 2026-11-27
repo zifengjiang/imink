@@ -37,12 +37,12 @@ struct LoginView: View {
 
         var id: String { rawValue }
 
-        var title: String {
+        var titleKey: LocalizedStringKey {
             switch self {
             case .web:
-                return "网页登录"
+                return "login_method_web"
             case .sessionToken:
-                return "Token 登录"
+                return "login_method_token"
             }
         }
     }
@@ -62,20 +62,20 @@ struct LoginView: View {
             
             VStack(spacing: 6) {
                 Text("Log in to sync your data")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.appHeadline)
                     .foregroundColor(Color.appLabel)
 
-                Text("Connect your Nintendo Account to load SplatNet 3 records, schedules, and player data.")
-                    .font(.system(size: 13))
+                Text("login_subtitle")
+                    .font(.system(size: AppFontScale.mono))
                     .foregroundColor(Color.appLabel.opacity(0.72))
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.horizontal, 28)
 
-            Picker("登录方式", selection: $loginMethod) {
+            Picker("login_method_picker", selection: $loginMethod) {
                 ForEach(LoginMethod.allCases) { method in
-                    Text(method.title).tag(method)
+                    Text(method.titleKey).tag(method)
                 }
             }
             .pickerStyle(.segmented)
@@ -87,8 +87,8 @@ struct LoginView: View {
                         await viewModel.loginFlow()
                     }
                 } label: {
-                    Text("任天堂账号登录")
-                        .font(.system(size: 13, weight: .semibold))
+                    Text("Log in with Nintendo Account")
+                        .font(.appMono)
                         .foregroundColor(.white)
                         .padding(.horizontal, 18)
                 }
@@ -99,8 +99,8 @@ struct LoginView: View {
                 .disabled(viewModel.status == .loading)
             } else {
                 VStack(spacing: 10) {
-                    TextField("粘贴 Nintendo session token", text: $sessionToken)
-                        .font(.system(size: 13))
+                    TextField("login_token_placeholder", text: $sessionToken)
+                        .font(.system(size: AppFontScale.mono))
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .textContentType(.oneTimeCode)
@@ -117,8 +117,8 @@ struct LoginView: View {
                             await viewModel.loginWithSessionToken(sessionToken)
                         }
                     } label: {
-                        Text("使用 Session Token 登录")
-                            .font(.system(size: 13, weight: .semibold))
+                        Text("login_with_session_token")
+                            .font(.appMono)
                             .foregroundColor(.white)
                             .padding(.horizontal, 18)
                     }
@@ -133,15 +133,15 @@ struct LoginView: View {
 
             if let errorMessage = viewModel.errorMessage {
                 Text(errorMessage)
-                    .font(.system(size: 12))
+                    .font(.appCaption)
                     .foregroundStyle(.red)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 28)
             }
 
-            Text("Authentication uses Nintendo's Coral API through nxapi-znca-api. Your session token is stored locally for sync.")
-                .font(.system(size: 11))
+            Text("login_coral_disclaimer")
+                .font(.system(size: AppFontScale.minimum))
                 .foregroundColor(Color.appLabel.opacity(0.55))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)

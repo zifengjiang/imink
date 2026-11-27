@@ -13,3 +13,12 @@
 "pay_grade" = "評價等級";
 "clear_bonus" = "通關獎勵";
 "your_points" = "獲得點數";
+"Log in to sync your data" = "立即登入同步資料";
+"Log in with Nintendo Account" = "Nintendo 帳號登入";
+"login_subtitle" = "連接 Nintendo 帳號以載入 SplatNet 3 對戰、打工、日程與玩家資料。";
+"login_method_picker" = "登入方式";
+"login_method_web" = "網頁登入";
+"login_method_token" = "Token 登入";
+"login_token_placeholder" = "貼上 Nintendo session token";
+"login_with_session_token" = "使用 Session Token 登入";
+"login_coral_disclaimer" = "認證透過 nxapi-znca-api 呼叫 Nintendo Coral 介面，Session Token 僅儲存在本機用於資料同步。";

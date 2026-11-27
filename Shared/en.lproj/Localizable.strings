@@ -13,3 +13,12 @@
 "pay_grade" = "Pay Grade";
 "clear_bonus" = "Clear Bonus";
 "your_points" = "Your Points";
+"Log in to sync your data" = "Log in to sync your data";
+"Log in with Nintendo Account" = "Log in with Nintendo Account";
+"login_subtitle" = "Connect your Nintendo Account to load SplatNet 3 records, schedules, and player data.";
+"login_method_picker" = "Login Method";
+"login_method_web" = "Web Login";
+"login_method_token" = "Session Token";
+"login_token_placeholder" = "Paste Nintendo session token";
+"login_with_session_token" = "Sign In with Session Token";
+"login_coral_disclaimer" = "Authentication uses Nintendo's Coral API through nxapi-znca-api. Your session token is stored locally for sync.";

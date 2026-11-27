@@ -13,3 +13,12 @@
 "pay_grade" = "評価等級";
 "clear_bonus" = "クリアボーナス";
 "your_points" = "獲得ポイント";
+"Log in to sync your data" = "ログインしてデータを同期";
+"Log in with Nintendo Account" = "ニンテンドーアカウントでログイン";
+"login_subtitle" = "ニンテンドーアカウントを連携して SplatNet 3 の記録・スケジュール・プレイヤーデータを読み込みます。";
+"login_method_picker" = "ログイン方法";
+"login_method_web" = "Web ログイン";
+"login_method_token" = "トークン";
+"login_token_placeholder" = "Nintendo session token を貼り付け";
+"login_with_session_token" = "Session Token でログイン";
+"login_coral_disclaimer" = "認証は nxapi-znca-api 経由で Nintendo Coral API を使用し、Session Token は同期用に端末内へ保存されます。";

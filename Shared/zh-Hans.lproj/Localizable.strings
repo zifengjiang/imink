@@ -21,6 +21,13 @@
 "Import Success" = "导入成功";
 "Log in to sync your data" = "立即登录同步数据";
 "Log in with Nintendo Account" = "任天堂账号登录";
+"login_subtitle" = "连接 Nintendo 账号以加载 SplatNet 3 对战、打工、日程与玩家数据。";
+"login_method_picker" = "登录方式";
+"login_method_web" = "网页登录";
+"login_method_token" = "Token 登录";
+"login_token_placeholder" = "粘贴 Nintendo session token";
+"login_with_session_token" = "使用 Session Token 登录";
+"login_coral_disclaimer" = "认证通过 nxapi-znca-api 调用 Nintendo Coral 接口，Session Token 仅保存在本地用于数据同步。";
 "home_schedule_title" = "日程";
 "home_picker_battle" = "对战";
 "home_picker_salmon_run" = "鲑鱼跑";
@@ -38,4 +45,3 @@
 "PRIVATE" = "私人比赛";
 "FEST" = "祭典比赛";
 "ALL" = "全部对战";
-"Log in with Nintendo Account" = "任天堂账号登录";

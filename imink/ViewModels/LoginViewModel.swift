@@ -44,10 +44,7 @@ class LoginViewModel:ObservableObject{
         status = .loading
 
         let loginIndicatorId = UUID().uuidString
-        defer {
-            Indicators.shared.dismiss(with: loginIndicatorId)
-        }
-        
+
         do {
             Toast.progress(id: loginIndicatorId, title: "登录中", subtitle: "获取sessionToken")
             
@@ -72,8 +69,8 @@ class LoginViewModel:ObservableObject{
                 return try Account.filter(Column("sp3Id") == sp3PrincipalId).fetchOne(db)?.id
             })!
             
-            Toast.finish(id: loginIndicatorId, title: "登录成功")
-            Toast.update(id: loginIndicatorId, subtitle: "正在完成登录...")
+            Toast.update(id: loginIndicatorId, subtitle: "已完成账户同步准备")
+            Toast.finish(id: loginIndicatorId, title: "登录成功", dismissAfter: 2)
 
             status = .loginSuccess
             MainViewModel.shared.isLogin = true
@@ -83,13 +80,16 @@ class LoginViewModel:ObservableObject{
             AppUserDefaults.shared.accountId = Int(accountId)
             AppUserDefaults.shared.gameServiceToken = loginFlowResult.webServiceToken.result.accessToken
             AppUserDefaults.shared.gameServiceTokenRefreshTime = Int(Date().timeIntervalSince1970)
+        } catch is CancellationError {
+            status = .none
+            Toast.dismiss(loginIndicatorId)
         } catch {
             logError(error)
             status = .none
             let message = Self.describe(error)
             errorMessage = message
-            Toast.finish(id: loginIndicatorId, title: "登录失败", failed: true)
             Toast.update(id: loginIndicatorId, subtitle: message)
+            Toast.finish(id: loginIndicatorId, title: "登录失败", failed: true, dismissAfter: 3)
         }
     }
 
@@ -103,9 +103,6 @@ class LoginViewModel:ObservableObject{
         errorMessage = nil
 
         let loginIndicatorId = UUID().uuidString
-        defer {
-            Indicators.shared.dismiss(with: loginIndicatorId)
-        }
 
         do {
             Toast.progress(id: loginIndicatorId, title: "登录中", subtitle: "验证 session token")
@@ -139,8 +136,8 @@ class LoginViewModel:ObservableObject{
                 throw NSOAuthorization.NSOAuthError.nxapiError(message: "Failed to persist account")
             }
 
-            Toast.finish(id: loginIndicatorId, title: "登录成功")
-            Toast.update(id: loginIndicatorId, subtitle: "正在完成登录...")
+            Toast.update(id: loginIndicatorId, subtitle: "已完成账户同步准备")
+            Toast.finish(id: loginIndicatorId, title: "登录成功", dismissAfter: 2)
 
             status = .loginSuccess
             MainViewModel.shared.isLogin = true
@@ -150,13 +147,15 @@ class LoginViewModel:ObservableObject{
             AppUserDefaults.shared.accountId = Int(accountId)
             AppUserDefaults.shared.gameServiceToken = webServiceToken.result.accessToken
             AppUserDefaults.shared.gameServiceTokenRefreshTime = Int(Date().timeIntervalSince1970)
+        } catch is CancellationError {
+            status = .none
+            Toast.dismiss(loginIndicatorId)
         } catch {
             logError(error)
             status = .none
             errorMessage = Self.describe(error)
-            Toast.finish(id: loginIndicatorId, title: "登录失败", failed: true)
             Toast.update(id: loginIndicatorId, subtitle: "请检查 session token 后重试")
-            Indicators.shared.updateIcon(for: loginIndicatorId, icon: .systemImage("xmark.icloud"))
+            Toast.finish(id: loginIndicatorId, title: "登录失败", failed: true, dismissAfter: 3)
         }
     }
 

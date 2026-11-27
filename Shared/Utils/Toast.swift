@@ -76,11 +76,22 @@ enum Toast {
         }
     }
 
-    /// 把进行中的提示切换为终态：成功显示对勾，失败显示错误图标。
-    static func finish(id: String, title: String, failed: Bool = false) {
+    /// 把进行中的提示切换为终态：成功显示对勾，失败显示错误图标，并可按指定延迟自动关闭。
+    static func finish(
+        id: String,
+        title: String,
+        failed: Bool = false,
+        dismissAfter delay: TimeInterval? = nil
+    ) {
         onMain {
             Indicators.shared.updateTitle(for: id, title: title)
-            Indicators.shared.updateIcon(for: id, icon: failed ? .systemImage("xmark.icloud") : .success)
+            Indicators.shared.updateIcon(
+                for: id,
+                icon: failed ? .systemImage("xmark.circle.fill") : .success
+            )
+            if let delay {
+                Indicators.shared.dismiss(with: id, after: delay)
+            }
         }
     }
 
