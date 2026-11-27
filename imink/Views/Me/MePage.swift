@@ -42,7 +42,7 @@ struct MePage: View {
 
                 Section("我的记录") {
                     NavigationLink("打工记录", destination: CoopRecordView())
-                    NavigationLink("祭典记录", destination: CoopRecordView())
+                    NavigationLink("祭典记录", destination: FestRecordView())
                     NavigationLink("场地记录", destination: StageRecordView())
                     NavigationLink("武器记录", destination: WeaponRecordView())
                 }
