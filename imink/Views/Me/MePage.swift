@@ -24,7 +24,10 @@ struct MePage: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
-                .padding(.bottom, 24)
+                .padding(.bottom, 12)
+            }
+            .refreshable {
+                await dashboard.reload(forceRemote: true)
             }
             .scrollIndicators(.hidden)
             .fixSafeareaBackground()
@@ -143,13 +146,20 @@ struct MePage: View {
                     } else if let localNameplate = identity.localNameplate {
                         NameplateView(localData: localNameplate)
                             .frame(maxWidth: .infinity)
+                    } else {
+                        NameplateView(
+                            name: identity.name,
+                            background: "Npl_Tutorial00",
+                            byname: "新晋乌贼",
+                            textColor: .white,
+                            badges: [],
+                            nameId: "0000"
+                        )
+                        .frame(maxWidth: .infinity)
                     }
 
                     HStack(alignment: .center, spacing: 8) {
-                        Label(dashboard.lastSyncText, systemImage: "arrow.triangle.2.circlepath")
-                            .font(.appCaptionMono)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
+                        identitySyncStatusView
 
                         Spacer(minLength: 8)
 
@@ -827,6 +837,36 @@ struct MePage: View {
                 .foregroundStyle(.secondary)
                 .frame(width: 52, height: 52)
                 .background(Color(.systemGray5), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        }
+    }
+
+    @ViewBuilder
+    private var identitySyncStatusView: some View {
+        switch dashboard.remoteSyncState {
+        case .syncing(let attempt, let maxAttempts):
+            HStack(spacing: 6) {
+                ProgressView()
+                    .controlSize(.mini)
+                Text(attempt > 1 ? "同步重试 (\(attempt)/\(maxAttempts))…" : "同步在线档案…")
+                    .font(.appCaptionMono)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+        case .offlineLocal:
+            HStack(spacing: 5) {
+                Image(systemName: "icloud.slash")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.secondary)
+                Text("离线，显示本地数据")
+                    .font(.appCaption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+        case .synced, .idle:
+            Label(dashboard.lastSyncText, systemImage: "checkmark.icloud")
+                .font(.appCaptionMono)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
         }
     }
 

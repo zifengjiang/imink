@@ -2,9 +2,16 @@ import Foundation
 import SwiftUI
 import GRDB
 import SplatDatabase
+import SwiftyJSON
 
 @MainActor
 final class MeDashboardViewModel: ObservableObject {
+    enum RemoteSyncState: Equatable {
+        case idle
+        case syncing(attempt: Int, maxAttempts: Int)
+        case synced
+        case offlineLocal
+    }
     struct LocalNameplateData {
         let name: String
         let byname: String
@@ -88,12 +95,17 @@ final class MeDashboardViewModel: ObservableObject {
     @Published private(set) var onlineFriends: [FriendListResult.Data.Friends.Node] = []
     @Published private(set) var trashCount: Int = 0
     @Published private(set) var lastSyncText: String = "尚未同步"
+    @Published private(set) var remoteSyncState: RemoteSyncState = .idle
 
-    func reload() async {
+    private var lastRemoteAttemptDate: Date?
+    private let remoteRetryCooldown: TimeInterval = 120
+
+    func reload(forceRemote: Bool = false) async {
         guard AppState.shared.isLogin else {
             identity = nil
             onlineFriends = []
             trashCount = 0
+            remoteSyncState = .idle
             isLoaded = true
             return
         }
@@ -108,19 +120,54 @@ final class MeDashboardViewModel: ObservableObject {
         applySnapshot(snapshot)
         isLoaded = true
 
-        async let remoteHistoryTask: HistoryRecord? = SN3Client.shared.fetchRecord(.historyRecord)
-        async let remoteFriendsTask: FriendListResult? = SN3Client.shared.fetchFriendList()
+        // 若近期已确认离线且非用户手动下拉刷新，直接保持本地展示，不反复重试打扰
+        if !forceRemote,
+           remoteSyncState == .offlineLocal,
+           let lastAttempt = lastRemoteAttemptDate,
+           Date().timeIntervalSince(lastAttempt) < remoteRetryCooldown {
+            return
+        }
 
-        if let remoteHistory = await remoteHistoryTask {
+        lastRemoteAttemptDate = Date()
+        let maxAttempts = 2
+        var fetchedHistory: HistoryRecord?
+
+        for attempt in 1...maxAttempts {
+            guard !Task.isCancelled else { return }
+            remoteSyncState = .syncing(attempt: attempt, maxAttempts: maxAttempts)
+            do {
+                try await SN3Client.shared.ensureToken()
+                let data = try await SN3Client.shared.graphQL(.historyRecord)
+                fetchedHistory = HistoryRecord(json: try JSON(data: data))
+                break
+            } catch SN3Client.Error.invalidGameServiceToken {
+                if !AppUserDefaults.shared.useManualGameServiceToken && attempt < maxAttempts {
+                    try? await NSOAccountManager.shared.refreshGameServiceTokenManual()
+                }
+            } catch is CancellationError {
+                return
+            } catch {
+                logError(error)
+                if attempt < maxAttempts {
+                    try? await Task.sleep(nanoseconds: 700_000_000)
+                }
+            }
+        }
+
+        if let remoteHistory = fetchedHistory {
             if let data = try? JSONEncoder().encode(remoteHistory),
                let jsonString = String(data: data, encoding: .utf8) {
                 AppUserDefaults.shared.historyRecord = jsonString
             }
             applyRemoteHistory(remoteHistory)
-        }
+            remoteSyncState = .synced
 
-        if let friendList = await remoteFriendsTask {
-            onlineFriends = friendList.data.friends?.nodes ?? []
+            if let friendList = await SN3Client.shared.fetchFriendList() {
+                onlineFriends = friendList.data.friends?.nodes ?? []
+            }
+        } else {
+            // 达到有限重试上限后收敛为离线本地态，绝不弹出或常驻全局重试贴纸
+            remoteSyncState = .offlineLocal
         }
     }
 
