@@ -96,6 +96,12 @@ struct NameplateView: View {
                         .padding(.top, geometryWidth * 5/284)
                         .padding(.leading, geometryWidth * 10/284)
                         
+                } else if let formatted = viewModel.formattedByname, !formatted.isEmpty {
+                    Text(formatted)
+                        .font(.nameplateCanvasFont(size: geometryWidth * 12/284))
+                        .foregroundColor(textColor)
+                        .padding(.top, geometryWidth * 5/284)
+                        .padding(.leading, geometryWidth * 10/284)
                 }
                 
 
