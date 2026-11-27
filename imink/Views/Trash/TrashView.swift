@@ -10,34 +10,55 @@ struct TrashView: View {
         selectedTab == 0 ? .coop : .battle
     }
 
+    private var isCurrentEmpty: Bool {
+        selectedTab == 0 ? viewModel.deletedCoops.isEmpty : viewModel.deletedBattles.isEmpty
+    }
+
     private var typePicker: some View {
         Picker("类型", selection: $selectedTab) {
             Text("鲑鱼跑").tag(0)
             Text("对战").tag(1)
         }
-        .pickerStyle(SegmentedPickerStyle())
-        .padding()
+        .pickerStyle(.segmented)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
     }
 
+    @ViewBuilder
     private var recordList: some View {
-        ScrollView {
-            LazyVStack {
-                if selectedTab == 0 {
-                    ForEach(viewModel.deletedCoops, id: \.id) { coop in
-                        DeletedCoopRowView(coop: coop)
-                    }
-                } else {
-                    ForEach(viewModel.deletedBattles, id: \.id) { battle in
-                        DeletedBattleRowView(battle: battle)
+        if isCurrentEmpty {
+            VStack(spacing: 12) {
+                Image(systemName: "trash")
+                    .font(.appDisplay)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 64, height: 64)
+                    .background(Color.listItemBackground, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                Text(selectedTab == 0 ? "暂无已删除的打工记录" : "暂无已删除的对战记录")
+                    .font(.appHeadline)
+                    .foregroundStyle(.appLabel)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            ScrollView {
+                LazyVStack(spacing: 10) {
+                    if selectedTab == 0 {
+                        ForEach(viewModel.deletedCoops, id: \.id) { coop in
+                            DeletedCoopRowView(coop: coop)
+                        }
+                    } else {
+                        ForEach(viewModel.deletedBattles, id: \.id) { battle in
+                            DeletedBattleRowView(battle: battle)
+                        }
                     }
                 }
+                .padding(.vertical, 4)
+            }
+            .refreshable {
+                await viewModel.loadData()
             }
         }
-        .refreshable {
-            await viewModel.loadData()
-        }
     }
-    
+
     private func restoreAll() {
         Task { await viewModel.restoreAll(kind: selectedKind) }
     }
@@ -47,44 +68,45 @@ struct TrashView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                typePicker
-                recordList
-            }
-            .navigationTitle("回收站")
-            .navigationBarTitleDisplayMode(.inline)
-            .floatingTabBarInset()
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        Button("恢复全部") {
-                            restoreAll()
-                        }
-                        
-                        Button("永久删除全部", role: .destructive) {
-                            viewModel.showPermanentDeleteAlert = true
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
+        VStack(spacing: 0) {
+            typePicker
+            recordList
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .navigationTitle("回收站")
+        .navigationBarTitleDisplayMode(.inline)
+        .fixSafeareaBackground()
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button("恢复全部") {
+                        restoreAll()
                     }
+                    .disabled(isCurrentEmpty)
+
+                    Button("永久删除全部", role: .destructive) {
+                        viewModel.showPermanentDeleteAlert = true
+                    }
+                    .disabled(isCurrentEmpty)
+                } label: {
+                    Image(systemName: "ellipsis.circle")
                 }
             }
-            .alert("永久删除确认", isPresented: $viewModel.showPermanentDeleteAlert) {
-                Button("取消", role: .cancel) {}
-                Button("永久删除", role: .destructive) {
-                    permanentlyDeleteAll()
-                }
-            } message: {
-                Text("此操作无法恢复，确定要永久删除所有回收站中的记录吗？")
+        }
+        .alert("永久删除确认", isPresented: $viewModel.showPermanentDeleteAlert) {
+            Button("取消", role: .cancel) {}
+            Button("永久删除", role: .destructive) {
+                permanentlyDeleteAll()
             }
-            .task {
+        } message: {
+            Text("此操作无法恢复，确定要永久删除所有回收站中的记录吗？")
+        }
+        .task {
+            await viewModel.loadData()
+        }
+        .onChange(of: selectedTab) { _, _ in
+            Task {
                 await viewModel.loadData()
-            }
-            .onChange(of: selectedTab) { _, _ in
-                Task {
-                    await viewModel.loadData()
-                }
             }
         }
     }
@@ -106,9 +128,8 @@ struct DeletedRecordRow<Content: View>: View {
 
     var body: some View {
         content
-            .padding()
-            .background(Color(.systemGray6))
-            .cornerRadius(10)
+            .padding(14)
+            .background(Color.listItemBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             .contextMenu {
                 Button("恢复") {
                     showRestoreAlert = true
@@ -126,7 +147,7 @@ struct DeletedRecordRow<Content: View>: View {
             } message: {
                 Text("确定要恢复这条记录吗？")
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 16)
     }
 
     private func restore() async {
@@ -154,24 +175,25 @@ struct DeletedCoopRowView: View {
     var body: some View {
         DeletedRecordRow(kind: .coop, recordId: coop.id ?? 0) {
             HStack {
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(coop.rule.localizedFromSplatNet)
-                        .font(.splatoonFont(size: 12))
-                        .foregroundColor(.secondary)
+                        .font(.appCaption)
+                        .foregroundStyle(.secondary)
 
                     Text(coop.clear ? "Clear!!" : "Failure")
-                        .font(.splatoonFont1(size: 14))
-                        .foregroundColor(coop.clear ? .green : .red)
+                        .font(.appGameSubhead)
+                        .foregroundStyle(coop.clear ? Color.waveClear : Color.waveDefeat)
                 }
 
                 Spacer()
 
-                VStack(alignment: .trailing) {
-                    Text("金蛋: \(coop.egg)")
-                        .font(.splatoonFont(size: 12))
-                    Text("\(coop.playedTime.toPlayedTimeString())")
-                        .font(.splatoonFont(size: 10))
-                        .foregroundColor(.secondary)
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text("金蛋 \(coop.egg)")
+                        .font(.appMono)
+                        .foregroundStyle(.appLabel)
+                    Text(coop.playedTime.toPlayedTimeString())
+                        .font(.appCaptionMono)
+                        .foregroundStyle(.secondary)
                 }
             }
         }
@@ -184,28 +206,28 @@ struct DeletedBattleRowView: View {
     var body: some View {
         DeletedRecordRow(kind: .battle, recordId: battle.id ?? 0) {
             HStack {
-                VStack(alignment: .leading) {
-                    Text(battle.battleMode.name)
-                        .font(.splatoonFont(size: 12))
-                        .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text((BattleMode(rawValue: battle.mode)?.name) ?? battle.mode)
+                        .font(.appCaption)
+                        .foregroundStyle(.secondary)
 
                     Text(battle.judgement.localizedFromSplatNet)
-                        .font(.splatoonFont1(size: 14))
-                        .foregroundColor(battle.judgement == "WIN" ? .green : .red)
+                        .font(.appGameSubhead)
+                        .foregroundStyle(battle.judgement == "WIN" ? Color.spLightGreen : Color.spPink)
                 }
 
                 Spacer()
 
-                VStack(alignment: .trailing) {
-                    Text("\(battle.playedTime.toPlayedTimeString())")
-                        .font(.splatoonFont(size: 10))
-                        .foregroundColor(.secondary)
-                }
+                Text(battle.playedTime.toPlayedTimeString())
+                    .font(.appCaptionMono)
+                    .foregroundStyle(.secondary)
             }
         }
     }
 }
 
 #Preview {
-    TrashView()
+    NavigationStack {
+        TrashView()
+    }
 }

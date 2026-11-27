@@ -5,6 +5,9 @@ struct MePage: View {
     @ObservedObject private var appState = AppState.shared
     @StateObject private var dashboard = MeDashboardViewModel()
     @AppStorage("mainViewTabSelection") private var tabSelection: Int = 3
+    #if DEBUG
+    @AppStorage("debugMeDestination") private var debugMeDestination: String = ""
+    #endif
     @State private var expandedFriendId: String?
     @State private var showLoginSheet = false
 
@@ -75,6 +78,25 @@ struct MePage: View {
             .task(id: "\(appState.isLogin)-\(appState.battleRecordsCount)-\(appState.salmonRunRecordsCount)") {
                 await dashboard.reload()
             }
+            #if DEBUG
+            .navigationDestination(
+                isPresented: Binding(
+                    get: { !debugMeDestination.isEmpty },
+                    set: { if !$0 { debugMeDestination = "" } }
+                )
+            ) {
+                switch debugMeDestination {
+                case "weapon":
+                    WeaponRecordView()
+                case "stage":
+                    StageRecordView()
+                case "trash":
+                    TrashView()
+                default:
+                    EmptyView()
+                }
+            }
+            #endif
         }
     }
 
