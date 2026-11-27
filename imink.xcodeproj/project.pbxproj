@@ -13,6 +13,7 @@
 		0B1000032EF2000000000001 /* MeSummaryMetric.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B1000062EF2000000000001 /* MeSummaryMetric.swift */; };
 		0B4F00012F12000000000001 /* FestRecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4F00022F12000000000001 /* FestRecordView.swift */; };
 		0B4F00032F12000000000001 /* MeDashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4F00042F12000000000001 /* MeDashboardViewModel.swift */; };
+		0B4F00052F12000000000001 /* ModeDetailScaffold.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4F00062F12000000000001 /* ModeDetailScaffold.swift */; };
 		0A4B54C32EEEA74F003FDBF7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BAD2C1A2E5B4FC600DE9952 /* WidgetKit.framework */; };
 		0A4B54C42EEEA74F003FDBF7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BAD2C1C2E5B4FC600DE9952 /* SwiftUI.framework */; };
 		0A4B54D52EEEA750003FDBF7 /* liveWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 0A4B54C22EEEA74E003FDBF7 /* liveWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -289,6 +290,7 @@
 		0B1000062EF2000000000001 /* MeSummaryMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeSummaryMetric.swift; sourceTree = "<group>"; };
 		0B4F00022F12000000000001 /* FestRecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FestRecordView.swift; sourceTree = "<group>"; };
 		0B4F00042F12000000000001 /* MeDashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeDashboardViewModel.swift; sourceTree = "<group>"; };
+		0B4F00062F12000000000001 /* ModeDetailScaffold.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeDetailScaffold.swift; sourceTree = "<group>"; };
 		0A2C668B2E682CAF00F1FB81 /* CoopPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoopPlayerView.swift; sourceTree = "<group>"; };
 		0A4B54C22EEEA74E003FDBF7 /* liveWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = liveWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		0A4B54FD2EEEA868003FDBF7 /* IndicatorTaskGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndicatorTaskGroup.swift; sourceTree = "<group>"; };
@@ -918,6 +920,7 @@
 				0B2000FA2EF3000000000001 /* ProgressBar.swift */,
 				0B2000702EF3000000000001 /* RecordStatusFilterSection.swift */,
 				0B2000502EF3000000000001 /* ShiftCardChrome.swift */,
+				0B4F00062F12000000000001 /* ModeDetailScaffold.swift */,
 				0AC00D822E6710F500F82E5A /* TimeRangeSlider.swift */,
 				8B7059032C0B00510076F680 /* NameplateView.swift */,
 				8BE0950C2C0315C40089705F /* ActivityView.swift */,
@@ -1382,6 +1385,7 @@
 				0B1000032EF2000000000001 /* MeSummaryMetric.swift in Sources */,
 				0B4F00012F12000000000001 /* FestRecordView.swift in Sources */,
 				0B4F00032F12000000000001 /* MeDashboardViewModel.swift in Sources */,
+				0B4F00052F12000000000001 /* ModeDetailScaffold.swift in Sources */,
 				0B1000012EF2000000000001 /* SWShimmer.swift in Sources */,
 				0B1000022EF2000000000001 /* SWKPICard.swift in Sources */,
 				8BFE91722C0D7CE000C12CBE /* Filter.swift in Sources */,
