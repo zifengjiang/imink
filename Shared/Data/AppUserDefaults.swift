@@ -220,7 +220,23 @@ class AppUserDefaults: ObservableObject {
 
 
 extension UserDefaults {
+    /// App Group 共享容器：主 App 与 Live Activity / Widget 扩展共用。
+    /// 注意：只有两个 target 都签了 `com.apple.security.application-groups` entitlement，
+    /// `UserDefaults(suiteName:)` 才会返回容器；缺失时它会返回 nil，
+    /// 这里降级到 `.standard` 并记录日志，避免启动即崩溃（不丢数据的 key 会回落到本 App 沙盒）。
     static let appGroup: UserDefaults = {
-        return UserDefaults(suiteName: "group.jiang.feng.imink")!
+        let suiteName = "group.jiang.feng.imink"
+        if let shared = UserDefaults(suiteName: suiteName) {
+            return shared
+        }
+        let error = NSError(
+            domain: "imink.AppGroup",
+            code: 1,
+            userInfo: [
+                NSLocalizedDescriptionKey: "无法打开 App Group 容器 \(suiteName)，已降级到 .standard；请检查 application-groups entitlement"
+            ]
+        )
+        logError(error)
+        return .standard
     }()
 }
