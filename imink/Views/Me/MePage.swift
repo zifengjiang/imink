@@ -166,7 +166,7 @@ struct MePage: View {
                         NavigationLink(destination: NameplateEditorView()) {
                             HStack(spacing: 4) {
                                 Image(systemName: "paintbrush.pointed.fill")
-                                    .font(.system(size: 11, weight: .semibold))
+                                    .font(.appSubCaptionMono)
                                 Text("铭牌编辑器")
                                     .font(.appCaption)
                             }
@@ -208,7 +208,7 @@ struct MePage: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
                 Image(systemName: "person.crop.circle.badge.exclamationmark")
-                    .font(.system(size: 28, weight: .semibold))
+                    .font(.appTitle)
                     .foregroundStyle(.secondary)
                     .frame(width: 56, height: 56)
                     .background(Color(.systemGray5), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -421,7 +421,7 @@ struct MePage: View {
             }
 
             Text(value)
-                .font(.system(size: 24, weight: .bold).monospacedDigit())
+                .font(.appGameMetric(size: 24))
                 .foregroundStyle(tint)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
@@ -511,7 +511,7 @@ struct MePage: View {
                     .background(tint.opacity(0.14), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
 
                 Text(title)
-                    .font(.appBody)
+                    .font(.appHeadline)
                     .foregroundStyle(.appLabel)
                     .lineLimit(1)
 
@@ -523,7 +523,7 @@ struct MePage: View {
                     .font(.appCaption)
                     .foregroundStyle(.secondary)
                 Text(primaryValue)
-                    .font(.system(size: 22, weight: .bold).monospacedDigit())
+                    .font(.appGameMetric(size: 22))
                     .foregroundStyle(.appLabel)
                     .lineLimit(1)
             }
@@ -538,7 +538,7 @@ struct MePage: View {
                 HStack(spacing: 4) {
                     Text(ctaTitle)
                     Image(systemName: "arrow.right")
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(.appSubCaptionMono)
                 }
                 .font(.appCaption)
                 .foregroundStyle(tint)
@@ -612,7 +612,7 @@ struct MePage: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Image(systemName: systemIcon)
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.appBody)
                         .foregroundStyle(tint)
                         .frame(width: 28, height: 28)
                         .background(tint.opacity(0.14), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
@@ -626,12 +626,12 @@ struct MePage: View {
                     }
 
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.appCaption)
                         .foregroundStyle(.tertiary)
                 }
 
                 Text(title)
-                    .font(.appBody)
+                    .font(.appHeadline)
                     .foregroundStyle(.appLabel)
             }
             .padding(12)
@@ -721,7 +721,7 @@ struct MePage: View {
         NavigationLink(destination: destination) {
             HStack(spacing: 12) {
                 Image(systemName: icon)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.appBody)
                     .foregroundStyle(tint)
                     .frame(width: 28, height: 28)
                     .background(tint.opacity(0.14), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
@@ -750,7 +750,7 @@ struct MePage: View {
                 }
 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.appCaption)
                     .foregroundStyle(.tertiary)
             }
             .padding(.horizontal, 12)
@@ -792,7 +792,7 @@ struct MePage: View {
     private func emptyBlockCard(icon: String, title: String, detail: String) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .font(.system(size: 20, weight: .semibold))
+                .font(.appTitle)
                 .foregroundStyle(.secondary)
                 .frame(width: 44, height: 44)
                 .background(Color.listBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
@@ -824,7 +824,7 @@ struct MePage: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         } else {
             Image(systemName: "person.fill")
-                .font(.system(size: 22, weight: .semibold))
+                .font(.appGameMetric(size: 22))
                 .foregroundStyle(.secondary)
                 .frame(width: 52, height: 52)
                 .background(Color(.systemGray5), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -846,7 +846,7 @@ struct MePage: View {
         case .offlineLocal:
             HStack(spacing: 5) {
                 Image(systemName: "icloud.slash")
-                    .font(.system(size: 11, weight: .medium))
+                    .font(.appSubCaptionMono)
                     .foregroundStyle(.secondary)
                 Text("离线，显示本地数据")
                     .font(.appCaption)

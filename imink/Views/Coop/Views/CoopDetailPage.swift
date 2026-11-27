@@ -28,7 +28,7 @@ struct CoopDetailPage: View {
             } else {
                 VStack(spacing: 10) {
                     Image(systemName: "exclamationmark.magnifyingglass")
-                        .font(.system(size: 32, weight: .semibold))
+                        .font(.appDisplay)
                         .foregroundStyle(.secondary)
                     Text("未找到该打工记录")
                         .font(.appHeadline)
@@ -48,7 +48,7 @@ struct CoopDetailPage: View {
                         } label: {
                             Image(systemName: viewModel.currentCoopIsFavorite ? "heart.fill" : "heart")
                                 .foregroundColor(viewModel.currentCoopIsFavorite ? .red : .accentColor)
-                                .font(.system(size: 18))
+                                .font(.appHeadline)
                         }
 
                         Button {

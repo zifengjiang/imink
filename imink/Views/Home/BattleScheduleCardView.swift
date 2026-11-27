@@ -202,7 +202,7 @@ struct BattleScheduleCardView: View {
         private var subscriptionIndicator: some View {
             Image(systemName: "bell.fill")
                 .foregroundColor(.orange)
-                .font(.system(size: 8, weight: .medium))
+                .font(.appSubCaptionMono)
                 .frame(width: 14, height: 14)
                 .background(
                     Circle()

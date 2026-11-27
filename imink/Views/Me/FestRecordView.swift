@@ -109,7 +109,7 @@ struct FestRecordView: View {
     private func emptyState(icon: String, title: String, subtitle: String) -> some View {
         VStack(spacing: 12) {
             Image(systemName: icon)
-                .font(.system(size: 36, weight: .semibold))
+                .font(.appDisplay)
                 .foregroundStyle(.secondary)
                 .frame(width: 68, height: 68)
                 .background(Color.listItemBackground, in: RoundedRectangle(cornerRadius: 16, style: .continuous))

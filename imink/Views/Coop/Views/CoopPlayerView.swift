@@ -27,7 +27,7 @@ struct CoopPlayerView: View {
                         HStack(spacing: 4) {
                             Image(systemName: "person.2.fill")
                                 .foregroundColor(.secondary)
-                                .font(.system(size: 12))
+                                .font(.appCaption)
                             Text("一起打工次数:")
                                 .font(.splatoonFont(size: 12))
                                 .foregroundColor(.secondary)

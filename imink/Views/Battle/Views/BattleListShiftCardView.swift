@@ -56,7 +56,7 @@ struct BattleListShiftCardView: View {
                 HStack(spacing: hSpace) {
                     HStack(spacing: 4) {
                         Image(systemName: "trophy.fill")
-                            .font(.system(size: 11, weight: .semibold))
+                            .font(.appSubCaptionMono)
                             .foregroundStyle(.spLightGreen)
                             .frame(width: 14, height: 14)
                         Text("\(status.victoryRate * 100, places: 1)%")
@@ -66,7 +66,7 @@ struct BattleListShiftCardView: View {
 
                     HStack(spacing: 4) {
                         Image(systemName: "scope")
-                            .font(.system(size: 11, weight: .semibold))
+                            .font(.appSubCaptionMono)
                             .foregroundStyle(.spOrange)
                             .frame(width: 14, height: 14)
                         Text("\(status.kd, places: 1)")
@@ -78,7 +78,7 @@ struct BattleListShiftCardView: View {
                 HStack(spacing: hSpace) {
                     HStack(spacing: 4) {
                         Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 11, weight: .semibold))
+                            .font(.appSubCaptionMono)
                             .foregroundStyle(.spLightGreen)
                             .frame(width: 14, height: 14)
                         Text("\(status.winCount)胜")
@@ -88,7 +88,7 @@ struct BattleListShiftCardView: View {
 
                     HStack(spacing: 4) {
                         Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 11, weight: .semibold))
+                            .font(.appSubCaptionMono)
                             .foregroundStyle(.spPink)
                             .frame(width: 14, height: 14)
                         Text("\(status.loseCount)负")

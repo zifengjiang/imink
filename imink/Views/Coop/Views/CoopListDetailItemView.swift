@@ -69,7 +69,7 @@ struct CoopListDetailItemView: View {
                     }) {
                         Image(systemName: "heart.fill")
                             .foregroundColor(.red)
-                            .font(.system(size: 14))
+                            .font(.appBody)
                     }
                     .buttonStyle(PlainButtonStyle())
                     .padding(.trailing, 8)

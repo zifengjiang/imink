@@ -36,7 +36,7 @@ struct SubscriptionOptionsSheet: View {
                 if schedules.isEmpty {
                     VStack(spacing: 16) {
                         Image(systemName: "calendar.badge.exclamationmark")
-                            .font(.system(size: 32))
+                            .font(.appDisplay)
                             .foregroundStyle(.secondary)
                         Text("暂无该场地的日程安排")
                             .font(.splatoonFont(size: 16))
@@ -155,7 +155,7 @@ struct ScheduleSubscriptionRow: View {
             }) {
                 HStack(spacing: 4) {
                     Image(systemName: isSubscribed ? "bell.fill" : "bell")
-                        .font(.system(size: 12))
+                        .font(.appCaption)
                     Text(isSubscribed ? "已订阅" : "订阅")
                         .font(.splatoonFont(size: 12))
                 }

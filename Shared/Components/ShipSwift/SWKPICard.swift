@@ -25,7 +25,7 @@ struct SWKPICard<Trailing: View>: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .center, spacing: 8) {
                 Image(systemName: icon)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.appBody)
                     .foregroundStyle(tint)
                     .frame(width: 28, height: 28)
                     .background(tint.opacity(0.14), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
@@ -37,15 +37,14 @@ struct SWKPICard<Trailing: View>: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(value)
-                    .font(.system(size: 24, weight: .semibold, design: .rounded))
+                    .font(.appGameMetric(size: 24))
                     .foregroundStyle(.appLabel)
-                    .monospacedDigit()
                     .contentTransition(.numericText())
                     .lineLimit(1)
                     .minimumScaleFactor(0.72)
 
                 Text(title)
-                    .font(.caption)
+                    .font(.appCaption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }

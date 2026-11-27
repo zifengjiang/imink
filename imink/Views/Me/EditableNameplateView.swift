@@ -112,7 +112,7 @@ struct BadgeSlot: View {
                         .overlay {
                             Image(systemName: "plus")
                                 .foregroundColor(.white.opacity(0.6))
-                                .font(.system(size: geometryHeight * 0.15))
+                                .font(.nameplateCanvasFont(size: geometryHeight * 0.15))
                         }
                 }
             }

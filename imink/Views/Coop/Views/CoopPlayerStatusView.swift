@@ -74,7 +74,7 @@ struct CoopPlayerStatusView:View {
                     HStack(spacing: 4) {
                         Image(systemName: "person.2.fill")
                             .foregroundColor(.secondary)
-                            .font(.system(size: 12))
+                            .font(.appCaption)
                         Text("一起打工次数:")
                             .font(.splatoonFont(size: 12))
                             .foregroundColor(.secondary)
@@ -98,7 +98,7 @@ struct CoopPlayerStatusView:View {
                     } label: {
                         HStack {
                             Image(systemName: "person.text.rectangle")
-                                .font(.system(size: 14))
+                                .font(.appBody)
                             Text("查看该玩家的所有记录")
                                 .font(.splatoonFont(size: 14))
                         }

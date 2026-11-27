@@ -66,7 +66,7 @@ struct LoginView: View {
                     .foregroundColor(Color.appLabel)
 
                 Text("login_subtitle")
-                    .font(.system(size: AppFontScale.mono))
+                    .font(.appMono)
                     .foregroundColor(Color.appLabel.opacity(0.72))
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
@@ -100,7 +100,7 @@ struct LoginView: View {
             } else {
                 VStack(spacing: 10) {
                     TextField("login_token_placeholder", text: $sessionToken)
-                        .font(.system(size: AppFontScale.mono))
+                        .font(.appMono)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .textContentType(.oneTimeCode)
@@ -141,7 +141,7 @@ struct LoginView: View {
             }
 
             Text("login_coral_disclaimer")
-                .font(.system(size: AppFontScale.minimum))
+                .font(.appSubCaptionMono)
                 .foregroundColor(Color.appLabel.opacity(0.55))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)

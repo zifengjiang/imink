@@ -203,7 +203,7 @@ struct ModeDetailScaffold<HeroContent: View, BodyContent: View>: View {
             } label: {
                 HStack(spacing: 6) {
                     Image(systemName: "doc.on.doc")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.appMono)
                     Text("复制摘要")
                         .font(.appCaption)
                 }
@@ -217,7 +217,7 @@ struct ModeDetailScaffold<HeroContent: View, BodyContent: View>: View {
             ShareLink(item: shareSummary) {
                 HStack(spacing: 6) {
                     Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.appMono)
                     Text("分享战报")
                         .font(.appCaption)
                 }
@@ -235,7 +235,7 @@ struct ModeDetailScaffold<HeroContent: View, BodyContent: View>: View {
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "photo.badge.arrow.down")
-                            .font(.system(size: 13, weight: .semibold))
+                            .font(.appMono)
                         Text("存相册")
                             .font(.appCaption)
                     }

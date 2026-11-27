@@ -270,7 +270,7 @@ struct SplatoonToastStamp: View {
                 spinner
             } else {
                 Image(systemName: Self.symbolName(for: tone))
-                    .font(.system(size: 15, weight: .black))
+                    .font(.appGameSubhead)
                     .foregroundStyle(tone.ink)
             }
         }

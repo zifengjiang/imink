@@ -53,7 +53,7 @@ struct VDGridView: View {
                 if data.isEmpty {
                     HStack(spacing: 8) {
                         Image(systemName: "square.grid.3x3.topleft.filled")
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(.appBody)
                             .foregroundStyle(.secondary)
                         Text(isCoop ? "vd_grid_empty_coop" : "vd_grid_empty_battle")
                             .font(.appCaption)

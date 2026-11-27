@@ -63,12 +63,12 @@ struct WeaponRecordView: View {
                         ForEach(0..<record.stats.level, id: \.self) { _ in
                             Image(systemName: "star.fill")
                                 .foregroundColor(.yellow)
-                                .font(.system(size: proxy.size.width/12))
+                                .font(.appSubCaptionMono)
                         }
                         ForEach(record.stats.level..<5, id: \.self) { _ in
                             Image(systemName: "star.fill")
                                 .foregroundColor(.clear)
-                                .font(.system(size: proxy.size.width/12))
+                                .font(.appSubCaptionMono)
                         }
                     }
                     .frame(maxWidth: .infinity)

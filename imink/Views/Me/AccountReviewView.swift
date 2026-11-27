@@ -94,7 +94,7 @@ struct AccountReviewView: View {
     private var loggedOutContent: some View {
         HStack(spacing: 12) {
             Image(systemName: "person.crop.circle.badge.exclamationmark")
-                .font(.system(size: 28, weight: .medium))
+                .font(.appDisplay)
                 .foregroundStyle(.secondary)
                 .frame(width: 60, height: 60)
                 .background(Color(.systemGray5), in: Circle())

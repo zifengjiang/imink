@@ -121,7 +121,7 @@ struct SalmonRunScheduleCardView: View {
     private var subscriptionIndicator: some View {
         Image(systemName: "bell.fill")
             .foregroundColor(.orange)
-            .font(.system(size: 14, weight: .medium))
+            .font(.appBody)
             .frame(width: 20, height: 20)
             .background(
                 Circle()

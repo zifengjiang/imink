@@ -55,7 +55,7 @@ struct BattleDetailView: View {
             } else {
                 VStack(spacing: 10) {
                     Image(systemName: "exclamationmark.magnifyingglass")
-                        .font(.system(size: 32, weight: .semibold))
+                        .font(.appDisplay)
                         .foregroundStyle(.secondary)
                     Text("未找到该对战记录")
                         .font(.appHeadline)
@@ -224,7 +224,7 @@ struct BattleDetailView: View {
                     )
                     VStack(spacing: 6) {
                         Image(systemName: "map")
-                            .font(.system(size: 24, weight: .semibold))
+                            .font(.appTitle)
                             .foregroundStyle(.white.opacity(0.7))
                         Text(resolvedStageLabel(battle: battle, stage: stage))
                             .font(.appBody)

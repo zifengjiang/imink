@@ -55,9 +55,7 @@ struct HomePage: View {
                             }) {
                                 HStack(spacing: 4) {
                                     Image(systemName: showSubscribedOnly ? "bell.fill" : "bell")
-                                        .font(.system(size: 14, weight: .medium))
-                                    // Text(showSubscribedOnly ? "已订阅" : "全部")
-                                    //     .font(.system(size: 12, weight: .medium))
+                                        .font(.appBody)
                                 }
                                 .foregroundColor(showSubscribedOnly ? .orange : .secondary)
                                 .padding(.horizontal, 8)

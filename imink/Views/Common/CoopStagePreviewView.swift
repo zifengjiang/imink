@@ -51,7 +51,7 @@ struct CoopStagePreviewView: View {
                 // 无数据状态
                 VStack(spacing: 8) {
                     Image(systemName: "chart.bar.xaxis")
-                        .font(.system(size: 24))
+                        .font(.appTitle)
                         .foregroundStyle(.secondary)
                     Text("暂无该场地的打工记录")
                         .font(.splatoonFont(size: 14))
@@ -83,7 +83,7 @@ struct CoopStagePreviewView: View {
         VStack(spacing: 8) {
             HStack {
                 Image(systemName: "bell")
-                    .font(.system(size: 14))
+                    .font(.appBody)
                     .foregroundStyle(.secondary)
                 Text("订阅提醒")
                     .font(.splatoonFont(size: 14))
@@ -108,7 +108,7 @@ struct CoopStagePreviewView: View {
                     }) {
                         HStack(spacing: 6) {
                             Image(systemName: "bell.badge.plus")
-                                .font(.system(size: 14))
+                                .font(.appBody)
                             Text("订阅提醒")
                                 .font(.splatoonFont(size: 14))
                         }
@@ -125,7 +125,7 @@ struct CoopStagePreviewView: View {
                         // 订阅状态指示
                         HStack {
                             Image(systemName: "bell.fill")
-                                .font(.system(size: 12))
+                                .font(.appCaption)
                                 .foregroundStyle(.orange)
                             Text("已订阅 \(stageSubscriptions.count) 个日程")
                                 .font(.splatoonFont(size: 12))
@@ -152,7 +152,7 @@ struct CoopStagePreviewView: View {
                         }) {
                             HStack(spacing: 4) {
                                 Image(systemName: "gear")
-                                    .font(.system(size: 12))
+                                    .font(.appCaption)
                                 Text("管理订阅")
                                 .font(.splatoonFont(size: 12))
                             }

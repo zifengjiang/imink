@@ -17,7 +17,7 @@ struct SubscriptionInfoRow: View {
             HStack {
                 // 日程类型图标
                 Image(systemName: subscription.scheduleType == .salmonRun ? "fish" : "gamecontroller")
-                    .font(.system(size: 10))
+                    .font(.appSubCaptionMono)
                     .foregroundStyle(.orange)
                 
                 // 日程标题

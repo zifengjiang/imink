@@ -55,7 +55,7 @@ struct BadgeSelectorView: View {
                                         .overlay {
                                             Image(systemName: "trash")
                                                 .foregroundColor(.red)
-                                                .font(.system(size: 16))
+                                                .font(.appBody)
                                         }
                                     
                                     Text("移除徽章")
