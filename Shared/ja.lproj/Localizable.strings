@@ -22,3 +22,7 @@
 "login_token_placeholder" = "Nintendo session token を貼り付け";
 "login_with_session_token" = "Session Token でログイン";
 "login_coral_disclaimer" = "認証は nxapi-znca-api 経由で Nintendo Coral API を使用し、Session Token は同期用に端末内へ保存されます。";
+"loading_text" = "読み込み中...";
+"home_recent_50_hint" = "右端ブロック = 直近50戦";
+"vd_grid_empty_battle" = "最近のバトル記録はありません";
+"vd_grid_empty_coop" = "最近のバイト記録はありません";

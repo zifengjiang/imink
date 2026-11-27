@@ -185,14 +185,13 @@ class HomeViewModel: ObservableObject {
                 try insertSchedules(json: json, db: db)
             }
             loadSchedules()
-            Toast.finish(id: IndicatorId, title: "获取赛程成功")
+            Toast.finish(id: IndicatorId, title: "获取赛程成功", dismissAfter: 2)
             AppUserDefaults.shared.scheduleRefreshTime = Int(Date().timeIntervalSince1970)
         }catch{
             loadSchedules()
             logError(error)
-            Toast.finish(id: IndicatorId, title: "获取赛程失败", failed: true)
+            Toast.finish(id: IndicatorId, title: "获取赛程失败", failed: true, dismissAfter: 3)
         }
-        Indicators.shared.dismiss(with: IndicatorId)
     }
     
     // MARK: - Stage Records Management

@@ -45,3 +45,7 @@
 "PRIVATE" = "私人比赛";
 "FEST" = "祭典比赛";
 "ALL" = "全部对战";
+"loading_text" = "加载中...";
+"home_recent_50_hint" = "右侧分块 = 最近 50 场";
+"vd_grid_empty_battle" = "暂无近期对战记录";
+"vd_grid_empty_coop" = "暂无近期打工记录";

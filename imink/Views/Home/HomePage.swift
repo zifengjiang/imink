@@ -7,8 +7,8 @@ struct HomePage: View {
     @StateObject var viewModel: HomeViewModel
     @EnvironmentObject var subscriptionManager: ScheduleSubscriptionManager
 
-    @State private var vdChartViewHeight: CGFloat = 200
-    @State private var vdChartLastBlockWidth: CGFloat = 0
+    @State private var vdChartViewHeight: CGFloat = 70
+    @State private var vdChartLastBlockWidth: CGFloat = 34
 
     @State private var mode: GameMode = .regular
     @State private var showSubscribedOnly = false
@@ -39,7 +39,7 @@ struct HomePage: View {
                             todaySalmonRunStatusView
                     }
                     .modifier(LoginViewModifier(isLogin: AppState.shared.isLogin, iconName: "TabBarHome"))
-                    .frame(height: 240)
+                    .frame(height: 264)
 
                     VStack(spacing:0){
                         HStack {
@@ -162,8 +162,8 @@ struct HomePage: View {
             }
             .padding(.top)
 
-            VStack(spacing: 0) {
-                HStack(alignment: .firstTextBaseline) {
+            VStack(spacing: 4) {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text("近期工况")
                         .font(.appTitle)
                         .foregroundStyle(Color.appLabel)
@@ -171,20 +171,25 @@ struct HomePage: View {
                     Text("(\(NSLocalizedString("最近500场", comment: "")))")
                         .font(.appCaption)
                         .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
 
-                    Spacer()
+                    Spacer(minLength: 8)
+
+                    Text("home_recent_50_hint")
+                        .font(.appSubCaptionMono)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
+                        .layoutPriority(1)
                 }
 
                 HStack {
                     Spacer()
-                    Text("最近50场")
-                        .font(.appSubCaptionMono)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.75)
-                        .frame(width: vdChartLastBlockWidth)
+                    Capsule()
+                        .fill(Color.secondary.opacity(0.45))
+                        .frame(width: max(vdChartLastBlockWidth, 24), height: 2)
                 }
-                .frame(height: 20)
 
                 VDGridView(data: viewModel.last500Coop, isCoop: true, height: $vdChartViewHeight, lastBlockWidth: $vdChartLastBlockWidth)
                     .frame(height: vdChartViewHeight)
@@ -212,8 +217,8 @@ struct HomePage: View {
             }
             .padding(.top)
 
-            VStack(spacing: 0) {
-                HStack(alignment: .firstTextBaseline) {
+            VStack(spacing: 4) {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text("近期战况")
                         .font(.appTitle)
                         .foregroundStyle(Color.appLabel)
@@ -221,20 +226,25 @@ struct HomePage: View {
                     Text("(\(NSLocalizedString("最近500场", comment: "")))")
                         .font(.appCaption)
                         .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
 
-                    Spacer()
+                    Spacer(minLength: 8)
+
+                    Text("home_recent_50_hint")
+                        .font(.appSubCaptionMono)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
+                        .layoutPriority(1)
                 }
 
                 HStack {
                     Spacer()
-                    Text("最近50场")
-                        .font(.appSubCaptionMono)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.75)
-                        .frame(width: vdChartLastBlockWidth)
+                    Capsule()
+                        .fill(Color.secondary.opacity(0.45))
+                        .frame(width: max(vdChartLastBlockWidth, 24), height: 2)
                 }
-                .frame(height: 20)
 
                 VDGridView(data: viewModel.last500Battle, isCoop:false, height: $vdChartViewHeight, lastBlockWidth: $vdChartLastBlockWidth)
                     .frame(height: vdChartViewHeight)
