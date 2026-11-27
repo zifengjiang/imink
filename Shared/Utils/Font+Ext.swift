@@ -19,7 +19,7 @@ enum AppFontScale {
 }
 
 extension Font {
-    enum CustomFont: String {
+    enum CustomFont: String, CaseIterable {
         case zhHans = "DFPZongYiW7-GB"
         case splatoon1 = "Splatfont 1 v1.008"
         case zhHant = "DFP222"
@@ -27,10 +27,32 @@ extension Font {
         case ja = "FOT-Kurokane Std EB"
     }
 
-    /// 进程内一次性缓存系统已注册字体名集合，避免列表每行渲染时反复创建 `UIFont` 探测。
+    /// 进程内一次性缓存系统已注册 PostScript 字体名集合，避免列表每行渲染时反复创建 `UIFont` 探测。
     private static let availableFontNames: Set<String> = Set(
         UIFont.familyNames.flatMap { UIFont.fontNames(forFamilyName: $0) }
     )
+
+    /// 家族名 → 首个 PostScript 名（进程内缓存一次）。
+    private static let postScriptNameByFamily: [String: String] = {
+        var map: [String: String] = [:]
+        for family in UIFont.familyNames {
+            if let ps = UIFont.fontNames(forFamilyName: family).first {
+                map[family] = ps
+            }
+        }
+        return map
+    }()
+
+    /// 解析可用的 PostScript 名：`rawValue` 本身就是 PostScript 名则直接返回，否则按家族名查表。
+    static func resolvedName(for font: CustomFont) -> String? {
+        if availableFontNames.contains(font.rawValue) {
+            return font.rawValue
+        }
+        if let ps = postScriptNameByFamily[font.rawValue], availableFontNames.contains(ps) {
+            return ps
+        }
+        return UIFont.fontNames(forFamilyName: font.rawValue).first
+    }
 
     /// 进程内缓存当前系统首选语言对应的游戏展示字体，消除每行列表重复读取 `Locale` 与字符串扫描开销。
     private static let cachedPreferredGameFont: CustomFont = resolvePreferredGameCustomFont()
@@ -145,11 +167,11 @@ extension Font {
         let clampedSize = max(size, AppFontScale.minimum)
         let resolvedStyle = textStyle ?? semanticTextStyle(for: clampedSize)
 
-        if availableFontNames.contains(font.rawValue) {
-            return .custom(font.rawValue, size: clampedSize, relativeTo: resolvedStyle)
+        if let postScriptName = resolvedName(for: font) {
+            return .custom(postScriptName, size: clampedSize, relativeTo: resolvedStyle)
         }
-        if font == .zhHant, availableFontNames.contains(CustomFont.zhHans.rawValue) {
-            return .custom(CustomFont.zhHans.rawValue, size: clampedSize, relativeTo: resolvedStyle)
+        if font == .zhHant, let fallbackPostScriptName = resolvedName(for: .zhHans) {
+            return .custom(fallbackPostScriptName, size: clampedSize, relativeTo: resolvedStyle)
         }
         return scaledSystemFont(size: clampedSize, weight: .bold, relativeTo: resolvedStyle)
     }
@@ -234,16 +256,16 @@ extension Font {
     // MARK: - 游戏铭牌等比画布专用（铭牌按 284pt 基准画布等比缩放，不随外部字阶变形）
 
     static func nameplateCanvasFont(size: CGFloat) -> Font {
-        if availableFontNames.contains(cachedPreferredGameFont.rawValue),
-           let uiFont = UIFont(name: cachedPreferredGameFont.rawValue, size: size) {
+        if let postScriptName = resolvedName(for: cachedPreferredGameFont),
+           let uiFont = UIFont(name: postScriptName, size: size) {
             return Font(uiFont)
         }
         return .system(size: size, weight: .semibold)
     }
 
     static func nameplateCanvasTitleFont(size: CGFloat) -> Font {
-        if availableFontNames.contains(CustomFont.splatoon1.rawValue),
-           let uiFont = UIFont(name: CustomFont.splatoon1.rawValue, size: size) {
+        if let postScriptName = resolvedName(for: .splatoon1),
+           let uiFont = UIFont(name: postScriptName, size: size) {
             return Font(uiFont)
         }
         return .system(size: size, weight: .bold)

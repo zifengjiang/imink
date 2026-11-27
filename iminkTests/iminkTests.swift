@@ -46,6 +46,34 @@ final class iminkTests: XCTestCase {
         XCTAssertEqual(LatestBattleHistoriesQuery().sampleData, Data())
     }
 
+    func testAllCustomGameFontsResolveRegisteredPostScriptNames() throws {
+        let registeredPostScriptNames = Set(
+            UIFont.familyNames.flatMap { UIFont.fontNames(forFamilyName: $0) }
+        )
+        XCTAssertEqual(Font.CustomFont.allCases.count, 5)
+
+        for customFont in Font.CustomFont.allCases {
+            let postScriptName = try XCTUnwrap(
+                Font.resolvedName(for: customFont),
+                "Expected non-nil PostScript name for CustomFont.\(customFont) (rawValue: \(customFont.rawValue))"
+            )
+            XCTAssertTrue(
+                registeredPostScriptNames.contains(postScriptName),
+                "Resolved PostScript name '\(postScriptName)' for CustomFont.\(customFont) must exist in UIFont.fontNames"
+            )
+            XCTAssertNotNil(
+                UIFont(name: postScriptName, size: 17),
+                "UIFont(name: '\(postScriptName)', size: 17) must load for CustomFont.\(customFont)"
+            )
+        }
+
+        XCTAssertEqual(Font.resolvedName(for: .zhHans), "DFPZongYiW7")
+        XCTAssertEqual(Font.resolvedName(for: .splatoon1), "Splatfont1v1.008-Regular")
+        XCTAssertEqual(Font.resolvedName(for: .zhHant), "DFP222")
+        XCTAssertEqual(Font.resolvedName(for: .ko), "KoreanERIN-M")
+        XCTAssertEqual(Font.resolvedName(for: .ja), "KurokaneStd-EB")
+    }
+
     func testNintendoLoginAcceptsUserWithoutBirthday() throws {
         let user = try JSONDecoder().decode(
             NSOAuthorization.NAUser.self,
