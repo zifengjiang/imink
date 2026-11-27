@@ -14,7 +14,7 @@ iOS 26/27 的系统浮动胶囊 `TabView` 完全接管了底部标签栏绘制�
 | **4 个根页面生命周期、懒加载与 `NavigationStack` 状态保持** | **系统能力兜住**（保留 `MainView` 原有 `TabView(selection: $tabSelection)`） | 不拆 `TabView`，通过 `.toolbar(useCustomDock ? .hidden : .visible, for: .tabBar)` 仅隐藏系统 `UITabBar` 视觉层；Tab 切换、状态保活、`.sheet` / `.fullScreenCover` 模态层级全部继续由系统托管。 |
 | **兜底回退（`@AppStorage("imink.useCustomDock")`）** | **系统能力兜住** | 开关默认 `true`；切为 `false` 时恢复 `.toolbar(.visible, for: .tabBar)` 与 `.tabBarMinimizeBehavior(.onScrollDown)`，原系统 `TabView` 与顶部标题菜单零损可用。 |
 | **完整多维筛选抽屉（`BattleFilterView` / `CoopFilterView`）** | **现有页面复用** | 继续使用原生 `.sheet` 承载场地、武器、时间滑杆、工友搜索、收藏/删除状态等重筛选，与 Dock 共用同一个 ViewModel 的 `@Published var filter: Filter`。 |
-| **底栏胶囊 + 右侧独立圆钮 + 向上展开模式快筛面板** | **必须自绘**（`ExpandingDock.swift`） | SwiftUI 原生 `TabView` 不支持将胶囊向上变形为自定义筛选行卡片，也不支持注入游戏字体；自绘约 380 行纯 SwiftUI 组件即可完整实现。 |
+| **4-Tab 居中对称毛玻璃胶囊 + 二次点击同 Tab 向上展开模式快筛面板** | **必须自绘**（`ExpandingDock.swift`） | 保持「主页 / 对战 / 鲑鱼跑 / 我」**4 个等宽对称按钮**（无多余第 5 颗右圆钮）；首次点击未选中 Tab 切换页面，**在当前已选中 Tab 上再点一次**即向上原地形变为透明模式快筛面板，选完立即生效并自动回弹收起。 |
 | **列表滚动自动退让与底部净空补齐** | **轻量适配**（`FloatingBarInsets.swift`） | 用 SwiftUI 原生 `.onScrollGeometryChange` 被动感知列表滚动方向，不挂额外手势；`FloatingBarInsets` 按新 Dock 实测顶沿（`68pt`）补齐 `8pt` 透明呼吸净空。 |
 
 ---
@@ -64,54 +64,47 @@ iOS 26/27 的系统浮动胶囊 `TabView` 完全接管了底部标签栏绘制�
 ```mermaid
 stateDiagram-v2
     [*] --> collapsed
-    collapsed --> expanded : 点击右端圆形按钮
-    expanded --> collapsed : 再次点击右下圆形按钮 / 点击外部变暗遮罩 / 跳转更多筛选 Sheet
+    collapsed --> expanded : 二次点击当前已选中的 Tab（或上拉胶囊）
+    expanded --> collapsed : 再次点击当前 Tab / 点击模式行自动收起 / 点击外部遮罩 / 下滑面板
     collapsed --> scrollingHidden : 列表向下连续滚动 (y > 96pt 且累计下滑 > 28pt)
     scrollingHidden --> collapsed : 列表向上回滚 (> 12pt) / 回到顶部 / 触底 / 切换 Tab
 ```
 
 | 状态 | 触发条件 | 视觉与交互表现 |
 | --- | --- | --- |
-| `collapsed`（收起常驻态） | 默认初始态；面板关闭后；列表在顶部（`y <= 24pt`）、向上回滚或滚到底部（距底 `<= 36pt`） | 左为 **4-Tab 轻薄胶囊（`48pt` 高）**，右隔 `10pt` 为 **`48×48pt` 圆形展开按钮**；若当前 Tab 有生效筛选条件，圆钮右上角浮现模式色圆点角标。 |
-| `expanded`（面板展开态） | 点击右端圆形按钮 | 全屏浮现变暗虚化遮罩；左侧胶囊沿底边向上弹开成毛玻璃圆角面板，展示当前 Tab 模式筛选行 + 底部「去筛选页设置更多条件… `›`」；右下圆钮图标旋转为 `xmark`。点击任一模式行**立即同步 `Filter` 并重筛列表**（面板保持展开方便确认勾选态）；点遮罩或再点右下圆钮收回成胶囊。 |
+| `collapsed`（收起常驻态） | 默认初始态；面板关闭后；列表在顶部（`y <= 24pt`）、向上回滚或滚到底部（距底 `<= 36pt`） | **居中对称 4-Tab 轻薄毛玻璃胶囊（`48pt` 高，无多余第 5 颗按钮）**，等宽排布「主页 / 对战 / 鲑鱼跑 / 我」；若对战或鲑鱼跑启用了筛选条件，对应 Tab 图标右上角显示 `6pt` 模式色圆点。首次点击未选中的 Tab 切换页面；**在当前已选中 Tab 上再点一次**即弹出该 Tab 的筛选面板。 |
+| `expanded`（面板展开态） | 在当前已选中 Tab 上再点一次（或上拉胶囊） | 底层页面施加真实高斯模糊（`.blur(radius: 10)`）与极轻透点击层；4-Tab 胶囊通过 `GlassEffectContainer` + `glassEffectID` **连续向上生长形变**为透明毛玻璃面板，**原 4-Tab 胶囊常驻在面板最底部充当连续底座**（当前激活 Tab 图标翻转为 `chevron.down` 提示可再点收起）。点选任一单选模式行**立即同步 `Filter` 重筛列表，并在 80ms 视觉落定后带轻微回弹自动收起**；再次点击同 Tab、点外部遮罩或下滑面板亦可收起。 |
 | `scrollingHidden`（滚动退让态） | 非展开态下，列表 `y > 96pt`、未触底且连续下滑 `> 28pt` | 像 iOS 26 一样自动退让：整组 Dock 向屏幕下方轻移并淡出（`offsetY: +68pt, scale: 0.94, opacity: 0`，关闭点击热区）；稍向上滑 `> 12pt` 或滑到底部立即回弹恢复 `collapsed`。滚动容器底部 `safeAreaInset` 保持恒定 `76pt` 不跳变。 |
 
 ---
 
 ## 4. 各状态尺寸、圆角、材质与阴影常量（4pt 栅格）
 
-### 4.1 几何尺寸常量（`DockMetrics`）
+### 4.1 几何尺寸常量（`DockConfig`）
 
 | 常量项 | 数值 | 设计说明 |
 | --- | --- | --- |
-| `collapsedHeight` | **`48pt`** | 严格 `<= 49pt`（比 iOS 26 系统浮动栏 `62pt` 薄 `14pt`），契合全站 `4pt` 栅格且满足 Apple HIG `>= 44pt` 触控高度 |
-| `circleButtonSize` | **`48×48pt`** | 与左侧收起胶囊等高对齐，间距 `dockSpacing = 10pt` |
-| `cornerRadius` | **`24pt`**（`.continuous`） | `collapsedHeight / 2`，收起时为标准胶囊，展开时同源过渡为 `24pt` 连续曲率卡片 |
-| `tabPillHeight` / `tabPillInset` | **`40pt`** / **`4pt`** | 内部选中滑块圆角 `20pt`（`24 - 4 = 20` 同心圆角）；图标 `18×18pt` + `11pt` 游戏字体单行文案 |
-| `panelRowHeight` | **`44pt`** | 展开面板单行高度（内圆角 `12pt`），左侧 `28×28pt` 模式色图标块 + `15pt` 游戏字体模式名 + 右侧勾选标与 `›` chevron |
-| `expandedMaxHeight` | **`min(屏幕高 * 0.62, 428pt)`** | 对战（7 行模式 + 1 行更多条件 + 标题栏）完整展开约 **`396pt`**，打工（5 行 + 1 行更多条件 + 标题栏）约 **`312pt`**；小屏/横屏超出自动内滚 |
-| `horizontalMargin` / `maxDockWidth` | **`16pt`** / **`392pt`** | 手机竖屏左右各留 `16pt`；iPad 或横屏总宽封顶 `392pt` 居中悬浮 |
+| `collapsedHeight` | **`48pt`** | 严格 `<= 49pt`（比 iOS 26 系统浮动栏 `62pt` 薄 `14pt`），契合全站 `4pt` 栅格且满足 Apple HIG `>= 44pt` 触控高度；展开态下常驻于面板底部充当底座 |
+| `cornerRadius` | **`24pt`**（`.continuous`） | `collapsedHeight / 2`，收起时为标准居中对称 4-Tab 胶囊，展开时通过 `glassEffectTransition(.matchedGeometry)` 同源形变为 `24pt` 连续曲率透明面板 |
+| `tabPillHeight` / `tabPillInset` | **`40pt`** / **`4pt`** | 4 个按钮在 `HStack(spacing: 4)` 内等宽均分；内部选中滑块圆角 `20pt`（`24 - 4 = 20` 同心圆角）；图标 `18×18pt` + `11pt` 游戏字体单行文案 |
+| `panelRowHeight` / `panelIconSize` | **`40pt`** / **`28×28pt`** | 紧凑单行高度 `40pt` + `28pt` 图标块，保证对战全部 7 个模式 + 更多条件行 + 底部 `48pt` 胶囊底座在单屏完整放下无需内滚；单选模式行仅在选中态显示右侧 `✓`（无多余 `›`），导航行显示 `›` |
+| `horizontalMargin` / `maxDockWidth` | **`20pt`** / **`368pt`** | 去掉第 5 颗右圆钮后恢复左右完全对称边距 `20pt`；大屏总宽封顶 `368pt` 居中悬浮 |
 | `bottomMargin` | Face ID 机型 **`20pt`**（`max(safeArea.bottom - 14, 16)`）；无安全区机型 **`12pt`** | 精准悬停在 Home Indicator 上方，不压系统手势条 |
 | `tabBarTopFromScreenBottom` | Face ID 机型 **`68pt`**（`20 + 48`） | 实测值同步写入 `FloatingBarInsets.measuredCustomDockTop` / `measuredTabBarTop`，加上 `breathingSpacing = 8pt` 后列表底部总净空 **`76pt`** |
 
-### 4.2 材质与阴影
+### 4.2 材质与背景虚化（原生 Liquid Glass）
 
-- **毛玻璃材质**：主体采用 `.ultraThinMaterial`，叠加浅/深色微调衬底（浅色叠 `Color.white.opacity(0.58)` 提亮防脏，深色叠 `Color(red: 0.08, green: 0.09, blue: 0.12).opacity(0.68)` 塑造深色半透明卡片感；若系统开启「降低透明度」则自动切换为不透明 `Color.listItemBackground`），外圈配 `1pt` 顶部高光渐变描边。
-- **展开背景遮罩**：`Color.black.opacity(colorScheme == .dark ? 0.54 : 0.36)` 全屏淡入，点击即收起。
-- **阴影**：
-  - `collapsed`：`Color.black.opacity(colorScheme == .dark ? 0.38 : 0.14), radius: 14, x: 0, y: 6`
-  - `expanded`：`Color.black.opacity(colorScheme == .dark ? 0.50 : 0.24), radius: 24, x: 0, y: 10`
+- **统一毛玻璃材质**：居中对称 4-Tab 胶囊与展开面板置于同一个 `GlassEffectContainer(spacing: 0)` 内，直接调用 iOS 26 原生 `.glassEffect(.regular.interactive(), in: shape)` + `.glassEffectID("dock.primaryPlatter", in: glassNamespace)` + `.glassEffectTransition(.matchedGeometry)`，面板内部行采用全透明底（仅选中行叠 `Color.accentColor.opacity(0.13~0.22)` 轻透高亮胶囊），让底层折射色彩自然透出；当系统开启「降低透明度」（`accessibilityReduceTransparency`）时自动降级为 `.ultraThinMaterial` + `1pt` `.white.opacity(0.35)` 描边 + 柔和阴影。
+- **展开背景景深虚化**：对 `MainView` 底层 `tabViewCore` 施加 `.blur(radius: 10 * (1 - dragDismissProgress))` 配合极轻遮罩（浅色 `0.08` / 深色 `0.22`），消除死板纯灰蒙层，拉出通透景深层次。
 
 ---
 
 ## 5. 动画参数与手感取舍
 
-- **面板展开 / 收起主动画**：`.spring(response: 0.36, dampingFraction: 0.78, blendDuration: 0.08)`（严格落在目标区间 `response: 0.34~0.42, dampingFraction: 0.72~0.82` 中点）。
-  - **锚点与缩放**：展开面板附加 `.scaleEffect(isExpanded ? 1.0 : 0.94, anchor: .bottom)` 与 `.opacity` 过渡，使卡片有从底部胶囊向上轻弹张开的物理体积感，且底边 `maxY` 稳固不漂移。
-  - **取舍理由**：`0.36s` 响应迅速不拖沓；`0.78` 阻尼产生一次恰到好处的轻回弹，既呼应参考视频里轻盈灵动的弹性，又避免低阻尼果冻晃动导致文字难以第一时间阅读。
-- **Tab 选中滑块动画**：`.spring(response: 0.34, dampingFraction: 0.80)`，连点切换四个 Tab 时干脆跟手。
-- **滚动退让动画**：`.spring(response: 0.38, dampingFraction: 0.82)`，临界点平稳不闪烁。
-- **无障碍减弱动态效果（`UIAccessibility.isReduceMotionEnabled`）**：统一通过 `DockMotion.animation(...)` 检测 `UIAccessibility.isReduceMotionEnabled || reduceMotion`；一旦开启，**全部退化为 `.easeOut(duration: 0.2)`**，同时关闭 `scaleEffect`（恒为 `1.0`）与图标旋转位移。
+- **面板展开 / 收起主动画**：采用带轻微自然回弹的系统弹簧 **`.spring(response: 0.34, dampingFraction: 0.82)`**，配合 `GlassEffectContainer` 连续形变，底部 4-Tab 胶囊保持不动作为面板底座向上生长出菜单区，杜绝「胶囊消失 + 卡片另起」的割裂感。
+- **手势跟手进度驱动**：下拉面板任意区域或头部把手时采用 **`.interactiveSpring(response: 0.26, dampingFraction: 0.84)`** 实时驱动面板位移与背景模糊半径插值，松手后按位移/预测速度回弹归位或收起。
+- **二次点击判定与单选自动收起**：`tabItemButton` 通过 `tabSelection == tab.rawValue` 精准判定是否属于「当前激活 Tab 的二次点击」——未选中 Tab 首次点击仅切换页面不弹窗，已在当前 Tab 再点一次才触发展开/收起；点选面板内任一单选模式行立即刷新 `Filter` 与底层列表，停留 `80ms` 让勾选态视觉确认后自动触发 `.spring(response: 0.34, dampingFraction: 0.82)` 带轻微回弹收回成胶囊。
+- **无障碍减弱动态效果（`UIAccessibility.isReduceMotionEnabled`）**：统一通过 `DockMotion` 检测 `UIAccessibility.isReduceMotionEnabled || reduceMotion`；开启时全部退化为 `.easeOut(duration: 0.2)`。
 
 ---
 

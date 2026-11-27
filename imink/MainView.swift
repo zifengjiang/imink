@@ -10,12 +10,21 @@ struct MainView: View {
 
     @StateObject var mainViewModel = MainViewModel.shared
     @ObservedObject private var dockStore = DockVisibilityStore.shared
+    @Environment(\.accessibilityReduceMotion) private var envReduceMotion
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    private var backgroundBlurRadius: CGFloat {
+        guard useCustomDock, dockStore.isExpanded, !reduceTransparency else { return 0 }
+        return 10 * max(0, 1 - dockStore.dragDismissProgress)
+    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
             if useCustomDock {
                 tabViewCore
                     .tabBarMinimizeBehavior(.never)
+                    .blur(radius: backgroundBlurRadius)
+                    .animation(DockMotion.panelAnimation(reduceMotion: envReduceMotion), value: dockStore.isExpanded)
                     .accessibilityHidden(dockStore.isExpanded)
 
                 ExpandingDockHost(tabSelection: $tabSelection)
@@ -33,7 +42,9 @@ struct MainView: View {
         .appLineHeight()
         .onChange(of: tabSelection) { _, newValue in
             Haptics.generateIfEnabled(.selectionChanged)
-            dockStore.collapse()
+            withAnimation(DockMotion.panelAnimation(reduceMotion: envReduceMotion)) {
+                dockStore.collapse()
+            }
             // remove all coopDetailViewModelDetail in case of memory leak
             if newValue != 2 {
                 AppState.shared.viewModelDict.removeAll()

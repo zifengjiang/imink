@@ -1,14 +1,14 @@
 import SwiftUI
 import UIKit
 
-/// 自绘可展开底部栏（`ExpandingDock`）动画策略：严格尊重系统「减弱动态效果」设置。
+/// 自绘可展开底部栏（`ExpandingDock`）原生动效参数：对齐 iOS 26 系统交互式弹簧，严格尊重「减弱动态效果」。
 enum DockMotion {
-    static let expandResponse: Double = 0.36
-    static let expandDamping: Double = 0.78
-    static let tabSlideResponse: Double = 0.34
-    static let tabSlideDamping: Double = 0.80
-    static let scrollHideResponse: Double = 0.38
-    static let scrollHideDamping: Double = 0.82
+    static let expandResponse: Double = 0.34
+    static let expandDamping: Double = 0.82
+    static let interactiveResponse: Double = 0.26
+    static let interactiveDamping: Double = 0.84
+    static let scrollHideResponse: Double = 0.36
+    static let scrollHideDamping: Double = 0.86
     static let reducedDuration: Double = 0.20
 
     static func isReduceMotionActive(_ environmentReduceMotion: Bool) -> Bool {
@@ -18,13 +18,19 @@ enum DockMotion {
     static func panelAnimation(reduceMotion: Bool) -> Animation {
         isReduceMotionActive(reduceMotion)
             ? .easeOut(duration: reducedDuration)
-            : .spring(response: expandResponse, dampingFraction: expandDamping, blendDuration: 0.08)
+            : .spring(response: expandResponse, dampingFraction: expandDamping)
+    }
+
+    static func interactiveDragAnimation(reduceMotion: Bool) -> Animation {
+        isReduceMotionActive(reduceMotion)
+            ? .linear(duration: 0.05)
+            : .interactiveSpring(response: interactiveResponse, dampingFraction: interactiveDamping)
     }
 
     static func tabAnimation(reduceMotion: Bool) -> Animation {
         isReduceMotionActive(reduceMotion)
             ? .easeOut(duration: reducedDuration)
-            : .spring(response: tabSlideResponse, dampingFraction: tabSlideDamping)
+            : .spring(response: expandResponse, dampingFraction: expandDamping)
     }
 
     static func scrollHideAnimation(reduceMotion: Bool) -> Animation {
@@ -75,7 +81,11 @@ enum DockTab: Int, CaseIterable, Identifiable {
     }
 }
 
-/// 可展开底部栏：左侧为 4-Tab 轻薄毛玻璃胶囊（展开时向上生长为当前 Tab 模式快筛卡片），右侧为等高独立圆形按钮。
+/// 可展开底部栏（Liquid Glass 4-Tab 居中对称版）：
+/// - 仅保留「主页 / 对战 / 鲑鱼跑 / 我」**4 个等宽对称按钮**，无第 5 颗右侧圆钮；
+/// - 采用 iOS 26 `GlassEffectContainer` + `.glassEffect(.regular.interactive(), in:)` + `.glassEffectID` 实现真毛玻璃透明折射与同一玻璃体连续形变；
+/// - **二次点击当前已选中的 Tab** 即向上原地形变弹出该 Tab 的模式筛选面板；再次点击同 Tab、点外部遮罩或下滑面板即可收起；
+/// - 展开时底部 4-Tab 胶囊常驻充当面板底座/把手（激活 Tab 图标翻转为下箭头提示可再点收起）；单选模式行（40pt 行高、28pt 图标块、仅选中显示 `✓`）点击后立即生效并带轻微回弹自动收起。
 struct ExpandingDock: View {
     @Binding var tabSelection: Int
 
@@ -88,7 +98,10 @@ struct ExpandingDock: View {
     @Environment(\.accessibilityReduceMotion) private var envReduceMotion
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
+    @Namespace private var glassNamespace
     @Namespace private var tabSelectionNamespace
+
+    @State private var dragOffsetY: CGFloat = 0
 
     private var reduceMotion: Bool {
         DockMotion.isReduceMotionActive(envReduceMotion)
@@ -106,40 +119,21 @@ struct ExpandingDock: View {
         DockTab(rawValue: tabSelection) ?? .home
     }
 
-    private var onAccent: Color {
-        FilterSheetLayout.onAccent(for: colorScheme)
-    }
-
-    /// 当前激活 Tab 是否有生效中的筛选条件（用于右端圆钮角标指示）。
-    private var currentTabHasActiveFilter: Bool {
-        switch activeTab {
-        case .battle:
-            return battleViewModel.hasAnyActiveFilter
-        case .coop:
-            return coopViewModel.hasAnyActiveFilter
-        case .home, .me:
-            return false
-        }
-    }
-
     var body: some View {
         GeometryReader { proxy in
             let screenSize = proxy.size
             let safeBottom = FloatingBarInsets.safeArea.bottom
             let bottomMargin = DockConfig.bottomMargin(safeAreaBottom: safeBottom)
             let hiddenOffset = DockConfig.collapsedHeight + bottomMargin + 16
-            let maxPanelHeight = min(screenSize.height * 0.62, 432)
+            let maxPanelBodyHeight = max(200, min(screenSize.height * 0.68, 496) - DockConfig.collapsedHeight)
 
             ZStack(alignment: .bottom) {
                 if isExpanded {
                     backdropLayer
                 }
 
-                HStack(alignment: .bottom, spacing: DockConfig.dockSpacing) {
-                    expandingCapsuleOrPanel(maxPanelHeight: maxPanelHeight)
-                        .frame(maxWidth: .infinity)
-
-                    expandToggleCircleButton
+                GlassEffectContainer(spacing: 0) {
+                    morphingGlassPlatter(maxPanelBodyHeight: maxPanelBodyHeight)
                 }
                 .frame(maxWidth: DockConfig.maxDockWidth)
                 .padding(.horizontal, DockConfig.horizontalMargin)
@@ -151,14 +145,13 @@ struct ExpandingDock: View {
                     }
                 }
                 .padding(.bottom, bottomMargin)
-                .offset(y: isScrollingHidden ? hiddenOffset : 0)
+                .offset(y: isScrollingHidden ? hiddenOffset : dragOffsetY)
                 .scaleEffect(isScrollingHidden && !reduceMotion ? 0.94 : 1.0, anchor: .bottom)
                 .opacity(isScrollingHidden ? 0 : 1)
                 .allowsHitTesting(!isScrollingHidden)
                 .onGeometryChange(for: CGFloat.self) { geo in
                     geo.size.height
                 } action: { _ in
-                    // 记录收起态下 Dock 顶沿距屏幕物理底边的高度，供 FloatingBarInsets 全局共享
                     if !isExpanded {
                         let restingTop = bottomMargin + DockConfig.collapsedHeight
                         if abs(FloatingBarInsets.measuredCustomDockTop - restingTop) > 0.5 {
@@ -179,16 +172,19 @@ struct ExpandingDock: View {
         }
     }
 
-    // MARK: - 1. 变暗背景遮罩
+    // MARK: - 1. 轻透背景点击遮罩（底层页面通过 MainView `.blur(radius:)` 产生真实景深虚化，不使用纯灰实色蒙层）
 
     private var backdropLayer: some View {
         Color.black
-            .opacity(colorScheme == .dark ? 0.54 : 0.36)
+            .opacity(
+                (colorScheme == .dark ? 0.22 : 0.08) * Double(max(0, 1 - dockStore.dragDismissProgress))
+            )
             .ignoresSafeArea()
             .contentShape(Rectangle())
             .onTapGesture {
                 Haptics.generateIfEnabled(.light)
                 withAnimation(DockMotion.panelAnimation(reduceMotion: envReduceMotion)) {
+                    dragOffsetY = 0
                     dockStore.collapse()
                 }
             }
@@ -196,55 +192,53 @@ struct ExpandingDock: View {
             .accessibilityHidden(true)
     }
 
-    // MARK: - 2. 左侧主容器（收起态 4-Tab 胶囊 ⇄ 展开态模式筛选卡片）
+    // MARK: - 2. 居中对称连续变形毛玻璃胶囊/面板主体（展开时上部生长出透明筛选行，底部 4-Tab 胶囊常驻作为面板底座）
 
-    private func expandingCapsuleOrPanel(maxPanelHeight: CGFloat) -> some View {
-        let shape = RoundedRectangle(cornerRadius: DockConfig.cornerRadius, style: .continuous)
+    private func morphingGlassPlatter(maxPanelBodyHeight: CGFloat) -> some View {
+        let platterShape = RoundedRectangle(cornerRadius: DockConfig.cornerRadius, style: .continuous)
 
-        return ZStack(alignment: .bottom) {
+        return VStack(spacing: 0) {
             if isExpanded {
-                expandedCardBody(maxPanelHeight: maxPanelHeight)
+                expandedMenuSection(maxPanelBodyHeight: maxPanelBodyHeight)
                     .transition(
                         reduceMotion
                             ? .opacity
-                            : .scale(scale: 0.94, anchor: .bottom).combined(with: .opacity)
+                            : .opacity.combined(with: .scale(scale: 0.96, anchor: .bottom))
                     )
-            } else {
-                collapsedTabBar
-                    .transition(.opacity)
+
+                Rectangle()
+                    .fill(Color.primary.opacity(colorScheme == .dark ? 0.14 : 0.09))
+                    .frame(height: 0.6)
+                    .padding(.horizontal, 12)
             }
+
+            // 居中对称 4-Tab 胶囊始终保留在底部，展开态下自然成为面板底座与把手，视觉完全连续
+            collapsedTabBarHandle
         }
         .frame(maxWidth: .infinity)
-        .frame(minHeight: DockConfig.collapsedHeight)
-        .background {
-            glassSurface(in: shape, elevated: isExpanded)
-        }
-        .clipShape(shape)
-        .overlay {
-            shape.strokeBorder(glassBorderGradient, lineWidth: 1)
-        }
-        .shadow(
-            color: Color.black.opacity(
-                isExpanded
-                    ? (colorScheme == .dark ? 0.50 : 0.24)
-                    : (colorScheme == .dark ? 0.38 : 0.14)
-            ),
-            radius: isExpanded ? 24 : 14,
-            x: 0,
-            y: isExpanded ? 10 : 6
+        .modifier(
+            AdaptiveLiquidGlassModifier(
+                shape: platterShape,
+                reduceTransparency: reduceTransparency,
+                colorScheme: colorScheme
+            )
         )
+        .glassEffectID("dock.primaryPlatter", in: glassNamespace)
+        .glassEffectTransition(.matchedGeometry)
+        .simultaneousGesture(platterVerticalDragGesture)
     }
 
-    // MARK: - 3. 收起态 4 个 Tab 横排胶囊（高度 48pt <= 49pt）
+    // MARK: - 3. 居中对称 4-Tab 胶囊（二次点击当前已选 Tab 弹出/收起面板，高度 48pt <= 49pt）
 
-    private var collapsedTabBar: some View {
-        HStack(spacing: 2) {
+    private var collapsedTabBarHandle: some View {
+        HStack(spacing: 4) {
             ForEach(DockTab.allCases) { tab in
                 tabItemButton(tab)
             }
         }
         .padding(DockConfig.tabPillInset)
         .frame(height: DockConfig.collapsedHeight)
+        .contentShape(Rectangle())
         .accessibilityElement(children: .contain)
     }
 
@@ -254,25 +248,50 @@ struct ExpandingDock: View {
             (tab == .coop && coopViewModel.hasAnyActiveFilter)
 
         return Button {
-            guard tabSelection != tab.rawValue else { return }
-            withAnimation(DockMotion.tabAnimation(reduceMotion: envReduceMotion)) {
-                tabSelection = tab.rawValue
+            if isSelected {
+                // 在当前已激活 Tab 上再点一次 -> 展开或收起该 Tab 的模式筛选面板
+                Haptics.generateIfEnabled(.light)
+                withAnimation(DockMotion.panelAnimation(reduceMotion: envReduceMotion)) {
+                    dragOffsetY = 0
+                    dockStore.toggleExpanded()
+                }
+            } else {
+                // 点击其他未激活 Tab -> 切换 Tab（若此前处于展开态则顺滑收起，不直接弹新面板）
+                withAnimation(DockMotion.tabAnimation(reduceMotion: envReduceMotion)) {
+                    dragOffsetY = 0
+                    if isExpanded {
+                        dockStore.collapse()
+                    }
+                    tabSelection = tab.rawValue
+                }
             }
         } label: {
             ZStack {
                 if isSelected {
                     Capsule()
-                        .fill(Color.accentColor.opacity(colorScheme == .dark ? 0.22 : 0.14))
+                        .fill(Color.accentColor.opacity(colorScheme == .dark ? (isExpanded ? 0.30 : 0.24) : (isExpanded ? 0.20 : 0.15)))
+                        .overlay {
+                            Capsule()
+                                .strokeBorder(Color.accentColor.opacity(isExpanded ? 0.32 : 0.22), lineWidth: 0.75)
+                        }
                         .matchedGeometryEffect(id: "dock.activeTabPill", in: tabSelectionNamespace)
                 }
 
                 VStack(spacing: 2) {
                     ZStack(alignment: .topTrailing) {
-                        Image(tab.iconName)
-                            .renderingMode(.template)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 18, height: 18)
+                        if isSelected && isExpanded {
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: 14, weight: .bold))
+                                .frame(width: 18, height: 18)
+                                .transition(.scale(scale: 0.8).combined(with: .opacity))
+                        } else {
+                            Image(tab.iconName)
+                                .renderingMode(.template)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 18, height: 18)
+                                .transition(.scale(scale: 0.85).combined(with: .opacity))
+                        }
 
                         if hasDot {
                             Circle()
@@ -287,7 +306,7 @@ struct ExpandingDock: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.85)
                 }
-                .foregroundStyle(isSelected ? Color.accentColor : Color.appLabel.opacity(0.68))
+                .foregroundStyle(isSelected ? Color.accentColor : Color.appLabel.opacity(0.76))
                 .padding(.horizontal, 4)
             }
             .frame(maxWidth: .infinity)
@@ -297,109 +316,42 @@ struct ExpandingDock: View {
         .buttonStyle(.plain)
         .accessibilityLabel(tab.localizedTitle)
         .accessibilityValue(hasDot ? "已启用筛选" : "")
+        .accessibilityHint(isSelected ? (isExpanded ? "再次点击收起筛选面板" : "再次点击展开筛选面板") : "")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
         .accessibilityIdentifier("expandingDock.tab.\(tab.rawValue)")
     }
 
-    // MARK: - 4. 右端（展开后右下）独立圆形按钮
+    // MARK: - 5. 展开态透明菜单区（40pt 紧凑行高 + 28pt 图标块，7 项一屏完整容纳）
 
-    private var expandToggleCircleButton: some View {
-        let circle = Circle()
-        let showAccentRing = isExpanded || currentTabHasActiveFilter
+    private func expandedMenuSection(maxPanelBodyHeight: CGFloat) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            panelGrabberAndHeader
 
-        return Button {
-            Haptics.generateIfEnabled(.light)
-            withAnimation(DockMotion.panelAnimation(reduceMotion: envReduceMotion)) {
-                dockStore.toggleExpanded()
+            ViewThatFits(in: .vertical) {
+                panelRowsStack
+
+                ScrollView(.vertical, showsIndicators: false) {
+                    panelRowsStack
+                }
+                .frame(maxHeight: maxPanelBodyHeight - 84)
             }
-        } label: {
-            Image(systemName: isExpanded ? "xmark" : "slider.horizontal.3")
-                .font(.system(size: 17, weight: .bold))
-                .foregroundStyle(
-                    isExpanded
-                        ? onAccent
-                        : (currentTabHasActiveFilter ? Color.accentColor : Color.appLabel)
-                )
-                .rotationEffect(.degrees(isExpanded && !reduceMotion ? 90 : 0))
-                .frame(width: DockConfig.circleButtonSize, height: DockConfig.circleButtonSize)
-                .background {
-                    if isExpanded {
-                        circle.fill(Color.accentColor)
-                    } else {
-                        glassSurface(in: circle, elevated: false)
-                    }
-                }
-                .overlay {
-                    circle.strokeBorder(
-                        showAccentRing
-                            ? Color.accentColor.opacity(isExpanded ? 0.0 : 0.45)
-                            : Color.white.opacity(colorScheme == .dark ? 0.20 : 0.65),
-                        lineWidth: 1
-                    )
-                    .allowsHitTesting(false)
-                }
-                .overlay(alignment: .topTrailing) {
-                    if !isExpanded && currentTabHasActiveFilter {
-                        Circle()
-                            .fill(activeTab.themeColor)
-                            .frame(width: 10, height: 10)
-                            .overlay {
-                                Circle().strokeBorder(Color.listItemBackground, lineWidth: 1.5)
-                            }
-                            .offset(x: -1, y: 1)
-                            .allowsHitTesting(false)
-                    }
-                }
-                .shadow(
-                    color: Color.black.opacity(colorScheme == .dark ? 0.38 : 0.14),
-                    radius: 12,
-                    x: 0,
-                    y: 5
-                )
-                .contentShape(Circle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(isExpanded ? "收起模式面板" : "展开模式筛选面板")
-        .accessibilityValue(currentTabHasActiveFilter ? "筛选已启用" : "")
-        .accessibilityIdentifier("expandingDock.toggleButton")
-    }
-
-    // MARK: - 5. 展开态面板内容（按当前 Tab 渲染对应模式快筛 + 更多条件入口）
-
-    private func expandedCardBody(maxPanelHeight: CGFloat) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            panelHeader
-
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 4) {
-                    switch activeTab {
-                    case .battle:
-                        battleModeRows
-                    case .coop:
-                        coopRuleRows
-                    case .home:
-                        homeQuickRows
-                    case .me:
-                        meQuickRows
-                    }
-                }
-            }
-            .scrollBounceBehavior(.basedOnSize)
-            .frame(maxHeight: maxPanelHeight - 96)
-            .fixedSize(horizontal: false, vertical: true)
 
             if let footer = moreFilterFooterRow {
-                Divider()
-                    .opacity(0.22)
-                    .padding(.horizontal, 4)
+                Rectangle()
+                    .fill(Color.primary.opacity(colorScheme == .dark ? 0.12 : 0.08))
+                    .frame(height: 0.6)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
 
                 footer
             }
         }
-        .padding(DockConfig.panelPadding)
+        .padding(.horizontal, DockConfig.panelPadding)
+        .padding(.top, 6)
+        .padding(.bottom, 6)
     }
 
-    private var panelHeader: some View {
+    private var panelGrabberAndHeader: some View {
         let config: (badge: String, title: String, trailing: String?, accent: Color) = {
             switch activeTab {
             case .battle:
@@ -424,34 +376,58 @@ struct ExpandingDock: View {
             }
         }()
 
-        return HStack(spacing: 8) {
-            Text(config.badge)
-                .font(.appSubCaptionMono)
-                .foregroundStyle(config.accent)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 2)
-                .background(config.accent.opacity(0.16), in: Capsule())
+        return VStack(spacing: 4) {
+            Capsule()
+                .fill(Color.primary.opacity(colorScheme == .dark ? 0.28 : 0.18))
+                .frame(width: 34, height: 4)
+                .frame(maxWidth: .infinity)
 
-            Text(config.title)
-                .font(.appHeadline)
-                .foregroundStyle(.appLabel)
-                .lineLimit(1)
+            HStack(spacing: 8) {
+                Text(config.badge)
+                    .font(.appSubCaptionMono)
+                    .foregroundStyle(config.accent)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 2)
+                    .background(config.accent.opacity(0.16), in: Capsule())
 
-            Spacer(minLength: 4)
-
-            if let trailing = config.trailing {
-                Text(trailing)
-                    .font(.appCaptionMono)
-                    .foregroundStyle(.secondary)
+                Text(config.title)
+                    .font(.appBody)
+                    .foregroundStyle(.appLabel)
                     .lineLimit(1)
+
+                Spacer(minLength: 4)
+
+                if let trailing = config.trailing {
+                    Text(trailing)
+                        .font(.appSubCaptionMono)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
             }
+            .padding(.horizontal, 6)
         }
-        .padding(.horizontal, 8)
-        .padding(.top, 4)
         .padding(.bottom, 2)
+        .contentShape(Rectangle())
+        .gesture(expandedHeaderDragGesture)
     }
 
-    // MARK: - 5.1 对战模式快筛行（真实 BattleMode 枚举）
+    @ViewBuilder
+    private var panelRowsStack: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            switch activeTab {
+            case .battle:
+                battleModeRows
+            case .coop:
+                coopRuleRows
+            case .home:
+                homeQuickRows
+            case .me:
+                meQuickRows
+            }
+        }
+    }
+
+    // MARK: - 5.1 对战模式快筛行（真实 BattleMode 枚举，选完自动回弹收起，无多余 chevron）
 
     private var battleModeRows: some View {
         ForEach(BattleMode.allCases, id: \.rawValue) { mode in
@@ -459,27 +435,25 @@ struct ExpandingDock: View {
                 ? battleViewModel.filter.modes.isEmpty
                 : battleViewModel.filter.modes.contains(mode.rawValue)
 
-            dockPanelRow(
+            dockSelectableRow(
                 id: "expandingDock.battleMode.\(mode.rawValue)",
                 title: mode.name,
                 isSelected: isSelected,
                 iconTint: mode.color,
-                trailingChevron: true,
                 icon: {
                     if mode == .all {
                         Image(systemName: "square.grid.2x2.fill")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(isSelected ? onAccent : .spOrange)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(isSelected ? Color.accentColor : .spOrange)
                     } else {
                         mode.icon
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 18, height: 18)
+                            .frame(width: 17, height: 17)
                     }
                 },
                 action: {
-                    Haptics.generateIfEnabled(.selectionChanged)
-                    Task {
+                    selectModeAndAutoCollapse {
                         await battleViewModel.selectModeFromDock(mode)
                     }
                 }
@@ -487,7 +461,7 @@ struct ExpandingDock: View {
         }
     }
 
-    // MARK: - 5.2 鲑鱼跑规则快筛行（真实 CoopRule 枚举 + 打工卡片）
+    // MARK: - 5.2 鲑鱼跑规则快筛行（真实 CoopRule 枚举 + 打工卡片，选完自动回弹收起）
 
     @ViewBuilder
     private var coopRuleRows: some View {
@@ -505,47 +479,43 @@ struct ExpandingDock: View {
                 }
             }()
 
-            dockPanelRow(
+            dockSelectableRow(
                 id: "expandingDock.coopRule.\(rule.rawValue)",
                 title: rule.name,
                 isSelected: isSelected,
                 iconTint: ruleColor,
-                trailingChevron: true,
                 icon: {
                     if rule == .ALL {
                         Image(systemName: "square.grid.2x2.fill")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(isSelected ? onAccent : .spGreen)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(isSelected ? Color.accentColor : .spGreen)
                     } else {
                         rule.icon
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 18, height: 18)
+                            .frame(width: 17, height: 17)
                     }
                 },
                 action: {
-                    Haptics.generateIfEnabled(.selectionChanged)
-                    Task {
+                    selectModeAndAutoCollapse {
                         await coopViewModel.selectRuleFromDock(rule)
                     }
                 }
             )
         }
 
-        dockPanelRow(
+        dockSelectableRow(
             id: "expandingDock.coopRule.SHIFT_CARDS",
             title: "打工卡片",
             isSelected: coopViewModel.isShowingShiftCards,
             iconTint: .spYellow,
-            trailingChevron: true,
             icon: {
                 Image(systemName: "rectangle.stack.fill")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(coopViewModel.isShowingShiftCards ? onAccent : .spYellow)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(coopViewModel.isShowingShiftCards ? Color.accentColor : .spYellow)
             },
             action: {
-                Haptics.generateIfEnabled(.selectionChanged)
-                Task {
+                selectModeAndAutoCollapse {
                     await coopViewModel.selectShiftCardsFromDock()
                 }
             }
@@ -556,43 +526,47 @@ struct ExpandingDock: View {
 
     @ViewBuilder
     private var homeQuickRows: some View {
-        dockPanelRow(
+        dockSelectableRow(
             id: "expandingDock.home.battleSchedule",
             title: "对战日程",
             isSelected: homeScheduleType == 0,
             iconTint: .spOrange,
-            trailingChevron: true,
             icon: {
                 Image(.anarchy)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 18, height: 18)
+                    .frame(width: 17, height: 17)
             },
             action: {
-                Haptics.generateIfEnabled(.selectionChanged)
-                homeScheduleType = 0
+                selectModeAndAutoCollapse {
+                    homeScheduleType = 0
+                }
             }
         )
 
-        dockPanelRow(
+        dockSelectableRow(
             id: "expandingDock.home.coopSchedule",
             title: "鲑鱼跑日程",
             isSelected: homeScheduleType == 1,
             iconTint: .spGreen,
-            trailingChevron: true,
             icon: {
                 Image(.salmonRun)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 18, height: 18)
+                    .frame(width: 17, height: 17)
             },
             action: {
-                Haptics.generateIfEnabled(.selectionChanged)
-                homeScheduleType = 1
+                selectModeAndAutoCollapse {
+                    homeScheduleType = 1
+                }
             }
         )
 
-        Divider().opacity(0.18).padding(.horizontal, 4)
+        Rectangle()
+            .fill(Color.primary.opacity(colorScheme == .dark ? 0.12 : 0.08))
+            .frame(height: 0.6)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
 
         dockNavigationRow(
             id: "expandingDock.home.gotoBattleFilter",
@@ -711,56 +685,51 @@ struct ExpandingDock: View {
         }
     }
 
-    // MARK: - 6. 行组件与材质辅助
+    // MARK: - 6. 透明毛玻璃行组件（不叠实色块，底层折射色彩自然透出；单选行只显示 ✓ 不显示 ›）
 
-    private func dockPanelRow<Icon: View>(
+    private func dockSelectableRow<Icon: View>(
         id: String,
         title: String,
         isSelected: Bool,
         iconTint: Color,
-        trailingChevron: Bool,
         @ViewBuilder icon: () -> Icon,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
             HStack(spacing: 10) {
                 icon()
-                    .frame(width: 28, height: 28)
+                    .frame(width: DockConfig.panelIconSize, height: DockConfig.panelIconSize)
                     .background(
-                        isSelected
-                            ? Color.black.opacity(colorScheme == .dark ? 0.18 : 0.22)
-                            : iconTint.opacity(0.16),
+                        iconTint.opacity(isSelected ? 0.22 : 0.14),
                         in: RoundedRectangle(cornerRadius: 8, style: .continuous)
                     )
 
                 Text(title)
                     .font(.appBody)
-                    .foregroundStyle(isSelected ? onAccent : .appLabel)
+                    .foregroundStyle(isSelected ? Color.accentColor : Color.appLabel)
                     .lineLimit(1)
                     .minimumScaleFactor(0.85)
 
                 Spacer(minLength: 4)
 
                 if isSelected {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(onAccent)
-                }
-
-                if trailingChevron {
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(isSelected ? onAccent.opacity(0.85) : Color.secondary.opacity(0.55))
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(Color.accentColor)
                 }
             }
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 8)
             .frame(height: DockConfig.panelRowHeight)
-            .background(
-                isSelected
-                    ? Color.accentColor
-                    : Color.primary.opacity(colorScheme == .dark ? 0.06 : 0.04),
-                in: RoundedRectangle(cornerRadius: 14, style: .continuous)
-            )
+            .background {
+                if isSelected {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color.accentColor.opacity(colorScheme == .dark ? 0.22 : 0.13))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .strokeBorder(Color.accentColor.opacity(0.26), lineWidth: 0.75)
+                        }
+                }
+            }
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -780,10 +749,10 @@ struct ExpandingDock: View {
         Button(action: action) {
             HStack(spacing: 10) {
                 Image(systemName: systemImage)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(tint)
-                    .frame(width: 28, height: 28)
-                    .background(tint.opacity(0.15), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .frame(width: DockConfig.panelIconSize, height: DockConfig.panelIconSize)
+                    .background(tint.opacity(0.14), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
 
                 Text(title)
                     .font(.appCaption)
@@ -796,22 +765,18 @@ struct ExpandingDock: View {
                 if badgeCount > 0 {
                     Text("\(badgeCount)")
                         .font(.appSubCaptionMono)
-                        .foregroundStyle(onAccent)
+                        .foregroundStyle(Color.accentColor)
                         .padding(.horizontal, 7)
                         .padding(.vertical, 2)
-                        .background(Color.accentColor, in: Capsule())
+                        .background(Color.accentColor.opacity(0.16), in: Capsule())
                 }
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(Color.secondary.opacity(0.65))
             }
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 8)
             .frame(height: DockConfig.panelRowHeight)
-            .background(
-                Color.primary.opacity(colorScheme == .dark ? 0.05 : 0.035),
-                in: RoundedRectangle(cornerRadius: 14, style: .continuous)
-            )
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -819,43 +784,118 @@ struct ExpandingDock: View {
         .accessibilityIdentifier(id)
     }
 
-    @ViewBuilder
-    private func glassSurface<S: Shape>(in shape: S, elevated: Bool) -> some View {
-        if reduceTransparency {
-            shape.fill(Color.listItemBackground)
-                .allowsHitTesting(false)
-        } else {
-            shape
-                .fill(.ultraThinMaterial)
-                .overlay {
-                    shape.fill(
-                        colorScheme == .dark
-                            ? Color(red: 0.08, green: 0.09, blue: 0.12).opacity(elevated ? 0.72 : 0.56)
-                            : Color.white.opacity(elevated ? 0.76 : 0.52)
-                    )
+    // MARK: - 7. 交互式手势驱动（`.interactiveSpring` 跟手下拉收起 / 上拉展开）
+
+    private var expandedHeaderDragGesture: some Gesture {
+        DragGesture(minimumDistance: 8, coordinateSpace: .global)
+            .onChanged { value in
+                guard isExpanded else { return }
+                let dy = value.translation.height
+                withAnimation(DockMotion.interactiveDragAnimation(reduceMotion: envReduceMotion)) {
+                    dragOffsetY = dy > 0 ? dy * 0.65 : dy * 0.14
+                    dockStore.dragDismissProgress = min(1, max(0, dy / 160))
                 }
-                .allowsHitTesting(false)
-        }
+            }
+            .onEnded { value in
+                guard isExpanded else { return }
+                let dy = value.translation.height
+                let predictedY = value.predictedEndTranslation.height
+                withAnimation(DockMotion.panelAnimation(reduceMotion: envReduceMotion)) {
+                    dragOffsetY = 0
+                    dockStore.dragDismissProgress = 0
+                    if dy > 56 || predictedY > 110 {
+                        Haptics.generateIfEnabled(.light)
+                        dockStore.collapse()
+                    }
+                }
+            }
     }
 
-    private var glassBorderGradient: LinearGradient {
-        LinearGradient(
-            colors: [
-                Color.white.opacity(colorScheme == .dark ? 0.24 : 0.78),
-                Color.primary.opacity(colorScheme == .dark ? 0.10 : 0.08)
-            ],
-            startPoint: .top,
-            endPoint: .bottom
-        )
+    private var platterVerticalDragGesture: some Gesture {
+        DragGesture(minimumDistance: 16, coordinateSpace: .global)
+            .onChanged { value in
+                let dy = value.translation.height
+                let dx = value.translation.width
+                guard isExpanded, abs(dy) > abs(dx) * 1.2 else { return }
+                withAnimation(DockMotion.interactiveDragAnimation(reduceMotion: envReduceMotion)) {
+                    dragOffsetY = dy > 0 ? dy * 0.65 : dy * 0.14
+                    dockStore.dragDismissProgress = min(1, max(0, dy / 160))
+                }
+            }
+            .onEnded { value in
+                let dy = value.translation.height
+                let dx = value.translation.width
+                let predictedY = value.predictedEndTranslation.height
+                if isExpanded {
+                    withAnimation(DockMotion.panelAnimation(reduceMotion: envReduceMotion)) {
+                        dragOffsetY = 0
+                        dockStore.dragDismissProgress = 0
+                        if abs(dy) > abs(dx) * 1.2 && (dy > 44 || predictedY > 100) {
+                            Haptics.generateIfEnabled(.light)
+                            dockStore.collapse()
+                        }
+                    }
+                } else if abs(dy) > abs(dx) * 1.4 && dy < -32 {
+                    Haptics.generateIfEnabled(.light)
+                    withAnimation(DockMotion.panelAnimation(reduceMotion: envReduceMotion)) {
+                        dockStore.expand()
+                    }
+                }
+            }
+    }
+
+    // MARK: - 8. 单选完自动收起 & 导航跳转辅助
+
+    private func selectModeAndAutoCollapse(_ work: @escaping () async -> Void) {
+        Haptics.generateIfEnabled(.selectionChanged)
+        Task { @MainActor in
+            await work()
+            // 短促停留 80ms 让勾选视觉反馈先落定，随后自动沿原生弹簧曲线收起面板
+            try? await Task.sleep(for: .milliseconds(80))
+            withAnimation(DockMotion.panelAnimation(reduceMotion: envReduceMotion)) {
+                dragOffsetY = 0
+                dockStore.collapse()
+            }
+        }
     }
 
     private func closeAndPerform(_ block: @escaping () -> Void) {
         Haptics.generateIfEnabled(.light)
         withAnimation(DockMotion.panelAnimation(reduceMotion: envReduceMotion)) {
+            dragOffsetY = 0
             dockStore.collapse()
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
             block()
+        }
+    }
+}
+
+/// 统一材质封装：优先使用 iOS 26 原生 `.glassEffect(.regular.interactive(), in:)`，
+/// 系统开启「降低透明度」时优雅降级为 `.ultraThinMaterial` + `1pt` 白色高光描边 + 柔和阴影。
+private struct AdaptiveLiquidGlassModifier<S: InsettableShape>: ViewModifier {
+    let shape: S
+    let reduceTransparency: Bool
+    let colorScheme: ColorScheme
+
+    func body(content: Content) -> some View {
+        if reduceTransparency {
+            content
+                .background(.ultraThinMaterial, in: shape)
+                .overlay {
+                    shape
+                        .strokeBorder(Color.white.opacity(0.35), lineWidth: 1)
+                        .allowsHitTesting(false)
+                }
+                .shadow(
+                    color: Color.black.opacity(colorScheme == .dark ? 0.34 : 0.12),
+                    radius: 14,
+                    x: 0,
+                    y: 6
+                )
+        } else {
+            content
+                .glassEffect(.regular.interactive(), in: shape)
         }
     }
 }

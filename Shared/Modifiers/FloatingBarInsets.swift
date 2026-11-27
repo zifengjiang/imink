@@ -10,26 +10,21 @@ enum DockConfig {
     /// 收起态胶囊高度（严格 `<= 49pt`，4pt 栅格，比 iOS 26 系统浮动栏 62pt 薄 14pt）。
     static let collapsedHeight: CGFloat = 48
 
-    /// 右端独立圆形展开/收起按钮尺寸（与左侧胶囊等高）。
-    static let circleButtonSize: CGFloat = 48
-
-    /// 左胶囊与右圆形按钮之间的水平间距。
-    static let dockSpacing: CGFloat = 10
-
-    /// 容器圆角（`collapsedHeight / 2`，收起态即为标准胶囊，展开态同源过渡为圆角面板）。
+    /// 容器圆角（`collapsedHeight / 2`，收起态即为居中对称 4-Tab 标准胶囊，展开态同源过渡为圆角面板）。
     static let cornerRadius: CGFloat = 24
 
     /// 内部选中 Tab 滑块高度与内边距（`24 - 4 = 20pt` 同心圆角）。
     static let tabPillHeight: CGFloat = 40
     static let tabPillInset: CGFloat = 4
 
-    /// 展开态单行高度与面板内边距。
-    static let panelRowHeight: CGFloat = 44
+    /// 展开态单行高度、图标块尺寸与面板内边距（40pt 行高确保 7 项对战模式 + 更多筛选 + 底部胶囊把手一屏完整放下）。
+    static let panelRowHeight: CGFloat = 40
+    static let panelIconSize: CGFloat = 28
     static let panelPadding: CGFloat = 8
 
-    /// 屏幕两侧水平外边距与大屏（iPad / 横屏）最大总宽限制。
-    static let horizontalMargin: CGFloat = 16
-    static let maxDockWidth: CGFloat = 392
+    /// 屏幕两侧对称水平外边距与大屏（iPad / 横屏）最大总宽限制（取消第 5 颗右圆钮，恢复居中对称 4-Tab 胶囊）。
+    static let horizontalMargin: CGFloat = 20
+    static let maxDockWidth: CGFloat = 368
 
     /// 当前是否启用自绘 `ExpandingDock`（默认 `true`）。
     @MainActor static var isCustomDockEnabled: Bool {
@@ -63,6 +58,8 @@ final class DockVisibilityStore: ObservableObject {
     static let shared = DockVisibilityStore()
 
     @Published var state: DockState = .collapsed
+    /// 手势下拉面板时的归一化收起进度（`0` 完全展开，`1` 拉到底），用于联动背景模糊半径。
+    @Published var dragDismissProgress: CGFloat = 0
     /// 「我」页快捷面板触发的二级导航目标标识。
     @Published var meDestination: String = ""
     /// 收起态下 Dock 胶囊 + 右圆钮在全屏容器坐标中的可点击热区（不加 `@Published` 避免触发重绘循环）。
@@ -76,16 +73,19 @@ final class DockVisibilityStore: ObservableObject {
 
     func toggleExpanded() {
         accumulatedScrollDelta = 0
+        dragDismissProgress = 0
         state = (state == .expanded) ? .collapsed : .expanded
     }
 
     func expand() {
         accumulatedScrollDelta = 0
+        dragDismissProgress = 0
         state = .expanded
     }
 
     func collapse() {
         accumulatedScrollDelta = 0
+        dragDismissProgress = 0
         if state != .collapsed {
             state = .collapsed
         }
