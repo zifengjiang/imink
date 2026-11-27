@@ -80,6 +80,47 @@ enum DockMotion {
     }
 }
 
+/// 搜索匹配与「最近使用」持久化工具（供视图与单元测试直接验证）。
+enum DockSearchSupport {
+    static let recentModesStorageKey = "imink.dock.recentModes"
+    static let maxRecentCount = 3
+
+    /// 大小写不敏感、全半角不敏感、忽略所有空白字符的搜索词归一化。
+    static func normalize(_ raw: String) -> String {
+        raw
+            .folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: .current)
+            .components(separatedBy: .whitespacesAndNewlines)
+            .joined()
+            .replacingOccurrences(of: "\u{3000}", with: "")
+            .lowercased()
+    }
+
+    static func matches(query: String, candidates: [String]) -> Bool {
+        let q = normalize(query)
+        guard !q.isEmpty else { return true }
+        return candidates.contains { candidate in
+            normalize(candidate).contains(q)
+        }
+    }
+
+    static func parseRecentKeys(_ rawStorage: String) -> [String] {
+        rawStorage
+            .split(separator: "|")
+            .map(String.init)
+            .filter { !$0.isEmpty }
+    }
+
+    static func recordRecentKey(_ key: String, into rawStorage: String) -> String {
+        guard !key.isEmpty else { return rawStorage }
+        var list = parseRecentKeys(rawStorage).filter { $0 != key }
+        list.insert(key, at: 0)
+        if list.count > maxRecentCount {
+            list = Array(list.prefix(maxRecentCount))
+        }
+        return list.joined(separator: "|")
+    }
+}
+
 private struct SqueezePulseTrigger: Equatable {
     var generation: Int = 0
     var isOpening: Bool = true
@@ -143,11 +184,26 @@ enum DockTab: Int, CaseIterable, Identifiable {
     }
 }
 
-/// 可展开底部栏（Liquid Glass 4-Tab 居中对称版）：
-/// - 仅保留「主页 / 对战 / 鲑鱼跑 / 我」**4 个等宽对称按钮**，无第 5 颗右侧圆钮；
-/// - 采用 iOS 26 `GlassEffectContainer` + `.glassEffect(.regular.interactive(), in:)` + `.glassEffectID` 实现真毛玻璃透明折射与同一玻璃体连续形变；
-/// - **二次点击当前已选中的 Tab** 即向上原地形变弹出该 Tab 的模式筛选面板；再次点击同 Tab、点外部遮罩或下滑面板即可收起；
-/// - 展开时底部 4-Tab 胶囊常驻充当面板底座/把手（激活 Tab 图标翻转为下箭头提示可再点收起）；单选模式行（40pt 行高、28pt 图标块、仅选中显示 `✓`）点击后立即生效并带轻微回弹自动收起。
+/// 面板内可搜索、可加入「最近使用」的筛选项描述。
+private struct DockPanelItem: Identifiable {
+    let id: String
+    let recentKey: String?
+    let title: String
+    let keywords: [String]
+    let isSelected: Bool
+    let isNavigation: Bool
+    let badgeCount: Int
+    let iconTint: Color
+    let iconBuilder: () -> AnyView
+    let action: () -> Void
+}
+
+/// 可展开底部栏（Liquid Glass 4-Tab 居中对称 + 36pt 玻璃搜索框 + 最近使用 + 键盘避让版）：
+/// - 仅保留「主页 / 对战 / 鲑鱼跑 / 我」4 个等宽对称按钮；
+/// - 面板标题行下方、分组之前内嵌 36pt 高玻璃底搜索框（`TextField` + `magnifyingglass` + `.textFieldStyle(.plain)` + 圆角 12，占位「搜索模式或规则」）；
+/// - 支持模式名 + 规则名大小写不敏感、忽略空格实时过滤，无匹配时显示「没有匹配的筛选项」；
+/// - 面板顶部支持「最近使用」分区（`@AppStorage("imink.dock.recentModes")`，最多 3 个，空时不显示）；
+/// - 键盘弹出时整体上移不遮挡 Dock；点击遮罩或下滑时先收键盘再收面板。
 struct ExpandingDock: View {
     @Binding var tabSelection: Int
 
@@ -156,6 +212,7 @@ struct ExpandingDock: View {
     @EnvironmentObject private var coopViewModel: CoopListViewModel
 
     @AppStorage("home_page_selectedScheduleType") private var homeScheduleType: Int = 0
+    @AppStorage(DockSearchSupport.recentModesStorageKey) private var recentModesStorage: String = ""
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var envReduceMotion
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
@@ -165,6 +222,9 @@ struct ExpandingDock: View {
 
     @State private var dragOffsetY: CGFloat = 0
     @State private var squeezeTrigger = SqueezePulseTrigger()
+    @State private var searchText: String = ""
+    @State private var keyboardOverlap: CGFloat = 0
+    @FocusState private var isSearchFocused: Bool
 
     private var reduceMotion: Bool {
         DockMotion.isReduceMotionActive(envReduceMotion)
@@ -182,27 +242,30 @@ struct ExpandingDock: View {
         DockTab(rawValue: tabSelection) ?? .home
     }
 
-    /// 当前 Tab 面板内的总动画槽位数（含头部标题行 + 选项行 + 底部更多筛选行），用于精确计算自底向上与反序收起延迟。
+    private var isSearching: Bool {
+        !DockSearchSupport.normalize(searchText).isEmpty
+    }
+
     private var currentTotalStaggerSlots: Int {
-        switch activeTab {
-        case .battle:
-            return BattleMode.allCases.count + 2 // header + 7 modes + footer = 9
-        case .coop:
-            return CoopRule.allCases.count + 3   // header + 4 rules + shiftCards + footer = 7
-        case .home:
-            return 5                             // header + 2 schedules + 2 nav rows = 5
-        case .me:
-            return 6                             // header + 5 quick entries = 6
-        }
+        9
     }
 
     var body: some View {
         GeometryReader { proxy in
             let screenSize = proxy.size
+            let safeTop = FloatingBarInsets.safeArea.top
             let safeBottom = FloatingBarInsets.safeArea.bottom
-            let bottomMargin = DockConfig.bottomMargin(safeAreaBottom: safeBottom)
-            let hiddenOffset = DockConfig.collapsedHeight + bottomMargin + 16
-            let maxPanelBodyHeight = max(200, min(screenSize.height * 0.68, 496) - DockConfig.collapsedHeight)
+            let restingBottomMargin = DockConfig.bottomMargin(safeAreaBottom: safeBottom)
+            // 键盘弹出时整组面板 + 底部 4-Tab 底座整体上移到键盘顶沿上方 8pt，绝不遮住 Dock
+            let effectiveBottomMargin = (isExpanded && keyboardOverlap > 10)
+                ? (keyboardOverlap + 8)
+                : restingBottomMargin
+            let hiddenOffset = DockConfig.collapsedHeight + restingBottomMargin + 16
+            let availableAboveBottom = max(
+                220,
+                screenSize.height - safeTop - 10 - effectiveBottomMargin - DockConfig.collapsedHeight
+            )
+            let maxPanelBodyHeight = min(availableAboveBottom, 468)
             let fullPlatterWidth = min(
                 max(screenSize.width - DockConfig.horizontalMargin * 2, 240),
                 DockConfig.maxDockWidth
@@ -227,7 +290,7 @@ struct ExpandingDock: View {
                         DockVisibilityStore.shared.collapsedHitRect = rect
                     }
                 }
-                .padding(.bottom, bottomMargin)
+                .padding(.bottom, effectiveBottomMargin)
                 .offset(y: isScrollingHidden ? hiddenOffset : dragOffsetY)
                 .scaleEffect(isScrollingHidden && !reduceMotion ? 0.94 : 1.0, anchor: .bottom)
                 .opacity(isScrollingHidden ? 0 : 1)
@@ -236,7 +299,7 @@ struct ExpandingDock: View {
                     geo.size.height
                 } action: { _ in
                     if !isExpanded {
-                        let restingTop = bottomMargin + DockConfig.collapsedHeight
+                        let restingTop = restingBottomMargin + DockConfig.collapsedHeight
                         if abs(FloatingBarInsets.measuredCustomDockTop - restingTop) > 0.5 {
                             FloatingBarInsets.measuredCustomDockTop = restingTop
                         }
@@ -250,11 +313,42 @@ struct ExpandingDock: View {
         .dynamicTypeSize(...DynamicTypeSize.xLarge)
         .animation(DockMotion.transitionAnimation(to: dockStore.state, reduceMotion: envReduceMotion), value: dockStore.state)
         .onChange(of: isExpanded) { oldValue, newValue in
-            guard oldValue != newValue, !reduceMotion else { return }
-            squeezeTrigger = SqueezePulseTrigger(
-                generation: squeezeTrigger.generation + 1,
-                isOpening: newValue
-            )
+            guard oldValue != newValue else { return }
+            if !newValue {
+                dismissKeyboard()
+                searchText = ""
+            }
+            if !reduceMotion {
+                squeezeTrigger = SqueezePulseTrigger(
+                    generation: squeezeTrigger.generation + 1,
+                    isOpening: newValue
+                )
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)) { note in
+            guard let endFrame = (note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else { return }
+            let windowHeight = UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .flatMap(\.windows)
+                .first { $0.isKeyWindow }?
+                .bounds.height ?? 874
+            let overlap = max(0, windowHeight - endFrame.minY)
+            withAnimation(
+                reduceMotion
+                    ? .easeOut(duration: DockMotion.reducedDuration)
+                    : .spring(response: 0.30, dampingFraction: 0.88)
+            ) {
+                keyboardOverlap = overlap
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            withAnimation(
+                reduceMotion
+                    ? .easeOut(duration: DockMotion.reducedDuration)
+                    : .spring(response: 0.26, dampingFraction: 0.92)
+            ) {
+                keyboardOverlap = 0
+            }
         }
         .onAppear {
             let restingTop = DockConfig.defaultCustomDockTop(safeAreaBottom: FloatingBarInsets.safeArea.bottom)
@@ -262,7 +356,7 @@ struct ExpandingDock: View {
         }
     }
 
-    // MARK: - 1. 轻透背景点击遮罩（底层页面通过 MainView `.blur(radius:)` 产生真实景深虚化，不使用纯灰实色蒙层）
+    // MARK: - 1. 轻透背景点击遮罩（点遮罩时：若键盘已弹出则先收键盘、再收面板）
 
     private var backdropLayer: some View {
         Color.black
@@ -272,11 +366,7 @@ struct ExpandingDock: View {
             .ignoresSafeArea()
             .contentShape(Rectangle())
             .onTapGesture {
-                Haptics.generateIfEnabled(.light)
-                withAnimation(DockMotion.closeAnimation(reduceMotion: envReduceMotion)) {
-                    dragOffsetY = 0
-                    dockStore.collapse()
-                }
+                dismissKeyboardThenCollapse()
             }
             .transition(.opacity)
             .accessibilityHidden(true)
@@ -288,7 +378,6 @@ struct ExpandingDock: View {
         let platterShape = RoundedRectangle(cornerRadius: DockConfig.cornerRadius, style: .continuous)
 
         return VStack(spacing: 0) {
-            // 菜单行容器常驻挂载以驱动每行独立进出场 transition，收起态高度与内边距均为 0pt，且不做任何整体位移
             expandedMenuSection(fullPlatterWidth: fullPlatterWidth, maxPanelBodyHeight: maxPanelBodyHeight)
 
             if isExpanded {
@@ -299,7 +388,6 @@ struct ExpandingDock: View {
                     .transition(.opacity.animation(.easeOut(duration: 0.14)))
             }
 
-            // 居中对称 4-Tab 胶囊始终保留在底部，展开态下自然成为面板底座与把手，底边零跳位
             collapsedTabBarHandle
         }
         .clipShape(platterShape)
@@ -361,20 +449,21 @@ struct ExpandingDock: View {
 
         return Button {
             if isSelected {
-                // 在当前已激活 Tab 上再点一次 -> 按非对称开合弹簧展开或收起该 Tab 的模式筛选面板
-                Haptics.generateIfEnabled(.light)
-                let nextAnim = isExpanded
-                    ? DockMotion.closeAnimation(reduceMotion: envReduceMotion)
-                    : DockMotion.openAnimation(reduceMotion: envReduceMotion)
-                withAnimation(nextAnim) {
-                    dragOffsetY = 0
-                    dockStore.toggleExpanded()
+                if isExpanded {
+                    dismissKeyboardThenCollapse()
+                } else {
+                    Haptics.generateIfEnabled(.light)
+                    withAnimation(DockMotion.openAnimation(reduceMotion: envReduceMotion)) {
+                        dragOffsetY = 0
+                        dockStore.expand()
+                    }
                 }
             } else {
-                // 点击其他未激活 Tab -> 切换 Tab（若此前处于展开态则沿高阻尼收起曲线顺滑收拢）
-                withAnimation(DockMotion.closeAnimation(reduceMotion: envReduceMotion)) {
-                    dragOffsetY = 0
-                    if isExpanded {
+                if isExpanded {
+                    dismissKeyboard()
+                    searchText = ""
+                    withAnimation(DockMotion.closeAnimation(reduceMotion: envReduceMotion)) {
+                        dragOffsetY = 0
                         dockStore.collapse()
                     }
                 }
@@ -438,12 +527,8 @@ struct ExpandingDock: View {
         .accessibilityIdentifier("expandingDock.tab.\(tab.rawValue)")
     }
 
-    // MARK: - 4. 展开态透明菜单区（不做整体位移；每行独立错峰上浮 + 反序快速收起）
+    // MARK: - 4. 展开态菜单区：标题行 -> 36pt 玻璃搜索框 -> 最近使用(可选) -> 模式/规则列表 -> 底部更多条件
 
-    /// 生成单行错峰进出场过渡：
-    /// - 展开（insertion）：按自底向上序号 `openIndex`（`0` 最靠近 Dock 底座），`delay = openIndex * 0.030s`，`opacity 0→1` + `offset y +10→0` + `blur 3→0`；
-    /// - 收起（removal）：反序自顶向下 `closeIndex = total - 1 - openIndex`，单行 `0.088s` + `0.011s` 阶梯（9 槽位总时长 `0.176s <= 0.18s`）；
-    /// - Reduce Motion：纯 `.opacity` 淡入淡出。
     private func staggeredRowTransition(openIndex: Int) -> AnyTransition {
         if reduceMotion {
             return .opacity.animation(.easeOut(duration: DockMotion.reducedDuration))
@@ -473,24 +558,35 @@ struct ExpandingDock: View {
     }
 
     private func expandedMenuSection(fullPlatterWidth: CGFloat, maxPanelBodyHeight: CGFloat) -> some View {
-        let estimatedRowsHeight = CGFloat(currentTotalStaggerSlots) * (DockConfig.panelRowHeight + 2)
-        let useInnerScroll = estimatedRowsHeight > maxPanelBodyHeight
+        let sections = resolvedVisibleSections
+        let totalVisibleRows = sections.reduce(0) { $0 + $1.items.count }
+        let sectionHeaderCount = sections.filter { $0.header != nil }.count
+        let chromeHeight: CGFloat = 40 + 40 + (moreFilterFooterRow != nil ? 48 : 8)
+        let maxListViewportHeight = max(88, min(286, maxPanelBodyHeight - chromeHeight))
+        let estimatedListHeight = CGFloat(max(totalVisibleRows, 1)) * (DockConfig.panelRowHeight + 2)
+            + CGFloat(sectionHeaderCount) * 22
+        let shouldScroll = estimatedListHeight > maxListViewportHeight
 
-        return VStack(alignment: .leading, spacing: isExpanded ? 4 : 0) {
+        return VStack(alignment: .leading, spacing: isExpanded ? 5 : 0) {
             if isExpanded {
                 panelGrabberAndHeader
-                    .transition(staggeredRowTransition(openIndex: currentTotalStaggerSlots - 1))
+                    .transition(staggeredRowTransition(openIndex: 8))
+
+                // 面板标题行下方、所有分组之前：36pt 高玻璃底搜索框（圆角 12）
+                dockSearchField
+                    .transition(staggeredRowTransition(openIndex: 7))
             }
 
-            if useInnerScroll {
+            if shouldScroll {
                 if isExpanded {
                     ScrollView(.vertical, showsIndicators: false) {
-                        panelRowsStack
+                        panelSectionsContent(sections: sections, totalRows: totalVisibleRows)
                     }
-                    .frame(maxHeight: max(120, maxPanelBodyHeight - 84))
+                    .scrollDismissesKeyboard(.interactively)
+                    .frame(maxHeight: maxListViewportHeight)
                 }
             } else {
-                panelRowsStack
+                panelSectionsContent(sections: sections, totalRows: totalVisibleRows)
             }
 
             if isExpanded, let footer = moreFilterFooterRow {
@@ -498,7 +594,7 @@ struct ExpandingDock: View {
                     .fill(Color.primary.opacity(colorScheme == .dark ? 0.12 : 0.08))
                     .frame(height: 0.6)
                     .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
+                    .padding(.vertical, 1)
                     .transition(.opacity.animation(.easeOut(duration: 0.14)))
 
                 footer
@@ -511,14 +607,23 @@ struct ExpandingDock: View {
         .frame(width: fullPlatterWidth)
     }
 
+    // MARK: - 4.1 顶部标题把手与 36pt 玻璃搜索框
+
     private var panelGrabberAndHeader: some View {
         let config: (badge: String, title: String, trailing: String?, accent: Color) = {
             switch activeTab {
             case .battle:
-                let status = battleViewModel.filter.modes.isEmpty
-                    ? "全部"
-                    : "已选 \(battleViewModel.filter.modes.count)"
-                return ("对战", "模式筛选", status, .spOrange)
+                let status: String
+                if !battleViewModel.filter.rules.isEmpty,
+                   let first = battleViewModel.filter.rules.first,
+                   let r = BattleRule(rawValue: first) {
+                    status = (r == .turfWar) ? "涂地模式" : r.name
+                } else if battleViewModel.filter.modes.isEmpty {
+                    status = "全部"
+                } else {
+                    status = "已选 \(battleViewModel.filter.modes.count)"
+                }
+                return ("对战", "模式与规则筛选", status, .spOrange)
             case .coop:
                 let status: String
                 if coopViewModel.isShowingShiftCards {
@@ -566,273 +671,564 @@ struct ExpandingDock: View {
             }
             .padding(.horizontal, 6)
         }
-        .padding(.bottom, 2)
         .contentShape(Rectangle())
         .gesture(expandedHeaderDragGesture)
     }
 
+    /// 规格 1：面板标题行下方、分组之前的 36pt 玻璃底搜索框（`TextField` + `magnifyingglass` + `.textFieldStyle(.plain)` + 圆角 12）。
+    private var dockSearchField: some View {
+        let searchShape = RoundedRectangle(cornerRadius: 12, style: .continuous)
+
+        return HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(.secondary)
+
+            TextField("搜索模式或规则", text: $searchText)
+                .textFieldStyle(.plain)
+                .font(.appCaption)
+                .foregroundStyle(Color.appLabel)
+                .focused($isSearchFocused)
+                .submitLabel(.search)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+                .accessibilityIdentifier("expandingDock.searchField")
+
+            if !searchText.isEmpty {
+                Button {
+                    Haptics.generateIfEnabled(.light)
+                    searchText = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("清除搜索词")
+                .accessibilityIdentifier("expandingDock.searchClearButton")
+            }
+        }
+        .padding(.horizontal, 10)
+        .frame(height: 36)
+        .background {
+            if reduceTransparency {
+                searchShape
+                    .fill(Color(uiColor: .secondarySystemBackground))
+            } else {
+                searchShape
+                    .fill(.ultraThinMaterial)
+                    .opacity(colorScheme == .dark ? 0.65 : 0.78)
+            }
+        }
+        .overlay {
+            searchShape
+                .strokeBorder(
+                    Color.white.opacity(colorScheme == .dark ? 0.22 : 0.52),
+                    lineWidth: 0.8
+                )
+                .allowsHitTesting(false)
+        }
+    }
+
+    // MARK: - 5. 数据源组装：最近使用（最多 3 项，空时不显示）+ 模式名/规则名实时过滤 + 空结果占位
+
+    private struct PanelSection: Identifiable {
+        let id: String
+        let header: String?
+        let items: [DockPanelItem]
+    }
+
+    private var resolvedVisibleSections: [PanelSection] {
+        if isSearching {
+            let candidates = searchableCatalogForActiveTab.filter { item in
+                DockSearchSupport.matches(query: searchText, candidates: [item.title] + item.keywords)
+            }
+            return candidates.isEmpty
+                ? []
+                : [PanelSection(id: "search.results", header: nil, items: candidates)]
+        }
+
+        var sections: [PanelSection] = []
+
+        // 规格 4：「最近使用」分区（最多 3 个，存储于 @AppStorage("imink.dock.recentModes")，空时不显示这一区）
+        let recents = resolvedRecentItems
+        if !recents.isEmpty {
+            sections.append(PanelSection(id: "section.recent", header: "最近使用", items: recents))
+        }
+
+        switch activeTab {
+        case .battle:
+            sections.append(
+                PanelSection(
+                    id: "section.battleModes",
+                    header: recents.isEmpty ? "对战模式" : "全部模式",
+                    items: battleModeItems
+                )
+            )
+            sections.append(
+                PanelSection(
+                    id: "section.battleRules",
+                    header: "对战规则",
+                    items: battleRuleItems
+                )
+            )
+        case .coop:
+            sections.append(
+                PanelSection(
+                    id: "section.coopRules",
+                    header: recents.isEmpty ? nil : "打工规则",
+                    items: coopRuleItems
+                )
+            )
+        case .home:
+            sections.append(PanelSection(id: "section.home", header: nil, items: homeQuickItems))
+        case .me:
+            sections.append(PanelSection(id: "section.me", header: nil, items: meQuickItems))
+        }
+        return sections
+    }
+
+    /// 搜索时的候选池：在「对战」搜模式+对战规则；在「鲑鱼跑」搜打工规则；在「主页/我」同时支持搜全站模式与规则。
+    private var searchableCatalogForActiveTab: [DockPanelItem] {
+        switch activeTab {
+        case .battle:
+            return battleModeItems + battleRuleItems
+        case .coop:
+            return coopRuleItems
+        case .home:
+            return homeQuickItems + battleModeItems.filter { $0.id != "expandingDock.battleMode.ALL" } + battleRuleItems + coopRuleItems.filter { $0.id != "expandingDock.coopRule.ALL_RULE" }
+        case .me:
+            return meQuickItems + battleModeItems.filter { $0.id != "expandingDock.battleMode.ALL" } + battleRuleItems + coopRuleItems.filter { $0.id != "expandingDock.coopRule.ALL_RULE" }
+        }
+    }
+
+    private var resolvedRecentItems: [DockPanelItem] {
+        let keys = DockSearchSupport.parseRecentKeys(recentModesStorage)
+        guard !keys.isEmpty else { return [] }
+        let lookupPool = battleModeItems + battleRuleItems + coopRuleItems
+        var resolved: [DockPanelItem] = []
+        for key in keys {
+            guard let base = lookupPool.first(where: { $0.recentKey == key }) else { continue }
+            // 在对战页只展示对战最近项、在打工页只展示打工最近项，主页/我展示跨页最近项，保证语义干净直观
+            if activeTab == .battle && !key.hasPrefix("battle") { continue }
+            if activeTab == .coop && !key.hasPrefix("coop") { continue }
+            resolved.append(
+                DockPanelItem(
+                    id: "expandingDock.recent.\(key)",
+                    recentKey: base.recentKey,
+                    title: base.title,
+                    keywords: base.keywords,
+                    isSelected: base.isSelected,
+                    isNavigation: false,
+                    badgeCount: 0,
+                    iconTint: base.iconTint,
+                    iconBuilder: base.iconBuilder,
+                    action: base.action
+                )
+            )
+            if resolved.count >= DockSearchSupport.maxRecentCount { break }
+        }
+        return resolved
+    }
+
     @ViewBuilder
-    private var panelRowsStack: some View {
+    private func panelSectionsContent(sections: [PanelSection], totalRows: Int) -> some View {
         VStack(alignment: .leading, spacing: isExpanded ? 2 : 0) {
-            switch activeTab {
-            case .battle:
-                battleModeRows
-            case .coop:
-                coopRuleRows
-            case .home:
-                homeQuickRows
-            case .me:
-                meQuickRows
+            if isExpanded {
+                if sections.isEmpty && isSearching {
+                    // 规格 2：无搜索结果时显示一行「没有匹配的筛选项」
+                    HStack(spacing: 10) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                            .frame(width: DockConfig.panelIconSize, height: DockConfig.panelIconSize)
+                            .background(Color.secondary.opacity(0.12), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+
+                        Text("没有匹配的筛选项")
+                            .font(.appBody)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+
+                        Spacer(minLength: 4)
+                    }
+                    .padding(.horizontal, 8)
+                    .frame(height: DockConfig.panelRowHeight)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("没有匹配的筛选项")
+                    .accessibilityIdentifier("expandingDock.searchEmptyState")
+                    .transition(.opacity.animation(.easeOut(duration: 0.16)))
+                } else {
+                    ForEach(Array(sections.enumerated()), id: \.element.id) { secIdx, section in
+                        if let header = section.header {
+                            Text(header)
+                                .font(.appSubCaptionMono)
+                                .foregroundStyle(.secondary)
+                                .padding(.horizontal, 8)
+                                .padding(.top, secIdx == 0 ? 2 : 6)
+                                .padding(.bottom, 1)
+                                .accessibilityIdentifier("expandingDock.section.\(section.id)")
+                                .transition(.opacity.animation(.easeOut(duration: 0.14)))
+                        }
+
+                        ForEach(Array(section.items.enumerated()), id: \.element.id) { itemIdx, item in
+                            let openIdx = max(1, min(6, totalRows - itemIdx))
+                            renderPanelItem(item)
+                                .transition(staggeredRowTransition(openIndex: openIdx))
+                        }
+                    }
+                }
             }
         }
     }
 
-    // MARK: - 5.1 对战模式快筛行（真实 BattleMode 枚举，自底向上 30ms 错峰上浮，选完自动收起）
+    @ViewBuilder
+    private func renderPanelItem(_ item: DockPanelItem) -> some View {
+        if item.isNavigation {
+            dockNavigationRow(
+                id: item.id,
+                title: item.title,
+                tint: item.iconTint,
+                badgeCount: item.badgeCount,
+                icon: item.iconBuilder,
+                action: item.action
+            )
+        } else {
+            dockSelectableRow(
+                id: item.id,
+                title: item.title,
+                isSelected: item.isSelected,
+                iconTint: item.iconTint,
+                icon: item.iconBuilder,
+                action: item.action
+            )
+        }
+    }
 
-    private var battleModeRows: some View {
-        let modes = BattleMode.allCases
-        return ForEach(Array(modes.enumerated()), id: \.element.rawValue) { idx, mode in
-            if isExpanded {
-                let isSelected = mode == .all
+    // MARK: - 5.1 对战模式项 + 对战规则项
+
+    private var battleModeItems: [DockPanelItem] {
+        BattleMode.allCases.map { mode in
+            let isSelected = battleViewModel.filter.rules.isEmpty && (
+                mode == .all
                     ? battleViewModel.filter.modes.isEmpty
                     : battleViewModel.filter.modes.contains(mode.rawValue)
-                // footer 占槽位 0，最底部模式行从槽位 1 开始向上递增
-                let openIndex = modes.count - idx
+            )
+            let extraKeywords: [String] = {
+                switch mode {
+                case .all: return ["全部对战", "all"]
+                case .regular: return ["一般比赛", "常规比赛", "涂地", "占地", "regular", "turfwar"]
+                case .anarchy: return ["蛮颓比赛", "真格比赛", "挑战", "开放", "bankara", "anarchy"]
+                case .xMatch: return ["X比赛", "X比赛系列", "xmatch", "x"]
+                case .league: return ["活动比赛", "活动", "league", "event"]
+                case .privateMatch: return ["私人比赛", "私房", "private"]
+                case .fest: return ["祭典比赛", "祭典", "splatfest", "fest"]
+                }
+            }()
+            let recentKey: String? = (mode == .all) ? nil : "battleMode:\(mode.rawValue)"
 
-                dockSelectableRow(
-                    id: "expandingDock.battleMode.\(mode.rawValue)",
-                    title: mode.name,
-                    isSelected: isSelected,
-                    iconTint: mode.color,
-                    icon: {
-                        if mode == .all {
+            return DockPanelItem(
+                id: "expandingDock.battleMode.\(mode.rawValue)",
+                recentKey: recentKey,
+                title: mode.name,
+                keywords: extraKeywords,
+                isSelected: isSelected,
+                isNavigation: false,
+                badgeCount: 0,
+                iconTint: mode.color,
+                iconBuilder: {
+                    if mode == .all {
+                        return AnyView(
                             Image(systemName: "square.grid.2x2.fill")
                                 .font(.system(size: 13, weight: .semibold))
                                 .foregroundStyle(isSelected ? Color.accentColor : .spOrange)
-                        } else {
+                        )
+                    } else {
+                        return AnyView(
                             mode.icon
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 17, height: 17)
-                        }
-                    },
-                    action: {
-                        selectModeAndAutoCollapse {
-                            await battleViewModel.selectModeFromDock(mode)
-                        }
+                        )
                     }
-                )
-                .transition(staggeredRowTransition(openIndex: openIndex))
-            }
+                },
+                action: {
+                    if let recentKey {
+                        recordRecentSelection(recentKey)
+                    }
+                    selectModeAndAutoCollapse {
+                        if tabSelection != DockTab.battle.rawValue {
+                            tabSelection = DockTab.battle.rawValue
+                        }
+                        await battleViewModel.selectModeFromDock(mode)
+                    }
+                }
+            )
         }
     }
 
-    // MARK: - 5.2 鲑鱼跑规则快筛行（真实 CoopRule 枚举 + 打工卡片，自底向上 30ms 错峰上浮）
+    private var battleRuleItems: [DockPanelItem] {
+        BattleRule.allCases.map { rule in
+            let isSelected = battleViewModel.filter.modes.isEmpty
+                && battleViewModel.filter.rules.contains(rule.rawValue)
+            let displayTitle: String = (rule == .turfWar) ? "涂地模式" : rule.name
+            let ruleTint: Color = {
+                switch rule {
+                case .turfWar: return .spLightGreen
+                case .splatZones, .towerControl, .rainmaker, .clamBlitz: return .spOrange
+                case .triColor: return .spPurple
+                }
+            }()
+            let extraKeywords: [String] = {
+                switch rule {
+                case .turfWar: return ["涂地模式", "涂地", "占地对战", "占地", "turfwar", "tw"]
+                case .splatZones: return ["真格区域", "区域", "占地真格", "splatzones", "area", "sz"]
+                case .towerControl: return ["真格塔楼", "塔楼", "推塔", "towercontrol", "loft", "tc"]
+                case .rainmaker: return ["真格鱼虎", "真格鱼虎对战", "鱼虎", "抢鱼", "rainmaker", "goal", "rm"]
+                case .clamBlitz: return ["真格蛤蜊", "蛤蜊", "投蛤", "clamblitz", "clam", "cb"]
+                case .triColor: return ["三色夺宝对战", "三色", "三色夺宝", "tricolor"]
+                }
+            }()
+            let recentKey = "battleRule:\(rule.rawValue)"
 
-    @ViewBuilder
-    private var coopRuleRows: some View {
-        let rules = CoopRule.allCases
-        ForEach(Array(rules.enumerated()), id: \.element.rawValue) { idx, rule in
-            if isExpanded {
-                let isSelected = !coopViewModel.isShowingShiftCards && (
-                    rule == .ALL
-                        ? coopViewModel.filter.rules.isEmpty
-                        : coopViewModel.filter.rules.contains(rule.rawValue)
-                )
-                let ruleColor: Color = {
-                    switch rule {
-                    case .ALL, .REGULAR: return .spGreen
-                    case .BIG_RUN: return .spPurple
-                    case .TEAM_CONTEST: return .spOrange
+            return DockPanelItem(
+                id: "expandingDock.battleRule.\(rule.rawValue)",
+                recentKey: recentKey,
+                title: displayTitle,
+                keywords: [rule.name] + extraKeywords,
+                isSelected: isSelected,
+                isNavigation: false,
+                badgeCount: 0,
+                iconTint: ruleTint,
+                iconBuilder: {
+                    AnyView(
+                        rule.image
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 17, height: 17)
+                    )
+                },
+                action: {
+                    recordRecentSelection(recentKey)
+                    selectModeAndAutoCollapse {
+                        if tabSelection != DockTab.battle.rawValue {
+                            tabSelection = DockTab.battle.rawValue
+                        }
+                        await battleViewModel.selectRuleFromDock(rule)
                     }
-                }()
-                let openIndex = rules.count + 1 - idx
+                }
+            )
+        }
+    }
 
-                dockSelectableRow(
-                    id: "expandingDock.coopRule.\(rule.rawValue)",
-                    title: rule.name,
-                    isSelected: isSelected,
-                    iconTint: ruleColor,
-                    icon: {
-                        if rule == .ALL {
+    // MARK: - 5.2 鲑鱼跑规则项
+
+    private var coopRuleItems: [DockPanelItem] {
+        var list: [DockPanelItem] = CoopRule.allCases.map { rule in
+            let isSelected = !coopViewModel.isShowingShiftCards && (
+                rule == .ALL
+                    ? coopViewModel.filter.rules.isEmpty
+                    : coopViewModel.filter.rules.contains(rule.rawValue)
+            )
+            let ruleColor: Color = {
+                switch rule {
+                case .ALL, .REGULAR: return .spGreen
+                case .BIG_RUN: return .spPurple
+                case .TEAM_CONTEST: return .spOrange
+                }
+            }()
+            let keywords: [String] = {
+                switch rule {
+                case .ALL: return ["全部打工", "all"]
+                case .REGULAR: return ["鲑鱼跑", "常规打工", "打工", "salmonrun", "regular"]
+                case .BIG_RUN: return ["大型跑", "bigrun"]
+                case .TEAM_CONTEST: return ["团队打工竞赛", "团队竞赛", "打工竞赛", "eggstrawork", "teamcontest"]
+                }
+            }()
+            let recentKey: String? = (rule == .ALL) ? nil : "coopRule:\(rule.rawValue)"
+
+            return DockPanelItem(
+                id: "expandingDock.coopRule.\(rule.rawValue)",
+                recentKey: recentKey,
+                title: rule.name,
+                keywords: keywords,
+                isSelected: isSelected,
+                isNavigation: false,
+                badgeCount: 0,
+                iconTint: ruleColor,
+                iconBuilder: {
+                    if rule == .ALL {
+                        return AnyView(
                             Image(systemName: "square.grid.2x2.fill")
                                 .font(.system(size: 13, weight: .semibold))
                                 .foregroundStyle(isSelected ? Color.accentColor : .spGreen)
-                        } else {
+                        )
+                    } else {
+                        return AnyView(
                             rule.icon
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 17, height: 17)
-                        }
-                    },
-                    action: {
-                        selectModeAndAutoCollapse {
-                            await coopViewModel.selectRuleFromDock(rule)
-                        }
+                        )
                     }
-                )
-                .transition(staggeredRowTransition(openIndex: openIndex))
-            }
-        }
-
-        if isExpanded {
-            dockSelectableRow(
-                id: "expandingDock.coopRule.SHIFT_CARDS",
-                title: "打工卡片",
-                isSelected: coopViewModel.isShowingShiftCards,
-                iconTint: .spYellow,
-                icon: {
-                    Image(systemName: "rectangle.stack.fill")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(coopViewModel.isShowingShiftCards ? Color.accentColor : .spYellow)
                 },
                 action: {
+                    if let recentKey {
+                        recordRecentSelection(recentKey)
+                    }
                     selectModeAndAutoCollapse {
+                        if tabSelection != DockTab.coop.rawValue {
+                            tabSelection = DockTab.coop.rawValue
+                        }
+                        await coopViewModel.selectRuleFromDock(rule)
+                    }
+                }
+            )
+        }
+
+        list.append(
+            DockPanelItem(
+                id: "expandingDock.coopRule.SHIFT_CARDS",
+                recentKey: "coopMode:SHIFT_CARDS",
+                title: "打工卡片",
+                keywords: ["打工卡片", "班次卡片", "shiftcards", "cards"],
+                isSelected: coopViewModel.isShowingShiftCards,
+                isNavigation: false,
+                badgeCount: 0,
+                iconTint: .spYellow,
+                iconBuilder: {
+                    AnyView(
+                        Image(systemName: "rectangle.stack.fill")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(coopViewModel.isShowingShiftCards ? Color.accentColor : .spYellow)
+                    )
+                },
+                action: {
+                    recordRecentSelection("coopMode:SHIFT_CARDS")
+                    selectModeAndAutoCollapse {
+                        if tabSelection != DockTab.coop.rawValue {
+                            tabSelection = DockTab.coop.rawValue
+                        }
                         await coopViewModel.selectShiftCardsFromDock()
                     }
                 }
             )
-            .transition(staggeredRowTransition(openIndex: 1))
-        }
+        )
+        return list
     }
 
-    // MARK: - 5.3 主页与「我」页快捷面板行
+    // MARK: - 5.3 主页与「我」页快捷项
 
-    @ViewBuilder
-    private var homeQuickRows: some View {
-        if isExpanded {
-            dockSelectableRow(
+    private var homeQuickItems: [DockPanelItem] {
+        [
+            DockPanelItem(
                 id: "expandingDock.home.battleSchedule",
+                recentKey: nil,
                 title: "对战日程",
+                keywords: ["对战日程", "日程", "schedule", "battle"],
                 isSelected: homeScheduleType == 0,
+                isNavigation: false,
+                badgeCount: 0,
                 iconTint: .spOrange,
-                icon: {
-                    Image(.anarchy)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 17, height: 17)
+                iconBuilder: {
+                    AnyView(Image(.anarchy).resizable().scaledToFit().frame(width: 17, height: 17))
                 },
                 action: {
-                    selectModeAndAutoCollapse {
-                        homeScheduleType = 0
-                    }
+                    selectModeAndAutoCollapse { homeScheduleType = 0 }
                 }
-            )
-            .transition(staggeredRowTransition(openIndex: 3))
-
-            dockSelectableRow(
+            ),
+            DockPanelItem(
                 id: "expandingDock.home.coopSchedule",
+                recentKey: nil,
                 title: "鲑鱼跑日程",
+                keywords: ["鲑鱼跑日程", "打工日程", "salmonrun", "coop"],
                 isSelected: homeScheduleType == 1,
+                isNavigation: false,
+                badgeCount: 0,
                 iconTint: .spGreen,
-                icon: {
-                    Image(.salmonRun)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 17, height: 17)
+                iconBuilder: {
+                    AnyView(Image(.salmonRun).resizable().scaledToFit().frame(width: 17, height: 17))
                 },
                 action: {
-                    selectModeAndAutoCollapse {
-                        homeScheduleType = 1
+                    selectModeAndAutoCollapse { homeScheduleType = 1 }
+                }
+            ),
+            DockPanelItem(
+                id: "expandingDock.home.gotoBattleFilter",
+                recentKey: nil,
+                title: "去对战筛选页设置条件…",
+                keywords: ["对战筛选", "更多条件"],
+                isSelected: false,
+                isNavigation: true,
+                badgeCount: battleViewModel.extraActiveFilterCount,
+                iconTint: .spOrange,
+                iconBuilder: {
+                    AnyView(
+                        Image(systemName: "line.3.horizontal.decrease.circle")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Color.spOrange)
+                    )
+                },
+                action: {
+                    closeAndPerform {
+                        tabSelection = DockTab.battle.rawValue
+                        battleViewModel.showFilterSheet = true
                     }
                 }
-            )
-            .transition(staggeredRowTransition(openIndex: 2))
-
-            Rectangle()
-                .fill(Color.primary.opacity(colorScheme == .dark ? 0.12 : 0.08))
-                .frame(height: 0.6)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .transition(.opacity.animation(.easeOut(duration: 0.14)))
-
-            dockNavigationRow(
-                id: "expandingDock.home.gotoBattleFilter",
-                title: "去对战筛选页设置条件…",
-                systemImage: "line.3.horizontal.decrease.circle",
-                tint: .spOrange,
-                badgeCount: battleViewModel.extraActiveFilterCount
-            ) {
-                closeAndPerform {
-                    tabSelection = DockTab.battle.rawValue
-                    battleViewModel.showFilterSheet = true
-                }
-            }
-            .transition(staggeredRowTransition(openIndex: 1))
-
-            dockNavigationRow(
+            ),
+            DockPanelItem(
                 id: "expandingDock.home.gotoCoopFilter",
+                recentKey: nil,
                 title: "去打工筛选页设置条件…",
-                systemImage: "line.3.horizontal.decrease.circle",
-                tint: .spGreen,
-                badgeCount: coopViewModel.extraActiveFilterCount
-            ) {
-                closeAndPerform {
-                    tabSelection = DockTab.coop.rawValue
-                    coopViewModel.showFilterSheet = true
+                keywords: ["打工筛选", "更多条件"],
+                isSelected: false,
+                isNavigation: true,
+                badgeCount: coopViewModel.extraActiveFilterCount,
+                iconTint: .spGreen,
+                iconBuilder: {
+                    AnyView(
+                        Image(systemName: "line.3.horizontal.decrease.circle")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Color.spGreen)
+                    )
+                },
+                action: {
+                    closeAndPerform {
+                        tabSelection = DockTab.coop.rawValue
+                        coopViewModel.showFilterSheet = true
+                    }
                 }
-            }
-            .transition(staggeredRowTransition(openIndex: 0))
-        }
+            ),
+        ]
     }
 
-    @ViewBuilder
-    private var meQuickRows: some View {
-        if isExpanded {
-            dockNavigationRow(
-                id: "expandingDock.me.weapon",
-                title: "武器榜",
-                systemImage: "scope",
-                tint: .spOrange,
-                badgeCount: 0
-            ) {
-                closeAndPerform { dockStore.meDestination = "weapon" }
-            }
-            .transition(staggeredRowTransition(openIndex: 4))
-
-            dockNavigationRow(
-                id: "expandingDock.me.stage",
-                title: "场地榜",
-                systemImage: "map.fill",
-                tint: .spLightGreen,
-                badgeCount: 0
-            ) {
-                closeAndPerform { dockStore.meDestination = "stage" }
-            }
-            .transition(staggeredRowTransition(openIndex: 3))
-
-            dockNavigationRow(
-                id: "expandingDock.me.coop",
-                title: "打工记录统计",
-                systemImage: "drop.fill",
-                tint: .spGreen,
-                badgeCount: 0
-            ) {
-                closeAndPerform { dockStore.meDestination = "coop" }
-            }
-            .transition(staggeredRowTransition(openIndex: 2))
-
-            dockNavigationRow(
-                id: "expandingDock.me.trash",
-                title: "记录回收站",
-                systemImage: "trash.fill",
-                tint: .spPink,
-                badgeCount: 0
-            ) {
-                closeAndPerform { dockStore.meDestination = "trash" }
-            }
-            .transition(staggeredRowTransition(openIndex: 1))
-
-            dockNavigationRow(
-                id: "expandingDock.me.settings",
-                title: "账号与偏好设置",
-                systemImage: "gearshape.fill",
-                tint: .accentColor,
-                badgeCount: 0
-            ) {
-                closeAndPerform { dockStore.meDestination = "settings" }
-            }
-            .transition(staggeredRowTransition(openIndex: 0))
+    private var meQuickItems: [DockPanelItem] {
+        [
+            ("expandingDock.me.weapon", "武器榜", ["武器榜", "weapon"], "scope", Color.spOrange, "weapon"),
+            ("expandingDock.me.stage", "场地榜", ["场地榜", "地图", "stage"], "map.fill", Color.spLightGreen, "stage"),
+            ("expandingDock.me.coop", "打工记录统计", ["打工记录统计", "统计", "coop"], "drop.fill", Color.spGreen, "coop"),
+            ("expandingDock.me.trash", "记录回收站", ["回收站", "已删除", "trash"], "trash.fill", Color.spPink, "trash"),
+            ("expandingDock.me.settings", "账号与偏好设置", ["设置", "偏好", "settings"], "gearshape.fill", Color.accentColor, "settings"),
+        ].map { id, title, kw, symbol, tint, dest in
+            DockPanelItem(
+                id: id,
+                recentKey: nil,
+                title: title,
+                keywords: kw,
+                isSelected: false,
+                isNavigation: true,
+                badgeCount: 0,
+                iconTint: tint,
+                iconBuilder: {
+                    AnyView(
+                        Image(systemName: symbol)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(tint)
+                    )
+                },
+                action: {
+                    closeAndPerform { dockStore.meDestination = dest }
+                }
+            )
         }
     }
 
@@ -845,9 +1241,13 @@ struct ExpandingDock: View {
                 dockNavigationRow(
                     id: "expandingDock.battle.moreFilters",
                     title: "去筛选页设置更多条件…",
-                    systemImage: "slider.horizontal.3",
                     tint: .spOrange,
-                    badgeCount: battleViewModel.extraActiveFilterCount
+                    badgeCount: battleViewModel.extraActiveFilterCount,
+                    icon: {
+                        Image(systemName: "slider.horizontal.3")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Color.spOrange)
+                    }
                 ) {
                     closeAndPerform {
                         battleViewModel.showFilterSheet = true
@@ -859,9 +1259,13 @@ struct ExpandingDock: View {
                 dockNavigationRow(
                     id: "expandingDock.coop.moreFilters",
                     title: "去筛选页设置更多条件…",
-                    systemImage: "slider.horizontal.3",
                     tint: .spGreen,
-                    badgeCount: coopViewModel.extraActiveFilterCount
+                    badgeCount: coopViewModel.extraActiveFilterCount,
+                    icon: {
+                        Image(systemName: "slider.horizontal.3")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Color.spGreen)
+                    }
                 ) {
                     closeAndPerform {
                         coopViewModel.showFilterSheet = true
@@ -873,7 +1277,7 @@ struct ExpandingDock: View {
         }
     }
 
-    // MARK: - 6. 透明毛玻璃行组件（不叠实色块，底层折射色彩自然透出；单选行只显示 ✓ 不显示 ›）
+    // MARK: - 6. 透明毛玻璃行组件（统一 40pt 行高、28pt 图标块；单选行只显示 ✓ 不显示 ›）
 
     private func dockSelectableRow<Icon: View>(
         id: String,
@@ -926,19 +1330,17 @@ struct ExpandingDock: View {
         .accessibilityIdentifier(id)
     }
 
-    private func dockNavigationRow(
+    private func dockNavigationRow<Icon: View>(
         id: String,
         title: String,
-        systemImage: String,
         tint: Color,
         badgeCount: Int,
+        @ViewBuilder icon: () -> Icon,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
             HStack(spacing: 10) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(tint)
+                icon()
                     .frame(width: DockConfig.panelIconSize, height: DockConfig.panelIconSize)
                     .background(tint.opacity(0.14), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
 
@@ -972,7 +1374,7 @@ struct ExpandingDock: View {
         .accessibilityIdentifier(id)
     }
 
-    // MARK: - 7. 交互式手势驱动（`.interactiveSpring` 跟手下拉收起 / 上拉展开）
+    // MARK: - 7. 交互式手势驱动（下滑时若键盘弹出则先收键盘、再收面板）
 
     private var expandedHeaderDragGesture: some Gesture {
         DragGesture(minimumDistance: 8, coordinateSpace: .global)
@@ -989,16 +1391,12 @@ struct ExpandingDock: View {
                 let dy = value.translation.height
                 let predictedY = value.predictedEndTranslation.height
                 let shouldClose = dy > 56 || predictedY > 110
-                withAnimation(
-                    shouldClose
-                        ? DockMotion.closeAnimation(reduceMotion: envReduceMotion)
-                        : DockMotion.openAnimation(reduceMotion: envReduceMotion)
-                ) {
-                    dragOffsetY = 0
-                    dockStore.dragDismissProgress = 0
-                    if shouldClose {
-                        Haptics.generateIfEnabled(.light)
-                        dockStore.collapse()
+                if shouldClose {
+                    dismissKeyboardThenCollapse()
+                } else {
+                    withAnimation(DockMotion.openAnimation(reduceMotion: envReduceMotion)) {
+                        dragOffsetY = 0
+                        dockStore.dragDismissProgress = 0
                     }
                 }
             }
@@ -1021,16 +1419,12 @@ struct ExpandingDock: View {
                 let predictedY = value.predictedEndTranslation.height
                 if isExpanded {
                     let shouldClose = abs(dy) > abs(dx) * 1.2 && (dy > 44 || predictedY > 100)
-                    withAnimation(
-                        shouldClose
-                            ? DockMotion.closeAnimation(reduceMotion: envReduceMotion)
-                            : DockMotion.openAnimation(reduceMotion: envReduceMotion)
-                    ) {
-                        dragOffsetY = 0
-                        dockStore.dragDismissProgress = 0
-                        if shouldClose {
-                            Haptics.generateIfEnabled(.light)
-                            dockStore.collapse()
+                    if shouldClose {
+                        dismissKeyboardThenCollapse()
+                    } else {
+                        withAnimation(DockMotion.openAnimation(reduceMotion: envReduceMotion)) {
+                            dragOffsetY = 0
+                            dockStore.dragDismissProgress = 0
                         }
                     }
                 } else if abs(dy) > abs(dx) * 1.4 && dy < -32 {
@@ -1042,16 +1436,55 @@ struct ExpandingDock: View {
             }
     }
 
-    // MARK: - 8. 单选完自动收起 & 导航跳转辅助
+    // MARK: - 8. 键盘先行收起、最近使用记录与单选自动收起辅助
+
+    private func recordRecentSelection(_ key: String) {
+        recentModesStorage = DockSearchSupport.recordRecentKey(key, into: recentModesStorage)
+    }
+
+    private func dismissKeyboard() {
+        isSearchFocused = false
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+
+    /// 规格 3：点击遮罩或下滑时，若键盘正处于弹出态，先触发收键盘，再在 130ms 后触发收面板，杜绝键盘与面板打架。
+    private func dismissKeyboardThenCollapse() {
+        Haptics.generateIfEnabled(.light)
+        let hadKeyboard = isSearchFocused || keyboardOverlap > 10
+        if hadKeyboard {
+            dismissKeyboard()
+            withAnimation(DockMotion.openAnimation(reduceMotion: envReduceMotion)) {
+                dragOffsetY = 0
+                dockStore.dragDismissProgress = 0
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.13) {
+                withAnimation(DockMotion.closeAnimation(reduceMotion: envReduceMotion)) {
+                    searchText = ""
+                    dockStore.collapse()
+                }
+            }
+        } else {
+            withAnimation(DockMotion.closeAnimation(reduceMotion: envReduceMotion)) {
+                dragOffsetY = 0
+                dockStore.dragDismissProgress = 0
+                searchText = ""
+                dockStore.collapse()
+            }
+        }
+    }
 
     private func selectModeAndAutoCollapse(_ work: @escaping () async -> Void) {
         Haptics.generateIfEnabled(.selectionChanged)
+        let hadKeyboard = isSearchFocused || keyboardOverlap > 10
+        if hadKeyboard {
+            dismissKeyboard()
+        }
         Task { @MainActor in
             await work()
-            // 短促停留 80ms 让勾选视觉反馈先落定，随后沿高阻尼收起曲线（damping 0.94 + 收腰 0.82）干脆收回
-            try? await Task.sleep(for: .milliseconds(80))
+            try? await Task.sleep(for: .milliseconds(hadKeyboard ? 110 : 80))
             withAnimation(DockMotion.closeAnimation(reduceMotion: envReduceMotion)) {
                 dragOffsetY = 0
+                searchText = ""
                 dockStore.collapse()
             }
         }
@@ -1059,11 +1492,13 @@ struct ExpandingDock: View {
 
     private func closeAndPerform(_ block: @escaping () -> Void) {
         Haptics.generateIfEnabled(.light)
+        dismissKeyboard()
         withAnimation(DockMotion.closeAnimation(reduceMotion: envReduceMotion)) {
             dragOffsetY = 0
+            searchText = ""
             dockStore.collapse()
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
             block()
         }
     }

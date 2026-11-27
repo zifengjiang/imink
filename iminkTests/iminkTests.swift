@@ -185,6 +185,26 @@ final class iminkTests: XCTestCase {
         XCTAssertEqual(coopVM.filter.rules, [CoopRule.BIG_RUN.rawValue])
         XCTAssertTrue(coopVM.filter.showOnlyFavorites)
         XCTAssertEqual(coopVM.navigationTitle, CoopRule.BIG_RUN.name)
+
+        // 验证对战规则快筛（如「涂地模式」TURF_WAR）与搜索大小写/空白忽略及最近使用 3 项上限
+        await battleVM.selectRuleFromDock(.turfWar)
+        XCTAssertEqual(battleVM.filter.rules, [BattleRule.turfWar.rawValue])
+        XCTAssertTrue(battleVM.filter.modes.isEmpty)
+        XCTAssertEqual(battleVM.navigationTitle, "涂地模式")
+
+        XCTAssertTrue(DockSearchSupport.matches(query: " 涂 地 ", candidates: ["涂地模式", "占地对战"]))
+        XCTAssertTrue(DockSearchSupport.matches(query: " x ", candidates: ["X比赛", "X比赛系列"]))
+        XCTAssertFalse(DockSearchSupport.matches(query: "zzz", candidates: ["涂地模式", "X比赛", "蛮颓比赛"]))
+
+        var recents = ""
+        recents = DockSearchSupport.recordRecentKey("battleMode:BANKARA", into: recents)
+        recents = DockSearchSupport.recordRecentKey("battleRule:TURF_WAR", into: recents)
+        recents = DockSearchSupport.recordRecentKey("battleMode:XMATCH", into: recents)
+        recents = DockSearchSupport.recordRecentKey("battleMode:FEST", into: recents)
+        XCTAssertEqual(
+            DockSearchSupport.parseRecentKeys(recents),
+            ["battleMode:FEST", "battleMode:XMATCH", "battleRule:TURF_WAR"]
+        )
     }
 
     func testNintendoLoginAcceptsUserWithoutBirthday() throws {

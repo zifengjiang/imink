@@ -163,11 +163,10 @@ final class iminkUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 1.5)
     }
 
-    /// 真实登录态 + 种子库（761 场对战 / 12,257 场打工）穿透录屏专用流程（严禁出现登录页）：
-    /// 1) 滚动真实彩色对战卡片，展示底部 4-Tab 毛玻璃胶囊实时透色折射；
-    /// 2) 二次点击当前「对战」Tab -> 水平微收腰（0.80）+ 开弹（damping 0.72）+ 逐行 30ms 错峰上浮展开；
-    /// 3) 点选「蛮颓比赛」-> 列表当场切为真实蛮颓卡片，面板反序快收（<=0.18s）+ 收腰（0.82）+ 高阻尼（0.94）干净收起；
-    /// 4) 轻滑筛选后的蛮颓卡片展示筛选结果与底栏贴合。
+    /// 真实登录态 + 种子库（761 场对战 / 12,257 场打工）搜索验收截图 + 穿透录屏全流程：
+    /// - 捕获 `dock-search-typing.png`（输入「涂地」后键盘弹出、面板上移且只剩匹配项）
+    /// - 捕获 `dock-search-empty.png`（输入「zzz」显示「没有匹配的筛选项」）
+    /// - 录制 `dock-demo2.mp4`（真数据卡片滚动 -> 二次点击展开含最近使用与搜索框 -> 点搜索框弹起键盘整体上移 -> 输入「涂地」过滤 -> 点选「涂地模式」先收键盘再收面板并实时筛出涂地卡片）
     func testSeededContentDemoFlowForRecording() throws {
         let app = XCUIApplication()
         app.launchArguments += [
@@ -179,54 +178,93 @@ final class iminkUITests: XCTestCase {
         let battleTab = app.buttons["expandingDock.tab.1"]
         XCTAssertTrue(battleTab.waitForExistence(timeout: 10))
 
-        // 切到「对战」Tab，并断言已处于真实数据登录态（绝不出现「任天堂账号登录」按钮）
+        // 切到「对战」Tab，并断言已处于真实数据登录态（严禁出现登录页）
         if !battleTab.isSelected {
             battleTab.tap()
-            Thread.sleep(forTimeInterval: 0.8)
+            Thread.sleep(forTimeInterval: 0.7)
         } else {
-            Thread.sleep(forTimeInterval: 0.6)
+            Thread.sleep(forTimeInterval: 0.5)
         }
         XCTAssertFalse(app.buttons["任天堂账号登录"].exists, "录屏必须处于真实数据登录态，严禁录登录页")
 
-        // 先确保处于「全部对战」初始态
+        // 先恢复「全部对战」干净起点（同时也会预热最近使用分区）
         if !app.navigationBars["全部对战"].exists {
             battleTab.tap()
             let allRow = app.buttons["expandingDock.battleMode.ALL"]
             if allRow.waitForExistence(timeout: 3) {
                 allRow.tap()
-                Thread.sleep(forTimeInterval: 0.8)
+                Thread.sleep(forTimeInterval: 0.7)
             }
         }
 
-        // 第 1 幕：滚动真实对战卡片，让彩色卡片在底部毛玻璃胶囊下方流动折射
+        // 第 1 幕：滚动真实对战彩色卡片，展示底部毛玻璃胶囊实时透色折射
         let scrollView = app.scrollViews.firstMatch
         if scrollView.waitForExistence(timeout: 3) {
             let bottomCoord = scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.72))
-            let topCoord = scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.36))
+            let topCoord = scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.38))
             bottomCoord.press(forDuration: 0.05, thenDragTo: topCoord)
-            Thread.sleep(forTimeInterval: 0.55)
+            Thread.sleep(forTimeInterval: 0.45)
             topCoord.press(forDuration: 0.05, thenDragTo: bottomCoord)
-            Thread.sleep(forTimeInterval: 0.65)
+            Thread.sleep(forTimeInterval: 0.55)
         }
 
-        // 第 2 幕：二次点击已选中的「对战」Tab -> 0.80 水平微收腰 + 0.72 开弹 + 30ms 逐行错峰上浮展开在彩色卡片之上
+        // 第 2 幕：二次点击已选中的「对战」Tab -> 展开面板（含顶部 36pt 搜索框与最近使用分区）
         battleTab.tap()
-        let anarchyRow = app.buttons["expandingDock.battleMode.BANKARA"]
-        XCTAssertTrue(anarchyRow.waitForExistence(timeout: 3))
-        Thread.sleep(forTimeInterval: 1.15)
+        let searchField = app.textFields["expandingDock.searchField"]
+        XCTAssertTrue(searchField.waitForExistence(timeout: 3))
+        Thread.sleep(forTimeInterval: 0.75)
 
-        // 第 3 幕：点选「蛮颓比赛」-> 列表当场切为蛮颓卡片，面板 <=0.18s 反序收拢 + 0.82 收腰 + 0.94 高阻尼干脆收起
-        anarchyRow.tap()
-        XCTAssertTrue(app.navigationBars["蛮颓比赛"].waitForExistence(timeout: 3))
-        Thread.sleep(forTimeInterval: 0.85)
+        // 第 3 幕：点击搜索框 -> 软键盘弹出，面板 + 底部 4-Tab 底座整体上移至键盘上方 -> 输入「涂地」
+        searchField.tap()
+        Thread.sleep(forTimeInterval: 0.75)
+        searchField.typeText("涂地")
+        let turfRuleRow = app.buttons["expandingDock.battleRule.TURF_WAR"]
+        XCTAssertTrue(turfRuleRow.waitForExistence(timeout: 3))
+        // 验证不匹配项已被过滤隐藏
+        XCTAssertFalse(app.buttons["expandingDock.battleMode.XMATCH"].exists)
+        Thread.sleep(forTimeInterval: 0.65)
+        try saveDesignScreenshot(named: "dock-search-typing.png")
 
-        // 第 4 幕：轻滑筛选后的蛮颓比赛卡片，再次印证玻璃底栏下的真实卡片层次
-        if scrollView.exists {
-            let c1 = scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.70))
-            let c2 = scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.42))
-            c1.press(forDuration: 0.05, thenDragTo: c2)
-            Thread.sleep(forTimeInterval: 0.8)
+        // 第 4 幕：点选匹配出的「涂地模式」-> 先收键盘再收面板，底层列表实时过滤为「涂地模式」真实卡片
+        turfRuleRow.tap()
+        XCTAssertTrue(app.navigationBars["涂地模式"].waitForExistence(timeout: 3))
+        Thread.sleep(forTimeInterval: 0.9)
+    }
+
+    /// 独立捕获无匹配态截图 `dock-search-empty.png`（输入 `zzz` 显示「没有匹配的筛选项」并验证点遮罩先收键盘再收面板）。
+    func testCaptureSearchEmptyScreenshot() throws {
+        let app = XCUIApplication()
+        app.launchArguments += [
+            "-imink.useCustomDock", "YES",
+            "-debugScrollToBottom", "NO"
+        ]
+        app.launch()
+
+        let battleTab = app.buttons["expandingDock.tab.1"]
+        XCTAssertTrue(battleTab.waitForExistence(timeout: 10))
+        if !battleTab.isSelected {
+            battleTab.tap()
+            Thread.sleep(forTimeInterval: 0.6)
         }
+
+        battleTab.tap()
+        let searchField = app.textFields["expandingDock.searchField"]
+        XCTAssertTrue(searchField.waitForExistence(timeout: 3))
+        searchField.tap()
+        Thread.sleep(forTimeInterval: 0.7)
+        searchField.typeText("zzz")
+
+        let emptyState = app.otherElements["expandingDock.searchEmptyState"]
+        let emptyLabel = app.staticTexts["没有匹配的筛选项"]
+        XCTAssertTrue(emptyState.waitForExistence(timeout: 3) || emptyLabel.waitForExistence(timeout: 3))
+        Thread.sleep(forTimeInterval: 0.5)
+        try saveDesignScreenshot(named: "dock-search-empty.png")
+
+        // 点击面板上方遮罩区验证「先收键盘再收面板」
+        let topBackdrop = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.08))
+        topBackdrop.tap()
+        Thread.sleep(forTimeInterval: 0.8)
+        XCTAssertFalse(searchField.exists)
     }
 
     private func saveDesignScreenshot(named filename: String) throws {

@@ -17,8 +17,9 @@ final class BattleListViewModel: PagedRecordListViewModel<BattleListRowInfo, Bat
         await reload(limit: limit, offset: offset)
     }
 
-    /// 从底部 Dock 选择对战模式（仅修改 `filter.modes`，保留收藏与可见性等其余筛选条件）。
+    /// 从底部 Dock 选择对战模式（清空 `filter.rules`，仅设置 `filter.modes`，保留收藏与可见性等其余筛选条件）。
     func selectModeFromDock(_ mode: BattleMode) async {
+        filter.rules.removeAll()
         filter.modes.removeAll()
         if mode != .all {
             filter.modes.insert(mode.rawValue)
@@ -27,16 +28,32 @@ final class BattleListViewModel: PagedRecordListViewModel<BattleListRowInfo, Bat
         await reload()
     }
 
-    /// 根据当前 `filter.modes` 同步顶部导航标题，保证 Dock 与筛选页双向一致。
+    /// 从底部 Dock 选择对战规则（如「涂地模式」「真格区域」等，清空 `filter.modes`，仅设置 `filter.rules`）。
+    func selectRuleFromDock(_ rule: BattleRule) async {
+        filter.modes.removeAll()
+        filter.rules = [rule.rawValue]
+        syncNavigationTitle()
+        await reload()
+    }
+
+    /// 根据当前 `filter.modes` 与 `filter.rules` 同步顶部导航标题，保证 Dock 与筛选页双向一致。
     func syncNavigationTitle() {
-        if filter.modes.isEmpty {
+        if filter.modes.isEmpty && filter.rules.isEmpty {
             navigationTitle = BattleMode.all.name
-        } else if filter.modes.count == 1,
+        } else if filter.modes.isEmpty,
+                  filter.rules.count == 1,
+                  let rawRule = filter.rules.first,
+                  let rule = BattleRule(rawValue: rawRule) {
+            navigationTitle = (rule == .turfWar) ? "涂地模式" : rule.name
+        } else if filter.rules.isEmpty,
+                  filter.modes.count == 1,
                   let raw = filter.modes.first,
                   let mode = BattleMode(rawValue: raw) {
             navigationTitle = mode.name
-        } else {
+        } else if !filter.modes.isEmpty && filter.rules.isEmpty {
             navigationTitle = "对战 (\(filter.modes.count)种模式)"
+        } else {
+            navigationTitle = "对战 (\(filter.modes.count + filter.rules.count)项筛选)"
         }
     }
 
@@ -50,7 +67,7 @@ final class BattleListViewModel: PagedRecordListViewModel<BattleListRowInfo, Bat
 
     /// 当前是否存在任何生效中的对战筛选条件。
     var hasAnyActiveFilter: Bool {
-        !filter.modes.isEmpty || extraActiveFilterCount > 0
+        !filter.modes.isEmpty || !filter.rules.isEmpty || extraActiveFilterCount > 0
     }
 
     func fetchBattles() async {

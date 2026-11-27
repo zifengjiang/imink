@@ -113,7 +113,11 @@ stateDiagram-v2
 
 经核查 `Shared/Models/BattleMode.swift`、`Shared/Models/CoopRule.swift`、`Shared/Data/RecordListQueries.swift` 以及本地真实种子库 `seed-db.sqlite`（`SELECT DISTINCT mode FROM battle` 与 `SELECT DISTINCT rule FROM coop`）：
 
-### 6.1 面板内快筛枚举（真实数据库定义）
+### 6.1 面板内快筛枚举、36pt 搜索框与「最近使用」分区
+
+- **36pt 玻璃搜索框**：位于面板标题行下方、所有分组之前，采用 `magnifyingglass` 图标 + `TextField("搜索模式或规则", text: $searchText)` + `.textFieldStyle(.plain)`，高 `36pt`、圆角 `12pt`、轻透玻璃材质底；支持对**模式名 + 规则名**（如输入「涂地」匹配「涂地模式」、输入「X」匹配「X比赛」）进行大小写不敏感、忽略空白字符的实时过滤，无匹配结果时展示 40pt 占位行「没有匹配的筛选项」。
+- **键盘避让与关闭时序**：监听 `UIResponder.keyboardWillChangeFrameNotification` 动态抬升 `effectiveBottomMargin = keyboardOverlap + 8`，保证软键盘弹出时整组面板与底部 4-Tab Dock 整体上移不被键盘遮住；点击遮罩或下滑面板时**先触发收起键盘，再收起面板**。
+- **「最近使用」分区（`@AppStorage("imink.dock.recentModes")`）**：记录用户最近点选过的最多 **3** 个模式/规则，显示于搜索框正下方、常规分组上方；为空时自动隐藏该分区。
 
 1. **对战 Tab（Tab 1，`BattleMode`，查询列 `battle.mode`）**：
    - `BattleMode.all`（`"ALL"` → **全部对战**，对应 `filter.modes = []`）

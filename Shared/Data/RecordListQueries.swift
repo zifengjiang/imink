@@ -18,6 +18,13 @@ extension Filter {
             conditions.append("battle.mode IN (\(rulePlaceholders))")
             arguments.append(contentsOf: array)
         }
+
+        if !rules.isEmpty {
+            let array = Array(rules)
+            let rulePlaceholders = array.map { _ in "?" }.joined(separator: ", ")
+            conditions.append("battle.rule IN (\(rulePlaceholders))")
+            arguments.append(contentsOf: array)
+        }
         
         // 软删除和喜爱功能的过滤条件
         if showOnlyActive && !showDeleted {
