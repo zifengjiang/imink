@@ -206,3 +206,54 @@ public struct FriendListQuery: SN3PersistedQuery {
 extension SN3PersistedQuery where Self == FriendListQuery {
     public static var friendList: FriendListQuery { .init() }
 }
+
+// MARK: - MyOutfitCommonDataEquipmentsQuery
+
+public struct MyOutfitCommonDataEquipmentsQuery: SN3PersistedQuery {
+    public static let name = "myOutfitCommonDataEquipmentsQuery"
+
+    let acceptLanguage: String
+    let gameWebToken: String?
+    let country: String?
+    let accountLanguage: String?
+
+    public var headers: [String: String]? {
+        var headers = [
+            "Accept": "*/*",
+            "Accept-Language": acceptLanguage,
+            "User-Agent": Self.androidWebViewUserAgent,
+            "X-Requested-With": "com.nintendo.znca",
+        ]
+
+        if let gameWebToken,
+           let country,
+           let accountLanguage {
+            headers["Cookie"] = "_gtoken=\(gameWebToken); _dnt=1"
+            headers["Origin"] = "https://api.lp1.av5ja.srv.nintendo.net"
+            headers["Referer"] = "https://api.lp1.av5ja.srv.nintendo.net/?lang=\(acceptLanguage)&na_country=\(country)&na_lang=\(accountLanguage)"
+            headers["Sec-Fetch-Dest"] = "empty"
+            headers["Sec-Fetch-Mode"] = "cors"
+            headers["Sec-Fetch-Site"] = "same-origin"
+        }
+
+        return headers
+    }
+
+    private static let androidWebViewUserAgent = "Mozilla/5.0 (Linux; Android 11; sdk_gphone_arm64 Build/RSR1.210722.013.A6; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/91.0.4472.114 Mobile Safari/537.36"
+}
+
+extension SN3PersistedQuery where Self == MyOutfitCommonDataEquipmentsQuery {
+    public static func myOutfitCommonDataEquipments(
+        language: String,
+        gameWebToken: String? = nil,
+        country: String? = nil,
+        accountLanguage: String? = nil
+    ) -> MyOutfitCommonDataEquipmentsQuery {
+        .init(
+            acceptLanguage: language,
+            gameWebToken: gameWebToken,
+            country: country,
+            accountLanguage: accountLanguage
+        )
+    }
+}

@@ -8,9 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		0A2C668C2E682CAF00F1FB81 /* CoopPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2C668B2E682CAF00F1FB81 /* CoopPlayerView.swift */; };
-		0B1000012EF2000000000001 /* SWShimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B1000042EF2000000000001 /* SWShimmer.swift */; };
-		0B1000022EF2000000000001 /* SWKPICard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B1000052EF2000000000001 /* SWKPICard.swift */; };
-		0B1000032EF2000000000001 /* MeSummaryMetric.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B1000062EF2000000000001 /* MeSummaryMetric.swift */; };
 		0B4F00012F12000000000001 /* FestRecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4F00022F12000000000001 /* FestRecordView.swift */; };
 		0B4F00032F12000000000001 /* MeDashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4F00042F12000000000001 /* MeDashboardViewModel.swift */; };
 		0B4F00052F12000000000001 /* ModeDetailScaffold.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4F00062F12000000000001 /* ModeDetailScaffold.swift */; };
@@ -28,6 +25,11 @@
 		0AADD2362E694D17002A19FF /* SubscriptionOptionsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AADD2352E694D17002A19FF /* SubscriptionOptionsSheet.swift */; };
 		0AADD23A2E694F8B002A19FF /* SubscriptionInfoRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AADD2392E694F8B002A19FF /* SubscriptionInfoRow.swift */; };
 		0AC00D832E6710F600F82E5A /* TimeRangeSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AC00D822E6710F500F82E5A /* TimeRangeSlider.swift */; };
+		0B1000012EF2000000000001 /* SWShimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B1000042EF2000000000001 /* SWShimmer.swift */; };
+		0B1000022EF2000000000001 /* SWKPICard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B1000052EF2000000000001 /* SWKPICard.swift */; };
+		0B1000032EF2000000000001 /* MeSummaryMetric.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B1000062EF2000000000001 /* MeSummaryMetric.swift */; };
+		0B2000012F19000000000001 /* SplatNetWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2000022F19000000000001 /* SplatNetWebView.swift */; };
+		0B3000012F19000000000001 /* MyGearView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3000022F19000000000001 /* MyGearView.swift */; };
 		8B0792072C0F435C0094EA57 /* TargetType+fetch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0792062C0F435C0094EA57 /* TargetType+fetch.swift */; };
 		8B0792092C1077DD0094EA57 /* BattleScheduleCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0792082C1077DD0094EA57 /* BattleScheduleCardView.swift */; };
 		8B07920B2C1078310094EA57 /* SalmonRunScheduleCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B07920A2C1078310094EA57 /* SalmonRunScheduleCardView.swift */; };
@@ -285,9 +287,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		0B1000042EF2000000000001 /* SWShimmer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SWShimmer.swift; sourceTree = "<group>"; };
-		0B1000052EF2000000000001 /* SWKPICard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SWKPICard.swift; sourceTree = "<group>"; };
-		0B1000062EF2000000000001 /* MeSummaryMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeSummaryMetric.swift; sourceTree = "<group>"; };
 		0B4F00022F12000000000001 /* FestRecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FestRecordView.swift; sourceTree = "<group>"; };
 		0B4F00042F12000000000001 /* MeDashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeDashboardViewModel.swift; sourceTree = "<group>"; };
 		0B4F00062F12000000000001 /* ModeDetailScaffold.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeDetailScaffold.swift; sourceTree = "<group>"; };
@@ -303,6 +302,11 @@
 		0AADD2352E694D17002A19FF /* SubscriptionOptionsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionOptionsSheet.swift; sourceTree = "<group>"; };
 		0AADD2392E694F8B002A19FF /* SubscriptionInfoRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionInfoRow.swift; sourceTree = "<group>"; };
 		0AC00D822E6710F500F82E5A /* TimeRangeSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeRangeSlider.swift; sourceTree = "<group>"; };
+		0B1000042EF2000000000001 /* SWShimmer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SWShimmer.swift; sourceTree = "<group>"; };
+		0B1000052EF2000000000001 /* SWKPICard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SWKPICard.swift; sourceTree = "<group>"; };
+		0B1000062EF2000000000001 /* MeSummaryMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeSummaryMetric.swift; sourceTree = "<group>"; };
+		0B2000022F19000000000001 /* SplatNetWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplatNetWebView.swift; sourceTree = "<group>"; };
+		0B3000022F19000000000001 /* MyGearView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyGearView.swift; sourceTree = "<group>"; };
 		8B0792062C0F435C0094EA57 /* TargetType+fetch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TargetType+fetch.swift"; sourceTree = "<group>"; };
 		8B0792082C1077DD0094EA57 /* BattleScheduleCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleScheduleCardView.swift; sourceTree = "<group>"; };
 		8B07920A2C1078310094EA57 /* SalmonRunScheduleCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SalmonRunScheduleCardView.swift; sourceTree = "<group>"; };
@@ -878,6 +882,8 @@
 				0B2000F42EF3000000000001 /* DeveloperSettingsPage.swift */,
 				8B3591442BF893D60066BCA3 /* MePage.swift */,
 				0B4F00042F12000000000001 /* MeDashboardViewModel.swift */,
+				0B2000022F19000000000001 /* SplatNetWebView.swift */,
+				0B3000022F19000000000001 /* MyGearView.swift */,
 				0B1000062EF2000000000001 /* MeSummaryMetric.swift */,
 				8BC2B0AB2E6D4697009ACFE8 /* EditableNameplateView.swift */,
 				8BC2B0AD2E6D46A0009ACFE8 /* BadgeSelectorView.swift */,
@@ -1382,6 +1388,8 @@
 				0B2000412EF3000000000001 /* PagedRecordListViewModel.swift in Sources */,
 				0AA478DE2E74098600E8499D /* FriendStyles.swift in Sources */,
 				8B3591452BF893D60066BCA3 /* MePage.swift in Sources */,
+				0B2000012F19000000000001 /* SplatNetWebView.swift in Sources */,
+				0B3000012F19000000000001 /* MyGearView.swift in Sources */,
 				0B1000032EF2000000000001 /* MeSummaryMetric.swift in Sources */,
 				0B4F00012F12000000000001 /* FestRecordView.swift in Sources */,
 				0B4F00032F12000000000001 /* MeDashboardViewModel.swift in Sources */,

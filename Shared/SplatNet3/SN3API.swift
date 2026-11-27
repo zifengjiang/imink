@@ -2,7 +2,12 @@ import Foundation
 
 public enum SN3API {
     case web(path: String = "/")
-    case bulletTokens(gameServiceToken: String)
+    case bulletTokens(
+        gameServiceToken: String,
+        country: String,
+        accountLanguage: String,
+        interfaceLanguage: String
+    )
 }
 
 extension SN3API: TargetType {
@@ -31,11 +36,25 @@ extension SN3API: TargetType {
         switch self {
         case .web:
             return nil
-        case .bulletTokens(let gameServiceToken):
+        case .bulletTokens(
+            let gameServiceToken,
+            let country,
+            let accountLanguage,
+            let interfaceLanguage
+        ):
             return [
-                "Accept-Language": "en-GB",
-                "X-NACountry": "US",
-                "Cookie": "_gtoken=\(gameServiceToken);"
+                "Accept": "*/*",
+                "Accept-Language": interfaceLanguage,
+                "Content-Type": "application/json",
+                "Cookie": "_gtoken=\(gameServiceToken); _dnt=1",
+                "Origin": "https://api.lp1.av5ja.srv.nintendo.net",
+                "Referer": "https://api.lp1.av5ja.srv.nintendo.net/?lang=\(interfaceLanguage)&na_country=\(country)&na_lang=\(accountLanguage)",
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "cors",
+                "Sec-Fetch-Site": "same-origin",
+                "User-Agent": "Mozilla/5.0 (Linux; Android 11; sdk_gphone_arm64 Build/RSR1.210722.013.A6; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/91.0.4472.114 Mobile Safari/537.36",
+                "X-NACOUNTRY": country,
+                "X-Requested-With": "com.nintendo.znca",
             ]
         }
     }

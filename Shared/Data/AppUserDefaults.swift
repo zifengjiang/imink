@@ -21,8 +21,18 @@ class AppUserDefaults: ObservableObject {
     var sessionToken: String? {
         didSet {
             AppState.shared.isLogin = sessionToken != nil
+            if sessionToken != oldValue {
+                nintendoAccountCountry = nil
+                nintendoAccountLanguage = nil
+            }
         }
     }
+
+    @AppStorage("nintendoAccountCountry", store: .appGroup)
+    var nintendoAccountCountry: String?
+
+    @AppStorage("nintendoAccountLanguage", store: .appGroup)
+    var nintendoAccountLanguage: String?
 
     @AppStorage("coopSummary", store: .appGroup)
     var coopSummary: String?

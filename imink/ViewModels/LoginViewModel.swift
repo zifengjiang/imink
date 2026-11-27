@@ -80,6 +80,8 @@ class LoginViewModel:ObservableObject{
             AppUserDefaults.shared.accountId = Int(accountId)
             AppUserDefaults.shared.gameServiceToken = loginFlowResult.webServiceToken.result.accessToken
             AppUserDefaults.shared.gameServiceTokenRefreshTime = Int(Date().timeIntervalSince1970)
+            AppUserDefaults.shared.nintendoAccountCountry = loginFlowResult.naUser.country
+            AppUserDefaults.shared.nintendoAccountLanguage = loginFlowResult.naUser.language
         } catch is CancellationError {
             status = .none
             Toast.dismiss(loginIndicatorId)

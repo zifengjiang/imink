@@ -7,6 +7,10 @@ public struct BulletTokenPlugin: PluginType {
     let bulletToken: String
 
     public func prepare(_ request: URLRequest, target: TargetType) -> URLRequest {
+        guard target is any SN3PersistedQuery else {
+            return request
+        }
+
         var request = request
         request.addValue("Bearer \(bulletToken)", forHTTPHeaderField: "Authorization")
         return request

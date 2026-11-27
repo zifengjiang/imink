@@ -1,14 +1,28 @@
 import Foundation
 
+private struct SplatNetRemoteConfiguration: Decodable {
+    let webAppVersion: String
+    let graphQLQueries: [String: String]
+
+    private enum CodingKeys: String, CodingKey {
+        case webAppVersion = "web_app_ver"
+        case graphQLQueries = "graphql_queries"
+    }
+}
+
 public class SN3Client {
     public static let shared = try! SN3Client()
     private var session: IMSessionType = IMSession.shared
     private let internalAuthorizationStorage: SN3AuthorizationStorage
 
     public var webVersion: String
-    private let graphQLHashMap: [String: String]
+    private var graphQLHashMap: [String: String]
+    private var hasAttemptedWebConfigurationRefresh = false
     private var gameServiceToken: String? = nil
     private var hasLoadedWebVersion = false
+    private var country = "US"
+    private var accountLanguage = "en-US"
+    private var interfaceLanguage = "en-GB"
 
     public var authorizationStorage: SN3AuthorizationStorage {
         internalAuthorizationStorage
@@ -27,6 +41,62 @@ public class SN3Client {
     public func setToken(_ token: String) async throws{
         self.gameServiceToken = token
         try await refreshBullet()
+    }
+
+    public func setToken(
+        _ token: String,
+        country: String,
+        accountLanguage: String,
+        interfaceLanguage: String
+    ) async throws {
+        self.country = country
+        self.accountLanguage = accountLanguage
+        self.interfaceLanguage = interfaceLanguage
+        try await setToken(token)
+    }
+
+    @MainActor
+    func refreshWebConfigurationIfAvailable() async {
+        guard !hasAttemptedWebConfigurationRefresh else {
+            return
+        }
+        hasAttemptedWebConfigurationRefresh = true
+
+        guard let url = URL(
+            string: "https://cdn.jsdelivr.net/gh/nintendoapis/nintendo-app-versions/data/splatnet3-app.json"
+        ) else {
+            return
+        }
+
+        var request = URLRequest(
+            url: url,
+            cachePolicy: .reloadRevalidatingCacheData,
+            timeoutInterval: 10
+        )
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200..<300).contains(httpResponse.statusCode) else {
+                return
+            }
+
+            let configuration = try JSONDecoder().decode(
+                SplatNetRemoteConfiguration.self,
+                from: data
+            )
+            guard !configuration.webAppVersion.isEmpty else {
+                return
+            }
+
+            webVersion = configuration.webAppVersion
+            graphQLHashMap.merge(configuration.graphQLQueries) { _, remote in
+                remote
+            }
+        } catch {
+            // Keep using the bundled configuration when the version service is unavailable.
+        }
     }
 
     public func refreshBullet() async throws {
@@ -60,7 +130,14 @@ public class SN3Client {
 extension SN3Client {
     private func makeBullet() async throws {
         guard let gameServiceToken = gameServiceToken else {return}
-        let (data, res) = try await session.request(api: SN3API.bulletTokens(gameServiceToken: gameServiceToken))
+        let (data, res) = try await session.request(
+            api: SN3API.bulletTokens(
+                gameServiceToken: gameServiceToken,
+                country: country,
+                accountLanguage: accountLanguage,
+                interfaceLanguage: interfaceLanguage
+            )
+        )
         switch res.statusCode {
         case 200, 201:
             break // OK

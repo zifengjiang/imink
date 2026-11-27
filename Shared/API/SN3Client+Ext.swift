@@ -172,3 +172,73 @@ extension SN3Client {
         return count
     }
 }
+// MARK: - My Gear Collection
+
+extension SN3Client {
+    @MainActor
+    func fetchMyGearCollection(language: String) async throws -> MyGearCollection {
+        await refreshWebConfigurationIfAvailable()
+
+        let webSession: SplatNetWebSession
+        do {
+            webSession = try await SplatNetWebSessionProvider.load()
+        } catch let error as DecodingError {
+            logError(error, "无法解析 Nintendo 账户响应")
+            throw MyGearCollectionError.invalidAccountResponse
+        }
+
+        let cacheKey = MyGearCollectionRequestCache.Key(
+            session: webSession,
+            interfaceLanguage: language
+        )
+        return try await MyGearCollectionRequestCache.shared.value(
+            for: cacheKey
+        ) { [self] in
+            try await fetchMyGearCollectionUncached(
+                language: language,
+                webSession: webSession
+            )
+        }
+    }
+
+    @MainActor
+    private func fetchMyGearCollectionUncached(
+        language: String,
+        webSession: SplatNetWebSession
+    ) async throws -> MyGearCollection {
+
+        do {
+            try await setToken(
+                webSession.gameWebToken,
+                country: webSession.country,
+                accountLanguage: webSession.accountLanguage,
+                interfaceLanguage: language
+            )
+        } catch let error as DecodingError {
+            logError(error, "无法解析鱿鱼圈登录响应")
+            throw MyGearCollectionError.invalidBulletTokenResponse
+        }
+
+        let responseData: Data
+        do {
+            responseData = try await graphQL(
+                .myOutfitCommonDataEquipments(
+                    language: language,
+                    gameWebToken: webSession.gameWebToken,
+                    country: webSession.country,
+                    accountLanguage: webSession.accountLanguage
+                )
+            )
+        } catch let error as DecodingError {
+            logError(error, "刷新鱿鱼圈登录响应失败")
+            throw MyGearCollectionError.invalidBulletTokenResponse
+        }
+
+        do {
+            return try MyGearResponseDecoder.decode(responseData)
+        } catch {
+            logError(error, "无法解析装备响应")
+            throw error
+        }
+    }
+}

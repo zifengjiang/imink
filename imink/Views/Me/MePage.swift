@@ -10,6 +10,7 @@ struct MePage: View {
     #endif
     @State private var expandedFriendId: String?
     @State private var showLoginSheet = false
+    @State private var presentedTool: PresentedTool?
 
     private let twoColumns = [
         GridItem(.flexible(), spacing: 12),
@@ -21,6 +22,9 @@ struct MePage: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     identitySection
+                    if appState.isLogin {
+                        toolsSection
+                    }
                     recentPerformanceSection
                     modeEntrySection
                     deepArchiveSection
@@ -73,6 +77,14 @@ struct MePage: View {
             .onChange(of: appState.isLogin) { _, isLogin in
                 if isLogin {
                     showLoginSheet = false
+                } else {
+                    presentedTool = nil
+                }
+            }
+            .fullScreenCover(item: $presentedTool) { tool in
+                switch tool {
+                case .splatNet3:
+                    SplatNetWebViewScreen()
                 }
             }
             .task(id: "\(appState.isLogin)-\(appState.battleRecordsCount)-\(appState.salmonRunRecordsCount)") {
@@ -272,6 +284,73 @@ struct MePage: View {
             }
         }
         .padding(14)
+        .background(Color.listItemBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    // MARK: - 工具（我的装备 / 鱿鱼圈 3）
+
+    private var toolsSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            sectionHeader(
+                title: "工具",
+                accent: .accentColor
+            )
+
+            LazyVGrid(columns: twoColumns, spacing: 12) {
+                NavigationLink {
+                    MyGearView()
+                } label: {
+                    toolCardContent(
+                        title: "我的装备",
+                        systemIcon: "tshirt.fill",
+                        tint: .spOrange,
+                        trailingIcon: "chevron.right"
+                    )
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    Haptics.generateIfEnabled(.light)
+                    presentedTool = .splatNet3
+                } label: {
+                    toolCardContent(
+                        title: "鱿鱼圈 3",
+                        systemIcon: "globe",
+                        tint: .accentColor,
+                        trailingIcon: "arrow.up.forward"
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func toolCardContent(
+        title: String,
+        systemIcon: String,
+        tint: Color,
+        trailingIcon: String
+    ) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: systemIcon)
+                .font(.appBody)
+                .foregroundStyle(tint)
+                .frame(width: 32, height: 32)
+                .background(tint.opacity(0.14), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+
+            Text(title)
+                .font(.appHeadline)
+                .foregroundStyle(.appLabel)
+                .lineLimit(1)
+
+            Spacer(minLength: 4)
+
+            Image(systemName: trailingIcon)
+                .font(.appCaption)
+                .foregroundStyle(.tertiary)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.listItemBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
@@ -891,6 +970,14 @@ struct MePage: View {
     private func formatNumberDelta(_ delta: Double?) -> String? {
         guard let delta, abs(delta) >= 0.01 else { return nil }
         return String(format: "%@%.2f", delta >= 0 ? "▲+" : "▼", delta)
+    }
+
+    private enum PresentedTool: String, Identifiable {
+        case splatNet3
+
+        var id: String {
+            rawValue
+        }
     }
 }
 
