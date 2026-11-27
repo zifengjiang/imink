@@ -80,12 +80,6 @@ struct FilterSummaryBanner: View {
         }
         .padding(FilterSheetLayout.cardPadding)
         .textureBackground(texture: .bubble, radius: 16)
-        .overlay(alignment: .top) {
-            Capsule()
-                .fill(accent)
-                .frame(height: 3)
-                .padding(.horizontal, 16)
-        }
     }
 }
 

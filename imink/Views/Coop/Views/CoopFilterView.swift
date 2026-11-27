@@ -341,7 +341,7 @@ struct CoopFilterView: View {
                             Color.black.opacity(0.75)
                         }
                     }
-                    .frame(height: 56)
+                    .frame(height: 54)
                     .frame(maxWidth: .infinity)
                     .clipped()
                     .overlay {
@@ -369,25 +369,17 @@ struct CoopFilterView: View {
                     )
                 )
 
-                HStack(spacing: 4) {
-                    Text(title)
-                        .font(.appCaption)
-                        .foregroundStyle(isSelected ? onAccent : .appLabel)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.92)
-
-                    Spacer(minLength: 2)
-
-                    if !isSelected {
-                        Image(systemName: "circle")
-                            .font(.appCaption)
-                            .foregroundStyle(Color.secondary.opacity(0.4))
-                    }
-                }
-                .padding(.horizontal, 10)
-                .frame(height: 28)
+                Text(title)
+                    .font(.appCaption)
+                    .appLineHeight(AppFontScale.caption)
+                    .foregroundStyle(isSelected ? onAccent : .appLabel)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.92)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, minHeight: 34, maxHeight: 34, alignment: .leading)
+                    .padding(.horizontal, 8)
             }
-            .padding(isSelected ? 2 : 0)
+            .padding(2)
             .background(
                 isSelected
                     ? Color.accentColor
