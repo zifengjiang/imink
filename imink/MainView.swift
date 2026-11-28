@@ -14,7 +14,7 @@ struct MainView: View {
     var body: some View {
         Group {
             if useCustomDock {
-                // UIKit 原生底导壳：UITabBarController 子类 + 实时系统 Liquid Glass UITabBar + 顶沿锚定快筛面板
+                // 单物体变形底导壳：原生 62pt Liquid Glass UITabBarController + 原地变形筛选卡片
                 ExpandingDockHost(tabSelection: $tabSelection)
                     .ignoresSafeArea()
             } else {

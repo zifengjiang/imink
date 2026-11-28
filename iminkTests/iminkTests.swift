@@ -207,6 +207,148 @@ final class iminkTests: XCTestCase {
         )
     }
 
+    func testDockMorphEarlyHandoffAndDetailPushGuardPolicies() {
+        // 1. 展开态绝不交接
+        XCTAssertFalse(
+            DockMorphHandoffPolicy.shouldHandoffToSystemTabBar(
+                isOpen: true,
+                closingElapsed: 0.25,
+                currentHeight: 62.0,
+                targetHeight: 62.0,
+                currentVelocity: 0,
+                scaleX: 1.0
+            )
+        )
+
+        // 2. 收起刚启动（< 100ms）不误交接
+        XCTAssertFalse(
+            DockMorphHandoffPolicy.shouldHandoffToSystemTabBar(
+                isOpen: false,
+                closingElapsed: 0.05,
+                currentHeight: 62.5,
+                targetHeight: 62.0,
+                currentVelocity: -10,
+                scaleX: 0.995
+            )
+        )
+
+        // 3. 高度误差 > 1.0pt 或水平收腰未回到 0.99~1.01 时不提前交接
+        XCTAssertFalse(
+            DockMorphHandoffPolicy.shouldHandoffToSystemTabBar(
+                isOpen: false,
+                closingElapsed: 0.20,
+                currentHeight: 63.6,
+                targetHeight: 62.0,
+                currentVelocity: -20,
+                scaleX: 0.995
+            )
+        )
+        XCTAssertFalse(
+            DockMorphHandoffPolicy.shouldHandoffToSystemTabBar(
+                isOpen: false,
+                closingElapsed: 0.20,
+                currentHeight: 62.4,
+                targetHeight: 62.0,
+                currentVelocity: -20,
+                scaleX: 0.97
+            )
+        )
+
+        // 4. 约 240~260ms 几何贴合（高度误差 ≤ 1.0pt 且 scaleX ∈ [0.99, 1.01]）立即交接，不等 400ms+ 长尾
+        XCTAssertTrue(
+            DockMorphHandoffPolicy.shouldHandoffToSystemTabBar(
+                isOpen: false,
+                closingElapsed: 0.25,
+                currentHeight: 62.8,
+                targetHeight: 62.0,
+                currentVelocity: -25,
+                scaleX: 0.994
+            )
+        )
+
+        // 5. 详情页 Push 保护：仅「对战 / 鲑鱼跑」根列表页（depth ≤ 1、无转场、无弹窗、完整底栏宽度）允许展开
+        XCTAssertTrue(
+            DockMorphHandoffPolicy.canExpandFilterMenu(
+                tab: .coop,
+                navigationStackDepths: [1],
+                hasActiveTransition: false,
+                hasPresentedModal: false,
+                platterWidth: 351,
+                containerWidth: 393,
+                tabBarHidden: false
+            )
+        )
+        XCTAssertTrue(
+            DockMorphHandoffPolicy.canExpandFilterMenu(
+                tab: .battle,
+                navigationStackDepths: [1],
+                hasActiveTransition: false,
+                hasPresentedModal: false,
+                platterWidth: 351,
+                containerWidth: 393,
+                tabBarHidden: false
+            )
+        )
+        // 主页与「我」不展开筛选菜单
+        XCTAssertFalse(
+            DockMorphHandoffPolicy.canExpandFilterMenu(
+                tab: .home,
+                navigationStackDepths: [1],
+                hasActiveTransition: false,
+                hasPresentedModal: false,
+                platterWidth: 351,
+                containerWidth: 393,
+                tabBarHidden: false
+            )
+        )
+        XCTAssertFalse(
+            DockMorphHandoffPolicy.canExpandFilterMenu(
+                tab: .me,
+                navigationStackDepths: [1],
+                hasActiveTransition: false,
+                hasPresentedModal: false,
+                platterWidth: 351,
+                containerWidth: 393,
+                tabBarHidden: false
+            )
+        )
+        // 进入详情页（depth == 2）禁止展开
+        XCTAssertFalse(
+            DockMorphHandoffPolicy.canExpandFilterMenu(
+                tab: .coop,
+                navigationStackDepths: [2],
+                hasActiveTransition: false,
+                hasPresentedModal: false,
+                platterWidth: 351,
+                containerWidth: 393,
+                tabBarHidden: false
+            )
+        )
+        // push 转场中或底栏缩成窄胶囊时禁止展开
+        XCTAssertFalse(
+            DockMorphHandoffPolicy.canExpandFilterMenu(
+                tab: .coop,
+                navigationStackDepths: [1],
+                hasActiveTransition: true,
+                hasPresentedModal: false,
+                platterWidth: 351,
+                containerWidth: 393,
+                tabBarHidden: false
+            )
+        )
+        XCTAssertFalse(
+            DockMorphHandoffPolicy.canExpandFilterMenu(
+                tab: .coop,
+                navigationStackDepths: [1],
+                hasActiveTransition: false,
+                hasPresentedModal: false,
+                platterWidth: 88,
+                containerWidth: 393,
+                tabBarHidden: false
+            )
+        )
+    }
+
     func testNintendoLoginAcceptsUserWithoutBirthday() throws {
         let user = try JSONDecoder().decode(
             NSOAuthorization.NAUser.self,
