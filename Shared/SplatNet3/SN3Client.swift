@@ -194,6 +194,8 @@ public extension SN3Client {
         case tooManyRequests
         case invalidBulletToken
         case responseError(code: Int, url: URL? = nil, body: String? = nil)
+        /// detail 一条都没拉下来（网络/令牌/限流之外的失败）
+        case noDetailFetched(message: String)
     }
 }
 
@@ -211,6 +213,8 @@ extension SN3Client.Error: LocalizedError {
                 return "服务返回错误（HTTP \(code)）：\(body.prefix(120))"
             }
             return "服务返回错误（HTTP \(code)），请稍后重试"
+        case let .noDetailFetched(message):
+            return "详情拉取失败：\(message)"
         }
     }
 }

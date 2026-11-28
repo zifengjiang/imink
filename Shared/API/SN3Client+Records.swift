@@ -9,17 +9,20 @@ import os.log
 extension SN3Client {
     /// 并发拉取一批 detail，成功后交给 `store` 落库。
     ///
-    /// 对战与打工的拉取流程只有查询类型、响应根键和落库方式不同，
-    /// 这里把并发抓取、错误忽略与计数逻辑统一起来。
+    /// 返回值必须是 **真正落库的行数**（由 `store` 统计），不能是「抓到的 detail 数」：
+    /// 之前这里在 `store` 抛错时只打日志并返回 `details.count`，于是 UI 与后台通知
+    /// 都会显示「加载了 N 条」，而事务其实整体回滚、库里 0 行。
+    /// 落库失败现在直接向上抛出，由 `runPipeline` 呈现给用户。
     private func fetchAndPersistDetails(
         ids: [String],
         rootKey: String,
         query: @escaping (String) -> any SN3PersistedQuery,
-        store: @escaping ([JSON]) async throws -> Void
-    ) async -> Int {
+        store: @escaping ([JSON]) async throws -> Int
+    ) async throws -> Int {
         guard !ids.isEmpty else { return 0 }
 
         var details: [JSON] = []
+        var fetchErrors: [String] = []
         await withTaskGroup(of: JSON?.self) { group in
             for id in ids {
                 group.addTask { [weak self] in
@@ -38,13 +41,36 @@ extension SN3Client {
             }
         }
 
-        guard !details.isEmpty else { return 0 }
+        guard !details.isEmpty else {
+            fetchErrors.append("全部 \(ids.count) 条 detail 拉取失败")
+            throw SN3Client.Error.noDetailFetched(message: fetchErrors.joined(separator: "; "))
+        }
+
+        // 恢复出来的库 / 新赛季素材里缺少 imageMap 记录时，getImageId(...) 会返回 0，
+        // 而 weapon.imageMapId、coop.stageId 等外键会让整批插入回滚。
+        // 插入前保证存在 id=0 的占位行，避免「因为一张未知图片而丢掉整批记录」。
         do {
-            try await store(details)
+            try SplatDatabase.shared.ensureUnknownImageMapRow()
         } catch {
             logError(error)
         }
-        return details.count
+
+        let saved = try await store(details)
+        if details.count < ids.count {
+            logError(
+                NSError(domain: "imink.Sync", code: 2, userInfo: [
+                    NSLocalizedDescriptionKey: "detail 拉取不完整：\(details.count)/\(ids.count)，已写入 \(saved) 条"
+                ])
+            )
+        }
+        return saved
+    }
+
+    /// 计数辅助：插入前后对比，得到真正落库的行数。
+    private func countRows(in table: String) async throws -> Int {
+        try await SplatDatabase.shared.dbQueue.read { db in
+            try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM \(table)") ?? 0
+        }
     }
 
     @discardableResult
@@ -65,14 +91,20 @@ extension SN3Client {
             },
             fetchAndStoreDetails: { [weak self] validIds in
                 guard let self else { return 0 }
-                return await self.fetchAndPersistDetails(
+                let before = try await self.countRows(in: "coop")
+                let saved = try await self.fetchAndPersistDetails(
                     ids: validIds,
                     rootKey: "coopHistoryDetail",
                     query: { .coopHistoryDetail(id: $0) }
                 ) { details in
                     try await SplatDatabase.shared.insertCoops(jsons: details)
                     await CoopListViewModel.shared.loadCoops(loadRecent: true)
+                    let after = try await SplatDatabase.shared.dbQueue.read { db in
+                        try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM coop") ?? 0
+                    }
+                    return after - before
                 }
+                return saved
             },
             groupId: groupId,
             taskName: groupId != nil ? "获取鲑鱼跑记录" : nil
@@ -110,14 +142,20 @@ extension SN3Client {
             },
             fetchAndStoreDetails: { [weak self] validIds in
                 guard let self else { return 0 }
-                return await self.fetchAndPersistDetails(
+                let before = try await self.countRows(in: "battle")
+                let saved = try await self.fetchAndPersistDetails(
                     ids: validIds,
                     rootKey: "vsHistoryDetail",
                     query: { .vsHistoryDetail(id: $0) }
                 ) { details in
                     try await SplatDatabase.shared.insertBattles(jsons: details)
                     await BattleListViewModel.shared.loadBattles()
+                    let after = try await SplatDatabase.shared.dbQueue.read { db in
+                        try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM battle") ?? 0
+                    }
+                    return after - before
                 }
+                return saved
             },
             groupId: groupId,
             taskName: groupId != nil ? "获取对战记录" : nil

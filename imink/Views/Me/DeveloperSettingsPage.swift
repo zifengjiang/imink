@@ -121,6 +121,26 @@ struct DeveloperSettingsPage: View {
                     .foregroundStyle(.secondary)
             }
 
+            // 同步失败原因（以前只进 os_log，界面上只有一句「刷新完成」）
+            HStack(alignment: .firstTextBaseline) {
+                Text("最近同步错误")
+                Spacer()
+                if let lastSyncError = AppUserDefaults.shared.lastSyncError, !lastSyncError.isEmpty {
+                    GameText(
+                        lastSyncError,
+                        size: AppFontScale.caption,
+                        color: .systemRed,
+                        lineLimit: 0,
+                        alignment: .right
+                    )
+                    .frame(maxWidth: 220, alignment: .trailing)
+                } else {
+                    Text("无")
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                }
+            }
+
             Button("手动刷新数据（测试）") {
                 Task { @MainActor in
                     let groupId = "manual-refresh-\(UUID().uuidString)"
@@ -133,14 +153,23 @@ struct DeveloperSettingsPage: View {
                     await NSOAccountManager.shared.refreshGameServiceTokenIfNeeded()
 
                     await Indicators.shared.registerSubTask(groupId: groupId, taskName: "获取对战记录")
-                    _ = await SN3Client.shared.fetchBattles(groupId: groupId)
+                    let battles = await SN3Client.shared.fetchBattles(groupId: groupId)
                     await Indicators.shared.completeSubTask(groupId: groupId, taskName: "获取对战记录")
 
                     await Indicators.shared.registerSubTask(groupId: groupId, taskName: "获取鲑鱼跑记录")
-                    _ = await SN3Client.shared.fetchCoops(groupId: groupId)
+                    let coops = await SN3Client.shared.fetchCoops(groupId: groupId)
                     await Indicators.shared.completeSubTask(groupId: groupId, taskName: "获取鲑鱼跑记录")
 
-                    await Indicators.shared.completeTaskGroup(groupId: groupId, success: true, message: "刷新完成")
+                    // nil = 本轮失败，绝不能再无条件报「刷新完成」
+                    let success = battles != nil && coops != nil
+                    let total = (battles ?? 0) + (coops ?? 0)
+                    let message: String
+                    if success {
+                        message = "刷新完成，写入 \(total) 条"
+                    } else {
+                        message = AppUserDefaults.shared.lastSyncError ?? "刷新失败"
+                    }
+                    await Indicators.shared.completeTaskGroup(groupId: groupId, success: success, message: message)
                 }
             }
 

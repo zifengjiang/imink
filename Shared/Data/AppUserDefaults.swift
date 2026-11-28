@@ -55,6 +55,13 @@ class AppUserDefaults: ObservableObject {
     @AppStorage("battlesRefreshTime", store: .appGroup)
     var battlesRefreshTime: Int = 0
 
+    /// 最近一次同步失败原因（成功时置 nil）。
+    ///
+    /// 以前同步失败只进 os_log，UI 上只有一句「加载完成」，用户完全看不见。
+    /// 现在失败原因存在这里，开发者设置页会展示，便于现场定位。
+    @AppStorage("lastSyncError", store: .appGroup)
+    var lastSyncError: String?
+
     @AppStorage("scheduleRefreshTime", store: .appGroup)
     var scheduleRefreshTime: Int = 0
     

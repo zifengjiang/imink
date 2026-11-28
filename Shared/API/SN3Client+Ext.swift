@@ -23,6 +23,29 @@ private enum Gate {
     }
 }
 
+    // MARK: - Sync 结果日志
+/// 记录「请求多少 / 真正落库多少」，让 `log stream` 里一眼能看出写入是否成功。
+@inline(__always)
+func logSyncResult(kind: String, requested: Int, saved: Int) {
+    os_log(
+        "sync[%{public}@] requested=%d saved=%d",
+        type: saved == requested ? .info : .error,
+        kind, requested, saved
+    )
+}
+
+/// 把同步失败翻译成用户能看懂的一句话（不会把技术细节藏进日志）。
+func syncFailureMessage(_ error: any Error) -> String {
+    let nsError = error as NSError
+    if nsError.domain == "SQLite" || nsError.domain.contains("GRDB") || nsError.domain == "SQLite.Result" {
+        return "写入数据库失败：\(error.localizedDescription)"
+    }
+    if let localized = (error as? LocalizedError)?.errorDescription, !localized.isEmpty {
+        return "同步失败：\(localized)"
+    }
+    return "同步失败：\(error.localizedDescription)"
+}
+
 
     // MARK: - SN3Client token helper
 extension SN3Client {
@@ -87,6 +110,7 @@ extension SN3Client {
         }
         
         var count = 0
+        var failed = false
         do{
             try await flag.withValue(true) {
                 do {
@@ -102,6 +126,8 @@ extension SN3Client {
                             await Indicators.shared.updateIcon(for: IndicatorID, icon: .success)
                         }
                         lastRefreshTime = Int(Date().timeIntervalSince1970)
+                        // 整体拉取成功（只是没新数据）→ 清掉上次的错误，避免误导
+                        AppUserDefaults.shared.lastSyncError = nil
                         return
                     }
                     
@@ -113,15 +139,29 @@ extension SN3Client {
                     let saved = try await fetchAndStoreDetails(ids)
                     count = saved
                     lastRefreshTime = Int(Date().timeIntervalSince1970)
-                    
+
+                    // 落库行数才是结果：抓到的 id 数 > 实际写入数 = 部分或全部写入失败
+                    let isPartial = saved < ids.count
+                    AppUserDefaults.shared.lastSyncError = isPartial ? "仅写入 \(saved)/\(ids.count) 条记录" : nil
+                    logSyncResult(kind: taskName ?? "records", requested: ids.count, saved: saved)
+
                     if useTaskGroup, let groupId = groupId, let taskName = taskName {
                         // 完成子任务，任务组会自动更新标题
                         await Indicators.shared.completeSubTask(groupId: groupId, taskName: taskName)
+                        if isPartial {
+                            await Indicators.shared.updateTitle(for: IndicatorID, title: "仅写入 \(saved)/\(ids.count) 条")
+                        }
                     } else {
                         // 非任务组模式，更新标题和图标并 dismiss
-                        await Indicators.shared.updateTitle(for: IndicatorID, title: "加载了\(saved)个新纪录")
-                        await Indicators.shared.updateIcon(for: IndicatorID, icon: .success)
-                        await Indicators.shared.dismiss(with: IndicatorID, after: 1)
+                        if isPartial {
+                            await Indicators.shared.updateTitle(for: IndicatorID, title: "仅写入 \(saved)/\(ids.count) 条记录")
+                            await Indicators.shared.updateIcon(for: IndicatorID, icon: .systemImage("exclamationmark.triangle"))
+                            await Indicators.shared.dismiss(with: IndicatorID, after: 3)
+                        } else {
+                            await Indicators.shared.updateTitle(for: IndicatorID, title: "加载了\(saved)个新纪录")
+                            await Indicators.shared.updateIcon(for: IndicatorID, icon: .success)
+                            await Indicators.shared.dismiss(with: IndicatorID, after: 1)
+                        }
                     }
                     return
                 } catch is CancellationError{
@@ -146,6 +186,11 @@ extension SN3Client {
                     } else {
                         await Indicators.shared.updateTitle(for: IndicatorID, title: "令牌已过期，重新获取...")
                         try await NSOAccountManager.shared.refreshGameServiceTokenManual(indicatorId: IndicatorID)
+                        // 令牌刷新了，但本次抓取并未重试：必须让调用方知道这一轮没有数据，
+                        // 否则后台任务会把它当成「没有新纪录」而定下一个 15 分钟的沉默。
+                        failed = true
+                        AppUserDefaults.shared.lastSyncError = "游戏服务令牌已刷新，请再次刷新数据"
+                        return
                     }
                 }catch SN3Client.Error.tooManyRequests{
                     if useTaskGroup, let groupId = groupId, let taskName = taskName {
@@ -158,18 +203,28 @@ extension SN3Client {
                     return
                 }catch {
                     logError(error)
+                    failed = true
+                    // 落库/拉取失败必须对用户可见，而不是只把进度条收掉
+                    let message = syncFailureMessage(error)
+                    AppUserDefaults.shared.lastSyncError = message
                     if useTaskGroup, let groupId = groupId, let taskName = taskName {
                         await Indicators.shared.completeSubTask(groupId: groupId, taskName: taskName)
+                        await Indicators.shared.updateTitle(for: IndicatorID, title: message)
+                        await Indicators.shared.updateIcon(for: IndicatorID, icon: .systemImage("exclamationmark.triangle"))
                     } else {
-                        await Indicators.shared.dismiss(with: IndicatorID)
+                        await Indicators.shared.updateTitle(for: IndicatorID, title: message)
+                        await Indicators.shared.updateIcon(for: IndicatorID, icon: .systemImage("exclamationmark.triangle"))
+                        await Indicators.shared.dismiss(with: IndicatorID, after: 4)
                     }
+                    Toast.failure(message)
                     return
                 }
             }
         }catch{
             logError(error)
+            failed = true
         }
-        return count
+        return failed ? nil : count
     }
 }
 // MARK: - My Gear Collection

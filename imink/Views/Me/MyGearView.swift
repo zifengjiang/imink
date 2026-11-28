@@ -326,6 +326,8 @@ final class MyGearViewModel: ObservableObject {
                 return "请求过于频繁，请稍后重试"
             case .responseError(let code, _, _):
                 return "鱿鱼圈请求失败（\(code)）"
+            case .noDetailFetched(let message):
+                return "记录详情拉取失败（\(message)）"
             }
         }
 

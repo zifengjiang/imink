@@ -104,7 +104,7 @@ extension SN3PersistedQuery where Self == XBattleHistoriesQuery {
 // MARK: EventBattleHistoriesQuery
 
 public struct EventBattleHistoriesQuery: SN3PersistedQuery {
-    public static let name = "XBattleHistoriesQuery"
+    public static let name = "EventBattleHistoriesQuery"
 }
 
 extension SN3PersistedQuery where Self == EventBattleHistoriesQuery {

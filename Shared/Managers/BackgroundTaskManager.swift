@@ -185,28 +185,52 @@ final class BackgroundTaskManager: ObservableObject {
         
         var totalNewData = 0
         var success = true
+        var failureMessages: [String] = []
         
         // 刷新token
         await NSOAccountManager.shared.refreshGameServiceTokenIfNeeded()
         
         // 获取对战记录
         await Indicators.shared.registerSubTask(groupId: groupId, taskName: "获取对战记录")
-        let battlesCount = await SN3Client.shared.fetchBattles(groupId: groupId) ?? 0
+        let battlesCount = await SN3Client.shared.fetchBattles(groupId: groupId)
         await Indicators.shared.completeSubTask(groupId: groupId, taskName: "获取对战记录")
-        totalNewData += battlesCount
+        if let battlesCount {
+            totalNewData += battlesCount
+        } else {
+            // nil 表示这一轮失败（令牌/网络/落库），不能当成「没有新纪录」
+            success = false
+            failureMessages.append("对战记录")
+        }
         
         // 获取鲑鱼跑记录
         await Indicators.shared.registerSubTask(groupId: groupId, taskName: "获取鲑鱼跑记录")
-        let coopsCount = await SN3Client.shared.fetchCoops(groupId: groupId) ?? 0
+        let coopsCount = await SN3Client.shared.fetchCoops(groupId: groupId)
         await Indicators.shared.completeSubTask(groupId: groupId, taskName: "获取鲑鱼跑记录")
-        totalNewData += coopsCount
+        if let coopsCount {
+            totalNewData += coopsCount
+        } else {
+            success = false
+            failureMessages.append("鲑鱼跑记录")
+        }
         
-        // 完成任务组
-        let message = totalNewData > 0 ? "成功加载 \(totalNewData) 个新纪录" : "没有新纪录"
+        // 完成任务组：失败时标题必须显式报错，否则用户只看到「完成」却没有新数据
+        let message: String
+        if success {
+            message = totalNewData > 0 ? "成功加载 \(totalNewData) 个新纪录" : "没有新纪录"
+        } else if totalNewData > 0 {
+            message = "已写入 \(totalNewData) 条，\(failureMessages.joined(separator: "、"))失败"
+        } else {
+            message = "同步失败：\(failureMessages.joined(separator: "、"))"
+        }
         await Indicators.shared.completeTaskGroup(groupId: groupId, success: success, message: message)
         
-        // 发送数据更新通知（仅当有新数据时）
-        if totalNewData > 0 {
+        // 失败原因落到 lastSyncError，开发者设置页可见
+        if !success {
+            AppUserDefaults.shared.lastSyncError = AppUserDefaults.shared.lastSyncError ?? message
+        }
+        
+        // 发送数据更新通知：只按 **真正写入数据库的行数** 计数，失败时绝不虚报
+        if success, totalNewData > 0 {
             unviewedDataCount += totalNewData
             await NotificationManager.shared.sendDataUpdateNotification(
                 newDataCount: totalNewData,
@@ -214,6 +238,7 @@ final class BackgroundTaskManager: ObservableObject {
             )
         }
         
+        logger.info("后台数据刷新结束: success=\(success) totalNewData=\(totalNewData) failures=\(failureMessages.joined(separator: ","))")
     }
     
     // MARK: - 执行日程后台刷新
