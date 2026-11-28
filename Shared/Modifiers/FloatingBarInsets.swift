@@ -248,7 +248,6 @@ struct FloatingTabBarInsetModifier: ViewModifier {
             content
         } else {
             content
-                .toolbar(useCustomDock ? .hidden : .visible, for: .tabBar)
                 .safeAreaInset(edge: .bottom, spacing: 0) {
                     Color.clear
                         .frame(maxWidth: .infinity)
@@ -279,7 +278,6 @@ struct FloatingBarPadding: ViewModifier {
     func body(content: Content) -> some View {
         let _ = useCustomDock
         content
-            .toolbar(useCustomDock ? .hidden : .visible, for: .tabBar)
             .padding(.top, max(0, FloatingBarInsets.top - currentInsets.top))
             .padding(.bottom, max(0, FloatingBarInsets.bottom - currentInsets.bottom))
             .environment(\.hasFloatingTabBarInset, true)
@@ -293,7 +291,6 @@ private struct FullFloatingBarClearanceModifier: ViewModifier {
     func body(content: Content) -> some View {
         let _ = useCustomDock
         content
-            .toolbar(useCustomDock ? .hidden : .visible, for: .tabBar)
             .padding(.top, FloatingBarInsets.top)
             .padding(.bottom, FloatingBarInsets.bottom)
             .environment(\.hasFloatingTabBarInset, true)

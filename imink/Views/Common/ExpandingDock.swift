@@ -1,86 +1,61 @@
+import Combine
 import SwiftUI
 import UIKit
+import UIKit.UIGestureRecognizerSubclass
 
-/// 自绘可展开底部栏（`ExpandingDock`）原生动效参数：
-/// - 非对称开合弹簧：展开 `response: 0.35, dampingFraction: 0.72`（带轻快微弹），收起 `response: 0.28, dampingFraction: 0.94`（干脆落位不穿底）；
-/// - 水平微收腰脉冲（`keyframeAnimator`）：展开宽度先压至 `0.80` 再回弹至 `1.0`，收起先压至 `0.82` 再回稳至 `1.0`；
-/// - 逐行错峰上浮：展开按底→顶每行 `delay: index * 0.030s`（`opacity 0→1` + `offset y +10→0` + `blur 3→0`），收起反序顶→底快速收拢（总时长 `≤ 0.18s`）；
-/// - 开启系统「减弱动态效果」时全面降级为纯淡入淡出（无位移、无缩放收腰、无模糊过渡）。
+/// 可展开底部栏（UIKit 原生底导 + 快筛面板）动效常量与辅助工具：
+/// - 展开：`UISpringTimingParameters(dampingRatio: 0.74)`（`duration = 0.36s`）+ 水平收腰 `scaleX: 0.80 -> 1.0`；
+/// - 收起：`UISpringTimingParameters(dampingRatio: 0.82)`（`duration = 0.28s`，带轻微回弹且底边锁死在 `tabBar` 上沿）；
+/// - 逐行错峰上浮：每行独立 `UIViewPropertyAnimator(duration:delay:)`，展开 `delay = index * 0.03s`；
+///   收起反序 `0.011s` 阶梯、单行 `0.088s`，总时长 `8 * 0.011 + 0.088 = 0.176s <= 0.18s`；
+/// - 开启系统「减弱动态效果」（`Reduce Motion`）时全面降级为纯淡入淡出（`0.18s easeOut`）。
 enum DockMotion {
-    static let expandResponse: Double = 0.35
-    static let expandDamping: Double = 0.72
-    static let collapseResponse: Double = 0.28
-    static let collapseDamping: Double = 0.94
-    static let interactiveResponse: Double = 0.26
-    static let interactiveDamping: Double = 0.84
-    static let scrollHideResponse: Double = 0.36
-    static let scrollHideDamping: Double = 0.86
-    static let reducedDuration: Double = 0.18
+    static let expandDuration: TimeInterval = 0.36
+    static let expandDamping: CGFloat = 0.74
+    static let collapseDuration: TimeInterval = 0.28
+    static let collapseDamping: CGFloat = 0.82
+    static let reducedDuration: TimeInterval = 0.18
 
-    /// 水平微收腰脉冲峰值比例（展开 `0.80`，收起 `0.82`）。
-    static let openSqueezeScale: CGFloat = 0.80
-    static let closeSqueezeScale: CGFloat = 0.82
+    /// 水平收腰起始缩放比（`scaleX = 0.80` 起手再经弹簧舒展回 `1.0`）。
+    static let openSqueezeScaleX: CGFloat = 0.80
+    static let closeSqueezeScaleX: CGFloat = 0.82
 
-    /// 面板逐行错峰参数（展开自底向上 30ms 步进；收起自顶向下反序且总时长 `8 * 0.011 + 0.088 = 0.176s <= 0.18s`）。
-    static let rowOpenStaggerStep: Double = 0.030
-    static let rowOpenResponse: Double = 0.32
-    static let rowOpenDamping: Double = 0.78
-    static let rowInitialOffsetY: CGFloat = 10
-    static let rowInitialBlur: CGFloat = 3
-    static let rowCloseStaggerStep: Double = 0.011
-    static let rowCloseItemDuration: Double = 0.088
+    /// 面板逐行错峰参数：展开 `index * 0.03s`；收起 `0.011s` 阶梯 + `0.088s` 单行时长（总时长 `<= 0.18s`）。
+    static let rowOpenStaggerStep: TimeInterval = 0.030
+    static let rowOpenDuration: TimeInterval = 0.30
+    static let rowOpenDamping: CGFloat = 0.78
+    static let rowInitialOffsetY: CGFloat = 12
+    static let rowCloseStaggerStep: TimeInterval = 0.011
+    static let rowCloseItemDuration: TimeInterval = 0.088
+    static let maxCloseStaggerIndex: Int = 8
 
-    static func isReduceMotionActive(_ environmentReduceMotion: Bool) -> Bool {
+    static func isReduceMotionActive(_ environmentReduceMotion: Bool = false) -> Bool {
         UIAccessibility.isReduceMotionEnabled || environmentReduceMotion
     }
 
     static func openAnimation(reduceMotion: Bool) -> Animation {
         isReduceMotionActive(reduceMotion)
             ? .easeOut(duration: reducedDuration)
-            : .spring(response: expandResponse, dampingFraction: expandDamping)
+            : .spring(response: expandDuration, dampingFraction: Double(expandDamping))
     }
 
     static func closeAnimation(reduceMotion: Bool) -> Animation {
         isReduceMotionActive(reduceMotion)
             ? .easeOut(duration: reducedDuration)
-            : .spring(response: collapseResponse, dampingFraction: collapseDamping)
+            : .spring(response: collapseDuration, dampingFraction: Double(collapseDamping))
     }
 
     static func transitionAnimation(to state: DockState, reduceMotion: Bool) -> Animation {
         switch state {
         case .expanded:
             return openAnimation(reduceMotion: reduceMotion)
-        case .collapsed:
+        case .collapsed, .scrollingHidden:
             return closeAnimation(reduceMotion: reduceMotion)
-        case .scrollingHidden:
-            return scrollHideAnimation(reduceMotion: reduceMotion)
         }
-    }
-
-    static func panelAnimation(reduceMotion: Bool) -> Animation {
-        openAnimation(reduceMotion: reduceMotion)
-    }
-
-    static func interactiveDragAnimation(reduceMotion: Bool) -> Animation {
-        isReduceMotionActive(reduceMotion)
-            ? .linear(duration: 0.05)
-            : .interactiveSpring(response: interactiveResponse, dampingFraction: interactiveDamping)
-    }
-
-    static func tabAnimation(reduceMotion: Bool) -> Animation {
-        isReduceMotionActive(reduceMotion)
-            ? .easeOut(duration: reducedDuration)
-            : .spring(response: 0.32, dampingFraction: 0.84)
-    }
-
-    static func scrollHideAnimation(reduceMotion: Bool) -> Animation {
-        isReduceMotionActive(reduceMotion)
-            ? .easeOut(duration: reducedDuration)
-            : .spring(response: scrollHideResponse, dampingFraction: scrollHideDamping)
     }
 }
 
-/// 搜索匹配与「最近使用」持久化工具（供视图与单元测试直接验证）。
+/// 搜索匹配与「最近使用」持久化工具（供 UIKit 面板与单元测试直接验证）。
 enum DockSearchSupport {
     static let recentModesStorageKey = "imink.dock.recentModes"
     static let maxRecentCount = 3
@@ -121,29 +96,7 @@ enum DockSearchSupport {
     }
 }
 
-private struct SqueezePulseTrigger: Equatable {
-    var generation: Int = 0
-    var isOpening: Bool = true
-}
-
-private struct SqueezeKeyframeValues {
-    var widthScale: CGFloat = 1.0
-}
-
-private struct DockRowStaggerModifier: ViewModifier {
-    let opacity: Double
-    let offsetY: CGFloat
-    let blurRadius: CGFloat
-
-    func body(content: Content) -> some View {
-        content
-            .opacity(opacity)
-            .offset(y: offsetY)
-            .blur(radius: blurRadius)
-    }
-}
-
-/// 四个一级根 Tab 定义（图标取项目 PDF 矢量资源，标题走本地化 + 全站游戏字体）。
+/// 四个一级根 Tab 定义（图标取项目 PDF 矢量资源，标题走本地化 key）。
 enum DockTab: Int, CaseIterable, Identifiable {
     case home = 0
     case battle = 1
@@ -174,646 +127,1603 @@ enum DockTab: Int, CaseIterable, Identifiable {
         titleKey.localized
     }
 
-    var themeColor: Color {
+    var themeUIColor: UIColor {
         switch self {
-        case .home: return .accentColor
-        case .battle: return .spOrange
-        case .coop: return .spGreen
-        case .me: return .spPurple
+        case .home: return UIColor(Color.accentColor)
+        case .battle: return UIColor(Color.spOrange)
+        case .coop: return UIColor(Color.spGreen)
+        case .me: return UIColor(Color.spPurple)
         }
     }
 }
 
-/// 面板内可搜索、可加入「最近使用」的筛选项描述。
-private struct DockPanelItem: Identifiable {
-    let id: String
-    let recentKey: String?
-    let title: String
-    let keywords: [String]
-    let isSelected: Bool
-    let isNavigation: Bool
-    let badgeCount: Int
-    let iconTint: Color
-    let iconBuilder: () -> AnyView
-    let action: () -> Void
-}
+// MARK: - SwiftUI Representable 桥接入口
 
-/// 可展开底部栏（Liquid Glass 4-Tab 居中对称 + 36pt 玻璃搜索框 + 最近使用 + 键盘避让版）：
-/// - 仅保留「主页 / 对战 / 鲑鱼跑 / 我」4 个等宽对称按钮；
-/// - 面板标题行下方、分组之前内嵌 36pt 高玻璃底搜索框（`TextField` + `magnifyingglass` + `.textFieldStyle(.plain)` + 圆角 12，占位「搜索模式或规则」）；
-/// - 支持模式名 + 规则名大小写不敏感、忽略空格实时过滤，无匹配时显示「没有匹配的筛选项」；
-/// - 面板顶部支持「最近使用」分区（`@AppStorage("imink.dock.recentModes")`，最多 3 个，空时不显示）；
-/// - 键盘弹出时整体上移不遮挡 Dock；点击遮罩或下滑时先收键盘再收面板。
-struct ExpandingDock: View {
+/// 将 UIKit 原生 `UIKitDockTabBarController` 嵌入 `MainView`：
+/// - 底栏由系统真实 `UITabBar` + `UITabBarAppearance` 驱动，享受 iOS 26 Liquid Glass 原生透镜与按压反馈；
+/// - 筛选面板为自绘 UIKit `UIGlassEffect` / `UIBlurEffect` 容器，底边锚定在 `tabBar` 上沿；
+/// - 展开与收起全程绝不隐藏或快照替换 `tabBar`，保证 4 个 Tab 按钮在任意帧均实时可见。
+struct ExpandingDockHost: UIViewControllerRepresentable {
     @Binding var tabSelection: Int
 
-    @ObservedObject private var dockStore = DockVisibilityStore.shared
-    @EnvironmentObject private var battleViewModel: BattleListViewModel
-    @EnvironmentObject private var coopViewModel: CoopListViewModel
-
-    @AppStorage("home_page_selectedScheduleType") private var homeScheduleType: Int = 0
-    @AppStorage(DockSearchSupport.recentModesStorageKey) private var recentModesStorage: String = ""
-    @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.accessibilityReduceMotion) private var envReduceMotion
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-
-    @Namespace private var glassNamespace
-    @Namespace private var tabSelectionNamespace
-
-    @State private var dragOffsetY: CGFloat = 0
-    @State private var squeezeTrigger = SqueezePulseTrigger()
-    @State private var searchText: String = ""
-    @State private var keyboardOverlap: CGFloat = 0
-    @FocusState private var isSearchFocused: Bool
-
-    private var reduceMotion: Bool {
-        DockMotion.isReduceMotionActive(envReduceMotion)
-    }
-
-    private var isExpanded: Bool {
-        dockStore.state == .expanded
-    }
-
-    private var isScrollingHidden: Bool {
-        dockStore.state == .scrollingHidden
-    }
-
-    private var activeTab: DockTab {
-        DockTab(rawValue: tabSelection) ?? .home
-    }
-
-    private var isSearching: Bool {
-        !DockSearchSupport.normalize(searchText).isEmpty
-    }
-
-    private var currentTotalStaggerSlots: Int {
-        9
-    }
-
-    var body: some View {
-        GeometryReader { proxy in
-            let screenSize = proxy.size
-            let safeTop = FloatingBarInsets.safeArea.top
-            let safeBottom = FloatingBarInsets.safeArea.bottom
-            let restingBottomMargin = DockConfig.bottomMargin(safeAreaBottom: safeBottom)
-            // 键盘弹出时整组面板 + 底部 4-Tab 底座整体上移到键盘顶沿上方 8pt，绝不遮住 Dock
-            let effectiveBottomMargin = (isExpanded && keyboardOverlap > 10)
-                ? (keyboardOverlap + 8)
-                : restingBottomMargin
-            let hiddenOffset = DockConfig.collapsedHeight + restingBottomMargin + 16
-            let availableAboveBottom = max(
-                220,
-                screenSize.height - safeTop - 10 - effectiveBottomMargin - DockConfig.collapsedHeight
-            )
-            let maxPanelBodyHeight = min(availableAboveBottom, 468)
-            let fullPlatterWidth = min(
-                max(screenSize.width - DockConfig.horizontalMargin * 2, 240),
-                DockConfig.maxDockWidth
-            )
-
-            ZStack(alignment: .bottom) {
-                if isExpanded {
-                    backdropLayer
-                }
-
-                GlassEffectContainer(spacing: 0) {
-                    morphingGlassPlatter(
-                        fullPlatterWidth: fullPlatterWidth,
-                        maxPanelBodyHeight: maxPanelBodyHeight
-                    )
-                }
-                .frame(width: fullPlatterWidth, alignment: .bottom)
-                .onGeometryChange(for: CGRect.self) { geo in
-                    geo.frame(in: .named("expandingDockHostSpace"))
-                } action: { rect in
-                    if !isExpanded, rect.width > 0, rect.height > 0 {
-                        DockVisibilityStore.shared.collapsedHitRect = rect
-                    }
-                }
-                .padding(.bottom, effectiveBottomMargin)
-                .offset(y: isScrollingHidden ? hiddenOffset : dragOffsetY)
-                .scaleEffect(isScrollingHidden && !reduceMotion ? 0.94 : 1.0, anchor: .bottom)
-                .opacity(isScrollingHidden ? 0 : 1)
-                .allowsHitTesting(!isScrollingHidden)
-                .onGeometryChange(for: CGFloat.self) { geo in
-                    geo.size.height
-                } action: { _ in
-                    if !isExpanded {
-                        let restingTop = restingBottomMargin + DockConfig.collapsedHeight
-                        if abs(FloatingBarInsets.measuredCustomDockTop - restingTop) > 0.5 {
-                            FloatingBarInsets.measuredCustomDockTop = restingTop
-                        }
-                    }
-                }
+    func makeUIViewController(context: Context) -> UIKitDockTabBarController {
+        UIKitDockTabBarController(initialSelection: tabSelection) { nextIndex in
+            if tabSelection != nextIndex {
+                tabSelection = nextIndex
             }
-            .frame(width: screenSize.width, height: screenSize.height, alignment: .bottom)
-            .coordinateSpace(name: "expandingDockHostSpace")
         }
-        .ignoresSafeArea()
-        .dynamicTypeSize(...DynamicTypeSize.xLarge)
-        .animation(DockMotion.transitionAnimation(to: dockStore.state, reduceMotion: envReduceMotion), value: dockStore.state)
-        .onChange(of: isExpanded) { oldValue, newValue in
-            guard oldValue != newValue else { return }
-            if !newValue {
-                dismissKeyboard()
-                searchText = ""
+    }
+
+    func updateUIViewController(_ uiViewController: UIKitDockTabBarController, context: Context) {
+        uiViewController.syncExternalSelection(tabSelection)
+    }
+}
+
+// MARK: - 1. Tab 容器 UINavigationController（承托 SwiftUI 页面，保留原 NavigationStack push/sheet 行为）
+
+@MainActor
+final class DockTabNavigationController: UINavigationController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // 各业务根视图（HomePage / BattleListView / CoopListView / MePage）内部自带 NavigationStack，
+        // 外层 UINavigationController 隐藏自身导航栏以避免双栏叠加，同时完整保留 UIKit 容器层级与模态弹出链路。
+        setNavigationBarHidden(true, animated: false)
+        view.backgroundColor = .clear
+    }
+}
+
+/// 懒加载宿主控制器：仅当某个 Tab 真正被选中进入视图树时才实例化对应 SwiftUI `UIHostingController`，
+/// 避免启动首帧同时触发 4 个页面的数据库查询、轮播定时器与网络任务。
+@MainActor
+private final class LazyTabRootViewController: UIViewController {
+    private let makeRootView: () -> AnyView
+    private var hostingController: UIHostingController<AnyView>?
+
+    init(makeRootView: @escaping () -> AnyView) {
+        self.makeRootView = makeRootView
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .clear
+        let host = UIHostingController(rootView: makeRootView())
+        host.view.backgroundColor = .clear
+        addChild(host)
+        host.view.frame = view.bounds
+        host.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        view.addSubview(host.view)
+        host.didMove(toParent: self)
+        self.hostingController = host
+    }
+}
+
+/// 被动观测根容器上的原始触摸起止，不拦截任何事件（`cancelsTouchesInView = false`），
+/// 用于在 iOS 26 `_UILiquidLensView` 吸收已选中 Tab 原地轻触且未回调 `shouldSelect` 时可靠兜底触发面板开关。
+private final class DockTabReTapObserverRecognizer: UIGestureRecognizer {
+    var onTouchBegan: ((CGPoint) -> Void)?
+    var onTouchEnded: ((CGPoint) -> Void)?
+    var onTouchCancelled: (() -> Void)?
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
+        if let p = touches.first?.location(in: view) {
+            onTouchBegan?(p)
+        }
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
+        if let p = touches.first?.location(in: view) {
+            onTouchEnded?(p)
+        }
+        state = .failed
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent) {
+        onTouchCancelled?()
+        state = .failed
+    }
+}
+
+// MARK: - 2. 根底导控制器 UIKitDockTabBarController
+
+@MainActor
+final class UIKitDockTabBarController: UITabBarController, UITabBarControllerDelegate, UIGestureRecognizerDelegate {
+    private let onSelectionChange: (Int) -> Void
+    private var activeIndex: Int
+    private var cancellables = Set<AnyCancellable>()
+
+    /// 变暗与轻模糊背景遮罩容器：严格插在 `tabBar` 下方（`insertSubview(..., belowSubview: tabBar)`），
+    /// 确保展开/收起全过程中实时 `UITabBar` 永远处于遮罩前方、不被压暗、不丢任何按钮。
+    private let backdropContainerView = UIView()
+    private let backdropBlurView = UIVisualEffectView(effect: nil)
+    private let backdropDimView = UIView()
+
+    /// 锚定于 `tabBar` 上沿的模式快筛面板子控制器。
+    private let panelController = DockFilterPanelViewController()
+
+    /// 对战与鲑鱼跑启用筛选时的 6pt 状态圆点（挂载于 `tabBar` 内部，不破坏系统模板图标着色）。
+    private let battleFilterDot = UIView()
+    private let coopFilterDot = UIView()
+
+    /// 用于去重 `shouldSelect` 与被动触摸观测器，确保真机轻触与 XCUITest 二次点击当前 Tab 100% 稳定触发且绝不双次翻转。
+    private var didHandleCurrentTapInDelegate = false
+    private var lastPanelToggleTimestamp: CFTimeInterval = 0
+    private var touchBeganPoint: CGPoint?
+    private var touchBeganOnActiveSlot = false
+
+    init(initialSelection: Int, onSelectionChange: @escaping (Int) -> Void) {
+        self.activeIndex = min(max(initialSelection, 0), DockTab.allCases.count - 1)
+        self.onSelectionChange = onSelectionChange
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        delegate = self
+        view.backgroundColor = .clear
+
+        if #available(iOS 26.0, *) {
+            tabBarMinimizeBehavior = .never
+        }
+
+        setupTabNavigationControllers()
+        configureSystemTabBarAppearance()
+        setupBackdropAndPanelHierarchy()
+        setupTabBarPassiveReTapRecognizer()
+        setupFilterDots()
+        bindViewModels()
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        if backdropContainerView.frame != view.bounds {
+            backdropContainerView.frame = view.bounds
+        }
+        if panelController.view.frame != view.bounds {
+            panelController.view.frame = view.bounds
+        }
+
+        // 仅在层级顺序不满足「业务页面(index 0) < 变暗遮罩 < 系统浮动底栏 < 顶沿面板透传层」时调整一次，
+        // 严禁在 viewDidLayoutSubviews 中无条件交换 subviews 引发主线程死循环布局！
+        ensureOverlaySubviewOrder()
+
+        let platterRect = measureTabBarPlatterRectInView()
+        let barTopFromBottom = max(0, view.bounds.height - platterRect.minY)
+        if barTopFromBottom > 40, abs(FloatingBarInsets.measuredCustomDockTop - barTopFromBottom) > 0.5 {
+            FloatingBarInsets.measuredCustomDockTop = barTopFromBottom
+        }
+        DockVisibilityStore.shared.collapsedHitRect = platterRect
+        panelController.updateAnchorTabBarRect(platterRect)
+        layoutFilterDots(in: platterRect)
+    }
+
+    private func ensureOverlaySubviewOrder() {
+        // UITabBarController.view 的第 0 层是承载各 Tab 页面的 UITransitionView，
+        // 其上方依次为 iOS 26 实际绘制液态玻璃胶囊的 _UITabBarContainerView 与 UITabBar。
+        // 必须将 backdropContainerView 严格锁在 transitionView 正上方（transIdx + 1），
+        // 才能确保 _UITabBarContainerView 与 UITabBar 全程位于变暗模糊遮罩前方，4 颗按钮永远清晰可见！
+        guard let transitionView = view.subviews.first(where: {
+            $0 !== backdropContainerView && $0 !== panelController.view && $0 !== tabBar
+                && String(describing: type(of: $0)).contains("Transition")
+        }) ?? view.subviews.first(where: {
+            $0 !== backdropContainerView && $0 !== panelController.view
+        }) else {
+            return
+        }
+        if let backdropIdx = view.subviews.firstIndex(of: backdropContainerView),
+           let transIdx = view.subviews.firstIndex(of: transitionView),
+           backdropIdx != transIdx + 1 {
+            view.insertSubview(backdropContainerView, aboveSubview: transitionView)
+        }
+        for dot in [battleFilterDot, coopFilterDot] where dot.superview === view {
+            if let dotIdx = view.subviews.firstIndex(of: dot),
+               let panelIdx = view.subviews.firstIndex(of: panelController.view),
+               dotIdx != panelIdx - 1 && dotIdx != panelIdx - 2 {
+                view.insertSubview(dot, belowSubview: panelController.view)
             }
-            if !reduceMotion {
-                squeezeTrigger = SqueezePulseTrigger(
-                    generation: squeezeTrigger.generation + 1,
-                    isOpening: newValue
+        }
+        if view.subviews.last !== panelController.view {
+            view.bringSubviewToFront(panelController.view)
+        }
+    }
+
+    func syncExternalSelection(_ externalIndex: Int) {
+        let clamped = min(max(externalIndex, 0), DockTab.allCases.count - 1)
+        guard clamped != activeIndex || selectedIndex != clamped else { return }
+        activeIndex = clamped
+        if selectedIndex != clamped {
+            selectedIndex = clamped
+        }
+        if panelController.isExpanded {
+            panelController.collapse(reason: .tabSwitch)
+        }
+    }
+
+    // MARK: - 4 个 Tab 的 UINavigationController + UIHostingController 组装
+
+    private func setupTabNavigationControllers() {
+        let mainVM = MainViewModel.shared
+        let battleVM = BattleListViewModel.shared
+        let coopVM = CoopListViewModel.shared
+        let bgTaskMgr = BackgroundTaskManager.shared
+        let notifMgr = NotificationManager.shared
+        let subMgr = ScheduleSubscriptionManager.shared
+
+        let controllers: [UINavigationController] = DockTab.allCases.map { dockTab in
+            let lazyRoot = LazyTabRootViewController {
+                let pageView: AnyView
+                switch dockTab {
+                case .home:
+                    pageView = AnyView(HomePage(viewModel: HomeViewModel()))
+                case .battle:
+                    pageView = AnyView(BattleListView())
+                case .coop:
+                    pageView = AnyView(CoopListView())
+                case .me:
+                    pageView = AnyView(MePage())
+                }
+
+                return AnyView(
+                    pageView
+                        .environmentObject(mainVM)
+                        .environmentObject(battleVM)
+                        .environmentObject(coopVM)
+                        .environmentObject(bgTaskMgr)
+                        .environmentObject(notifMgr)
+                        .environmentObject(subMgr)
+                        .appGameTypography()
+                        .appLineHeight()
                 )
             }
+
+            let nav = DockTabNavigationController(rootViewController: lazyRoot)
+            let icon = UIImage(named: dockTab.iconName)?.withRenderingMode(.alwaysTemplate)
+            let item = UITabBarItem(title: dockTab.localizedTitle, image: icon, selectedImage: icon)
+            item.tag = dockTab.rawValue
+            item.accessibilityLabel = dockTab.localizedTitle
+            item.accessibilityIdentifier = "expandingDock.tab.\(dockTab.rawValue)"
+            nav.tabBarItem = item
+            return nav
         }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)) { note in
-            guard let endFrame = (note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else { return }
-            let windowHeight = UIApplication.shared.connectedScenes
-                .compactMap { $0 as? UIWindowScene }
-                .flatMap(\.windows)
-                .first { $0.isKeyWindow }?
-                .bounds.height ?? 874
-            let overlap = max(0, windowHeight - endFrame.minY)
-            withAnimation(
-                reduceMotion
-                    ? .easeOut(duration: DockMotion.reducedDuration)
-                    : .spring(response: 0.30, dampingFraction: 0.88)
-            ) {
-                keyboardOverlap = overlap
-            }
+
+        setViewControllers(controllers, animated: false)
+        selectedIndex = activeIndex
+    }
+
+    private func configureSystemTabBarAppearance() {
+        let accent = UIColor(Color.accentColor)
+        tabBar.tintColor = accent
+        tabBar.unselectedItemTintColor = UIColor.secondaryLabel
+        tabBar.isTranslucent = true
+
+        let appearance = tabBar.standardAppearance.copy()
+        if UIAccessibility.isReduceTransparencyEnabled {
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = .secondarySystemBackground
+        } else {
+            appearance.configureWithDefaultBackground()
         }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-            withAnimation(
-                reduceMotion
-                    ? .easeOut(duration: DockMotion.reducedDuration)
-                    : .spring(response: 0.26, dampingFraction: 0.92)
-            ) {
-                keyboardOverlap = 0
-            }
+
+        let tabFont = Font.gameUIFont(size: 11, weight: .semibold)
+        let normalAttrs: [NSAttributedString.Key: Any] = [
+            .font: tabFont,
+            .foregroundColor: UIColor.secondaryLabel,
+        ]
+        let selectedAttrs: [NSAttributedString.Key: Any] = [
+            .font: tabFont,
+            .foregroundColor: accent,
+        ]
+        for layout in [
+            appearance.stackedLayoutAppearance,
+            appearance.inlineLayoutAppearance,
+            appearance.compactInlineLayoutAppearance,
+        ] {
+            layout.normal.titleTextAttributes = normalAttrs
+            layout.selected.titleTextAttributes = selectedAttrs
+            layout.selected.iconColor = accent
         }
-        .onAppear {
-            let restingTop = DockConfig.defaultCustomDockTop(safeAreaBottom: FloatingBarInsets.safeArea.bottom)
-            FloatingBarInsets.measuredCustomDockTop = restingTop
+
+        tabBar.standardAppearance = appearance
+        tabBar.scrollEdgeAppearance = appearance
+    }
+
+    private func setupBackdropAndPanelHierarchy() {
+        backdropContainerView.frame = view.bounds
+        backdropContainerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        backdropContainerView.isHidden = true
+        backdropContainerView.accessibilityElementsHidden = true
+
+        backdropBlurView.frame = backdropContainerView.bounds
+        backdropBlurView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        backdropBlurView.alpha = 0.52
+        backdropBlurView.isUserInteractionEnabled = false
+        backdropContainerView.addSubview(backdropBlurView)
+
+        backdropDimView.frame = backdropContainerView.bounds
+        backdropDimView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        backdropDimView.alpha = 0
+        backdropDimView.isUserInteractionEnabled = false
+        updateBackdropDimColor()
+        backdropContainerView.addSubview(backdropDimView)
+
+        let backdropTap = UITapGestureRecognizer(target: self, action: #selector(handleBackdropTap))
+        backdropContainerView.addGestureRecognizer(backdropTap)
+        if let firstSub = view.subviews.first {
+            view.insertSubview(backdropContainerView, aboveSubview: firstSub)
+        } else {
+            view.insertSubview(backdropContainerView, belowSubview: tabBar)
+        }
+
+        addChild(panelController)
+        panelController.view.frame = view.bounds
+        panelController.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        view.addSubview(panelController.view)
+        panelController.didMove(toParent: self)
+
+        panelController.backdropBlurView = backdropBlurView
+        panelController.backdropDimView = backdropDimView
+        panelController.backdropContainerView = backdropContainerView
+        panelController.onRequestTabSwitch = { [weak self] targetTab in
+            guard let self else { return }
+            self.activeIndex = targetTab.rawValue
+            self.selectedIndex = targetTab.rawValue
+            self.onSelectionChange(targetTab.rawValue)
+        }
+
+        registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, _) in
+            self.updateBackdropDimColor()
+            self.configureSystemTabBarAppearance()
         }
     }
 
-    // MARK: - 1. 轻透背景点击遮罩（点遮罩时：若键盘已弹出则先收键盘、再收面板）
-
-    private var backdropLayer: some View {
-        Color.black
-            .opacity(
-                (colorScheme == .dark ? 0.22 : 0.08) * Double(max(0, 1 - dockStore.dragDismissProgress))
-            )
-            .ignoresSafeArea()
-            .contentShape(Rectangle())
-            .onTapGesture {
-                dismissKeyboardThenCollapse()
-            }
-            .transition(.opacity)
-            .accessibilityHidden(true)
+    private func updateBackdropDimColor() {
+        let alpha: CGFloat = traitCollection.userInterfaceStyle == .dark ? 0.26 : 0.12
+        backdropDimView.backgroundColor = UIColor.black.withAlphaComponent(alpha)
     }
 
-    // MARK: - 2. 居中对称连续变形毛玻璃主体（`keyframeAnimator` 水平微收腰脉冲 + 面板底边紧贴 Dock 零跳位）
-
-    private func morphingGlassPlatter(fullPlatterWidth: CGFloat, maxPanelBodyHeight: CGFloat) -> some View {
-        let platterShape = RoundedRectangle(cornerRadius: DockConfig.cornerRadius, style: .continuous)
-
-        return VStack(spacing: 0) {
-            expandedMenuSection(fullPlatterWidth: fullPlatterWidth, maxPanelBodyHeight: maxPanelBodyHeight)
-
-            if isExpanded {
-                Rectangle()
-                    .fill(Color.primary.opacity(colorScheme == .dark ? 0.14 : 0.09))
-                    .frame(height: 0.6)
-                    .padding(.horizontal, 12)
-                    .transition(.opacity.animation(.easeOut(duration: 0.14)))
-            }
-
-            collapsedTabBarHandle
+    private func setupFilterDots() {
+        for (dot, color) in [(battleFilterDot, UIColor(Color.spOrange)), (coopFilterDot, UIColor(Color.spGreen))] {
+            dot.backgroundColor = color
+            dot.layer.cornerRadius = 3
+            dot.isUserInteractionEnabled = false
+            dot.isHidden = true
+            view.insertSubview(dot, belowSubview: panelController.view)
         }
-        .clipShape(platterShape)
-        .keyframeAnimator(initialValue: SqueezeKeyframeValues(), trigger: squeezeTrigger) { content, value in
-            let factor = (reduceMotion || squeezeTrigger.generation == 0) ? 1.0 : value.widthScale
-            content
-                .frame(width: fullPlatterWidth * factor)
-        } keyframes: { _ in
-            KeyframeTrack(\.widthScale) {
-                if reduceMotion || squeezeTrigger.generation == 0 {
-                    LinearKeyframe(1.0, duration: 0.01)
-                } else if squeezeTrigger.isOpening {
-                    CubicKeyframe(DockMotion.openSqueezeScale, duration: 0.085)
-                    SpringKeyframe(
-                        1.0,
-                        duration: 0.36,
-                        spring: Spring(response: 0.30, dampingRatio: 0.80)
-                    )
-                } else {
-                    CubicKeyframe(DockMotion.closeSqueezeScale, duration: 0.060)
-                    SpringKeyframe(
-                        1.0,
-                        duration: 0.22,
-                        spring: Spring(response: 0.20, dampingRatio: 0.94)
-                    )
-                }
-            }
-        }
-        .modifier(
-            AdaptiveLiquidGlassModifier(
-                shape: platterShape,
-                reduceTransparency: reduceTransparency,
-                colorScheme: colorScheme
-            )
-        )
-        .glassEffectID("dock.primaryPlatter", in: glassNamespace)
-        .glassEffectTransition(.matchedGeometry)
-        .simultaneousGesture(platterVerticalDragGesture)
     }
 
-    // MARK: - 3. 居中对称 4-Tab 胶囊（二次点击当前已选 Tab 弹出/收起面板，高度 48pt <= 49pt）
+    private func layoutFilterDots(in platterRectInView: CGRect) {
+        guard platterRectInView.width > 80 else { return }
+        let slotWidth = platterRectInView.width / CGFloat(DockTab.allCases.count)
 
-    private var collapsedTabBarHandle: some View {
-        HStack(spacing: 4) {
-            ForEach(DockTab.allCases) { tab in
-                tabItemButton(tab)
-            }
-        }
-        .padding(DockConfig.tabPillInset)
-        .frame(height: DockConfig.collapsedHeight)
-        .contentShape(Rectangle())
-        .accessibilityElement(children: .contain)
+        let battleSlotMidX = platterRectInView.minX + slotWidth * 1.5
+        battleFilterDot.frame = CGRect(x: battleSlotMidX + 10, y: platterRectInView.minY + 8, width: 6, height: 6)
+        battleFilterDot.isHidden = !BattleListViewModel.shared.hasAnyActiveFilter
+
+        let coopSlotMidX = platterRectInView.minX + slotWidth * 2.5
+        coopFilterDot.frame = CGRect(x: coopSlotMidX + 10, y: platterRectInView.minY + 8, width: 6, height: 6)
+        coopFilterDot.isHidden = !CoopListViewModel.shared.hasAnyActiveFilter
     }
 
-    private func tabItemButton(_ tab: DockTab) -> some View {
-        let isSelected = tabSelection == tab.rawValue
-        let hasDot = (tab == .battle && battleViewModel.hasAnyActiveFilter) ||
-            (tab == .coop && coopViewModel.hasAnyActiveFilter)
-
-        return Button {
-            if isSelected {
-                if isExpanded {
-                    dismissKeyboardThenCollapse()
-                } else {
-                    Haptics.generateIfEnabled(.light)
-                    withAnimation(DockMotion.openAnimation(reduceMotion: envReduceMotion)) {
-                        dragOffsetY = 0
-                        dockStore.expand()
-                    }
-                }
-            } else {
-                if isExpanded {
-                    dismissKeyboard()
-                    searchText = ""
-                    withAnimation(DockMotion.closeAnimation(reduceMotion: envReduceMotion)) {
-                        dragOffsetY = 0
-                        dockStore.collapse()
-                    }
-                }
-                withAnimation(DockMotion.tabAnimation(reduceMotion: envReduceMotion)) {
-                    tabSelection = tab.rawValue
+    private func bindViewModels() {
+        BattleListViewModel.shared.$filter
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                self.layoutFilterDots(in: self.measureTabBarPlatterRectInView())
+                if self.panelController.isExpanded {
+                    self.panelController.refreshContentIfExpanded()
                 }
             }
-        } label: {
-            ZStack {
-                if isSelected {
-                    Capsule()
-                        .fill(Color.accentColor.opacity(colorScheme == .dark ? (isExpanded ? 0.30 : 0.24) : (isExpanded ? 0.20 : 0.15)))
-                        .overlay {
-                            Capsule()
-                                .strokeBorder(Color.accentColor.opacity(isExpanded ? 0.32 : 0.22), lineWidth: 0.75)
-                        }
-                        .matchedGeometryEffect(id: "dock.activeTabPill", in: tabSelectionNamespace)
+            .store(in: &cancellables)
+
+        CoopListViewModel.shared.$filter
+            .combineLatest(CoopListViewModel.shared.$isShowingShiftCards)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _, _ in
+                guard let self else { return }
+                self.layoutFilterDots(in: self.measureTabBarPlatterRectInView())
+                if self.panelController.isExpanded {
+                    self.panelController.refreshContentIfExpanded()
                 }
-
-                VStack(spacing: 2) {
-                    ZStack(alignment: .topTrailing) {
-                        if isSelected && isExpanded {
-                            Image(systemName: "chevron.down")
-                                .font(.system(size: 14, weight: .bold))
-                                .frame(width: 18, height: 18)
-                                .transition(.scale(scale: 0.8).combined(with: .opacity))
-                        } else {
-                            Image(tab.iconName)
-                                .renderingMode(.template)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 18, height: 18)
-                                .transition(.scale(scale: 0.85).combined(with: .opacity))
-                        }
-
-                        if hasDot {
-                            Circle()
-                                .fill(tab.themeColor)
-                                .frame(width: 6, height: 6)
-                                .offset(x: 4, y: -2)
-                        }
-                    }
-
-                    Text(tab.localizedTitle)
-                        .font(.appSubCaptionMono)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.85)
-                }
-                .foregroundStyle(isSelected ? Color.accentColor : Color.appLabel.opacity(0.76))
-                .padding(.horizontal, 4)
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: DockConfig.tabPillHeight)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(tab.localizedTitle)
-        .accessibilityValue(hasDot ? "已启用筛选" : "")
-        .accessibilityHint(isSelected ? (isExpanded ? "再次点击收起筛选面板" : "再次点击展开筛选面板") : "")
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
-        .accessibilityIdentifier("expandingDock.tab.\(tab.rawValue)")
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: UIAccessibility.reduceTransparencyStatusDidChangeNotification)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.configureSystemTabBarAppearance()
+                self?.panelController.applyMaterialAppearance()
+            }
+            .store(in: &cancellables)
     }
 
-    // MARK: - 4. 展开态菜单区：标题行 -> 36pt 玻璃搜索框 -> 最近使用(可选) -> 模式/规则列表 -> 底部更多条件
+    // MARK: - 测量系统 UITabBar / 浮动胶囊容器实际几何区域
 
-    private func staggeredRowTransition(openIndex: Int) -> AnyTransition {
-        if reduceMotion {
-            return .opacity.animation(.easeOut(duration: DockMotion.reducedDuration))
+    private func measureTabBarPlatterRectInView() -> CGRect {
+        let rawBarRect = tabBar.convert(tabBar.bounds, to: view)
+        var detected: CGRect?
+        func findPlatter(in current: UIView) {
+            guard detected == nil else { return }
+            for sub in current.subviews where !sub.isHidden && sub.alpha > 0.05 {
+                if sub === backdropContainerView || sub === panelController.view { continue }
+                let typeName = String(describing: type(of: sub))
+                if typeName.contains("Transition") { continue }
+                let candidate = sub.convert(sub.bounds, to: view)
+                if candidate.minY >= view.bounds.height - 132,
+                   candidate.width >= view.bounds.width * 0.60,
+                   candidate.width <= view.bounds.width - 12,
+                   candidate.height >= 44,
+                   candidate.height <= 74 {
+                    detected = candidate
+                    return
+                }
+                findPlatter(in: sub)
+            }
         }
-        let total = max(currentTotalStaggerSlots, 1)
-        let clampedOpen = min(max(openIndex, 0), total - 1)
-        let closeIndex = max(0, total - 1 - clampedOpen)
-        let hiddenState = DockRowStaggerModifier(
-            opacity: 0,
-            offsetY: DockMotion.rowInitialOffsetY,
-            blurRadius: DockMotion.rowInitialBlur
-        )
-        let identityState = DockRowStaggerModifier(opacity: 1, offsetY: 0, blurRadius: 0)
-
-        return .asymmetric(
-            insertion: .modifier(active: hiddenState, identity: identityState)
-                .animation(
-                    .spring(response: DockMotion.rowOpenResponse, dampingFraction: DockMotion.rowOpenDamping)
-                        .delay(Double(clampedOpen) * DockMotion.rowOpenStaggerStep)
-                ),
-            removal: .modifier(active: hiddenState, identity: identityState)
-                .animation(
-                    .easeIn(duration: DockMotion.rowCloseItemDuration)
-                        .delay(Double(closeIndex) * DockMotion.rowCloseStaggerStep)
-                )
+        findPlatter(in: view)
+        if let detected {
+            return detected
+        }
+        let horizontalInset: CGFloat = 20
+        let height: CGFloat = min(max(rawBarRect.height > 0 ? 58 : 58, 48), 64)
+        let bottomPad = max(view.safeAreaInsets.bottom - 13, 18)
+        return CGRect(
+            x: horizontalInset,
+            y: max(0, view.bounds.height - bottomPad - height),
+            width: max(240, view.bounds.width - horizontalInset * 2),
+            height: height
         )
     }
 
-    private func expandedMenuSection(fullPlatterWidth: CGFloat, maxPanelBodyHeight: CGFloat) -> some View {
-        let sections = resolvedVisibleSections
-        let totalVisibleRows = sections.reduce(0) { $0 + $1.items.count }
-        let sectionHeaderCount = sections.filter { $0.header != nil }.count
-        let chromeHeight: CGFloat = 40 + 40 + (moreFilterFooterRow != nil ? 48 : 8)
-        let maxListViewportHeight = max(88, min(286, maxPanelBodyHeight - chromeHeight))
-        let estimatedListHeight = CGFloat(max(totalVisibleRows, 1)) * (DockConfig.panelRowHeight + 2)
-            + CGFloat(sectionHeaderCount) * 22
-        let shouldScroll = estimatedListHeight > maxListViewportHeight
+    // MARK: - UITabBarControllerDelegate & 二次点击当前 Tab 展开/收起
 
-        return VStack(alignment: .leading, spacing: isExpanded ? 5 : 0) {
-            if isExpanded {
-                panelGrabberAndHeader
-                    .transition(staggeredRowTransition(openIndex: 8))
-
-                // 面板标题行下方、所有分组之前：36pt 高玻璃底搜索框（圆角 12）
-                dockSearchField
-                    .transition(staggeredRowTransition(openIndex: 7))
-            }
-
-            if shouldScroll {
-                if isExpanded {
-                    ScrollView(.vertical, showsIndicators: false) {
-                        panelSectionsContent(sections: sections, totalRows: totalVisibleRows)
-                    }
-                    .scrollDismissesKeyboard(.interactively)
-                    .frame(maxHeight: maxListViewportHeight)
-                }
-            } else {
-                panelSectionsContent(sections: sections, totalRows: totalVisibleRows)
-            }
-
-            if isExpanded, let footer = moreFilterFooterRow {
-                Rectangle()
-                    .fill(Color.primary.opacity(colorScheme == .dark ? 0.12 : 0.08))
-                    .frame(height: 0.6)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 1)
-                    .transition(.opacity.animation(.easeOut(duration: 0.14)))
-
-                footer
-                    .transition(staggeredRowTransition(openIndex: 0))
-            }
+    func tabBarController(
+        _ tabBarController: UITabBarController,
+        shouldSelect viewController: UIViewController
+    ) -> Bool {
+        guard let controllers = tabBarController.viewControllers,
+              let tappedIndex = controllers.firstIndex(of: viewController) else {
+            return true
         }
-        .padding(.horizontal, DockConfig.panelPadding)
-        .padding(.top, isExpanded ? 6 : 0)
-        .padding(.bottom, isExpanded ? 6 : 0)
-        .frame(width: fullPlatterWidth)
+        didHandleCurrentTapInDelegate = true
+
+        if tappedIndex == activeIndex {
+            triggerPanelToggleWithCooldown()
+            return false
+        }
+
+        if panelController.isExpanded {
+            panelController.collapse(reason: .tabSwitch)
+        }
+        activeIndex = tappedIndex
+        onSelectionChange(tappedIndex)
+        return true
     }
 
-    // MARK: - 4.1 顶部标题把手与 36pt 玻璃搜索框
-
-    private var panelGrabberAndHeader: some View {
-        let config: (badge: String, title: String, trailing: String?, accent: Color) = {
-            switch activeTab {
-            case .battle:
-                let status: String
-                if !battleViewModel.filter.rules.isEmpty,
-                   let first = battleViewModel.filter.rules.first,
-                   let r = BattleRule(rawValue: first) {
-                    status = (r == .turfWar) ? "涂地模式" : r.name
-                } else if battleViewModel.filter.modes.isEmpty {
-                    status = "全部"
-                } else {
-                    status = "已选 \(battleViewModel.filter.modes.count)"
-                }
-                return ("对战", "模式与规则筛选", status, .spOrange)
-            case .coop:
-                let status: String
-                if coopViewModel.isShowingShiftCards {
-                    status = "卡片视图"
-                } else if coopViewModel.filter.rules.isEmpty {
-                    status = "全部"
-                } else {
-                    status = "已选 \(coopViewModel.filter.rules.count)"
-                }
-                return ("鲑鱼跑", "规则筛选", status, .spGreen)
-            case .home:
-                return ("主页", "日程与快筛", homeScheduleType == 0 ? "对战日程" : "打工日程", .accentColor)
-            case .me:
-                return ("我的", "战绩快捷入口", nil, .spPurple)
-            }
-        }()
-
-        return VStack(spacing: 4) {
-            Capsule()
-                .fill(Color.primary.opacity(colorScheme == .dark ? 0.28 : 0.18))
-                .frame(width: 34, height: 4)
-                .frame(maxWidth: .infinity)
-
-            HStack(spacing: 8) {
-                Text(config.badge)
-                    .font(.appSubCaptionMono)
-                    .foregroundStyle(config.accent)
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 2)
-                    .background(config.accent.opacity(0.16), in: Capsule())
-
-                Text(config.title)
-                    .font(.appBody)
-                    .foregroundStyle(.appLabel)
-                    .lineLimit(1)
-
-                Spacer(minLength: 4)
-
-                if let trailing = config.trailing {
-                    Text(trailing)
-                        .font(.appSubCaptionMono)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
-            }
-            .padding(.horizontal, 6)
+    private func setupTabBarPassiveReTapRecognizer() {
+        let observer = DockTabReTapObserverRecognizer()
+        observer.cancelsTouchesInView = false
+        observer.delaysTouchesBegan = false
+        observer.delaysTouchesEnded = false
+        observer.delegate = self
+        observer.onTouchBegan = { [weak self] point in
+            self?.handleObserverTouchBegan(at: point)
         }
-        .contentShape(Rectangle())
-        .gesture(expandedHeaderDragGesture)
+        observer.onTouchEnded = { [weak self] point in
+            self?.handleObserverTouchEnded(at: point)
+        }
+        observer.onTouchCancelled = { [weak self] in
+            self?.touchBeganPoint = nil
+            self?.touchBeganOnActiveSlot = false
+        }
+        view.addGestureRecognizer(observer)
     }
 
-    /// 规格 1：面板标题行下方、分组之前的 36pt 玻璃底搜索框（`TextField` + `magnifyingglass` + `.textFieldStyle(.plain)` + 圆角 12）。
-    private var dockSearchField: some View {
-        let searchShape = RoundedRectangle(cornerRadius: 12, style: .continuous)
+    func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
+        true
+    }
 
-        return HStack(spacing: 8) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(.secondary)
-
-            TextField("搜索模式或规则", text: $searchText)
-                .textFieldStyle(.plain)
-                .font(.appCaption)
-                .foregroundStyle(Color.appLabel)
-                .focused($isSearchFocused)
-                .submitLabel(.search)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .accessibilityIdentifier("expandingDock.searchField")
-
-            if !searchText.isEmpty {
-                Button {
-                    Haptics.generateIfEnabled(.light)
-                    searchText = ""
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 14))
-                        .foregroundStyle(.secondary)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("清除搜索词")
-                .accessibilityIdentifier("expandingDock.searchClearButton")
-            }
+    private func handleObserverTouchBegan(at point: CGPoint) {
+        didHandleCurrentTapInDelegate = false
+        // 同步系统栏真实选中项
+        if selectedIndex >= 0, selectedIndex < DockTab.allCases.count {
+            activeIndex = selectedIndex
         }
-        .padding(.horizontal, 10)
-        .frame(height: 36)
-        .background {
-            if reduceTransparency {
-                searchShape
-                    .fill(Color(uiColor: .secondarySystemBackground))
-            } else {
-                searchShape
-                    .fill(.ultraThinMaterial)
-                    .opacity(colorScheme == .dark ? 0.65 : 0.78)
-            }
+        if panelController.isExpanded, panelController.currentPanelFrameInHost.contains(point) {
+            touchBeganPoint = nil
+            touchBeganOnActiveSlot = false
+            return
         }
-        .overlay {
-            searchShape
-                .strokeBorder(
-                    Color.white.opacity(colorScheme == .dark ? 0.22 : 0.52),
-                    lineWidth: 0.8
-                )
-                .allowsHitTesting(false)
+        let platter = measureTabBarPlatterRectInView()
+        guard platter.insetBy(dx: -10, dy: -16).contains(point) else {
+            touchBeganPoint = nil
+            touchBeganOnActiveSlot = false
+            return
+        }
+        let slotWidth = platter.width / CGFloat(max(DockTab.allCases.count, 1))
+        let slot = min(
+            max(Int((point.x - platter.minX) / max(slotWidth, 1)), 0),
+            DockTab.allCases.count - 1
+        )
+        touchBeganPoint = point
+        touchBeganOnActiveSlot = (slot == activeIndex)
+    }
+
+    private func handleObserverTouchEnded(at point: CGPoint) {
+        let wasActiveSlot = touchBeganOnActiveSlot
+        let start = touchBeganPoint
+        touchBeganPoint = nil
+        touchBeganOnActiveSlot = false
+
+        guard wasActiveSlot, let start, hypot(point.x - start.x, point.y - start.y) < 22 else {
+            return
+        }
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            guard !self.didHandleCurrentTapInDelegate else { return }
+            self.triggerPanelToggleWithCooldown()
         }
     }
 
-    // MARK: - 5. 数据源组装：最近使用（最多 3 项，空时不显示）+ 模式名/规则名实时过滤 + 空结果占位
+    private func triggerPanelToggleWithCooldown() {
+        let now = CACurrentMediaTime()
+        guard now - lastPanelToggleTimestamp > 0.20 else { return }
+        lastPanelToggleTimestamp = now
+        togglePanelForCurrentTab()
+    }
 
-    private struct PanelSection: Identifiable {
+    private func togglePanelForCurrentTab() {
+        let currentTab = DockTab(rawValue: activeIndex) ?? .home
+        if panelController.isExpanded {
+            panelController.collapse(reason: .reTapTab)
+        } else {
+            Haptics.generateIfEnabled(.light)
+            panelController.expand(for: currentTab)
+        }
+    }
+
+    @objc private func handleBackdropTap() {
+        panelController.collapse(reason: .backdropTap)
+    }
+}
+
+// MARK: - 3. 面板透传宿主视图（收起态及面板外点击 100% 透传给底层 tabBar 与遮罩）
+
+private final class DockPanelPassThroughView: UIView {
+    var activePanelFrameProvider: (() -> CGRect?)?
+
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        guard !isHidden, alpha > 0.01, let panelRect = activePanelFrameProvider?() else {
+            return nil
+        }
+        guard panelRect.insetBy(dx: -6, dy: -6).contains(point) else {
+            return nil
+        }
+        return super.hitTest(point, with: event)
+    }
+}
+
+// MARK: - 4. 模式快筛面板控制器 DockFilterPanelViewController（纯 UIKit 实现）
+
+@MainActor
+final class DockFilterPanelViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizerDelegate {
+    enum CollapseReason {
+        case reTapTab
+        case backdropTap
+        case swipeDown
+        case pickedItem
+        case navigationAction
+        case tabSwitch
+    }
+
+    struct PanelItemModel {
+        let id: String
+        let recentKey: String?
+        let title: String
+        let keywords: [String]
+        let isSelected: Bool
+        let isNavigation: Bool
+        let badgeCount: Int
+        let tintColor: UIColor
+        let iconImage: UIImage?
+        let rendersAsTemplate: Bool
+        let action: () -> Void
+    }
+
+    struct PanelSectionModel {
         let id: String
         let header: String?
-        let items: [DockPanelItem]
+        let items: [PanelItemModel]
     }
 
-    private var resolvedVisibleSections: [PanelSection] {
-        if isSearching {
-            let candidates = searchableCatalogForActiveTab.filter { item in
-                DockSearchSupport.matches(query: searchText, candidates: [item.title] + item.keywords)
+    weak var backdropContainerView: UIView?
+    weak var backdropBlurView: UIVisualEffectView?
+    weak var backdropDimView: UIView?
+    var onRequestTabSwitch: ((DockTab) -> Void)?
+
+    private(set) var isExpanded = false
+    var currentPanelFrameInHost: CGRect { platterShadowWrap.frame }
+    private var activeTab: DockTab = .battle
+    private var anchorTabBarRect: CGRect = .zero
+    private var searchQuery: String = ""
+    private var keyboardOverlapHeight: CGFloat = 0
+    private var dragTranslationY: CGFloat = 0
+
+    // 外层阴影与圆角玻璃主体（anchorPoint = (0.5, 1.0) 底边中心锚定在 tabBar 上沿）
+    private let platterShadowWrap = UIView()
+    private let platterGlassView = UIVisualEffectView(effect: nil)
+    private let platterHairlineBorder = UIView()
+
+    // 标题把手区 + 36pt 搜索框 + 滚动列表区 + 底部固定入口
+    private let grabberPill = UIView()
+    private let headerContainer = UIView()
+    private let headerBadgeLabel = UILabel()
+    private let headerBadgeBg = UIView()
+    private let headerTitleLabel = UILabel()
+    private let headerStatusLabel = UILabel()
+
+    private let searchBoxGlassView = UIVisualEffectView(effect: nil)
+    private let searchIconView = UIImageView()
+    private let searchTextField = UITextField()
+    private let searchClearButton = UIButton(type: .custom)
+
+    private let rowsScrollView = UIScrollView()
+    private let rowsStackView = UIStackView()
+
+    private let footerSeparator = UIView()
+    private let footerHostView = UIView()
+
+    // 可打断物理弹簧动画器与逐行错峰动画器集合
+    private var panelAnimator: UIViewPropertyAnimator?
+    private var rowAnimators: [UIViewPropertyAnimator] = []
+    private var animatedSlotsBottomUp: [UIView] = []
+    private var cancellables = Set<AnyCancellable>()
+
+    override func loadView() {
+        let passThrough = DockPanelPassThroughView()
+        passThrough.backgroundColor = .clear
+        passThrough.isOpaque = false
+        passThrough.activePanelFrameProvider = { [weak self] in
+            guard let self, self.isExpanded else { return nil }
+            return self.platterShadowWrap.frame
+        }
+        self.view = passThrough
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.isHidden = true
+        setupPlatterChrome()
+        setupHeaderAndSearchViews()
+        setupRowsScrollAndFooter()
+        setupGestures()
+        setupKeyboardObservers()
+        applyMaterialAppearance()
+
+        registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, _) in
+            self.applyMaterialAppearance()
+            if self.isExpanded {
+                self.rebuildSections(animateHeight: false)
             }
-            return candidates.isEmpty
-                ? []
-                : [PanelSection(id: "search.results", header: nil, items: candidates)]
+        }
+    }
+
+    func updateAnchorTabBarRect(_ rect: CGRect) {
+        anchorTabBarRect = rect
+        if isExpanded && panelAnimator?.isRunning != true {
+            layoutPlatterGeometry(targetHeight: measureDesiredPanelHeight())
+        }
+    }
+
+    func refreshContentIfExpanded() {
+        guard isExpanded else { return }
+        rebuildSections(animateHeight: true)
+    }
+
+    // MARK: - 视图搭建（100% UIKit）
+
+    private func setupPlatterChrome() {
+        platterShadowWrap.layer.anchorPoint = CGPoint(x: 0.5, y: 1.0)
+        platterShadowWrap.layer.shadowColor = UIColor.black.cgColor
+        platterShadowWrap.layer.shadowOffset = CGSize(width: 0, height: 8)
+        platterShadowWrap.layer.shadowRadius = 18
+        platterShadowWrap.layer.shadowOpacity = 0.16
+        view.addSubview(platterShadowWrap)
+
+        platterGlassView.clipsToBounds = true
+        platterGlassView.layer.cornerRadius = DockConfig.cornerRadius
+        platterGlassView.layer.cornerCurve = .continuous
+        platterShadowWrap.addSubview(platterGlassView)
+
+        platterHairlineBorder.isUserInteractionEnabled = false
+        platterHairlineBorder.layer.cornerRadius = DockConfig.cornerRadius
+        platterHairlineBorder.layer.cornerCurve = .continuous
+        platterHairlineBorder.layer.borderWidth = 0.8
+        platterGlassView.contentView.addSubview(platterHairlineBorder)
+    }
+
+    private func setupHeaderAndSearchViews() {
+        let content = platterGlassView.contentView
+
+        grabberPill.backgroundColor = UIColor.label.withAlphaComponent(0.22)
+        grabberPill.layer.cornerRadius = 2
+        headerContainer.addSubview(grabberPill)
+
+        headerBadgeBg.layer.cornerRadius = 9
+        headerBadgeBg.layer.cornerCurve = .continuous
+        headerContainer.addSubview(headerBadgeBg)
+
+        headerBadgeLabel.font = Font.gameUIFont(size: 11, weight: .semibold)
+        headerContainer.addSubview(headerBadgeLabel)
+
+        headerTitleLabel.font = Font.gameUIFont(size: 15, weight: .semibold)
+        headerTitleLabel.textColor = UIColor(Color.appLabel)
+        headerContainer.addSubview(headerTitleLabel)
+
+        headerStatusLabel.font = Font.gameUIFont(size: 11)
+        headerStatusLabel.textColor = .secondaryLabel
+        headerStatusLabel.textAlignment = .right
+        headerContainer.addSubview(headerStatusLabel)
+
+        content.addSubview(headerContainer)
+
+        // 36pt 高玻璃底搜索框（圆角 12）
+        searchBoxGlassView.clipsToBounds = true
+        searchBoxGlassView.layer.cornerRadius = 12
+        searchBoxGlassView.layer.cornerCurve = .continuous
+        searchBoxGlassView.layer.borderWidth = 0.8
+        content.addSubview(searchBoxGlassView)
+
+        let searchContent = searchBoxGlassView.contentView
+        searchIconView.image = UIImage(
+            systemName: "magnifyingglass",
+            withConfiguration: UIImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
+        )
+        searchIconView.tintColor = .secondaryLabel
+        searchIconView.contentMode = .scaleAspectFit
+        searchContent.addSubview(searchIconView)
+
+        searchTextField.delegate = self
+        searchTextField.font = Font.gameUIFont(size: 13)
+        searchTextField.textColor = UIColor(Color.appLabel)
+        searchTextField.tintColor = UIColor(Color.accentColor)
+        searchTextField.returnKeyType = .search
+        searchTextField.autocorrectionType = .no
+        searchTextField.autocapitalizationType = .none
+        searchTextField.clearButtonMode = .never
+        searchTextField.accessibilityIdentifier = "expandingDock.searchField"
+        searchTextField.attributedPlaceholder = NSAttributedString(
+            string: "搜索模式或规则",
+            attributes: [
+                .font: Font.gameUIFont(size: 12),
+                .foregroundColor: UIColor.secondaryLabel,
+            ]
+        )
+        searchTextField.addTarget(self, action: #selector(handleSearchEditingChanged), for: .editingChanged)
+        searchContent.addSubview(searchTextField)
+
+        searchClearButton.setImage(
+            UIImage(
+                systemName: "xmark.circle.fill",
+                withConfiguration: UIImage.SymbolConfiguration(pointSize: 14, weight: .regular)
+            ),
+            for: .normal
+        )
+        searchClearButton.tintColor = .secondaryLabel
+        searchClearButton.isHidden = true
+        searchClearButton.accessibilityLabel = "清除搜索词"
+        searchClearButton.accessibilityIdentifier = "expandingDock.searchClearButton"
+        searchClearButton.addTarget(self, action: #selector(handleClearSearchTapped), for: .touchUpInside)
+        searchContent.addSubview(searchClearButton)
+    }
+
+    private func setupRowsScrollAndFooter() {
+        let content = platterGlassView.contentView
+
+        rowsScrollView.showsVerticalScrollIndicator = false
+        rowsScrollView.showsHorizontalScrollIndicator = false
+        rowsScrollView.delaysContentTouches = false
+        rowsScrollView.canCancelContentTouches = true
+        rowsScrollView.keyboardDismissMode = .interactive
+        content.addSubview(rowsScrollView)
+
+        rowsStackView.axis = .vertical
+        rowsStackView.alignment = .fill
+        rowsStackView.spacing = 2
+        rowsScrollView.addSubview(rowsStackView)
+
+        footerSeparator.backgroundColor = UIColor.separator.withAlphaComponent(0.35)
+        content.addSubview(footerSeparator)
+        content.addSubview(footerHostView)
+    }
+
+    func applyMaterialAppearance() {
+        let isDark = traitCollection.userInterfaceStyle == .dark
+        let reduceTrans = UIAccessibility.isReduceTransparencyEnabled
+
+        if reduceTrans {
+            platterGlassView.effect = nil
+            platterGlassView.backgroundColor = .secondarySystemBackground
+            platterHairlineBorder.layer.borderColor = UIColor.separator.withAlphaComponent(0.55).cgColor
+            searchBoxGlassView.effect = nil
+            searchBoxGlassView.backgroundColor = .tertiarySystemFill
+        } else {
+            platterGlassView.backgroundColor = .clear
+            if #available(iOS 26.0, *) {
+                let glass = UIGlassEffect(style: .regular)
+                glass.isInteractive = true
+                platterGlassView.effect = glass
+                platterGlassView.cornerConfiguration = .uniformCorners(radius: .fixed(DockConfig.cornerRadius))
+            } else {
+                platterGlassView.effect = UIBlurEffect(style: .systemThickMaterial)
+            }
+            platterHairlineBorder.layer.borderColor = UIColor.white
+                .withAlphaComponent(isDark ? 0.18 : 0.42)
+                .cgColor
+
+            searchBoxGlassView.effect = UIBlurEffect(style: .systemUltraThinMaterial)
+            searchBoxGlassView.backgroundColor = UIColor.secondarySystemFill.withAlphaComponent(isDark ? 0.32 : 0.45)
         }
 
-        var sections: [PanelSection] = []
+        searchBoxGlassView.layer.borderColor = UIColor.white
+            .withAlphaComponent(isDark ? 0.20 : 0.50)
+            .cgColor
+        platterShadowWrap.layer.shadowOpacity = isDark ? 0.34 : 0.14
+    }
 
-        // 规格 4：「最近使用」分区（最多 3 个，存储于 @AppStorage("imink.dock.recentModes")，空时不显示这一区）
-        let recents = resolvedRecentItems
+    // MARK: - 展开 / 收起（可打断 UIViewPropertyAnimator + UISpringTimingParameters + 水平收腰 + 逐行错峰）
+
+    func expand(for tab: DockTab) {
+        activeTab = tab
+        searchQuery = ""
+        searchTextField.text = ""
+        searchClearButton.isHidden = true
+        dragTranslationY = 0
+
+        stopActiveAnimatorsPreservingCurrentState()
+
+        let wasAlreadyVisible = !view.isHidden && platterShadowWrap.alpha > 0.05
+        isExpanded = true
+        DockVisibilityStore.shared.expand()
+
+        view.isHidden = false
+        view.isUserInteractionEnabled = true
+        platterShadowWrap.accessibilityElementsHidden = false
+        platterShadowWrap.accessibilityViewIsModal = true
+
+        backdropContainerView?.isHidden = false
+        backdropContainerView?.isUserInteractionEnabled = true
+
+        rebuildSections(animateHeight: false)
+        let targetHeight = measureDesiredPanelHeight()
+        layoutPlatterGeometry(targetHeight: targetHeight)
+
+        let reduceMotion = DockMotion.isReduceMotionActive()
+        if reduceMotion {
+            platterShadowWrap.transform = .identity
+            if !wasAlreadyVisible {
+                platterShadowWrap.alpha = 0
+            }
+            animatedSlotsBottomUp.forEach {
+                $0.alpha = 1
+                $0.transform = .identity
+            }
+            let anim = UIViewPropertyAnimator(duration: DockMotion.reducedDuration, curve: .easeOut)
+            anim.addAnimations {
+                self.platterShadowWrap.alpha = 1
+                self.backdropDimView?.alpha = 1
+                if !UIAccessibility.isReduceTransparencyEnabled {
+                    self.backdropBlurView?.effect = UIBlurEffect(style: .systemUltraThinMaterial)
+                }
+            }
+            anim.startAnimation()
+            panelAnimator = anim
+            return
+        }
+
+        // 水平收腰：容器从 scaleX = 0.80 起手，底边锁死在 tabBar 上沿，通过弹簧舒展回 1.0
+        if !wasAlreadyVisible {
+            platterShadowWrap.alpha = 0
+            platterShadowWrap.transform = CGAffineTransform(scaleX: DockMotion.openSqueezeScaleX, y: 0.88)
+        }
+
+        let spring = UISpringTimingParameters(
+            dampingRatio: DockMotion.expandDamping,
+            initialVelocity: CGVector(dx: 0.35, dy: 0.45)
+        )
+        let animator = UIViewPropertyAnimator(duration: DockMotion.expandDuration, timingParameters: spring)
+        animator.isInterruptible = true
+        animator.isUserInteractionEnabled = true
+        animator.addAnimations {
+            self.platterShadowWrap.alpha = 1
+            self.platterShadowWrap.transform = .identity
+            self.backdropDimView?.alpha = 1
+            if !UIAccessibility.isReduceTransparencyEnabled {
+                self.backdropBlurView?.effect = UIBlurEffect(style: .systemUltraThinMaterial)
+            }
+        }
+        animator.startAnimation()
+        panelAnimator = animator
+
+        // 逐行错峰上浮：每行独立 UIViewPropertyAnimator(duration:delay:)，delay = index * 0.03s
+        for (index, slotView) in animatedSlotsBottomUp.enumerated() {
+            slotView.alpha = 0
+            slotView.transform = CGAffineTransform(translationX: 0, y: DockMotion.rowInitialOffsetY)
+            let rowTiming = UISpringTimingParameters(dampingRatio: DockMotion.rowOpenDamping)
+            let rowAnim = UIViewPropertyAnimator(duration: DockMotion.rowOpenDuration, timingParameters: rowTiming)
+            rowAnim.addAnimations {
+                slotView.alpha = 1
+                slotView.transform = .identity
+            }
+            rowAnim.startAnimation(afterDelay: Double(index) * DockMotion.rowOpenStaggerStep)
+            rowAnimators.append(rowAnim)
+        }
+    }
+
+    func collapse(reason: CollapseReason, completion: (() -> Void)? = nil) {
+        guard isExpanded else {
+            completion?()
+            return
+        }
+
+        let hadKeyboard = searchTextField.isFirstResponder || keyboardOverlapHeight > 10
+        if reason != .pickedItem {
+            Haptics.generateIfEnabled(.light)
+        }
+
+        // 规格要求：键盘弹出时若点遮罩或下滑收起，必须先收键盘、再收面板
+        if hadKeyboard && (reason == .backdropTap || reason == .swipeDown || reason == .reTapTab) {
+            searchTextField.resignFirstResponder()
+            resetInteractiveDragIfNeeded()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) { [weak self] in
+                self?.performCollapseAnimation(reason: reason, completion: completion)
+            }
+            return
+        }
+
+        if hadKeyboard {
+            searchTextField.resignFirstResponder()
+        }
+        performCollapseAnimation(reason: reason, completion: completion)
+    }
+
+    private func performCollapseAnimation(reason: CollapseReason, completion: (() -> Void)?) {
+        guard isExpanded else {
+            completion?()
+            return
+        }
+        isExpanded = false
+        dragTranslationY = 0
+        DockVisibilityStore.shared.collapse()
+
+        // 立即释放模态无障碍拦截，同时保持视觉视图完整执行弹簧与逐行收拢动画
+        view.isUserInteractionEnabled = false
+        backdropContainerView?.isUserInteractionEnabled = false
+        platterShadowWrap.accessibilityViewIsModal = false
+        platterShadowWrap.accessibilityElementsHidden = true
+
+        stopActiveAnimatorsPreservingCurrentState()
+
+        let reduceMotion = DockMotion.isReduceMotionActive()
+        if reduceMotion {
+            let anim = UIViewPropertyAnimator(duration: DockMotion.reducedDuration, curve: .easeOut)
+            anim.addAnimations {
+                self.platterShadowWrap.alpha = 0
+                self.backdropDimView?.alpha = 0
+                self.backdropBlurView?.effect = nil
+            }
+            anim.addCompletion { [weak self] pos in
+                guard let self, pos == .end, !self.isExpanded else { return }
+                self.finishCollapsedHiddenState()
+                completion?()
+            }
+            anim.startAnimation()
+            panelAnimator = anim
+            return
+        }
+
+        // 收起逐行错峰：自顶向下反序 0.011s 阶梯 + 0.088s 单行时长（8 * 0.011 + 0.088 = 0.176s <= 0.18s）
+        let topDownSlots = Array(animatedSlotsBottomUp.reversed())
+        for (idx, slotView) in topDownSlots.enumerated() {
+            let clampedStep = min(idx, DockMotion.maxCloseStaggerIndex)
+            let rowAnim = UIViewPropertyAnimator(duration: DockMotion.rowCloseItemDuration, curve: .easeIn)
+            rowAnim.addAnimations {
+                slotView.alpha = 0
+                slotView.transform = CGAffineTransform(translationX: 0, y: 8)
+            }
+            rowAnim.startAnimation(afterDelay: Double(clampedStep) * DockMotion.rowCloseStaggerStep)
+            rowAnimators.append(rowAnim)
+        }
+
+        let damping: CGFloat = (reason == .pickedItem) ? 0.78 : DockMotion.collapseDamping
+        let spring = UISpringTimingParameters(
+            dampingRatio: damping,
+            initialVelocity: CGVector(dx: 0, dy: 0.25)
+        )
+        let animator = UIViewPropertyAnimator(duration: DockMotion.collapseDuration, timingParameters: spring)
+        animator.isInterruptible = true
+        animator.addAnimations {
+            self.platterShadowWrap.transform = CGAffineTransform(translationX: 0, y: 8)
+                .scaledBy(x: DockMotion.closeSqueezeScaleX, y: 0.84)
+            self.platterShadowWrap.alpha = 0
+            self.backdropDimView?.alpha = 0
+            self.backdropBlurView?.effect = nil
+        }
+        animator.addCompletion { [weak self] position in
+            guard let self, position == .end, !self.isExpanded else { return }
+            self.finishCollapsedHiddenState()
+            completion?()
+        }
+        animator.startAnimation()
+        panelAnimator = animator
+    }
+
+    private func finishCollapsedHiddenState() {
+        searchQuery = ""
+        searchTextField.text = ""
+        searchClearButton.isHidden = true
+        platterShadowWrap.transform = .identity
+        view.isHidden = true
+        backdropContainerView?.isHidden = true
+    }
+
+    private func stopActiveAnimatorsPreservingCurrentState() {
+        if let active = panelAnimator, active.state == .active {
+            active.stopAnimation(true)
+        }
+        panelAnimator = nil
+
+        for anim in rowAnimators where anim.state == .active {
+            anim.stopAnimation(true)
+        }
+        rowAnimators.removeAll()
+    }
+
+    // MARK: - 几何计算与键盘避让（底边锚定在 tabBar 上沿，键盘弹出时整体上移避让）
+
+    private var resolvedPanelWidth: CGFloat {
+        let hostW = view.bounds.width > 0 ? view.bounds.width : 393
+        if anchorTabBarRect.width > 200 {
+            return min(anchorTabBarRect.width, DockConfig.maxDockWidth)
+        }
+        return min(max(hostW - DockConfig.horizontalMargin * 2, 240), DockConfig.maxDockWidth)
+    }
+
+    private var resolvedAnchorBottomY: CGFloat {
+        let hostH = view.bounds.height > 0 ? view.bounds.height : 852
+        let restingY: CGFloat
+        if anchorTabBarRect.height > 0 {
+            // 严格锚定在系统 tabBar 胶囊顶沿上方 8pt 处，绝不遮盖实时 tabBar 按钮
+            restingY = anchorTabBarRect.minY - 8
+        } else {
+            restingY = hostH - 91
+        }
+        if keyboardOverlapHeight > 10 {
+            let keyboardClearY = hostH - keyboardOverlapHeight - 8
+            return min(restingY, keyboardClearY)
+        }
+        return restingY
+    }
+
+    private func measureDesiredPanelHeight() -> CGFloat {
+        let pad = DockConfig.panelPadding
+        let headerH: CGFloat = 42
+        let searchH: CGFloat = 36
+        let spacingAfterHeader: CGFloat = 6
+        let spacingAfterSearch: CGFloat = 6
+        let hasFooter = !footerHostView.isHidden
+        let footerBlockH: CGFloat = hasFooter ? (8 + DockConfig.panelRowHeight) : 0
+
+        let stackFitting = rowsStackView.systemLayoutSizeFitting(
+            CGSize(width: resolvedPanelWidth - pad * 2, height: UIView.layoutFittingCompressedSize.height),
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
+        let naturalRowsH = max(stackFitting.height, DockConfig.panelRowHeight)
+
+        let safeTop = max(view.safeAreaInsets.top, 54)
+        let maxTotalPanelH = max(196, min(464, resolvedAnchorBottomY - safeTop - 10))
+        let fixedChromeH = pad + headerH + spacingAfterHeader + searchH + spacingAfterSearch + footerBlockH + pad
+        let maxViewportH = max(76, maxTotalPanelH - fixedChromeH)
+
+        let viewportH = min(naturalRowsH, maxViewportH)
+        rowsScrollView.isScrollEnabled = naturalRowsH > viewportH + 1
+
+        return fixedChromeH + viewportH
+    }
+
+    private func layoutPlatterGeometry(targetHeight: CGFloat) {
+        let width = resolvedPanelWidth
+        let pad = DockConfig.panelPadding
+        let bottomY = resolvedAnchorBottomY + dragTranslationY
+        let centerX = anchorTabBarRect.width > 200 ? anchorTabBarRect.midX : view.bounds.midX
+
+        let savedTransform = platterShadowWrap.transform
+        platterShadowWrap.transform = .identity
+        platterShadowWrap.bounds = CGRect(x: 0, y: 0, width: width, height: targetHeight)
+        platterShadowWrap.center = CGPoint(x: centerX, y: bottomY)
+        platterGlassView.frame = platterShadowWrap.bounds
+        platterHairlineBorder.frame = platterGlassView.bounds
+        platterShadowWrap.transform = savedTransform
+
+        let innerW = width - pad * 2
+        var cursorY: CGFloat = pad
+
+        headerContainer.frame = CGRect(x: pad, y: cursorY, width: innerW, height: 42)
+        grabberPill.frame = CGRect(x: (innerW - 34) / 2, y: 2, width: 34, height: 4)
+
+        headerBadgeLabel.sizeToFit()
+        let badgeW = headerBadgeLabel.bounds.width + 14
+        let badgeH: CGFloat = 20
+        headerBadgeBg.frame = CGRect(x: 6, y: 14, width: badgeW, height: badgeH)
+        headerBadgeLabel.frame = CGRect(x: 13, y: 14, width: headerBadgeLabel.bounds.width, height: badgeH)
+
+        headerStatusLabel.sizeToFit()
+        let statusW = min(headerStatusLabel.bounds.width, 110)
+        headerStatusLabel.frame = CGRect(x: innerW - 6 - statusW, y: 14, width: statusW, height: 20)
+
+        let titleX = headerBadgeBg.frame.maxX + 8
+        let titleMaxW = max(60, headerStatusLabel.frame.minX - titleX - 6)
+        headerTitleLabel.frame = CGRect(x: titleX, y: 13, width: titleMaxW, height: 22)
+
+        cursorY += 42 + 6
+
+        // 36pt 搜索框
+        searchBoxGlassView.frame = CGRect(x: pad, y: cursorY, width: innerW, height: 36)
+        searchIconView.frame = CGRect(x: 10, y: 10, width: 16, height: 16)
+        let clearW: CGFloat = searchClearButton.isHidden ? 0 : 28
+        searchClearButton.frame = CGRect(x: innerW - 32, y: 4, width: 28, height: 28)
+        let fieldX: CGFloat = 32
+        searchTextField.frame = CGRect(
+            x: fieldX,
+            y: 0,
+            width: max(60, innerW - fieldX - clearW - 8),
+            height: 36
+        )
+
+        cursorY += 36 + 6
+
+        let hasFooter = !footerHostView.isHidden
+        let footerReserved: CGFloat = hasFooter ? (8 + DockConfig.panelRowHeight) : 0
+        let scrollH = max(40, targetHeight - cursorY - footerReserved - pad)
+
+        rowsScrollView.frame = CGRect(x: pad, y: cursorY, width: innerW, height: scrollH)
+        let stackSize = rowsStackView.systemLayoutSizeFitting(
+            CGSize(width: innerW, height: UIView.layoutFittingCompressedSize.height),
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
+        rowsStackView.frame = CGRect(x: 0, y: 0, width: innerW, height: stackSize.height)
+        rowsScrollView.contentSize = CGSize(width: innerW, height: stackSize.height)
+
+        if hasFooter {
+            let sepY = rowsScrollView.frame.maxY + 4
+            footerSeparator.frame = CGRect(x: pad + 6, y: sepY, width: innerW - 12, height: 0.6)
+            footerHostView.frame = CGRect(
+                x: pad,
+                y: sepY + 4,
+                width: innerW,
+                height: DockConfig.panelRowHeight
+            )
+            footerHostView.subviews.first?.frame = footerHostView.bounds
+        }
+    }
+
+    // MARK: - 搜索输入与键盘通知
+
+    @objc private func handleSearchEditingChanged() {
+        searchQuery = searchTextField.text ?? ""
+        searchClearButton.isHidden = searchQuery.isEmpty
+        rebuildSections(animateHeight: true)
+    }
+
+    @objc private func handleClearSearchTapped() {
+        Haptics.generateIfEnabled(.light)
+        searchQuery = ""
+        searchTextField.text = ""
+        searchClearButton.isHidden = true
+        rebuildSections(animateHeight: true)
+    }
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+
+    private func setupKeyboardObservers() {
+        NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] note in
+                guard let self else { return }
+                guard let endFrame = (note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else {
+                    return
+                }
+                let windowHeight = self.view.window?.bounds.height ?? self.view.bounds.height
+                let overlap = max(0, windowHeight - endFrame.minY)
+                self.animateKeyboardAdjustment(to: overlap, userInfo: note.userInfo)
+            }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] note in
+                self?.animateKeyboardAdjustment(to: 0, userInfo: note.userInfo)
+            }
+            .store(in: &cancellables)
+    }
+
+    private func animateKeyboardAdjustment(to overlap: CGFloat, userInfo: [AnyHashable: Any]?) {
+        guard abs(keyboardOverlapHeight - overlap) > 0.5 else { return }
+        keyboardOverlapHeight = overlap
+        guard isExpanded else { return }
+
+        let duration = (userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double) ?? 0.28
+        let rawCurve = (userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt) ?? 7
+        let options = UIView.AnimationOptions(rawValue: rawCurve << 16)
+
+        UIView.animate(withDuration: max(duration, 0.18), delay: 0, options: [options, .beginFromCurrentState]) {
+            let desiredH = self.measureDesiredPanelHeight()
+            self.layoutPlatterGeometry(targetHeight: desiredH)
+        }
+    }
+
+    // MARK: - 下滑交互手势（跟手阻尼 + 抬手判定收起或回弹）
+
+    private func setupGestures() {
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePanelPan(_:)))
+        pan.delegate = self
+        platterShadowWrap.addGestureRecognizer(pan)
+    }
+
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard let pan = gestureRecognizer as? UIPanGestureRecognizer else { return true }
+        let velocity = pan.velocity(in: platterShadowWrap)
+        guard abs(velocity.y) > abs(velocity.x) * 1.15 else { return false }
+        let touchInScroll = pan.location(in: rowsScrollView)
+        if rowsScrollView.bounds.contains(touchInScroll) && rowsScrollView.isScrollEnabled {
+            return rowsScrollView.contentOffset.y <= 0.5 && velocity.y > 0
+        }
+        return true
+    }
+
+    @objc private func handlePanelPan(_ recognizer: UIPanGestureRecognizer) {
+        guard isExpanded else { return }
+        let dy = recognizer.translation(in: view).y
+        let vy = recognizer.velocity(in: view).y
+
+        switch recognizer.state {
+        case .began, .changed:
+            dragTranslationY = dy > 0 ? dy * 0.66 : dy * 0.15
+            let progress = min(1, max(0, dy / 170))
+            DockVisibilityStore.shared.dragDismissProgress = progress
+            backdropDimView?.alpha = 1 - progress * 0.85
+            layoutPlatterGeometry(targetHeight: platterShadowWrap.bounds.height)
+
+        case .ended:
+            if dy > 48 || vy > 320 {
+                collapse(reason: .swipeDown)
+            } else {
+                resetInteractiveDragIfNeeded()
+            }
+
+        case .cancelled, .failed:
+            resetInteractiveDragIfNeeded()
+
+        default:
+            break
+        }
+    }
+
+    private func resetInteractiveDragIfNeeded() {
+        dragTranslationY = 0
+        DockVisibilityStore.shared.dragDismissProgress = 0
+        let duration = DockMotion.isReduceMotionActive() ? DockMotion.reducedDuration : 0.26
+        let anim = UIViewPropertyAnimator(
+            duration: duration,
+            timingParameters: UISpringTimingParameters(dampingRatio: 0.84)
+        )
+        anim.addAnimations {
+            self.backdropDimView?.alpha = 1
+            self.layoutPlatterGeometry(targetHeight: self.measureDesiredPanelHeight())
+        }
+        anim.startAnimation()
+    }
+
+    // MARK: - 数据源构建与 UI 行刷新（搜索 + 最近使用 + 分组 + 单选无 ›）
+
+    private var isSearching: Bool {
+        !DockSearchSupport.normalize(searchQuery).isEmpty
+    }
+
+    private func rebuildSections(animateHeight: Bool) {
+        configureHeaderContent()
+
+        rowsStackView.arrangedSubviews.forEach { sub in
+            rowsStackView.removeArrangedSubview(sub)
+            sub.removeFromSuperview()
+        }
+        footerHostView.subviews.forEach { $0.removeFromSuperview() }
+
+        let sections = buildVisibleSections()
+        var topDownRowViews: [UIView] = []
+
+        if sections.isEmpty && isSearching {
+            let emptyRow = makeSearchEmptyRow()
+            rowsStackView.addArrangedSubview(emptyRow)
+            topDownRowViews.append(emptyRow)
+        } else {
+            for (secIdx, section) in sections.enumerated() {
+                if let header = section.header {
+                    let headerView = makeSectionHeaderView(
+                        title: header,
+                        sectionID: section.id,
+                        topPadding: secIdx == 0 ? 2 : 6
+                    )
+                    rowsStackView.addArrangedSubview(headerView)
+                    topDownRowViews.append(headerView)
+                }
+                for item in section.items {
+                    let rowControl = DockFilterRowControl(model: item, isDark: traitCollection.userInterfaceStyle == .dark)
+                    rowsStackView.addArrangedSubview(rowControl)
+                    topDownRowViews.append(rowControl)
+                }
+            }
+        }
+
+        if let footerModel = buildMoreFiltersFooterItem() {
+            footerSeparator.isHidden = false
+            footerHostView.isHidden = false
+            let footerRow = DockFilterRowControl(model: footerModel, isDark: traitCollection.userInterfaceStyle == .dark)
+            footerHostView.addSubview(footerRow)
+            topDownRowViews.append(footerRow)
+        } else {
+            footerSeparator.isHidden = true
+            footerHostView.isHidden = true
+        }
+
+        // 自底向上收集错峰槽位（越靠近 tabBar 的行越先上浮）
+        var slots: [UIView] = Array(topDownRowViews.reversed())
+        slots.append(searchBoxGlassView)
+        slots.append(headerContainer)
+        animatedSlotsBottomUp = slots
+
+        let targetH = measureDesiredPanelHeight()
+        if animateHeight && !DockMotion.isReduceMotionActive() {
+            let spring = UISpringTimingParameters(dampingRatio: 0.86)
+            let anim = UIViewPropertyAnimator(duration: 0.24, timingParameters: spring)
+            anim.addAnimations {
+                self.layoutPlatterGeometry(targetHeight: targetH)
+            }
+            anim.startAnimation()
+        } else {
+            layoutPlatterGeometry(targetHeight: targetH)
+        }
+    }
+
+    private func configureHeaderContent() {
+        let battleVM = BattleListViewModel.shared
+        let coopVM = CoopListViewModel.shared
+        let homeSchedule = UserDefaults.standard.integer(forKey: "home_page_selectedScheduleType")
+
+        let badge: String
+        let title: String
+        let status: String?
+        let accent: UIColor
+
+        switch activeTab {
+        case .battle:
+            if !battleVM.filter.rules.isEmpty,
+               let first = battleVM.filter.rules.first,
+               let rule = BattleRule(rawValue: first) {
+                status = (rule == .turfWar) ? "涂地模式" : rule.name
+            } else if battleVM.filter.modes.isEmpty {
+                status = "全部"
+            } else if battleVM.filter.modes.count == 1,
+                      let raw = battleVM.filter.modes.first,
+                      let mode = BattleMode(rawValue: raw) {
+                status = mode.name
+            } else {
+                status = "已选 \(battleVM.filter.modes.count)"
+            }
+            badge = "对战"
+            title = "模式与规则筛选"
+            accent = UIColor(Color.spOrange)
+
+        case .coop:
+            if coopVM.isShowingShiftCards {
+                status = "卡片视图"
+            } else if coopVM.filter.rules.isEmpty {
+                status = "全部"
+            } else if coopVM.filter.rules.count == 1,
+                      let raw = coopVM.filter.rules.first,
+                      let rule = CoopRule(rawValue: raw) {
+                status = rule.name
+            } else {
+                status = "已选 \(coopVM.filter.rules.count)"
+            }
+            badge = "鲑鱼跑"
+            title = "规则筛选"
+            accent = UIColor(Color.spGreen)
+
+        case .home:
+            badge = "主页"
+            title = "日程与快筛"
+            status = homeSchedule == 0 ? "对战日程" : "打工日程"
+            accent = UIColor(Color.accentColor)
+
+        case .me:
+            badge = "我的"
+            title = "战绩快捷入口"
+            status = nil
+            accent = UIColor(Color.spPurple)
+        }
+
+        headerBadgeLabel.text = badge
+        headerBadgeLabel.textColor = accent
+        headerBadgeBg.backgroundColor = accent.withAlphaComponent(0.16)
+        headerTitleLabel.text = title
+        headerStatusLabel.text = status
+        headerStatusLabel.isHidden = (status == nil)
+    }
+
+    private func makeSectionHeaderView(title: String, sectionID: String, topPadding: CGFloat) -> UIView {
+        let wrap = UIView()
+        wrap.accessibilityIdentifier = "expandingDock.section.\(sectionID)"
+        let label = UILabel()
+        label.text = title
+        label.font = Font.gameUIFont(size: 11)
+        label.textColor = .secondaryLabel
+        label.translatesAutoresizingMaskIntoConstraints = false
+        wrap.addSubview(label)
+
+        NSLayoutConstraint.activate([
+            label.leadingAnchor.constraint(equalTo: wrap.leadingAnchor, constant: 8),
+            label.trailingAnchor.constraint(equalTo: wrap.trailingAnchor, constant: -8),
+            label.topAnchor.constraint(equalTo: wrap.topAnchor, constant: topPadding),
+            label.bottomAnchor.constraint(equalTo: wrap.bottomAnchor, constant: -2),
+        ])
+        return wrap
+    }
+
+    private func makeSearchEmptyRow() -> UIView {
+        let container = UIView()
+        container.isAccessibilityElement = true
+        container.accessibilityLabel = "没有匹配的筛选项"
+        container.accessibilityIdentifier = "expandingDock.searchEmptyState"
+        container.translatesAutoresizingMaskIntoConstraints = false
+        container.heightAnchor.constraint(equalToConstant: DockConfig.panelRowHeight).isActive = true
+
+        let badge = UIView()
+        badge.backgroundColor = UIColor.secondaryLabel.withAlphaComponent(0.12)
+        badge.layer.cornerRadius = 8
+        badge.layer.cornerCurve = .continuous
+        badge.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(badge)
+
+        let icon = UIImageView(
+            image: UIImage(
+                systemName: "magnifyingglass",
+                withConfiguration: UIImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
+            )
+        )
+        icon.tintColor = .secondaryLabel
+        icon.translatesAutoresizingMaskIntoConstraints = false
+        badge.addSubview(icon)
+
+        let label = UILabel()
+        label.text = "没有匹配的筛选项"
+        label.font = Font.gameUIFont(size: 15)
+        label.textColor = .secondaryLabel
+        label.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(label)
+
+        NSLayoutConstraint.activate([
+            badge.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 8),
+            badge.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            badge.widthAnchor.constraint(equalToConstant: DockConfig.panelIconSize),
+            badge.heightAnchor.constraint(equalToConstant: DockConfig.panelIconSize),
+            icon.centerXAnchor.constraint(equalTo: badge.centerXAnchor),
+            icon.centerYAnchor.constraint(equalTo: badge.centerYAnchor),
+            label.leadingAnchor.constraint(equalTo: badge.trailingAnchor, constant: 10),
+            label.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -8),
+            label.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+        ])
+        return container
+    }
+
+    // MARK: - 筛选项目录构建
+
+    private func buildVisibleSections() -> [PanelSectionModel] {
+        if isSearching {
+            let matched = searchableCatalog().filter { item in
+                DockSearchSupport.matches(query: searchQuery, candidates: [item.title] + item.keywords)
+            }
+            return matched.isEmpty ? [] : [PanelSectionModel(id: "search.results", header: nil, items: matched)]
+        }
+
+        var sections: [PanelSectionModel] = []
+        let recents = buildRecentItems()
         if !recents.isEmpty {
-            sections.append(PanelSection(id: "section.recent", header: "最近使用", items: recents))
+            sections.append(PanelSectionModel(id: "section.recent", header: "最近使用", items: recents))
         }
 
         switch activeTab {
         case .battle:
             sections.append(
-                PanelSection(
+                PanelSectionModel(
                     id: "section.battleModes",
                     header: recents.isEmpty ? "对战模式" : "全部模式",
-                    items: battleModeItems
+                    items: buildBattleModeItems()
                 )
             )
             sections.append(
-                PanelSection(
+                PanelSectionModel(
                     id: "section.battleRules",
                     header: "对战规则",
-                    items: battleRuleItems
+                    items: buildBattleRuleItems()
                 )
             )
         case .coop:
             sections.append(
-                PanelSection(
+                PanelSectionModel(
                     id: "section.coopRules",
                     header: recents.isEmpty ? nil : "打工规则",
-                    items: coopRuleItems
+                    items: buildCoopRuleItems()
                 )
             )
         case .home:
-            sections.append(PanelSection(id: "section.home", header: nil, items: homeQuickItems))
+            sections.append(PanelSectionModel(id: "section.home", header: nil, items: buildHomeQuickItems()))
         case .me:
-            sections.append(PanelSection(id: "section.me", header: nil, items: meQuickItems))
+            sections.append(PanelSectionModel(id: "section.me", header: nil, items: buildMeQuickItems()))
         }
         return sections
     }
 
-    /// 搜索时的候选池：在「对战」搜模式+对战规则；在「鲑鱼跑」搜打工规则；在「主页/我」同时支持搜全站模式与规则。
-    private var searchableCatalogForActiveTab: [DockPanelItem] {
+    private func searchableCatalog() -> [PanelItemModel] {
         switch activeTab {
         case .battle:
-            return battleModeItems + battleRuleItems
+            return buildBattleModeItems() + buildBattleRuleItems()
         case .coop:
-            return coopRuleItems
+            return buildCoopRuleItems()
         case .home:
-            return homeQuickItems + battleModeItems.filter { $0.id != "expandingDock.battleMode.ALL" } + battleRuleItems + coopRuleItems.filter { $0.id != "expandingDock.coopRule.ALL_RULE" }
+            return buildHomeQuickItems()
+                + buildBattleModeItems().filter { $0.id != "expandingDock.battleMode.ALL" }
+                + buildBattleRuleItems()
+                + buildCoopRuleItems().filter { $0.id != "expandingDock.coopRule.ALL_RULE" }
         case .me:
-            return meQuickItems + battleModeItems.filter { $0.id != "expandingDock.battleMode.ALL" } + battleRuleItems + coopRuleItems.filter { $0.id != "expandingDock.coopRule.ALL_RULE" }
+            return buildMeQuickItems()
+                + buildBattleModeItems().filter { $0.id != "expandingDock.battleMode.ALL" }
+                + buildBattleRuleItems()
+                + buildCoopRuleItems().filter { $0.id != "expandingDock.coopRule.ALL_RULE" }
         }
     }
 
-    private var resolvedRecentItems: [DockPanelItem] {
-        let keys = DockSearchSupport.parseRecentKeys(recentModesStorage)
+    private func buildRecentItems() -> [PanelItemModel] {
+        let rawStorage = UserDefaults.standard.string(forKey: DockSearchSupport.recentModesStorageKey) ?? ""
+        let keys = DockSearchSupport.parseRecentKeys(rawStorage)
         guard !keys.isEmpty else { return [] }
-        let lookupPool = battleModeItems + battleRuleItems + coopRuleItems
-        var resolved: [DockPanelItem] = []
+
+        let pool = buildBattleModeItems() + buildBattleRuleItems() + buildCoopRuleItems()
+        var recents: [PanelItemModel] = []
         for key in keys {
-            guard let base = lookupPool.first(where: { $0.recentKey == key }) else { continue }
-            // 在对战页只展示对战最近项、在打工页只展示打工最近项，主页/我展示跨页最近项，保证语义干净直观
             if activeTab == .battle && !key.hasPrefix("battle") { continue }
             if activeTab == .coop && !key.hasPrefix("coop") { continue }
-            resolved.append(
-                DockPanelItem(
+            guard let base = pool.first(where: { $0.recentKey == key }) else { continue }
+            recents.append(
+                PanelItemModel(
                     id: "expandingDock.recent.\(key)",
                     recentKey: base.recentKey,
                     title: base.title,
@@ -821,164 +1731,129 @@ struct ExpandingDock: View {
                     isSelected: base.isSelected,
                     isNavigation: false,
                     badgeCount: 0,
-                    iconTint: base.iconTint,
-                    iconBuilder: base.iconBuilder,
+                    tintColor: base.tintColor,
+                    iconImage: base.iconImage,
+                    rendersAsTemplate: base.rendersAsTemplate,
                     action: base.action
                 )
             )
-            if resolved.count >= DockSearchSupport.maxRecentCount { break }
+            if recents.count >= DockSearchSupport.maxRecentCount { break }
         }
-        return resolved
+        return recents
     }
 
-    @ViewBuilder
-    private func panelSectionsContent(sections: [PanelSection], totalRows: Int) -> some View {
-        VStack(alignment: .leading, spacing: isExpanded ? 2 : 0) {
-            if isExpanded {
-                if sections.isEmpty && isSearching {
-                    // 规格 2：无搜索结果时显示一行「没有匹配的筛选项」
-                    HStack(spacing: 10) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(.secondary)
-                            .frame(width: DockConfig.panelIconSize, height: DockConfig.panelIconSize)
-                            .background(Color.secondary.opacity(0.12), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+    private func recordRecentSelection(_ key: String) {
+        let defaults = UserDefaults.standard
+        let current = defaults.string(forKey: DockSearchSupport.recentModesStorageKey) ?? ""
+        let updated = DockSearchSupport.recordRecentKey(key, into: current)
+        defaults.set(updated, forKey: DockSearchSupport.recentModesStorageKey)
+    }
 
-                        Text("没有匹配的筛选项")
-                            .font(.appBody)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-
-                        Spacer(minLength: 4)
-                    }
-                    .padding(.horizontal, 8)
-                    .frame(height: DockConfig.panelRowHeight)
-                    .accessibilityElement(children: .combine)
-                    .accessibilityLabel("没有匹配的筛选项")
-                    .accessibilityIdentifier("expandingDock.searchEmptyState")
-                    .transition(.opacity.animation(.easeOut(duration: 0.16)))
-                } else {
-                    ForEach(Array(sections.enumerated()), id: \.element.id) { secIdx, section in
-                        if let header = section.header {
-                            Text(header)
-                                .font(.appSubCaptionMono)
-                                .foregroundStyle(.secondary)
-                                .padding(.horizontal, 8)
-                                .padding(.top, secIdx == 0 ? 2 : 6)
-                                .padding(.bottom, 1)
-                                .accessibilityIdentifier("expandingDock.section.\(section.id)")
-                                .transition(.opacity.animation(.easeOut(duration: 0.14)))
-                        }
-
-                        ForEach(Array(section.items.enumerated()), id: \.element.id) { itemIdx, item in
-                            let openIdx = max(1, min(6, totalRows - itemIdx))
-                            renderPanelItem(item)
-                                .transition(staggeredRowTransition(openIndex: openIdx))
-                        }
-                    }
-                }
-            }
+    private func pickAndAutoCollapse(_ work: @escaping () async -> Void) {
+        Haptics.generateIfEnabled(.selectionChanged)
+        let hadKeyboard = searchTextField.isFirstResponder || keyboardOverlapHeight > 10
+        if hadKeyboard {
+            searchTextField.resignFirstResponder()
+        }
+        // 并发启动列表筛选查询：ViewModel 的 filter 与 navigationTitle 会在首个同步片段立即生效，
+        // 面板在 75ms 视觉确认勾选后立即执行弹簧收起，绝不被大表 SQL 查询卡在半空。
+        Task { @MainActor in
+            await work()
+        }
+        Task { @MainActor [weak self] in
+            await Task.yield()
+            self?.rebuildSections(animateHeight: false)
+            try? await Task.sleep(for: .milliseconds(hadKeyboard ? 110 : 75))
+            self?.collapse(reason: .pickedItem)
         }
     }
 
-    @ViewBuilder
-    private func renderPanelItem(_ item: DockPanelItem) -> some View {
-        if item.isNavigation {
-            dockNavigationRow(
-                id: item.id,
-                title: item.title,
-                tint: item.iconTint,
-                badgeCount: item.badgeCount,
-                icon: item.iconBuilder,
-                action: item.action
-            )
-        } else {
-            dockSelectableRow(
-                id: item.id,
-                title: item.title,
-                isSelected: item.isSelected,
-                iconTint: item.iconTint,
-                icon: item.iconBuilder,
-                action: item.action
-            )
+    private func closeAndPerformNavigation(_ block: @escaping () -> Void) {
+        collapse(reason: .navigationAction)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
+            block()
         }
     }
 
-    // MARK: - 5.1 对战模式项 + 对战规则项
-
-    private var battleModeItems: [DockPanelItem] {
-        BattleMode.allCases.map { mode in
-            let isSelected = battleViewModel.filter.rules.isEmpty && (
+    private func buildBattleModeItems() -> [PanelItemModel] {
+        let battleVM = BattleListViewModel.shared
+        return BattleMode.allCases.map { mode in
+            let isSelected = battleVM.filter.rules.isEmpty && (
                 mode == .all
-                    ? battleViewModel.filter.modes.isEmpty
-                    : battleViewModel.filter.modes.contains(mode.rawValue)
+                    ? battleVM.filter.modes.isEmpty
+                    : battleVM.filter.modes.contains(mode.rawValue)
             )
-            let extraKeywords: [String] = {
+            let keywords: [String] = {
                 switch mode {
                 case .all: return ["全部对战", "all"]
                 case .regular: return ["一般比赛", "常规比赛", "涂地", "占地", "regular", "turfwar"]
                 case .anarchy: return ["蛮颓比赛", "真格比赛", "挑战", "开放", "bankara", "anarchy"]
-                case .xMatch: return ["X比赛", "X比赛系列", "xmatch", "x"]
+                case .xMatch: return ["X比赛", "X 比赛", "X比赛系列", "xmatch", "x"]
                 case .league: return ["活动比赛", "活动", "league", "event"]
                 case .privateMatch: return ["私人比赛", "私房", "private"]
                 case .fest: return ["祭典比赛", "祭典", "splatfest", "fest"]
                 }
             }()
             let recentKey: String? = (mode == .all) ? nil : "battleMode:\(mode.rawValue)"
+            let icon: UIImage? = {
+                switch mode {
+                case .all:
+                    return UIImage(
+                        systemName: "square.grid.2x2.fill",
+                        withConfiguration: UIImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
+                    )
+                case .regular, .fest:
+                    return UIImage(resource: .turfWar)
+                case .anarchy:
+                    return UIImage(resource: .anarchy)
+                case .xMatch:
+                    return UIImage(resource: .xBattle)
+                case .league:
+                    return UIImage(resource: .event)
+                case .privateMatch:
+                    return UIImage(resource: .private)
+                }
+            }()
 
-            return DockPanelItem(
+            return PanelItemModel(
                 id: "expandingDock.battleMode.\(mode.rawValue)",
                 recentKey: recentKey,
                 title: mode.name,
-                keywords: extraKeywords,
+                keywords: keywords,
                 isSelected: isSelected,
                 isNavigation: false,
                 badgeCount: 0,
-                iconTint: mode.color,
-                iconBuilder: {
-                    if mode == .all {
-                        return AnyView(
-                            Image(systemName: "square.grid.2x2.fill")
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundStyle(isSelected ? Color.accentColor : .spOrange)
-                        )
-                    } else {
-                        return AnyView(
-                            mode.icon
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 17, height: 17)
-                        )
-                    }
-                },
-                action: {
-                    if let recentKey {
-                        recordRecentSelection(recentKey)
-                    }
-                    selectModeAndAutoCollapse {
-                        if tabSelection != DockTab.battle.rawValue {
-                            tabSelection = DockTab.battle.rawValue
-                        }
-                        await battleViewModel.selectModeFromDock(mode)
-                    }
+                tintColor: UIColor(mode == .all ? .spOrange : mode.color),
+                iconImage: icon,
+                rendersAsTemplate: mode == .all
+            ) { [weak self] in
+                guard let self else { return }
+                if let recentKey {
+                    self.recordRecentSelection(recentKey)
                 }
-            )
+                self.pickAndAutoCollapse {
+                    if self.activeTab != .battle {
+                        self.onRequestTabSwitch?(.battle)
+                    }
+                    await BattleListViewModel.shared.selectModeFromDock(mode)
+                }
+            }
         }
     }
 
-    private var battleRuleItems: [DockPanelItem] {
-        BattleRule.allCases.map { rule in
-            let isSelected = battleViewModel.filter.modes.isEmpty
-                && battleViewModel.filter.rules.contains(rule.rawValue)
-            let displayTitle: String = (rule == .turfWar) ? "涂地模式" : rule.name
-            let ruleTint: Color = {
+    private func buildBattleRuleItems() -> [PanelItemModel] {
+        let battleVM = BattleListViewModel.shared
+        return BattleRule.allCases.map { rule in
+            let isSelected = battleVM.filter.modes.isEmpty && battleVM.filter.rules.contains(rule.rawValue)
+            let displayTitle = (rule == .turfWar) ? "涂地模式" : rule.name
+            let tint: UIColor = {
                 switch rule {
-                case .turfWar: return .spLightGreen
-                case .splatZones, .towerControl, .rainmaker, .clamBlitz: return .spOrange
-                case .triColor: return .spPurple
+                case .turfWar: return UIColor(Color.spLightGreen)
+                case .splatZones, .towerControl, .rainmaker, .clamBlitz: return UIColor(Color.spOrange)
+                case .triColor: return UIColor(Color.spPurple)
                 }
             }()
-            let extraKeywords: [String] = {
+            let keywords: [String] = {
                 switch rule {
                 case .turfWar: return ["涂地模式", "涂地", "占地对战", "占地", "turfwar", "tw"]
                 case .splatZones: return ["真格区域", "区域", "占地真格", "splatzones", "area", "sz"]
@@ -988,52 +1863,55 @@ struct ExpandingDock: View {
                 case .triColor: return ["三色夺宝对战", "三色", "三色夺宝", "tricolor"]
                 }
             }()
+            let icon: UIImage = {
+                switch rule {
+                case .clamBlitz: return UIImage(resource: .clamBlitz)
+                case .rainmaker: return UIImage(resource: .rainmaker)
+                case .splatZones: return UIImage(resource: .splatZones)
+                case .towerControl: return UIImage(resource: .towerControl)
+                case .turfWar: return UIImage(resource: .turfWar)
+                case .triColor: return UIImage(resource: .league)
+                }
+            }()
             let recentKey = "battleRule:\(rule.rawValue)"
 
-            return DockPanelItem(
+            return PanelItemModel(
                 id: "expandingDock.battleRule.\(rule.rawValue)",
                 recentKey: recentKey,
                 title: displayTitle,
-                keywords: [rule.name] + extraKeywords,
+                keywords: [rule.name] + keywords,
                 isSelected: isSelected,
                 isNavigation: false,
                 badgeCount: 0,
-                iconTint: ruleTint,
-                iconBuilder: {
-                    AnyView(
-                        rule.image
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 17, height: 17)
-                    )
-                },
-                action: {
-                    recordRecentSelection(recentKey)
-                    selectModeAndAutoCollapse {
-                        if tabSelection != DockTab.battle.rawValue {
-                            tabSelection = DockTab.battle.rawValue
-                        }
-                        await battleViewModel.selectRuleFromDock(rule)
+                tintColor: tint,
+                iconImage: icon,
+                rendersAsTemplate: false
+            ) { [weak self] in
+                guard let self else { return }
+                self.recordRecentSelection(recentKey)
+                self.pickAndAutoCollapse {
+                    if self.activeTab != .battle {
+                        self.onRequestTabSwitch?(.battle)
                     }
+                    await BattleListViewModel.shared.selectRuleFromDock(rule)
                 }
-            )
+            }
         }
     }
 
-    // MARK: - 5.2 鲑鱼跑规则项
-
-    private var coopRuleItems: [DockPanelItem] {
-        var list: [DockPanelItem] = CoopRule.allCases.map { rule in
-            let isSelected = !coopViewModel.isShowingShiftCards && (
+    private func buildCoopRuleItems() -> [PanelItemModel] {
+        let coopVM = CoopListViewModel.shared
+        var items: [PanelItemModel] = CoopRule.allCases.map { rule in
+            let isSelected = !coopVM.isShowingShiftCards && (
                 rule == .ALL
-                    ? coopViewModel.filter.rules.isEmpty
-                    : coopViewModel.filter.rules.contains(rule.rawValue)
+                    ? coopVM.filter.rules.isEmpty
+                    : coopVM.filter.rules.contains(rule.rawValue)
             )
-            let ruleColor: Color = {
+            let tint: UIColor = {
                 switch rule {
-                case .ALL, .REGULAR: return .spGreen
-                case .BIG_RUN: return .spPurple
-                case .TEAM_CONTEST: return .spOrange
+                case .ALL, .REGULAR: return UIColor(Color.spGreen)
+                case .BIG_RUN: return UIColor(Color.spPurple)
+                case .TEAM_CONTEST: return UIColor(Color.spOrange)
                 }
             }()
             let keywords: [String] = {
@@ -1044,9 +1922,24 @@ struct ExpandingDock: View {
                 case .TEAM_CONTEST: return ["团队打工竞赛", "团队竞赛", "打工竞赛", "eggstrawork", "teamcontest"]
                 }
             }()
+            let icon: UIImage? = {
+                switch rule {
+                case .ALL:
+                    return UIImage(
+                        systemName: "square.grid.2x2.fill",
+                        withConfiguration: UIImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
+                    )
+                case .REGULAR:
+                    return UIImage(resource: .salmonRun)
+                case .BIG_RUN:
+                    return UIImage(resource: .coopBigrun)
+                case .TEAM_CONTEST:
+                    return UIImage(resource: .coopTeamContest)
+                }
+            }()
             let recentKey: String? = (rule == .ALL) ? nil : "coopRule:\(rule.rawValue)"
 
-            return DockPanelItem(
+            return PanelItemModel(
                 id: "expandingDock.coopRule.\(rule.rawValue)",
                 recentKey: recentKey,
                 title: rule.name,
@@ -1054,515 +1947,223 @@ struct ExpandingDock: View {
                 isSelected: isSelected,
                 isNavigation: false,
                 badgeCount: 0,
-                iconTint: ruleColor,
-                iconBuilder: {
-                    if rule == .ALL {
-                        return AnyView(
-                            Image(systemName: "square.grid.2x2.fill")
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundStyle(isSelected ? Color.accentColor : .spGreen)
-                        )
-                    } else {
-                        return AnyView(
-                            rule.icon
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 17, height: 17)
-                        )
-                    }
-                },
-                action: {
-                    if let recentKey {
-                        recordRecentSelection(recentKey)
-                    }
-                    selectModeAndAutoCollapse {
-                        if tabSelection != DockTab.coop.rawValue {
-                            tabSelection = DockTab.coop.rawValue
-                        }
-                        await coopViewModel.selectRuleFromDock(rule)
-                    }
+                tintColor: tint,
+                iconImage: icon,
+                rendersAsTemplate: rule == .ALL
+            ) { [weak self] in
+                guard let self else { return }
+                if let recentKey {
+                    self.recordRecentSelection(recentKey)
                 }
-            )
+                self.pickAndAutoCollapse {
+                    if self.activeTab != .coop {
+                        self.onRequestTabSwitch?(.coop)
+                    }
+                    await CoopListViewModel.shared.selectRuleFromDock(rule)
+                }
+            }
         }
 
-        list.append(
-            DockPanelItem(
+        items.append(
+            PanelItemModel(
                 id: "expandingDock.coopRule.SHIFT_CARDS",
                 recentKey: "coopMode:SHIFT_CARDS",
                 title: "打工卡片",
                 keywords: ["打工卡片", "班次卡片", "shiftcards", "cards"],
-                isSelected: coopViewModel.isShowingShiftCards,
+                isSelected: coopVM.isShowingShiftCards,
                 isNavigation: false,
                 badgeCount: 0,
-                iconTint: .spYellow,
-                iconBuilder: {
-                    AnyView(
-                        Image(systemName: "rectangle.stack.fill")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(coopViewModel.isShowingShiftCards ? Color.accentColor : .spYellow)
-                    )
-                },
-                action: {
-                    recordRecentSelection("coopMode:SHIFT_CARDS")
-                    selectModeAndAutoCollapse {
-                        if tabSelection != DockTab.coop.rawValue {
-                            tabSelection = DockTab.coop.rawValue
-                        }
-                        await coopViewModel.selectShiftCardsFromDock()
+                tintColor: UIColor(Color.spYellow),
+                iconImage: UIImage(
+                    systemName: "rectangle.stack.fill",
+                    withConfiguration: UIImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
+                ),
+                rendersAsTemplate: true
+            ) { [weak self] in
+                guard let self else { return }
+                self.recordRecentSelection("coopMode:SHIFT_CARDS")
+                self.pickAndAutoCollapse {
+                    if self.activeTab != .coop {
+                        self.onRequestTabSwitch?(.coop)
                     }
+                    await CoopListViewModel.shared.selectShiftCardsFromDock()
                 }
-            )
+            }
         )
-        return list
+        return items
     }
 
-    // MARK: - 5.3 主页与「我」页快捷项
-
-    private var homeQuickItems: [DockPanelItem] {
-        [
-            DockPanelItem(
+    private func buildHomeQuickItems() -> [PanelItemModel] {
+        let scheduleType = UserDefaults.standard.integer(forKey: "home_page_selectedScheduleType")
+        let filterSym = UIImage(
+            systemName: "line.3.horizontal.decrease.circle",
+            withConfiguration: UIImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
+        )
+        return [
+            PanelItemModel(
                 id: "expandingDock.home.battleSchedule",
                 recentKey: nil,
                 title: "对战日程",
                 keywords: ["对战日程", "日程", "schedule", "battle"],
-                isSelected: homeScheduleType == 0,
+                isSelected: scheduleType == 0,
                 isNavigation: false,
                 badgeCount: 0,
-                iconTint: .spOrange,
-                iconBuilder: {
-                    AnyView(Image(.anarchy).resizable().scaledToFit().frame(width: 17, height: 17))
-                },
-                action: {
-                    selectModeAndAutoCollapse { homeScheduleType = 0 }
+                tintColor: UIColor(Color.spOrange),
+                iconImage: UIImage(resource: .anarchy),
+                rendersAsTemplate: false
+            ) { [weak self] in
+                self?.pickAndAutoCollapse {
+                    UserDefaults.standard.set(0, forKey: "home_page_selectedScheduleType")
                 }
-            ),
-            DockPanelItem(
+            },
+            PanelItemModel(
                 id: "expandingDock.home.coopSchedule",
                 recentKey: nil,
                 title: "鲑鱼跑日程",
                 keywords: ["鲑鱼跑日程", "打工日程", "salmonrun", "coop"],
-                isSelected: homeScheduleType == 1,
+                isSelected: scheduleType == 1,
                 isNavigation: false,
                 badgeCount: 0,
-                iconTint: .spGreen,
-                iconBuilder: {
-                    AnyView(Image(.salmonRun).resizable().scaledToFit().frame(width: 17, height: 17))
-                },
-                action: {
-                    selectModeAndAutoCollapse { homeScheduleType = 1 }
+                tintColor: UIColor(Color.spGreen),
+                iconImage: UIImage(resource: .salmonRun),
+                rendersAsTemplate: false
+            ) { [weak self] in
+                self?.pickAndAutoCollapse {
+                    UserDefaults.standard.set(1, forKey: "home_page_selectedScheduleType")
                 }
-            ),
-            DockPanelItem(
+            },
+            PanelItemModel(
                 id: "expandingDock.home.gotoBattleFilter",
                 recentKey: nil,
                 title: "去对战筛选页设置条件…",
                 keywords: ["对战筛选", "更多条件"],
                 isSelected: false,
                 isNavigation: true,
-                badgeCount: battleViewModel.extraActiveFilterCount,
-                iconTint: .spOrange,
-                iconBuilder: {
-                    AnyView(
-                        Image(systemName: "line.3.horizontal.decrease.circle")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(Color.spOrange)
-                    )
-                },
-                action: {
-                    closeAndPerform {
-                        tabSelection = DockTab.battle.rawValue
-                        battleViewModel.showFilterSheet = true
-                    }
+                badgeCount: BattleListViewModel.shared.extraActiveFilterCount,
+                tintColor: UIColor(Color.spOrange),
+                iconImage: filterSym,
+                rendersAsTemplate: true
+            ) { [weak self] in
+                self?.closeAndPerformNavigation {
+                    self?.onRequestTabSwitch?(.battle)
+                    BattleListViewModel.shared.showFilterSheet = true
                 }
-            ),
-            DockPanelItem(
+            },
+            PanelItemModel(
                 id: "expandingDock.home.gotoCoopFilter",
                 recentKey: nil,
                 title: "去打工筛选页设置条件…",
                 keywords: ["打工筛选", "更多条件"],
                 isSelected: false,
                 isNavigation: true,
-                badgeCount: coopViewModel.extraActiveFilterCount,
-                iconTint: .spGreen,
-                iconBuilder: {
-                    AnyView(
-                        Image(systemName: "line.3.horizontal.decrease.circle")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(Color.spGreen)
-                    )
-                },
-                action: {
-                    closeAndPerform {
-                        tabSelection = DockTab.coop.rawValue
-                        coopViewModel.showFilterSheet = true
-                    }
+                badgeCount: CoopListViewModel.shared.extraActiveFilterCount,
+                tintColor: UIColor(Color.spGreen),
+                iconImage: filterSym,
+                rendersAsTemplate: true
+            ) { [weak self] in
+                self?.closeAndPerformNavigation {
+                    self?.onRequestTabSwitch?(.coop)
+                    CoopListViewModel.shared.showFilterSheet = true
                 }
-            ),
+            },
         ]
     }
 
-    private var meQuickItems: [DockPanelItem] {
-        [
-            ("expandingDock.me.weapon", "武器榜", ["武器榜", "weapon"], "scope", Color.spOrange, "weapon"),
-            ("expandingDock.me.stage", "场地榜", ["场地榜", "地图", "stage"], "map.fill", Color.spLightGreen, "stage"),
-            ("expandingDock.me.coop", "打工记录统计", ["打工记录统计", "统计", "coop"], "drop.fill", Color.spGreen, "coop"),
-            ("expandingDock.me.trash", "记录回收站", ["回收站", "已删除", "trash"], "trash.fill", Color.spPink, "trash"),
-            ("expandingDock.me.settings", "账号与偏好设置", ["设置", "偏好", "settings"], "gearshape.fill", Color.accentColor, "settings"),
-        ].map { id, title, kw, symbol, tint, dest in
-            DockPanelItem(
+    private func buildMeQuickItems() -> [PanelItemModel] {
+        let specs: [(String, String, [String], String, UIColor, String)] = [
+            ("expandingDock.me.weapon", "武器榜", ["武器榜", "weapon"], "scope", UIColor(Color.spOrange), "weapon"),
+            ("expandingDock.me.stage", "场地榜", ["场地榜", "地图", "stage"], "map.fill", UIColor(Color.spLightGreen), "stage"),
+            ("expandingDock.me.coop", "打工记录统计", ["打工记录统计", "统计", "coop"], "drop.fill", UIColor(Color.spGreen), "coop"),
+            ("expandingDock.me.trash", "记录回收站", ["回收站", "已删除", "trash"], "trash.fill", UIColor(Color.spPink), "trash"),
+            ("expandingDock.me.settings", "账号与偏好设置", ["设置", "偏好", "settings"], "gearshape.fill", UIColor(Color.accentColor), "settings"),
+        ]
+        return specs.map { id, title, keywords, symbol, tint, dest in
+            PanelItemModel(
                 id: id,
                 recentKey: nil,
                 title: title,
-                keywords: kw,
+                keywords: keywords,
                 isSelected: false,
                 isNavigation: true,
                 badgeCount: 0,
-                iconTint: tint,
-                iconBuilder: {
-                    AnyView(
-                        Image(systemName: symbol)
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(tint)
-                    )
-                },
-                action: {
-                    closeAndPerform { dockStore.meDestination = dest }
+                tintColor: tint,
+                iconImage: UIImage(
+                    systemName: symbol,
+                    withConfiguration: UIImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
+                ),
+                rendersAsTemplate: true
+            ) { [weak self] in
+                self?.closeAndPerformNavigation {
+                    DockVisibilityStore.shared.meDestination = dest
                 }
-            )
+            }
         }
     }
 
-    // MARK: - 5.4 底部固定「去筛选页设置更多条件…」入口
-
-    private var moreFilterFooterRow: AnyView? {
+    private func buildMoreFiltersFooterItem() -> PanelItemModel? {
+        let sliderImg = UIImage(
+            systemName: "slider.horizontal.3",
+            withConfiguration: UIImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
+        )
         switch activeTab {
         case .battle:
-            return AnyView(
-                dockNavigationRow(
-                    id: "expandingDock.battle.moreFilters",
-                    title: "去筛选页设置更多条件…",
-                    tint: .spOrange,
-                    badgeCount: battleViewModel.extraActiveFilterCount,
-                    icon: {
-                        Image(systemName: "slider.horizontal.3")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(Color.spOrange)
-                    }
-                ) {
-                    closeAndPerform {
-                        battleViewModel.showFilterSheet = true
-                    }
+            return PanelItemModel(
+                id: "expandingDock.battle.moreFilters",
+                recentKey: nil,
+                title: "去筛选页设置更多条件…",
+                keywords: [],
+                isSelected: false,
+                isNavigation: true,
+                badgeCount: BattleListViewModel.shared.extraActiveFilterCount,
+                tintColor: UIColor(Color.spOrange),
+                iconImage: sliderImg,
+                rendersAsTemplate: true
+            ) { [weak self] in
+                self?.closeAndPerformNavigation {
+                    BattleListViewModel.shared.showFilterSheet = true
                 }
-            )
+            }
         case .coop:
-            return AnyView(
-                dockNavigationRow(
-                    id: "expandingDock.coop.moreFilters",
-                    title: "去筛选页设置更多条件…",
-                    tint: .spGreen,
-                    badgeCount: coopViewModel.extraActiveFilterCount,
-                    icon: {
-                        Image(systemName: "slider.horizontal.3")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(Color.spGreen)
-                    }
-                ) {
-                    closeAndPerform {
-                        coopViewModel.showFilterSheet = true
-                    }
+            return PanelItemModel(
+                id: "expandingDock.coop.moreFilters",
+                recentKey: nil,
+                title: "去筛选页设置更多条件…",
+                keywords: [],
+                isSelected: false,
+                isNavigation: true,
+                badgeCount: CoopListViewModel.shared.extraActiveFilterCount,
+                tintColor: UIColor(Color.spGreen),
+                iconImage: sliderImg,
+                rendersAsTemplate: true
+            ) { [weak self] in
+                self?.closeAndPerformNavigation {
+                    CoopListViewModel.shared.showFilterSheet = true
                 }
-            )
+            }
         case .home, .me:
             return nil
         }
     }
-
-    // MARK: - 6. 透明毛玻璃行组件（统一 40pt 行高、28pt 图标块；单选行只显示 ✓ 不显示 ›）
-
-    private func dockSelectableRow<Icon: View>(
-        id: String,
-        title: String,
-        isSelected: Bool,
-        iconTint: Color,
-        @ViewBuilder icon: () -> Icon,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            HStack(spacing: 10) {
-                icon()
-                    .frame(width: DockConfig.panelIconSize, height: DockConfig.panelIconSize)
-                    .background(
-                        iconTint.opacity(isSelected ? 0.22 : 0.14),
-                        in: RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    )
-
-                Text(title)
-                    .font(.appBody)
-                    .foregroundStyle(isSelected ? Color.accentColor : Color.appLabel)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.85)
-
-                Spacer(minLength: 4)
-
-                if isSelected {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(Color.accentColor)
-                }
-            }
-            .padding(.horizontal, 8)
-            .frame(height: DockConfig.panelRowHeight)
-            .background {
-                if isSelected {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color.accentColor.opacity(colorScheme == .dark ? 0.22 : 0.13))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .strokeBorder(Color.accentColor.opacity(0.26), lineWidth: 0.75)
-                        }
-                }
-            }
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(title)
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
-        .accessibilityIdentifier(id)
-    }
-
-    private func dockNavigationRow<Icon: View>(
-        id: String,
-        title: String,
-        tint: Color,
-        badgeCount: Int,
-        @ViewBuilder icon: () -> Icon,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            HStack(spacing: 10) {
-                icon()
-                    .frame(width: DockConfig.panelIconSize, height: DockConfig.panelIconSize)
-                    .background(tint.opacity(0.14), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-
-                Text(title)
-                    .font(.appCaption)
-                    .foregroundStyle(.appLabel)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.85)
-
-                Spacer(minLength: 4)
-
-                if badgeCount > 0 {
-                    Text("\(badgeCount)")
-                        .font(.appSubCaptionMono)
-                        .foregroundStyle(Color.accentColor)
-                        .padding(.horizontal, 7)
-                        .padding(.vertical, 2)
-                        .background(Color.accentColor.opacity(0.16), in: Capsule())
-                }
-
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(Color.secondary.opacity(0.65))
-            }
-            .padding(.horizontal, 8)
-            .frame(height: DockConfig.panelRowHeight)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(title)
-        .accessibilityIdentifier(id)
-    }
-
-    // MARK: - 7. 交互式手势驱动（下滑时若键盘弹出则先收键盘、再收面板）
-
-    private var expandedHeaderDragGesture: some Gesture {
-        DragGesture(minimumDistance: 8, coordinateSpace: .global)
-            .onChanged { value in
-                guard isExpanded else { return }
-                let dy = value.translation.height
-                withAnimation(DockMotion.interactiveDragAnimation(reduceMotion: envReduceMotion)) {
-                    dragOffsetY = dy > 0 ? dy * 0.65 : dy * 0.14
-                    dockStore.dragDismissProgress = min(1, max(0, dy / 160))
-                }
-            }
-            .onEnded { value in
-                guard isExpanded else { return }
-                let dy = value.translation.height
-                let predictedY = value.predictedEndTranslation.height
-                let shouldClose = dy > 56 || predictedY > 110
-                if shouldClose {
-                    dismissKeyboardThenCollapse()
-                } else {
-                    withAnimation(DockMotion.openAnimation(reduceMotion: envReduceMotion)) {
-                        dragOffsetY = 0
-                        dockStore.dragDismissProgress = 0
-                    }
-                }
-            }
-    }
-
-    private var platterVerticalDragGesture: some Gesture {
-        DragGesture(minimumDistance: 16, coordinateSpace: .global)
-            .onChanged { value in
-                let dy = value.translation.height
-                let dx = value.translation.width
-                guard isExpanded, abs(dy) > abs(dx) * 1.2 else { return }
-                withAnimation(DockMotion.interactiveDragAnimation(reduceMotion: envReduceMotion)) {
-                    dragOffsetY = dy > 0 ? dy * 0.65 : dy * 0.14
-                    dockStore.dragDismissProgress = min(1, max(0, dy / 160))
-                }
-            }
-            .onEnded { value in
-                let dy = value.translation.height
-                let dx = value.translation.width
-                let predictedY = value.predictedEndTranslation.height
-                if isExpanded {
-                    let shouldClose = abs(dy) > abs(dx) * 1.2 && (dy > 44 || predictedY > 100)
-                    if shouldClose {
-                        dismissKeyboardThenCollapse()
-                    } else {
-                        withAnimation(DockMotion.openAnimation(reduceMotion: envReduceMotion)) {
-                            dragOffsetY = 0
-                            dockStore.dragDismissProgress = 0
-                        }
-                    }
-                } else if abs(dy) > abs(dx) * 1.4 && dy < -32 {
-                    Haptics.generateIfEnabled(.light)
-                    withAnimation(DockMotion.openAnimation(reduceMotion: envReduceMotion)) {
-                        dockStore.expand()
-                    }
-                }
-            }
-    }
-
-    // MARK: - 8. 键盘先行收起、最近使用记录与单选自动收起辅助
-
-    private func recordRecentSelection(_ key: String) {
-        recentModesStorage = DockSearchSupport.recordRecentKey(key, into: recentModesStorage)
-    }
-
-    private func dismissKeyboard() {
-        isSearchFocused = false
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-    }
-
-    /// 规格 3：点击遮罩或下滑时，若键盘正处于弹出态，先触发收键盘，再在 130ms 后触发收面板，杜绝键盘与面板打架。
-    private func dismissKeyboardThenCollapse() {
-        Haptics.generateIfEnabled(.light)
-        let hadKeyboard = isSearchFocused || keyboardOverlap > 10
-        if hadKeyboard {
-            dismissKeyboard()
-            withAnimation(DockMotion.openAnimation(reduceMotion: envReduceMotion)) {
-                dragOffsetY = 0
-                dockStore.dragDismissProgress = 0
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.13) {
-                withAnimation(DockMotion.closeAnimation(reduceMotion: envReduceMotion)) {
-                    searchText = ""
-                    dockStore.collapse()
-                }
-            }
-        } else {
-            withAnimation(DockMotion.closeAnimation(reduceMotion: envReduceMotion)) {
-                dragOffsetY = 0
-                dockStore.dragDismissProgress = 0
-                searchText = ""
-                dockStore.collapse()
-            }
-        }
-    }
-
-    private func selectModeAndAutoCollapse(_ work: @escaping () async -> Void) {
-        Haptics.generateIfEnabled(.selectionChanged)
-        let hadKeyboard = isSearchFocused || keyboardOverlap > 10
-        if hadKeyboard {
-            dismissKeyboard()
-        }
-        Task { @MainActor in
-            await work()
-            try? await Task.sleep(for: .milliseconds(hadKeyboard ? 110 : 80))
-            withAnimation(DockMotion.closeAnimation(reduceMotion: envReduceMotion)) {
-                dragOffsetY = 0
-                searchText = ""
-                dockStore.collapse()
-            }
-        }
-    }
-
-    private func closeAndPerform(_ block: @escaping () -> Void) {
-        Haptics.generateIfEnabled(.light)
-        dismissKeyboard()
-        withAnimation(DockMotion.closeAnimation(reduceMotion: envReduceMotion)) {
-            dragOffsetY = 0
-            searchText = ""
-            dockStore.collapse()
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
-            block()
-        }
-    }
 }
 
-/// 统一材质封装：优先使用 iOS 26 原生 `.glassEffect(.regular.interactive(), in:)`，
-/// 系统开启「降低透明度」时优雅降级为 `.ultraThinMaterial` + `1pt` 白色高光描边 + 柔和阴影。
-private struct AdaptiveLiquidGlassModifier<S: InsettableShape>: ViewModifier {
-    let shape: S
-    let reduceTransparency: Bool
-    let colorScheme: ColorScheme
+// MARK: - 5. 统一 40pt 行高 UIKit 按钮控件（单选行仅显示 ✓ 无 ›，导航行显示 ›）
 
-    func body(content: Content) -> some View {
-        if reduceTransparency {
-            content
-                .background(.ultraThinMaterial, in: shape)
-                .overlay {
-                    shape
-                        .strokeBorder(Color.white.opacity(0.35), lineWidth: 1)
-                        .allowsHitTesting(false)
-                }
-                .shadow(
-                    color: Color.black.opacity(colorScheme == .dark ? 0.34 : 0.12),
-                    radius: 14,
-                    x: 0,
-                    y: 6
-                )
-        } else {
-            content
-                .glassEffect(.regular.interactive(), in: shape)
-        }
-    }
-}
+@MainActor
+private final class DockFilterRowControl: UIControl {
+    private let model: DockFilterPanelViewController.PanelItemModel
+    private let isDark: Bool
+    private let highlightPill = UIView()
+    private let iconBadge = UIView()
+    private let iconView = UIImageView()
+    private let titleLabel = UILabel()
+    private let countBadge = UILabel()
+    private let trailingSymbol = UIImageView()
 
-/// 将 `ExpandingDock` 承载于独立的透传 `UIView` 层级之上，彻底避免 iOS 26/27 `UITabBarController` 底层视图拦截底部边缘点击，
-/// 同时在收起态下将非 Dock 区域的滚动与点击 100% 透传给下层页面。
-struct ExpandingDockHost: UIViewControllerRepresentable {
-    @Binding var tabSelection: Int
-
-    func makeUIViewController(context: Context) -> DockPassThroughHostController {
-        DockPassThroughHostController(rootView: makeHostedDock())
-    }
-
-    func updateUIViewController(_ uiViewController: DockPassThroughHostController, context: Context) {
-        uiViewController.update(rootView: makeHostedDock())
-    }
-
-    private func makeHostedDock() -> AnyView {
-        AnyView(
-            ExpandingDock(tabSelection: $tabSelection)
-                .environmentObject(BattleListViewModel.shared)
-                .environmentObject(CoopListViewModel.shared)
-                .appGameTypography()
-                .appLineHeight()
-        )
-    }
-}
-
-final class DockPassThroughHostController: UIViewController {
-    private let hostingController: UIHostingController<AnyView>
-
-    init(rootView: AnyView) {
-        self.hostingController = UIHostingController(rootView: rootView)
-        super.init(nibName: nil, bundle: nil)
+    init(model: DockFilterPanelViewController.PanelItemModel, isDark: Bool) {
+        self.model = model
+        self.isDark = isDark
+        super.init(frame: .zero)
+        setupRow()
     }
 
     @available(*, unavailable)
@@ -1570,62 +2171,160 @@ final class DockPassThroughHostController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func loadView() {
-        let passThrough = DockPassThroughView()
-        passThrough.backgroundColor = .clear
-        passThrough.isOpaque = false
-        passThrough.hitTestHandler = { [weak self] point, event in
-            guard let self else { return nil }
-            let store = DockVisibilityStore.shared
-            switch store.state {
-            case .scrollingHidden:
-                return nil
-            case .expanded:
-                return self.hostingController.view.hitTest(point, with: event)
-            case .collapsed:
-                let hitZone: CGRect
-                if store.collapsedHitRect.width > 0 {
-                    hitZone = store.collapsedHitRect.insetBy(dx: -8, dy: -8)
+    override var intrinsicContentSize: CGSize {
+        CGSize(width: UIView.noIntrinsicMetric, height: DockConfig.panelRowHeight)
+    }
+
+    override var isHighlighted: Bool {
+        didSet {
+            guard oldValue != isHighlighted else { return }
+            let anim = UIViewPropertyAnimator(duration: 0.09, curve: .easeOut)
+            anim.addAnimations {
+                if self.isHighlighted {
+                    self.highlightPill.backgroundColor = UIColor.label.withAlphaComponent(self.isDark ? 0.14 : 0.08)
+                    if !DockMotion.isReduceMotionActive() {
+                        self.transform = CGAffineTransform(scaleX: 0.985, y: 0.985)
+                    }
                 } else {
-                    hitZone = CGRect(
-                        x: 0,
-                        y: max(0, self.view.bounds.height - 96),
-                        width: self.view.bounds.width,
-                        height: 96
-                    )
+                    self.applyRestingBackground()
+                    self.transform = .identity
                 }
-                guard hitZone.contains(point) else { return nil }
-                return self.hostingController.view.hitTest(point, with: event)
             }
+            anim.startAnimation()
         }
-        self.view = passThrough
     }
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        hostingController.safeAreaRegions = []
-        addChild(hostingController)
-        hostingController.view.backgroundColor = .clear
-        hostingController.view.isOpaque = false
-        hostingController.view.frame = view.bounds
-        hostingController.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        view.addSubview(hostingController.view)
-        hostingController.didMove(toParent: self)
-    }
+    private func setupRow() {
+        let accent = UIColor(Color.accentColor)
+        translatesAutoresizingMaskIntoConstraints = false
+        heightAnchor.constraint(equalToConstant: DockConfig.panelRowHeight).isActive = true
 
-    func update(rootView: AnyView) {
-        hostingController.rootView = rootView
-    }
-}
+        isAccessibilityElement = true
+        accessibilityLabel = model.title
+        accessibilityIdentifier = model.id
+        accessibilityTraits = model.isSelected ? [.button, .selected] : [.button]
 
-private final class DockPassThroughView: UIView {
-    var hitTestHandler: ((CGPoint, UIEvent?) -> UIView?)?
+        highlightPill.isUserInteractionEnabled = false
+        highlightPill.layer.cornerRadius = 12
+        highlightPill.layer.cornerCurve = .continuous
+        highlightPill.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(highlightPill)
+        applyRestingBackground()
 
-    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        guard !isHidden, alpha > 0.01, isUserInteractionEnabled else { return nil }
-        if let handler = hitTestHandler {
-            return handler(point, event)
+        iconBadge.isUserInteractionEnabled = false
+        iconBadge.backgroundColor = model.tintColor.withAlphaComponent(model.isSelected ? 0.22 : 0.14)
+        iconBadge.layer.cornerRadius = 8
+        iconBadge.layer.cornerCurve = .continuous
+        iconBadge.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(iconBadge)
+
+        iconView.contentMode = .scaleAspectFit
+        if model.rendersAsTemplate {
+            iconView.image = model.iconImage?.withRenderingMode(.alwaysTemplate)
+            iconView.tintColor = model.isSelected ? accent : model.tintColor
+        } else {
+            iconView.image = model.iconImage?.withRenderingMode(.alwaysOriginal)
         }
-        return super.hitTest(point, with: event)
+        iconView.translatesAutoresizingMaskIntoConstraints = false
+        iconBadge.addSubview(iconView)
+
+        titleLabel.text = model.title
+        titleLabel.font = Font.gameUIFont(size: model.isNavigation ? 12 : 15)
+        titleLabel.textColor = model.isSelected ? accent : UIColor(Color.appLabel)
+        titleLabel.lineBreakMode = .byTruncatingTail
+        titleLabel.adjustsFontSizeToFitWidth = true
+        titleLabel.minimumScaleFactor = 0.85
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(titleLabel)
+
+        trailingSymbol.contentMode = .scaleAspectFit
+        trailingSymbol.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(trailingSymbol)
+
+        if model.isNavigation {
+            // 导航行显示右侧 › chevron 及可选附加条件徽标
+            trailingSymbol.image = UIImage(
+                systemName: "chevron.right",
+                withConfiguration: UIImage.SymbolConfiguration(pointSize: 12, weight: .bold)
+            )
+            trailingSymbol.tintColor = UIColor.secondaryLabel.withAlphaComponent(0.65)
+            trailingSymbol.isHidden = false
+        } else if model.isSelected {
+            // 单选模式/规则行：选中态只显示 ✓，绝不显示 ›
+            trailingSymbol.image = UIImage(
+                systemName: "checkmark",
+                withConfiguration: UIImage.SymbolConfiguration(pointSize: 14, weight: .bold)
+            )
+            trailingSymbol.tintColor = accent
+            trailingSymbol.isHidden = false
+        } else {
+            trailingSymbol.isHidden = true
+        }
+
+        countBadge.font = Font.gameUIFont(size: 11)
+        countBadge.textColor = accent
+        countBadge.backgroundColor = accent.withAlphaComponent(0.16)
+        countBadge.textAlignment = .center
+        countBadge.layer.cornerRadius = 9
+        countBadge.clipsToBounds = true
+        countBadge.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(countBadge)
+
+        if model.badgeCount > 0 {
+            countBadge.text = "  \(model.badgeCount)  "
+            countBadge.isHidden = false
+        } else {
+            countBadge.isHidden = true
+        }
+
+        NSLayoutConstraint.activate([
+            highlightPill.leadingAnchor.constraint(equalTo: leadingAnchor),
+            highlightPill.trailingAnchor.constraint(equalTo: trailingAnchor),
+            highlightPill.topAnchor.constraint(equalTo: topAnchor),
+            highlightPill.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+            iconBadge.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
+            iconBadge.centerYAnchor.constraint(equalTo: centerYAnchor),
+            iconBadge.widthAnchor.constraint(equalToConstant: DockConfig.panelIconSize),
+            iconBadge.heightAnchor.constraint(equalToConstant: DockConfig.panelIconSize),
+
+            iconView.centerXAnchor.constraint(equalTo: iconBadge.centerXAnchor),
+            iconView.centerYAnchor.constraint(equalTo: iconBadge.centerYAnchor),
+            iconView.widthAnchor.constraint(equalToConstant: 17),
+            iconView.heightAnchor.constraint(equalToConstant: 17),
+
+            trailingSymbol.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
+            trailingSymbol.centerYAnchor.constraint(equalTo: centerYAnchor),
+            trailingSymbol.widthAnchor.constraint(equalToConstant: 16),
+            trailingSymbol.heightAnchor.constraint(equalToConstant: 16),
+
+            countBadge.trailingAnchor.constraint(equalTo: trailingSymbol.leadingAnchor, constant: -6),
+            countBadge.centerYAnchor.constraint(equalTo: centerYAnchor),
+            countBadge.heightAnchor.constraint(equalToConstant: 18),
+
+            titleLabel.leadingAnchor.constraint(equalTo: iconBadge.trailingAnchor, constant: 10),
+            titleLabel.trailingAnchor.constraint(
+                lessThanOrEqualTo: model.badgeCount > 0 ? countBadge.leadingAnchor : trailingSymbol.leadingAnchor,
+                constant: -6
+            ),
+            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+        ])
+
+        addAction(UIAction { [weak self] _ in
+            self?.model.action()
+        }, for: .touchUpInside)
+    }
+
+    private func applyRestingBackground() {
+        let accent = UIColor(Color.accentColor)
+        if model.isSelected && !model.isNavigation {
+            highlightPill.backgroundColor = accent.withAlphaComponent(isDark ? 0.22 : 0.13)
+            highlightPill.layer.borderWidth = 0.75
+            highlightPill.layer.borderColor = accent.withAlphaComponent(0.26).cgColor
+        } else {
+            highlightPill.backgroundColor = .clear
+            highlightPill.layer.borderWidth = 0
+            highlightPill.layer.borderColor = nil
+        }
     }
 }

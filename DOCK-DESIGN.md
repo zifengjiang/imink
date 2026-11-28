@@ -1,162 +1,115 @@
-# ExpandingDock 设计方案（imink 第一版）
+# ExpandingDock 设计方案（UIKit 原生底导第二版）
 
-## 1. 背景与「低改动高收益」架构拆分
-
-### 1.1 为什么必须换掉系统浮动胶囊栏
-iOS 26/27 的系统浮动胶囊 `TabView` 完全接管了底部标签栏绘制：`UITabBarItem`、`UITabBarAppearance` 与 `Tab` 自定义 `Label` 内的 `.font(...)` 均被系统忽略，且一旦构造新的 `UITabBarAppearance` 还会把全局 `AccentColor`（`#5639D6`）重置为系统蓝（详见 `Shared/Modifiers/AppTypography.swift` 顶部注释）。只有自绘底栏表面，才能拿回**全站游戏字体**（简中 `DFPZongYiW7` / 繁中 `DFP222` / 日文 `KurokaneStd-EB` / 韩文 `KoreanERIN-M` / 英文 `Splatfont 1`）、**`<= 49pt` 的轻薄高度**、圆角以及向上展开面板的控制权。
-
-### 1.2 哪些用系统能力兜住 vs 哪些必须自绘（最小侵入原则）
-
-为避免推倒重做整套根导航容器，我们采用**保留原生 `TabView` 容器 + 仅隐藏系统栏外观 + 叠放自绘 `ExpandingDock`** 的低改动高收益路径：
-
-| 职责模块 | 实现归属 | 说明 |
-| --- | --- | --- |
-| **4 个根页面生命周期、懒加载与 `NavigationStack` 状态保持** | **系统能力兜住**（保留 `MainView` 原有 `TabView(selection: $tabSelection)`） | 不拆 `TabView`，通过 `.toolbar(useCustomDock ? .hidden : .visible, for: .tabBar)` 仅隐藏系统 `UITabBar` 视觉层；Tab 切换、状态保活、`.sheet` / `.fullScreenCover` 模态层级全部继续由系统托管。 |
-| **兜底回退（`@AppStorage("imink.useCustomDock")`）** | **系统能力兜住** | 开关默认 `true`；切为 `false` 时恢复 `.toolbar(.visible, for: .tabBar)` 与 `.tabBarMinimizeBehavior(.onScrollDown)`，原系统 `TabView` 与顶部标题菜单零损可用。 |
-| **完整多维筛选抽屉（`BattleFilterView` / `CoopFilterView`）** | **现有页面复用** | 继续使用原生 `.sheet` 承载场地、武器、时间滑杆、工友搜索、收藏/删除状态等重筛选，与 Dock 共用同一个 ViewModel 的 `@Published var filter: Filter`。 |
-| **4-Tab 居中对称毛玻璃胶囊 + 二次点击同 Tab 向上展开模式快筛面板** | **必须自绘**（`ExpandingDock.swift`） | 保持「主页 / 对战 / 鲑鱼跑 / 我」**4 个等宽对称按钮**（无多余第 5 颗右圆钮）；首次点击未选中 Tab 切换页面，**在当前已选中 Tab 上再点一次**即向上原地形变为透明模式快筛面板，选完立即生效并自动回弹收起。 |
-| **列表滚动自动退让与底部净空补齐** | **轻量适配**（`FloatingBarInsets.swift`） | 用 SwiftUI 原生 `.onScrollGeometryChange` 被动感知列表滚动方向，不挂额外手势；`FloatingBarInsets` 按新 Dock 实测顶沿（`68pt`）补齐 `8pt` 透明呼吸净空。 |
+> **合规声明**：本实现 100% 独立编写，基于 Apple 官方公开框架（`UITabBarController`、`UINavigationController`、`UITabBarAppearance`、`UIVisualEffectView`、`UIGlassEffect`、`UIViewPropertyAnimator`、`UISpringTimingParameters`）构建；**绝未复制任何 `AFK-surf/Comma`（AGPL-3.0）源码或引入其版权声明**。
 
 ---
 
-## 2. 参考实现的思路（未复制代码）
+## 1. 背景与为什么从 SwiftUI 重写为 UIKit
 
-> **合规声明**：本节仅阅读并提炼架构与交互思路，**未复制任何源码，亦未引入任何第三方或 AGPL 代码与许可证文件**；所有代码均为针对 imink 业务与 SwiftUI 体系独立编写。
+### 1.1 SwiftUI 自绘版与 UIKit 原生版的本质差异（三点核心手感差距）
 
-### 2.1 从 `afk-surf/comma` 学到的核心机制（仅借鉴思路，未复制代码）
-
-精读了原视频对应的开源客户端 `afk-surf/comma` 中 `ShellTabBarController.swift`、`Design/Glass/GlassTabBar.swift`（`TabOverflowMenuView`）与 `Tasks/Dock/TaskDockViewController+Interaction.swift`，对照原视频逐帧图（`f001`～`f040`），提炼出 4 条关键机制：
-
-1. **「左主胶囊 + 右独立圆钮」双体并列拓扑与底边锚定生长**：
-   - 视频帧（`f001`、`f009`、`f014`、`f016`）与 `GlassTabBar.swift` 显示，底栏并非单一大长条，而是**左侧主胶囊 + `8~10pt` 间距 + 右侧等高独立正圆按钮**。
-   - 展开时，左侧主胶囊**以底边 `maxY` 为不动锚点向上生长**为圆角卡片面板（`CGRect(x: bar.minX, y: bar.maxY - height, ...)`），右侧圆形按钮稳稳停留在原位（视觉上正好处于展开卡片的右下侧），再次点击该圆钮或点击外部遮罩即可原路折回胶囊，拇指无需移动位置。
-2. **半高连续圆角（`thickness / 2`）与紧凑行高节奏**：
-   - `TabOverflowMenuView` 将容器圆角固定为收起态厚度的一半（`.continuous` 连续曲率），使收起态天然是标准胶囊，展开态无需跳变圆角半径即可平滑过渡为大圆角面板；内部行高 `44~48pt`、外圈内边距 `8pt`，选中行带内嵌胶囊底块高亮。
-3. **弹簧开合与逐行上浮微动效 + Reduce Motion 降级**：
-   - 展开采用带轻微回弹的弹簧（时长约 `0.35s`、阻尼约 `0.72~0.78`），面板行带约 `10~14pt` 的自下而上微位移与淡入；收起采用更高阻尼（`~0.85+`）干脆落位，防止底边回弹穿模。
-   - `TaskDockViewController+Interaction.swift` 显式检测 `UIAccessibility.isReduceMotionEnabled`，开启时放弃弹簧位移，降级为短促（`0.15~0.20s`）的 `.easeOut` 透明度过渡。
-4. **手势隔离与滚动共存原则**：
-   - 外部点击关闭手势仅在面板展开（`isOpen == true`）且触点落在面板 `frame` 之外时接收事件；收起态下容器空白区完全透传触摸，且绝不在 `UIScrollView` 内容区抢占纵向滚动手势；展开期间开启模态无障碍标记（`accessibilityViewIsModal`），收起瞬间立即释放。
-
-#### 我们的实现为什么与 `afk-surf/comma` 截然不同
-
-| 维度 | `afk-surf/comma`（原项目） | `imink`（我们的独立实现） |
-| --- | --- | --- |
-| **技术栈与复杂度** | 重度 UIKit：`ShellTabBarController`（1,200+ 行 `UITabBarController` 子类）+ `TabOverflowMenuView`（3,300+ 行基于 `CADisplayLink` 逐帧手算物理量的 `UIView`），目的是在静止态复用系统 `_UILiquidLensView` 并在折叠屏侧栏等 5 种姿态间做像素级接管。 | 纯声明式 SwiftUI（约 380 行）：保留 SwiftUI `TabView` 隐藏系统栏，叠加 `ExpandingDock` 视图，直接用 SwiftUI `spring` 动画、`.ultraThinMaterial` 与 `@Namespace` `matchedGeometryEffect`，零 `CADisplayLink`、零视图树遍历黑魔法。 |
-| **底栏排版诉求** | 系统 SF Symbols 无文字图标栏（`home` / `inbox` / `people` + `more`）。 | 必须渲染 imink 专属 PDF 矢量图标（`TabBarHome` 等）+ **多语种游戏字体 11pt 标签**，且总高度压薄至 **`48pt`**（`<= 49pt`）。 |
-| **主胶囊与右圆钮语义** | 左胶囊第 4 槽溢出二级导航页（`Apps` / `Drive` / `Plugins` / `Settings`），右圆钮打开 AI 对话路由层。 | 左胶囊完整承载 **4 个一级 Tab（主页 / 对战 / 鲑鱼跑 / 我）**；**右圆钮专职作为当前 Tab 的「模式快筛展开键」**，展开卡片承载数据库真实模式枚举与「去筛选页设置更多条件…」。 |
-
-### 2.2 SwiftUI 社区近似实现对比（`mikonyaa/LiquidGlassTabBars`）
-
-同时调研了社区纯 SwiftUI 实现 `mikonyaa/LiquidGlassTabBars`（`LiquidTabBar.swift` 与 `LiquidGlassSurfaceModifier.swift`）：
-
-- **对方做法**：使用 `@Namespace` + `matchedGeometryEffect(id:in:)` 驱动选中胶囊在 Tab 间平滑横移（`.spring(response: 0.32, dampingFraction: 0.82)`）；通过 `LiquidGlassSurfaceModifier` 同时监听 `@Environment(\.accessibilityReduceMotion)` 与 `@Environment(\.accessibilityReduceTransparency)`（开启「降低透明度」时自动退化为实心底色 + `1pt` 描边）；支持重复点击当前 Tab 触发 `onReselect`。
-- **我们借用的思路**：① 用 `@Namespace` + `matchedGeometryEffect` 实现 4 个 Tab 间的选中胶囊横移；② 同时尊重 `Reduce Motion` 与 `Reduce Transparency` 两项系统无障碍设置。
-- **为什么不能直接引入该第三方依赖**：
-  1. **缺少核心交互**：它只有水平胶囊切换，没有「右侧独立圆形按钮」与「向上弹开成筛选行列表面板」的状态机；
-  2. **尺寸与字体不符**：其默认栏高 `60pt` 超过我们 `<= 49pt` 的硬指标，且写死了 `Image(systemName:)` 与系统 `.caption2` 字体，无法直接渲染 imink 矢量资源与游戏字体；
-  3. **依赖与维护成本**：为百余行 UI 表层引入外部 SPM 包会增加构建供应链、Xcode 版本兼容与许可证审计负担，原生自写更轻、更可控。
+1. **底栏触控与液态光学透镜（`_UILiquidLensView` vs 静态胶囊位移）**：
+   - **SwiftUI 版**：用 `HStack` + `Capsule().matchedGeometryEffect` 模拟选中滑块，手指按下无液态膨胀折射，滑块仅做平面弹簧横移，缺少 iOS 26 原生底导那种「水滴吸住拇指」的阻尼质感。
+   - **UIKit 版**：底栏直接使用真实系统 `UITabBar`（由 `UITabBarController` 驱动），原生激活 iOS 26 的 120Hz 光学折射透镜与系统级触控按压弹性，滑动与点按手感和系统自带 App 完全一致、零违和感。
+2. **展开/收起的可打断物理连续性（`UIViewPropertyAnimator` vs 声明式 `Transition`）**：
+   - **SwiftUI 版**：依赖 `if isExpanded` 视图树增删 + `keyframeAnimator` + `AnyTransition.asymmetric`，首次挂载搜索框与多行列表时存在 SwiftUI 布局事务抖动，半途反向点击或手势打断时容易跳帧。
+   - **UIKit 版**：面板常驻于轻量 `UIView` 层级，容器收腰（`scaleX: 0.80 -> 1.0`）与逐行错峰上浮全部由 `isInterruptible = true` 的 `UIViewPropertyAnimator` + `UISpringTimingParameters` 驱动；中途随时反点或下拉，均从当前屏幕真实插值位置平滑反向衔接。
+3. **搜索框焦点、软键盘避让与滚动手势响应（零延迟 `UIControl` vs `@FocusState` 异步桥接）**：
+   - **SwiftUI 版**：`@FocusState` 与 `NotificationCenter` 跨层同步键盘高度存在一拍延迟，且 `ScrollView` 内 `Button` 有约 `150ms` 触摸识别迟滞。
+   - **UIKit 版**：`UITextField` 直接读取系统键盘帧动画曲线（`keyboardAnimationCurve`）同频抬升面板，`UIScrollView(delaysContentTouches: false)` + 自定义 `UIControl` 实现触屏瞬时 `90ms` 高亮微缩反馈，「先收键盘、再收面板」时序精准可控。
 
 ---
 
-## 3. 状态机设计（`DockState`）
+## 2. 真机录屏 Bug 复盘与「反例：不要这么做」
+
+### 2.1 真机故障录屏逐帧定位（`dock-comma-glitch-record.mp4`）
+
+- **测试样本**：`/Users/jiangfeng/Documents/imink-design/dock-comma-glitch-record.mp4`（iPhone 17 Pro 真机录制，`1206×2622`，编码帧步进 `16.67ms` / `60fps`，总长 `6.018s` / `360` 帧，运行 `experiment/comma-dock` 实验壳）。
+- **最小化故障窗口拼图**：`~/Documents/imink-design/comma-glitch-frames.png`（截取 `#141 t=2.350s` 至 `#170 t=2.833s`，窗口跨度 **`0.483s < 0.5s`**，共 30 帧，5 行 × 每行 6 帧，每帧裁底部 `700px`）。
+- **关键帧时间戳**：
+  - **正常展开末帧**：`#141`（`t = 2.350s`）——「鲑鱼跑」菜单处于展开态，「大型跑 ✓」被点选。
+  - **首个异常帧**：`#142`（`t = 2.367s`）——触发 `close()` 收起，面板开始模糊缩小，此时底层真实 `systemBar.tabBar.alpha` 仍为 `0`；到 `#148`（`t = 2.467s`）/ `#149`（`t = 2.483s`）胶囊高度已落回底栏位置、`12pt` 动态模糊褪去，但底栏内**只有「鲑鱼跑」1 颗按钮可见，「主页 / 对战 / 我」其余 3 颗按钮完全消失**。
+  - **异常持续末帧**：`#166`（`t = 2.767s`）——其余 3 颗按钮依然空白未绘制。
+  - **首个恢复帧**：`#167`（`t = 2.783s`）——动画尾段终于判定收敛，恢复 `systemBar.tabBar.alpha = 1`，4 颗按钮瞬间跳出。
+  - **消失总时长**：从收起首帧 `#142`（`2.367s`）到恢复帧 `#167`（`2.783s`）长达 **`416.7ms`**（25 帧）；即便从底栏轮廓完全落定的 `#149`（`2.483s`）算起，也有整整 **`300.0ms`**（18 帧）底导缺失 3 个按钮（同一录屏 `#312 t=5.202s` 至 `#338 t=5.635s` 对战收起时完全复现了同一故障）。
+
+### 2.2 代码级根因核对（`experiment/comma-dock` 分支 `imink/Views/Common/CommaDockExperimentShell.swift`）
+
+核对 `experiment/comma-dock:imink/Views/Common/CommaDockExperimentShell.swift` 后，确认故障由**两段机制叠加**导致：
+
+1. **展开至收起全程隐藏真实 `UITabBar`，直到双弹簧长尾彻底归零才恢复可见**：
+   - **L128–L134**：`overflowMenu.onVisibilityChange` 在 `visible == true` 时直接将 `self.systemBar.tabBar.alpha = 0` 隐藏真实底栏；
+   - **L757 & L764–L780**：`open()`（L757）调用 `onVisibilityChange?(true)` 隐藏真栏，但 `close()`（L764–L780）**并未恢复真栏**，而是继续依赖覆盖层里的静态快照充当底栏；
+   - **L538–L541 & L1021–L1035 & L1120–L1131**：`stepMorph()`（L1021–L1035）要求高度弹簧（`abs(glassHeight - glassTarget) < 0.2 && abs(glassVelocity) < 2`）**与**收腰弹簧（`squeezeCloseResponse = 0.36s`，`abs(glassSqueeze) < 0.003 && abs(glassSqueezeVelocity) < 0.02`）**同时收敛**才调用 `finishMorph()`（L1120），进而在 **L1130** 触发 `onVisibilityChange?(false)` 把 `systemBar.tabBar.alpha` 设回 `1`。虽然胶囊在 `~116ms`（`2.483s`）视觉上已经落到底部，但阻尼弹簧的微幅渐近长尾又拖了 `300ms` 才达到 `0.003` 阈值，导致真栏被额外藏匿了整整 417ms。
+2. **`drawHierarchy` 离屏截图无法捕获 iOS 26 Liquid Glass 未选中项的材质混合层，导致 `CommaTabSnapshotLayer` 天生残缺**：
+   - **L356 & L368–L383**：`captureTabBarSnapshot(platter:)` 在离屏 `UIGraphicsImageRenderer` 中调用 `systemBar.tabBar.drawHierarchy(..., afterScreenUpdates: false)`（L373–L381）。在 iOS 26/27 的 Liquid Glass `UITabBar` 中，未选中的 3 个 Tab 图标与文字依赖背板 vibrancy / `CABackdropLayer` 混合滤镜渲染，离屏位图上下文无法合成背板采样，**截出来的 `tabsSnapshot` 里只有前景实心选中胶囊里的「鲑鱼跑」1 颗按钮，其余 3 颗按钮在位图里本身就是空的**（在展开首帧 `#040 t=0.667s` 即可观察到）；
+   - **L533、L1145 & L1219–L1237**：收起过程中 `morphProgress` 从 `1` 降向 `0`，`CommaMenuMorph.tabsOpacity`（L1145：`1 - smoothstep(0, 0.6, p)`）驱动 `CommaTabSnapshotLayer`（L1219–L1237）把这张残缺快照从 `morphBlur = 12pt`（L533、L1229）逐渐去模糊并拉满不透明度 `opacity = 1`，于是用户在 `300~417ms` 内清晰看到一个「只剩 1 颗按钮、其余 3 颗全丢」的假底栏，直到 L1130 切回真栏时才突兀闪出。
+
+### 2.3 反例：不要这么做（工程铁律）
+
+1. **绝不要在面板展开/收起期间隐藏实时 `UITabBar`（`tabBar.alpha = 0` / `isHidden = true`）再用静态截图顶替**：实时 `UITabBar` 必须全程保持可见与可交互，任何截图替代方案都会在状态切换、徽标刷新或深浅色变化时与真实栏失步。
+2. **绝不要对 iOS 26 Liquid Glass / `UIVisualEffectView` 组件调用离屏 `drawHierarchy` 充当过渡帧**：依赖 `CABackdropLayer` 与 vibrancy 滤镜的子视图（如未选中的 `UITabBarButton`）在离屏位图中会静默丢失，造成按钮「凭空蒸发」。
+3. **绝不要把关键 UI 的显隐恢复绑在物理弹簧极严苛的渐近收敛阈值（如 `< 0.003`）上**：二阶弹簧在肉眼早已静止后仍有数百毫秒的微幅尾迹，用它门控真栏显隐会把原本几十毫秒的瑕疵放大成 400ms 级的明显卡顿。
+4. **绝不要用 `CADisplayLink` 480Hz 手写物理积分器 + UIKit 包 SwiftUI `UIHostingController` 双层嵌套去画几行简单菜单**：既增加主线程帧同步复杂度，又难以排查跨框架渲染时序；直接用 UIKit 原生 `UIViewPropertyAnimator` + `UISpringTimingParameters` 交给 Core Animation Render Server 合成更稳、更省电、天然支持手势打断。
+
+---
+
+## 3. UIKit 第二版架构与技术取舍
+
+### 3.1 视图控制器与 Z 轴层级拓扑
 
 ```mermaid
-stateDiagram-v2
-    [*] --> collapsed
-    collapsed --> expanded : 二次点击当前已选中的 Tab（或上拉胶囊）
-    expanded --> collapsed : 再次点击当前 Tab / 点击模式行自动收起 / 点击外部遮罩 / 下滑面板
-    collapsed --> scrollingHidden : 列表向下连续滚动 (y > 96pt 且累计下滑 > 28pt)
-    scrollingHidden --> collapsed : 列表向上回滚 (> 12pt) / 回到顶部 / 触底 / 切换 Tab
+flowchart TD
+    MainView["MainView (@AppStorage imink.useCustomDock)"]
+    MainView -->|"true（默认）"| Host["ExpandingDockHost (UIViewControllerRepresentable)"]
+    MainView -->|"false（兜底）"| Fallback["原生 SwiftUI TabView (.onScrollDown)"]
+
+    Host --> Shell["UIKitDockTabBarController (UITabBarController 子类)"]
+    Shell --> Layer0["Layer 0: 4 × DockTabNavigationController -> UIHostingController (Home / Battle / Coop / Me)"]
+    Shell --> Layer1["Layer 1: backdropContainerView (UIVisualEffectView 模糊 + 低透明黑遮罩，insertSubview belowSubview: tabBar)"]
+    Shell --> Layer2["Layer 2: 系统实时 UITabBar (Liquid Glass + UITabBarAppearance，全程 alpha = 1 永不隐藏)"]
+    Shell --> Layer3["Layer 3: DockFilterPanelViewController (DockPanelPassThroughView + UIGlassEffect 面板，底边锚定 tabBar 上沿)"]
 ```
 
-| 状态 | 触发条件 | 视觉与交互表现 |
+### 3.2 关键技术方向取舍与理由
+
+| 决策点 | 最终方案 | 取舍理由 |
 | --- | --- | --- |
-| `collapsed`（收起常驻态） | 默认初始态；面板关闭后；列表在顶部（`y <= 24pt`）、向上回滚或滚到底部（距底 `<= 36pt`） | **居中对称 4-Tab 轻薄毛玻璃胶囊（`48pt` 高，无多余第 5 颗按钮）**，等宽排布「主页 / 对战 / 鲑鱼跑 / 我」；若对战或鲑鱼跑启用了筛选条件，对应 Tab 图标右上角显示 `6pt` 模式色圆点。首次点击未选中的 Tab 切换页面；**在当前已选中 Tab 上再点一次**即弹出该 Tab 的筛选面板。 |
-| `expanded`（面板展开态） | 在当前已选中 Tab 上再点一次（或上拉胶囊） | 底层页面施加真实高斯模糊（`.blur(radius: 10)`）与极轻透点击层；4-Tab 胶囊通过 `GlassEffectContainer` + `glassEffectID` **连续向上生长形变**为透明毛玻璃面板，**原 4-Tab 胶囊常驻在面板最底部充当连续底座**（当前激活 Tab 图标翻转为 `chevron.down` 提示可再点收起）。点选任一单选模式行**立即同步 `Filter` 重筛列表，并在 80ms 视觉落定后带轻微回弹自动收起**；再次点击同 Tab、点外部遮罩或下滑面板亦可收起。 |
-| `scrollingHidden`（滚动退让态） | 非展开态下，列表 `y > 96pt`、未触底且连续下滑 `> 28pt` | 像 iOS 26 一样自动退让：整组 Dock 向屏幕下方轻移并淡出（`offsetY: +68pt, scale: 0.94, opacity: 0`，关闭点击热区）；稍向上滑 `> 12pt` 或滑到底部立即回弹恢复 `collapsed`。滚动容器底部 `safeAreaInset` 保持恒定 `76pt` 不跳变。 |
+| **根容器壳** | `UIKitDockTabBarController`（`UITabBarController` 子类）+ 4 个 `DockTabNavigationController` 包裹 `UIHostingController` | 外层 `DockTabNavigationController` 隐藏自身冗余导航栏，将单栏控制权交给各业务根视图已有的 `NavigationStack`，既满足标准 UIKit 容器层级，又 100% 保留原有 `NavigationLink` push、`NavigationPath`、`.sheet`（`BattleFilterView` / `CoopFilterView` 缩放过渡）与 `.fullScreenCover`（鱿鱼圈 WebView）零回归。 |
+| **底栏实现：真实系统 `UITabBar` vs 自绘 `UIView` 栏** | **优先采用真实系统 `UITabBar` + `UITabBarAppearance`**（显式绑定 `tabBar.tintColor = AccentColor` `#5639D6`） | 系统 `UITabBar` 独享 iOS 26 原生 `_UILiquidLensView` 液态光学透镜与真实按压回弹，这正是「和 Apple 原生底导几乎一模一样、非常无感」的核心来源。虽然 iOS 26 浮动胶囊栏对 Tab 底部 2～3 字小标签固定使用系统字体（见 `AppTypography.swift` 说明），但显式在实例级设置 `tintColor` 完美守住了 `#5639D6` 品牌紫，且展开面板内的标题、搜索框、分组与选项行 **100% 使用全站游戏字体 `Font.gameUIFont`**，兼顾原生手感与品牌调性。 |
+| **菜单面板容器：`UIPresentationController` vs 自绘子控制器容器** | **挂在 `UITabBarController` 内的自绘子控制器 `DockFilterPanelViewController` + 透传宿主视图** | 若采用模态 `present` + `UIPresentationController`，UIKit 会将模态 `UITransitionView` 压在 `UITabBar` 之上，不仅遮罩会压暗底栏，还会阻断「再次点击当前 Tab 收起 / 直接点其他 Tab 切换页面」。采用内部子控制器并将 `backdropContainerView` 严格插到 `tabBar` **下方**、将面板底边锚定在 `tabBar` 胶囊上沿上方 `8pt`，使得**底栏在展开、筛选、收起每一帧都 100% 清晰露在最前方**，从物理层级上彻底消灭「底导按钮消失」的可能。 |
+| **毛玻璃与遮罩材质** | 面板优先 `UIGlassEffect(style: .regular)`（`isInteractive = true`），旧系统回退 `UIBlurEffect(style: .systemThickMaterial)`；遮罩采用 `UIVisualEffectView(.systemUltraThinMaterial)` + 低透明黑 | 面板与 iOS 26 底栏共享一致的通透折射质感；遮罩通过动画切换 `effect` 与独立黑色叠层 `alpha`（深色 `0.26` / 浅色 `0.12`），避免直接动画化 `UIVisualEffectView.alpha` 带来的离屏合成警告；开启「降低透明度」时自动切换为 `.secondarySystemBackground` 实心底与清晰描边。 |
+| **二次点击同 Tab 识别** | `UITabBarControllerDelegate.shouldSelect` 主路径 + `tabBar` 被动 `UITapGestureRecognizer(cancelsTouchesInView: false)` 90ms 时间戳去重兜底 | 既利用标准代理拦截同 Tab 重选（返回 `false` 展开/收起面板而不重置滚动位置），又防止极端情况下液态透镜吞掉原地轻触，真机拇指连点与 XCUITest 自动化点击均 100% 可靠。 |
 
 ---
 
-## 4. 各状态尺寸、圆角、材质与阴影常量（4pt 栅格）
+## 4. 动效参数、功能规格与无障碍兜底
 
-### 4.1 几何尺寸常量（`DockConfig`）
+### 4.1 动画曲线与物理参数（`DockMotion`）
 
-| 常量项 | 数值 | 设计说明 |
-| --- | --- | --- |
-| `collapsedHeight` | **`48pt`** | 严格 `<= 49pt`（比 iOS 26 系统浮动栏 `62pt` 薄 `14pt`），契合全站 `4pt` 栅格且满足 Apple HIG `>= 44pt` 触控高度；展开态下常驻于面板底部充当底座 |
-| `cornerRadius` | **`24pt`**（`.continuous`） | `collapsedHeight / 2`，收起时为标准居中对称 4-Tab 胶囊，展开时通过 `glassEffectTransition(.matchedGeometry)` 同源形变为 `24pt` 连续曲率透明面板 |
-| `tabPillHeight` / `tabPillInset` | **`40pt`** / **`4pt`** | 4 个按钮在 `HStack(spacing: 4)` 内等宽均分；内部选中滑块圆角 `20pt`（`24 - 4 = 20` 同心圆角）；图标 `18×18pt` + `11pt` 游戏字体单行文案 |
-| `panelRowHeight` / `panelIconSize` | **`40pt`** / **`28×28pt`** | 紧凑单行高度 `40pt` + `28pt` 图标块，保证对战全部 7 个模式 + 更多条件行 + 底部 `48pt` 胶囊底座在单屏完整放下无需内滚；单选模式行仅在选中态显示右侧 `✓`（无多余 `›`），导航行显示 `›` |
-| `horizontalMargin` / `maxDockWidth` | **`20pt`** / **`368pt`** | 去掉第 5 颗右圆钮后恢复左右完全对称边距 `20pt`；大屏总宽封顶 `368pt` 居中悬浮 |
-| `bottomMargin` | Face ID 机型 **`20pt`**（`max(safeArea.bottom - 14, 16)`）；无安全区机型 **`12pt`** | 精准悬停在 Home Indicator 上方，不压系统手势条 |
-| `tabBarTopFromScreenBottom` | Face ID 机型 **`68pt`**（`20 + 48`） | 实测值同步写入 `FloatingBarInsets.measuredCustomDockTop` / `measuredTabBarTop`，加上 `breathingSpacing = 8pt` 后列表底部总净空 **`76pt`** |
+- **底部中心锚定与水平收腰**：面板容器设置 `layer.anchorPoint = CGPoint(x: 0.5, y: 1.0)`，底边锁死在 `tabBar` 胶囊上沿上方 `8pt`；展开从 `CGAffineTransform(scaleX: 0.80, y: 0.88)` 起手，由可打断 `UIViewPropertyAnimator(duration: 0.36, timingParameters: UISpringTimingParameters(dampingRatio: 0.74, initialVelocity: CGVector(dx: 0.35, dy: 0.45)))` 弹回 `1.0`。
+- **点选轻微回弹自动收起**：点选任一单选模式/规则行后，立即更新 `Filter` 刷新列表并高亮 `✓`，停留 `75ms` 确认视觉反馈后触发 `UISpringTimingParameters(dampingRatio: 0.78)`（常规收起 `0.82`，`duration = 0.28s`）向 `scaleX = 0.82` 收腰落回。
+- **逐行错峰上浮与反序快收**：
+  - 展开：自底向上为每个可见行创建独立 `UIViewPropertyAnimator(duration: 0.30, dampingRatio: 0.78)`，按 `delay = Double(index) * 0.03s` 依次上浮（`y: +12pt -> 0`，`alpha: 0 -> 1`）。
+  - 收起：自顶向下反序执行 `UIViewPropertyAnimator(duration: 0.088, curve: .easeIn)`，步进 `0.011s`（最多 9 阶：`8 * 0.011 + 0.088 = 0.176s <= 0.18s`）。
+- **Reduce Motion 无障碍降级**：检测到 `UIAccessibility.isReduceMotionEnabled == true` 时，跳过一切缩放、收腰与位移，全面降级为 `0.18s .easeOut` 纯透明度淡入淡出。
 
-### 4.2 材质与背景虚化（原生 Liquid Glass）
+### 4.2 完整守住的产品行为清单
 
-- **统一毛玻璃材质**：居中对称 4-Tab 胶囊与展开面板置于同一个 `GlassEffectContainer(spacing: 0)` 内，直接调用 iOS 26 原生 `.glassEffect(.regular.interactive(), in: shape)` + `.glassEffectID("dock.primaryPlatter", in: glassNamespace)` + `.glassEffectTransition(.matchedGeometry)`，面板内部行采用全透明底（仅选中行叠 `Color.accentColor.opacity(0.13~0.22)` 轻透高亮胶囊），让底层折射色彩自然透出；当系统开启「降低透明度」（`accessibilityReduceTransparency`）时自动降级为 `.ultraThinMaterial` + `1pt` `.white.opacity(0.35)` 描边 + 柔和阴影。
-- **展开背景景深虚化**：对 `MainView` 底层 `tabViewCore` 施加 `.blur(radius: 10 * (1 - dragDismissProgress))` 配合极轻遮罩（浅色 `0.08` / 深色 `0.22`），消除死板纯灰蒙层，拉出通透景深层次。
-
----
-
-## 5. 动画参数与手感取舍
-
-- **非对称开合弹簧（`DockMotion`）**：展开采用 **`.spring(response: 0.35, dampingFraction: 0.72)`**（带轻快开弹张力），收起采用 **`.spring(response: 0.28, dampingFraction: 0.94)`**（高阻尼干脆落位、绝不穿底），保留 `GlassEffectContainer` + `glassEffectID` + `glassEffectTransition(.matchedGeometry)` 连续形变，且底部 4-Tab 胶囊底边始终锁死在 `bottomMargin` 零跳位。
-- **水平微收腰脉冲（SwiftUI `keyframeAnimator`）**：不缩放文字与圆角，直接通过 `KeyframeTrack(\.widthScale)` 驱动玻璃容器宽度——展开过程先在 `85ms` 内压至 **`0.80`** 再经弹簧回弹至 `1.0`；收起过程先在 `60ms` 内压至 **`0.82`** 再以 `0.94` 高阻尼归稳至 `1.0`，赋予玻璃液滴被向上拉扯与收回时的流体张力。
-- **逐行错峰上浮与反序快收（`staggeredRowTransition`）**：面板行取消整体位移，每行独立应用 `AnyTransition.asymmetric`——展开自底向上按 `delay: index * 0.030s` 执行 `opacity 0→1` + `offset(y: +10→0)` + `blur(radius: 3→0)`；收起反序自顶向下按 `0.011s` 阶梯 + `0.088s` 单行时长（9 槽位总时长 `0.176s <= 0.18s`）快速收拢。
-- **手势跟手与单选自动收起**：下拉面板时采用 `.interactiveSpring(response: 0.26, dampingFraction: 0.84)` 实时联动面板位移与背景模糊半径；点选单选模式行立刻刷新 `Filter` 重筛列表，停留 `80ms` 确认勾选后触发高阻尼收起曲线自动收回。
-- **无障碍减弱动态效果（`UIAccessibility.isReduceMotionEnabled`）**：开启时关闭水平收腰、逐行位移与模糊，全面降级为纯淡入淡出（`.easeOut(duration: 0.18)`）。
+1. **4 个对称 Tab，无第 5 颗按钮**：图标使用项目矢量 PDF `TabBarHome / TabBarBattle / TabBarSalmonRun / TabBarMe`，标题走本地化键 `tab_home / tab_battle / tab_salmon_run / tab_me`，对战/打工启用筛选时在对应图标右上角显示 `6pt` 模式色提示点。
+2. **二次点击当前 Tab 展开 / 点选即筛并自动收起**：完整覆盖对战 7 模式 + 6 规则、打工 4 规则 + 打工卡片、主页日程快切与「我」页快捷入口；点遮罩、再点当前 Tab、面板下拉手势均可收起。
+3. **36pt 玻璃搜索框 +「最近使用」分区 + 规范行样式**：搜索框高 `36pt`、圆角 `12pt`，支持模式名与规则名大小写/全半角/空白不敏感实时过滤，无匹配时显示 `40pt`「没有匹配的筛选项」；顶部「最近使用」持久化于 `imink.dock.recentModes`（最多 3 条，空时隐藏）；全行统一 `40pt` 行高，单选行选中态**只显示 `✓` 不显示 `›`**，底部「去筛选页设置更多条件…」导航行显示附加条件数与 `›`。
+4. **软键盘避让与先行收起**：监听 `keyboardWillChangeFrameNotification` 动态将面板底边抬升至键盘顶沿上方 `8pt`；键盘弹出时点遮罩或下滑，先执行 `resignFirstResponder()` 收键盘，延迟 `120ms` 后再平滑收起面板。
+5. **双向 Filter 同步与系统 TabView 兜底**：与 `BattleFilterView` / `CoopFilterView` 共享 `BattleListViewModel.shared.filter` 与 `CoopListViewModel.shared.filter`；偏好设置中的 `@AppStorage("imink.useCustomDock")` 切为 `false` 时即时回退原生 SwiftUI `TabView`。
 
 ---
 
-## 6. 模式筛选进 Dock 后的信息架构与真实枚举覆盖
+## 5. `uikit-dock-demo.mp4` 60fps 逐帧底栏可见性核验
 
-经核查 `Shared/Models/BattleMode.swift`、`Shared/Models/CoopRule.swift`、`Shared/Data/RecordListQueries.swift` 以及本地真实种子库 `seed-db.sqlite`（`SELECT DISTINCT mode FROM battle` 与 `SELECT DISTINCT rule FROM coop`）：
+- **演示视频**：`~/Documents/imink-design/uikit-dock-demo.mp4`（`1206×2622`，`60fps`，共 `500` 帧 / `8.33s`，复现完整三段式路径：鲑鱼跑收起静止 → 二次点击展开快筛面板 → 点选「大型跑」自动回弹收起并刷新列表）。
+- **核验方法**：使用 `ffmpeg -i uikit-dock-demo.mp4 -vf fps=60` 抽出全部 `500` 张逐帧 PNG，锁定底部系统胶囊 ROI 区域 `x=[72..1133], y=[2391..2561]`，逐帧统计：① 相邻帧与相对第 1 帧的平均绝对像素差（MAE，`0..255`）；② 均分 4 个按钮槽位（主页 / 对战 / 鲑鱼跑 / 我）的图标+文字亮度标准差留存比（若任一按钮消失，该槽对比度会骤降 `>70%`，留存比跌破 `0.30`）。
+- **实测结果**：
+  - **收起过渡窗口（`#265..#271`，`t=4.400s..4.500s`）**：底栏 ROI 相邻帧最大像素差 MAE 仅为 **`4.19 / 255.0`（`1.64%`）**（仅来自下层背景遮罩退去时的轻微毛玻璃透色变化及 `6pt` 筛选圆点亮起）。
+  - **全片 500 帧**：底栏 ROI 相邻帧最大 MAE 为 `18.53 / 255.0`（`7.27%`，第 `#17` 帧手指点击触发系统液态透镜膨胀高光），相对首帧最大 MAE 为 `19.98 / 255.0`（`7.84%`）。
+  - **4 颗按钮对比度留存率**：Slot 0（主页）最低 `0.900`、Slot 1（对战）最低 `0.888`、Slot 2（鲑鱼跑）最低 `0.898`、Slot 3（我）最低 `0.889`——**全部 500 帧均保持 `>= 88.8%` 完整绘制，0 帧缺失**。
 
-### 6.1 面板内快筛枚举、36pt 搜索框与「最近使用」分区
-
-- **36pt 玻璃搜索框**：位于面板标题行下方、所有分组之前，采用 `magnifyingglass` 图标 + `TextField("搜索模式或规则", text: $searchText)` + `.textFieldStyle(.plain)`，高 `36pt`、圆角 `12pt`、轻透玻璃材质底；支持对**模式名 + 规则名**（如输入「涂地」匹配「涂地模式」、输入「X」匹配「X比赛」）进行大小写不敏感、忽略空白字符的实时过滤，无匹配结果时展示 40pt 占位行「没有匹配的筛选项」。
-- **键盘避让与关闭时序**：监听 `UIResponder.keyboardWillChangeFrameNotification` 动态抬升 `effectiveBottomMargin = keyboardOverlap + 8`，保证软键盘弹出时整组面板与底部 4-Tab Dock 整体上移不被键盘遮住；点击遮罩或下滑面板时**先触发收起键盘，再收起面板**。
-- **「最近使用」分区（`@AppStorage("imink.dock.recentModes")`）**：记录用户最近点选过的最多 **3** 个模式/规则，显示于搜索框正下方、常规分组上方；为空时自动隐藏该分区。
-
-1. **对战 Tab（Tab 1，`BattleMode`，查询列 `battle.mode`）**：
-   - `BattleMode.all`（`"ALL"` → **全部对战**，对应 `filter.modes = []`）
-   - `BattleMode.regular`（`"REGULAR"` → **一般比赛** / 占地涂地）
-   - `BattleMode.anarchy`（`"BANKARA"` → **蛮颓比赛** / 真格系列）
-   - `BattleMode.xMatch`（`"XMATCH"` → **X比赛**）
-   - `BattleMode.league`（`"LEAGUE"` → **活动比赛**）
-   - `BattleMode.privateMatch`（`"PRIVATE"` → **私人比赛**）
-   - `BattleMode.fest`（`"FEST"` → **祭典比赛**）
-   - 底部固定入口：**「去筛选页设置更多条件…」**（右侧带剩余激活条件计数与 `›` chevron，点击收起 Dock 并弹出 `BattleFilterView`）。
-2. **鲑鱼跑 Tab（Tab 2，`CoopRule`，查询列 `coop.rule`）**：
-   - `CoopRule.ALL`（`"ALL_RULE"` → **全部打工**，对应 `filter.rules = []`）
-   - `CoopRule.REGULAR`（`"REGULAR"` → **鲑鱼跑**）
-   - `CoopRule.BIG_RUN`（`"BIG_RUN"` → **大型跑**）
-   - `CoopRule.TEAM_CONTEST`（`"TEAM_CONTEST"` → **团队打工竞赛**）
-   - 视图切换行：**打工卡片**（调用 `loadCards()` 按班次聚合浏览，对齐原顶部菜单能力）
-   - 底部固定入口：**「去筛选页设置更多条件…」**（右侧带场地/武器/工友/时段等已启用条件数与 `›` chevron，点击收起 Dock 并弹出 `CoopFilterView`）。
-3. **主页 Tab（Tab 0）与 我 Tab（Tab 3）**：
-   - 主页展开面板提供「对战日程 / 鲑鱼跑日程」快切（双向绑定 `@AppStorage("home_page_selectedScheduleType")`）以及直达对战/打工筛选入口；
-   - 「我」页展开面板提供「武器榜 / 场地榜 / 记录回收站 / 偏好设置」快捷跳转行（每行带 `›` chevron），保证在任意 Tab 点开右端圆钮都有实用一致的面板体验。
-
-### 6.2 哪些留在筛选页 Sheet + 双向同步机制
-
-- **留在 `BattleFilterView` / `CoopFilterView` 的重条件**：多模式并集勾选（如同时看蛮颓 + X比赛）、起止日期范围双滑杆、地图多选网格、配发武器 11 大类多选、同工玩家搜索与精确匹配、活跃/已删除记录范围、只显示收藏、一键重置。
-- **双向同步**：
-  - Dock 与 `BattleFilterView` 共同读写 `BattleListViewModel.shared.filter`；与 `CoopFilterView` 共同读写 `CoopListViewModel.shared.filter`（`CoopFilterView` 同步补齐打工规则筛选区块与概览标签展示，确保从 Dock 选完「大型跑」进 `CoopFilterView` 能直观看到并支持重置联动）。
-  - 在 Dock 点选某模式时仅修改 `filter.modes` / `filter.rules`，完整保留收藏、地图、武器等其他已选条件，同时立即刷新 `navigationTitle` 与列表数据。
-
----
-
-## 7. 风险清单与应对
-
-1. **手势冲突（横向滚动 vs 拖拽展开 vs 系统上滑回桌面）**：
-   - 第一版**不绑定底部边缘上滑拖拽展开手势**，严格采用「点右端圆钮展开、点遮罩或圆钮收起」，从根源上杜绝与 iOS Home Indicator 手势、首页轮播 `CarouselView` 横滑及列表纵滑抢事件。列表滚动隐藏采用纯被动的 `onScrollGeometryChange` 监听。
-2. **安全区与 `FloatingBarInsets` 留白精度**：
-   - 当 `useCustomDock == true` 时，`TabView` 系统栏隐藏后子容器 `safeAreaInsets.bottom` 变为 `34pt`（仅 Home Indicator）。`FloatingBarInsets` 区分新旧模式：自定义 Dock 模式下不再被 `34pt` 误覆盖 `measuredTabBarTop`，而是按实测 Dock 顶沿 `68pt` + `8pt` 呼吸间距补齐差额 `42pt`（总净空 `76pt`）；切回旧系统栏（`useCustomDock == false`）时自动恢复 `83pt + 8pt = 91pt`。
-3. **iPad 与横屏适配**：
-   - 限制 Dock 总宽上限 `392pt` 居中悬浮，避免在 iPad 上拉成横跨全屏的宽条；展开面板加 `ScrollView` 最大高度保护（`min(screenHeight * 0.62, 428pt)`），横屏矮视口下可顺滑滚动不顶穿导航栏。
-4. **Live Activity 与顶部 Toast 并存**：
-   - 灵动岛 `LiveActivityManager` 与居顶的 `SplatoonToastOverlay` 位于屏幕顶部；`.sheet` / `.fullScreenCover` 位于系统模态层高于 `MainView`，且从 Dock 打开筛选 Sheet 时先收起面板，视觉层级互不干扰。
-5. **无障碍（VoiceOver / Reduce Motion / Reduce Transparency / Dynamic Type）**：
-   - 完整支持 `UIAccessibility.isReduceMotionEnabled`（`0.2s easeOut` 无缩放）与 `accessibilityReduceTransparency`（实心高对比底色）；展开态为面板标记 `.accessibilityAddTraits(.isModal)` 并隐藏背景可访问性焦点；底栏胶囊限制 `.dynamicTypeSize(...DynamicTypeSize.xLarge)` 防止超大字号撑破 `48pt` 胶囊，同时为所有按钮标注清晰的中文 `accessibilityLabel` 与选中状态。

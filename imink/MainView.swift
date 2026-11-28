@@ -1,5 +1,4 @@
 import SwiftUI
-import os
 
 struct MainView: View {
     @AppStorage("mainViewTabSelection")
@@ -11,27 +10,15 @@ struct MainView: View {
     @StateObject var mainViewModel = MainViewModel.shared
     @ObservedObject private var dockStore = DockVisibilityStore.shared
     @Environment(\.accessibilityReduceMotion) private var envReduceMotion
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-
-    private var backgroundBlurRadius: CGFloat {
-        guard useCustomDock, dockStore.isExpanded, !reduceTransparency else { return 0 }
-        return 10 * max(0, 1 - dockStore.dragDismissProgress)
-    }
 
     var body: some View {
-        ZStack(alignment: .bottom) {
+        Group {
             if useCustomDock {
-                tabViewCore
-                    .tabBarMinimizeBehavior(.never)
-                    .blur(radius: backgroundBlurRadius)
-                    .animation(DockMotion.transitionAnimation(to: dockStore.state, reduceMotion: envReduceMotion), value: dockStore.isExpanded)
-                    .accessibilityHidden(dockStore.isExpanded)
-
+                // UIKit 原生底导壳：UITabBarController 子类 + 实时系统 Liquid Glass UITabBar + 顶沿锚定快筛面板
                 ExpandingDockHost(tabSelection: $tabSelection)
                     .ignoresSafeArea()
-                    .zIndex(10)
             } else {
-                // 兜底旧路径：完整保留原有系统浮动胶囊 TabView 与滚动收缩行为
+                // 兜底旧路径：完整保留原有 SwiftUI TabView 与滚动收缩、导航标题菜单行为
                 tabViewCore
                     .tabBarMinimizeBehavior(.onScrollDown)
             }
@@ -65,7 +52,7 @@ struct MainView: View {
     private var tabViewCore: some View {
         TabView(selection: $tabSelection) {
             HomePage(viewModel: HomeViewModel())
-                .toolbar(useCustomDock ? .hidden : .visible, for: .tabBar)
+                .toolbar(.visible, for: .tabBar)
                 .tabItem {
                     Label("tab_home", image: "TabBarHome")
                 }
@@ -73,7 +60,7 @@ struct MainView: View {
 
             BattleListView()
                 .environmentObject(mainViewModel)
-                .toolbar(useCustomDock ? .hidden : .visible, for: .tabBar)
+                .toolbar(.visible, for: .tabBar)
                 .tabItem {
                     Label("tab_battle", image: "TabBarBattle")
                 }
@@ -81,7 +68,7 @@ struct MainView: View {
 
             CoopListView()
                 .environmentObject(mainViewModel)
-                .toolbar(useCustomDock ? .hidden : .visible, for: .tabBar)
+                .toolbar(.visible, for: .tabBar)
                 .tabItem {
                     Label("tab_salmon_run", image: "TabBarSalmonRun")
                 }
@@ -89,7 +76,7 @@ struct MainView: View {
 
             MePage()
                 .environmentObject(mainViewModel)
-                .toolbar(useCustomDock ? .hidden : .visible, for: .tabBar)
+                .toolbar(.visible, for: .tabBar)
                 .tabItem {
                     Label("tab_me", image: "TabBarMe")
                 }

@@ -267,6 +267,147 @@ final class iminkUITests: XCTestCase {
         XCTAssertFalse(searchField.exists)
     }
 
+    /// UIKit 第二版底导完整验收截图与交互回归：
+    /// 输出 `uikit-dock-collapsed.png`、`uikit-dock-expanded.png`、`uikit-dock-search.png` 并校验全部产品规格。
+    func testCaptureUIKitDockAcceptanceScreenshots() throws {
+        let app = XCUIApplication()
+        app.launchArguments += [
+            "-imink.useCustomDock", "YES",
+            "-debugScrollToBottom", "NO",
+            "-session_token", "seed_preview_session_token",
+            "-accountId", "1",
+        ]
+        app.launch()
+
+        let homeTab = app.buttons["expandingDock.tab.0"]
+        let battleTab = app.buttons["expandingDock.tab.1"]
+        let coopTab = app.buttons["expandingDock.tab.2"]
+        let meTab = app.buttons["expandingDock.tab.3"]
+        XCTAssertTrue(homeTab.waitForExistence(timeout: 10))
+        XCTAssertTrue(battleTab.exists)
+        XCTAssertTrue(coopTab.exists)
+        XCTAssertTrue(meTab.exists)
+        XCTAssertFalse(app.buttons["expandingDock.toggleButton"].exists)
+
+        // 切至「对战」Tab（首次点击仅切换 Tab，不弹面板），并确认已处于真实种子数据登录态
+        if !battleTab.isSelected {
+            battleTab.tap()
+            Thread.sleep(forTimeInterval: 0.9)
+        }
+        XCTAssertFalse(app.buttons["任天堂账号登录"].exists)
+        XCTAssertFalse(app.buttons["expandingDock.battleMode.BANKARA"].exists)
+
+        // 预热一条「最近使用」（选一次 X 比赛再切回全部对战），让展开态完整呈现「最近使用 + 分组标题 + 36pt 搜索框」
+        battleTab.tap()
+        let xMatchRow = app.buttons["expandingDock.battleMode.XMATCH"]
+        XCTAssertTrue(xMatchRow.waitForExistence(timeout: 3))
+        xMatchRow.tap()
+        XCTAssertTrue(app.navigationBars["X比赛"].waitForExistence(timeout: 3))
+        Thread.sleep(forTimeInterval: 0.9)
+
+        battleTab.tap()
+        let allBattleRow = app.buttons["expandingDock.battleMode.ALL"]
+        XCTAssertTrue(allBattleRow.waitForExistence(timeout: 3))
+        allBattleRow.tap()
+        XCTAssertTrue(app.navigationBars["全部对战"].waitForExistence(timeout: 3))
+        Thread.sleep(forTimeInterval: 0.9)
+        XCTAssertFalse(allBattleRow.exists)
+
+        // 1. 捕获收起态截图 `uikit-dock-collapsed.png`（完整收起、底部仅 4 颗真实 Liquid Glass 按钮 + 彩色对战卡片）
+        try saveDesignScreenshot(named: "uikit-dock-collapsed.png")
+
+        // 2. 二次点击「对战」Tab 展开面板 -> 校验 4 个 Tab 按钮全程仍在 -> 捕获 `uikit-dock-expanded.png`
+        battleTab.tap()
+        let searchField = app.textFields["expandingDock.searchField"]
+        XCTAssertTrue(searchField.waitForExistence(timeout: 3))
+        XCTAssertTrue(homeTab.exists && battleTab.exists && coopTab.exists && meTab.exists)
+        Thread.sleep(forTimeInterval: 0.7)
+        try saveDesignScreenshot(named: "uikit-dock-expanded.png")
+
+        // 3. 点击 36pt 搜索框 -> 软键盘弹出、面板整体上移避让 -> 输入「涂地」 -> 捕获 `uikit-dock-search.png`
+        searchField.tap()
+        Thread.sleep(forTimeInterval: 0.7)
+        searchField.typeText("涂地")
+        let turfRow = app.buttons["expandingDock.battleRule.TURF_WAR"]
+        XCTAssertTrue(turfRow.waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["expandingDock.battleMode.XMATCH"].exists)
+        Thread.sleep(forTimeInterval: 0.6)
+        try saveDesignScreenshot(named: "uikit-dock-search.png")
+
+        // 4. 验证空匹配态「没有匹配的筛选项」及点击遮罩「先收键盘再收面板」
+        let clearBtn = app.buttons["expandingDock.searchClearButton"]
+        if clearBtn.exists {
+            clearBtn.tap()
+        }
+        searchField.typeText("zzz")
+        XCTAssertTrue(app.otherElements["expandingDock.searchEmptyState"].waitForExistence(timeout: 3))
+        let backdropTop = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.08))
+        backdropTop.tap()
+        Thread.sleep(forTimeInterval: 0.8)
+        XCTAssertFalse(searchField.exists)
+
+        // 5. 复现并验证「鲑鱼跑 -> 大型跑」链路
+        coopTab.tap()
+        Thread.sleep(forTimeInterval: 0.7)
+        coopTab.tap()
+        let bigRunRow = app.buttons["expandingDock.coopRule.BIG_RUN"]
+        XCTAssertTrue(bigRunRow.waitForExistence(timeout: 3))
+        bigRunRow.tap()
+        XCTAssertTrue(app.navigationBars["大型跑"].waitForExistence(timeout: 3))
+        Thread.sleep(forTimeInterval: 0.6)
+
+        // 恢复「全部打工」干净态
+        coopTab.tap()
+        let allCoopRow = app.buttons["expandingDock.coopRule.ALL_RULE"]
+        if allCoopRow.waitForExistence(timeout: 3) {
+            allCoopRow.tap()
+            XCTAssertTrue(app.navigationBars["全部打工"].waitForExistence(timeout: 3))
+        }
+    }
+
+    /// 供 `uikit-dock-demo.mp4` 录屏使用的三段式演示：
+    /// 在「鲑鱼跑」Tab 上复现主人反馈的完整路径（静止收起态 -> 二次点击「鲑鱼跑」展开面板 -> 点选「大型跑」自动回弹收起），全程 4 颗底导按钮常驻可见。
+    func testUIKitDockDemoRecordingFlow() throws {
+        let app = XCUIApplication()
+        app.launchArguments += [
+            "-imink.useCustomDock", "YES",
+            "-debugScrollToBottom", "NO",
+            "-session_token", "seed_preview_session_token",
+            "-accountId", "1",
+        ]
+        app.launch()
+
+        let coopTab = app.buttons["expandingDock.tab.2"]
+        XCTAssertTrue(coopTab.waitForExistence(timeout: 10))
+        if !coopTab.isSelected {
+            coopTab.tap()
+            Thread.sleep(forTimeInterval: 1.0)
+        }
+        XCTAssertFalse(app.buttons["任天堂账号登录"].exists)
+        if !app.navigationBars["全部打工"].exists {
+            coopTab.tap()
+            let allCoop = app.buttons["expandingDock.coopRule.ALL_RULE"]
+            if allCoop.waitForExistence(timeout: 3) {
+                allCoop.tap()
+                Thread.sleep(forTimeInterval: 1.0)
+            }
+        }
+
+        // 写就绪标记文件通知外部录屏脚本精确起拍，彻底避开启动期白屏
+        try "ready".write(toFile: "/tmp/imink_demo_ready.flag", atomically: true, encoding: .utf8)
+
+        // 起拍静止段（收起态 4 按钮完整可见） -> 二次点击「鲑鱼跑」展开 -> 点选「大型跑」自动回弹收起
+        Thread.sleep(forTimeInterval: 1.3)
+        coopTab.tap()
+        let bigRunRow = app.buttons["expandingDock.coopRule.BIG_RUN"]
+        XCTAssertTrue(bigRunRow.waitForExistence(timeout: 3))
+        Thread.sleep(forTimeInterval: 1.3)
+
+        bigRunRow.tap()
+        XCTAssertTrue(app.navigationBars["大型跑"].waitForExistence(timeout: 3))
+        Thread.sleep(forTimeInterval: 1.6)
+    }
+
     private func saveDesignScreenshot(named filename: String) throws {
         let shot = XCUIScreen.main.screenshot()
         let attachment = XCTAttachment(screenshot: shot)
