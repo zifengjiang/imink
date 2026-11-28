@@ -17,9 +17,9 @@ enum DockConfig {
     static let tabPillHeight: CGFloat = 40
     static let tabPillInset: CGFloat = 4
 
-    /// 展开态单行高度、图标块尺寸与面板内边距（40pt 行高确保 7 项对战模式 + 更多筛选 + 底部胶囊把手一屏完整放下）。
-    static let panelRowHeight: CGFloat = 40
-    static let panelIconSize: CGFloat = 28
+    /// 展开态单行高度、图标块尺寸与面板内边距（36pt 紧凑行高，贴合精简扁平列表）。
+    static let panelRowHeight: CGFloat = 36
+    static let panelIconSize: CGFloat = 26
     static let panelPadding: CGFloat = 8
 
     /// 屏幕两侧对称水平外边距与大屏（iPad / 横屏）最大总宽限制（取消第 5 颗右圆钮，恢复居中对称 4-Tab 胶囊）。

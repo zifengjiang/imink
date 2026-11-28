@@ -408,6 +408,156 @@ final class iminkUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 1.6)
     }
 
+    /// 真 Liquid Glass（`.clear` vs `.regular`）对比采样 + 精简扁平面板与折叠搜索框验收：
+    /// 输出无遮挡彩色对战卡基准图、`.clear` 展开图、`.regular` 展开图与搜索展开图。
+    func testCaptureLiquidGlassStyleComparisonAndAcceptance() throws {
+        let app = XCUIApplication()
+        app.launchArguments += [
+            "-imink.useCustomDock", "YES",
+            "-imink.dockGlassStyle", "clear",
+            "-debugScrollToBottom", "NO",
+            "-session_token", "seed_preview_session_token",
+            "-accountId", "1",
+        ]
+        app.launch()
+
+        let homeTab = app.buttons["expandingDock.tab.0"]
+        let battleTab = app.buttons["expandingDock.tab.1"]
+        let coopTab = app.buttons["expandingDock.tab.2"]
+        let meTab = app.buttons["expandingDock.tab.3"]
+        XCTAssertTrue(homeTab.waitForExistence(timeout: 10))
+        XCTAssertTrue(battleTab.exists && coopTab.exists && meTab.exists)
+
+        if !battleTab.isSelected {
+            battleTab.tap()
+            Thread.sleep(forTimeInterval: 0.9)
+        }
+        // 确保恢复「全部对战」态，使页面呈现高饱和绿色/品红比分条与彩色对战卡片
+        if !app.navigationBars["全部对战"].exists {
+            battleTab.tap()
+            let allRow = app.buttons["expandingDock.battleMode.ALL"]
+            if allRow.waitForExistence(timeout: 3) {
+                allRow.tap()
+                Thread.sleep(forTimeInterval: 0.9)
+            }
+        }
+
+        // 保持 0pt 默认列表顶部位置（此位置底部恰好有高饱和橙色与宝蓝色真格区域比分条、粉红色 LOSE 标签及底部胜负统计卡），
+        // 确保无面板基准图、.clear 展开图与 .regular 展开图达到 0.00px 像素级坐标严格对齐！
+        Thread.sleep(forTimeInterval: 0.6)
+
+        // 1. 捕获同一位置的无面板基准截图（同时包含面板展开区背后的原色卡片 + 同位置真实系统 UITabBar 透色效果）
+        try saveDesignScreenshot(named: "_raw_battle_uncovered_and_native_tabbar.png")
+
+        // 2. 二次点击「对战」展开 `UIGlassEffect(.clear)` 面板：
+        // 校验精简扁平列表（无分组标题、无最近使用、无底部更多条件行、搜索框默认收进标题栏放大镜）
+        battleTab.tap()
+        let searchToggle = app.buttons["expandingDock.searchToggleButton"]
+        XCTAssertTrue(searchToggle.waitForExistence(timeout: 3))
+        XCTAssertTrue(homeTab.exists && battleTab.exists && coopTab.exists && meTab.exists)
+        XCTAssertFalse(app.otherElements["expandingDock.section.section.recent"].exists)
+        XCTAssertFalse(app.buttons["expandingDock.battle.moreFilters"].exists)
+        XCTAssertFalse(app.textFields["expandingDock.searchField"].isHittable)
+        Thread.sleep(forTimeInterval: 0.8)
+        try saveDesignScreenshot(named: "_raw_battle_expanded_clear.png")
+
+        // 3. 点击标题栏放大镜按钮 -> 展开 36pt 搜索输入框 -> 输入「涂地」 -> 保存 `uikit-dock-glass-search.png`
+        searchToggle.tap()
+        let searchField = app.textFields["expandingDock.searchField"]
+        XCTAssertTrue(searchField.waitForExistence(timeout: 3))
+        Thread.sleep(forTimeInterval: 0.6)
+        searchField.typeText("涂地")
+        let turfRow = app.buttons["expandingDock.battleRule.TURF_WAR"]
+        XCTAssertTrue(turfRow.waitForExistence(timeout: 3))
+        Thread.sleep(forTimeInterval: 0.6)
+        try saveDesignScreenshot(named: "uikit-dock-glass-search.png")
+
+        // 4. 再测 `UIGlassEffect(.regular)` 在完全同一位置、同一彩色对战卡上的透色表现，供定量对比
+        app.terminate()
+        let regularApp = XCUIApplication()
+        regularApp.launchArguments += [
+            "-imink.useCustomDock", "YES",
+            "-imink.dockGlassStyle", "regular",
+            "-debugScrollToBottom", "NO",
+            "-session_token", "seed_preview_session_token",
+            "-accountId", "1",
+        ]
+        regularApp.launch()
+        let regBattleTab = regularApp.buttons["expandingDock.tab.1"]
+        XCTAssertTrue(regBattleTab.waitForExistence(timeout: 10))
+        if !regBattleTab.isSelected {
+            regBattleTab.tap()
+            Thread.sleep(forTimeInterval: 0.9)
+        }
+        if !regularApp.navigationBars["全部对战"].exists {
+            regBattleTab.tap()
+            let allRow = regularApp.buttons["expandingDock.battleMode.ALL"]
+            if allRow.waitForExistence(timeout: 3) {
+                allRow.tap()
+                Thread.sleep(forTimeInterval: 0.9)
+            }
+        }
+        Thread.sleep(forTimeInterval: 0.6)
+
+        regBattleTab.tap()
+        XCTAssertTrue(regularApp.buttons["expandingDock.searchToggleButton"].waitForExistence(timeout: 3))
+        Thread.sleep(forTimeInterval: 0.8)
+        try saveDesignScreenshot(named: "_raw_battle_expanded_regular.png")
+    }
+
+    /// 供 `uikit-dock-glass.mp4` 录屏使用的四拍完整流：
+    /// 静止收起 -> 展开精简 Liquid Glass 面板 -> 点击标题栏放大镜展开搜索 -> 输入并点选模式 -> 自动回弹收起（全程 4 颗底栏按钮常驻可见）。
+    func testLiquidGlassDemoRecordingFlow() throws {
+        let app = XCUIApplication()
+        app.launchArguments += [
+            "-imink.useCustomDock", "YES",
+            "-debugScrollToBottom", "NO",
+            "-session_token", "seed_preview_session_token",
+            "-accountId", "1",
+        ]
+        app.launch()
+
+        let battleTab = app.buttons["expandingDock.tab.1"]
+        XCTAssertTrue(battleTab.waitForExistence(timeout: 10))
+        if !battleTab.isSelected {
+            battleTab.tap()
+            Thread.sleep(forTimeInterval: 0.9)
+        }
+        if !app.navigationBars["全部对战"].exists {
+            battleTab.tap()
+            let allRow = app.buttons["expandingDock.battleMode.ALL"]
+            if allRow.waitForExistence(timeout: 3) {
+                allRow.tap()
+                Thread.sleep(forTimeInterval: 0.9)
+            }
+        }
+
+        // 写就绪标记通知外部录屏脚本精确起拍
+        try "ready".write(toFile: "/tmp/imink_demo_ready.flag", atomically: true, encoding: .utf8)
+
+        // 1. 静止收起态 -> 二次点击「对战」展开精简面板（标题栏仅显示放大镜）
+        Thread.sleep(forTimeInterval: 0.9)
+        battleTab.tap()
+        let searchToggle = app.buttons["expandingDock.searchToggleButton"]
+        XCTAssertTrue(searchToggle.waitForExistence(timeout: 3))
+        Thread.sleep(forTimeInterval: 1.0)
+
+        // 2. 点击放大镜展开 36pt 搜索框 -> 输入 "X" 实时过滤到「X比赛」
+        searchToggle.tap()
+        let searchField = app.textFields["expandingDock.searchField"]
+        XCTAssertTrue(searchField.waitForExistence(timeout: 3))
+        Thread.sleep(forTimeInterval: 0.45)
+        searchField.typeText("X")
+        let xMatchRow = app.buttons["expandingDock.battleMode.XMATCH"]
+        XCTAssertTrue(xMatchRow.waitForExistence(timeout: 3))
+        Thread.sleep(forTimeInterval: 0.65)
+
+        // 3. 点选「X比赛」 -> 收键盘并自动回弹缩回实时 UITabBar 胶囊
+        xMatchRow.tap()
+        XCTAssertTrue(app.navigationBars["X比赛"].waitForExistence(timeout: 3))
+        Thread.sleep(forTimeInterval: 1.3)
+    }
+
     private func saveDesignScreenshot(named filename: String) throws {
         let shot = XCUIScreen.main.screenshot()
         let attachment = XCTAttachment(screenshot: shot)
