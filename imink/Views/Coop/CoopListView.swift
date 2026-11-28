@@ -4,11 +4,11 @@ struct CoopListView: View {
     @EnvironmentObject var viewModel: CoopListViewModel
     @Namespace private var animation
     @State var activeID:String?
-    @State var showFilterSheet = false
     @State var selectedRow:String?
     @State var isFirstRow = true
     @State private var selection = RecordSelection<Int64>()
     @State private var navigationPath = NavigationPath()
+    @AppStorage(DockConfig.storageKey) private var useCustomDock: Bool = true
     #if DEBUG
     @AppStorage("debugScrollToBottom") private var debugScrollToBottom: Bool = false
     #endif
@@ -75,10 +75,11 @@ struct CoopListView: View {
                         }
                     }
                     .scrollPosition(id: $activeID, anchor: .bottom)
+                    .dockScrollMinimizeObserver()
                     .fixSafeareaBackground()
                     .modifier(LoginViewModifier(isLogin: AppState.shared.isLogin, iconName: "TabBarSalmonRun"))
-                    .navigationBarTitle(viewModel.navigationTitle,displayMode: .inline)
-//                    .navigationBarTitleDisplayMode(.inline)
+                    .navigationTitle(viewModel.navigationTitle)
+                    .navigationBarTitleDisplayMode(.inline)
                     .onChange(of: activeID) { oldValue, newValue in
                         if newValue == viewModel.rows.last?.id {
                             Task{
@@ -112,7 +113,7 @@ struct CoopListView: View {
                             onDelete: batchDelete,
                             filterButton: AnyView(
                                 Button {
-                                    showFilterSheet = true
+                                    viewModel.showFilterSheet = true
                                 } label: {
                                     Label("筛选", systemImage: "line.horizontal.3.decrease.circle")
                                 }
@@ -120,40 +121,7 @@ struct CoopListView: View {
                         )
                         .matchedTransitionSource(id: "filter", in: animation)
                     }
-                    .toolbarTitleMenu {
-                        ForEach(CoopRule.allCases, id:\.rawValue){ rule in
-                            Button{
-                                viewModel.filter.clear()
-                                if rule != .ALL{
-                                    viewModel.filter.rules.insert(rule.rawValue)
-                                }
-                                viewModel.navigationTitle = rule.name
-                                guard AppState.shared.isLogin else { return }
-                                Task{
-                                    await viewModel.loadCoops()
-                                }
-                            } label: {
-                                Label(
-                                    title: { Text("\(rule.name)") },
-                                    icon: { rule.icon }
-                                )
-                            }
-                        }
-
-                        Button{
-                            viewModel.filter.rules.removeAll()
-                            viewModel.navigationTitle = "打工卡片"
-                            guard AppState.shared.isLogin else { return }
-                            Task{
-                                await viewModel.loadCards()
-                            }
-                        } label: {
-                            Label(
-                                title: { Text("打工卡片") },
-                                icon: { Image(systemName: "creditcard") }
-                            )
-                        }
-                    }
+                    .modifier(LegacyCoopTitleMenuModifier(isEnabled: !useCustomDock, viewModel: viewModel))
 //                    .onChange(of: scenePhase) { oldValue, newPhase in
 //                        switch newPhase {
 //                        case .active:
@@ -183,8 +151,8 @@ struct CoopListView: View {
                     selectedRow = rowId
                 }
             }
-            .sheet(isPresented: $showFilterSheet){
-                CoopFilterView(showFilterView: $showFilterSheet, filter: $viewModel.filter){
+            .sheet(isPresented: $viewModel.showFilterSheet){
+                CoopFilterView(showFilterView: $viewModel.showFilterSheet, filter: $viewModel.filter){
                     guard AppState.shared.isLogin else { return }
                     await viewModel.loadCoops()
                 }
@@ -245,3 +213,40 @@ struct CoopListView: View {
     //#Preview {
     //    CoopListView()
     //}
+
+private struct LegacyCoopTitleMenuModifier: ViewModifier {
+    let isEnabled: Bool
+    @ObservedObject var viewModel: CoopListViewModel
+
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content.toolbarTitleMenu {
+                ForEach(CoopRule.allCases, id: \.rawValue) { rule in
+                    Button {
+                        Task {
+                            await viewModel.selectRuleFromDock(rule)
+                        }
+                    } label: {
+                        Label(
+                            title: { Text("\(rule.name)") },
+                            icon: { rule.icon }
+                        )
+                    }
+                }
+
+                Button {
+                    Task {
+                        await viewModel.selectShiftCardsFromDock()
+                    }
+                } label: {
+                    Label(
+                        title: { Text("打工卡片") },
+                        icon: { Image(systemName: "creditcard") }
+                    )
+                }
+            }
+        } else {
+            content
+        }
+    }
+}

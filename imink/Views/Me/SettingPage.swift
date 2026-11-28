@@ -21,6 +21,7 @@ struct SettingPage: View {
     // 新增状态变量
     @State var isUpdatingByname = false
     @State var bynameUpdateProgress: BynameUpdateProgress?
+    @AppStorage(DockConfig.storageKey) private var useCustomDock: Bool = true
 
     var body: some View {
         NavigationStack{
@@ -233,6 +234,8 @@ struct SettingPage: View {
     private var preferenceSection: some View {
                     Section(header: Text("偏好设置")){
                         Toggle("启用振动", isOn: Preferences.shared.$enableHaptics)
+
+                        Toggle("使用可展开底部栏（Dock）", isOn: $useCustomDock)
                     
                         Button {
                             Task {

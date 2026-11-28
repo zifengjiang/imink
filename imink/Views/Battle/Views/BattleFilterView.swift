@@ -27,6 +27,9 @@ struct BattleFilterView: View {
         for mode in selectableModes where filter.modes.contains(mode.rawValue) {
             tags.append(mode.name)
         }
+        for rule in BattleRule.allCases where filter.rules.contains(rule.rawValue) {
+            tags.append(rule == .turfWar ? "涂地模式" : rule.name)
+        }
         if filter.visibility != .active {
             tags.append(filter.visibility.title)
         }

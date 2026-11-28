@@ -125,7 +125,228 @@ final class iminkTests: XCTestCase {
             FloatingBarInsets.bottom,
             FloatingBarInsets.tabBarTopFromScreenBottom + FloatingBarInsets.breathingSpacing
         )
-        XCTAssertEqual(FloatingBarInsets.breathingSpacing, 16)
+        XCTAssertEqual(FloatingBarInsets.breathingSpacing, 8)
+        XCTAssertLessThanOrEqual(DockConfig.collapsedHeight, 49)
+        XCTAssertEqual(DockConfig.defaultCustomDockTop(safeAreaBottom: 34), 68)
+    }
+
+    @MainActor
+    func testExpandingDockBidirectionalFilterSyncAndFallbackToggle() async {
+        let defaults = UserDefaults.standard
+        let previousToggle = defaults.object(forKey: DockConfig.storageKey)
+        defer {
+            if let previousToggle {
+                defaults.set(previousToggle, forKey: DockConfig.storageKey)
+            } else {
+                defaults.removeObject(forKey: DockConfig.storageKey)
+            }
+        }
+
+        // 默认开启新版自绘 Dock（48pt）
+        defaults.removeObject(forKey: DockConfig.storageKey)
+        XCTAssertTrue(DockConfig.isCustomDockEnabled)
+        XCTAssertEqual(FloatingBarInsets.tabBarHeight, 48)
+
+        // 兜底开关切回 false 时恢复系统 62pt 浮动胶囊计算
+        defaults.set(false, forKey: DockConfig.storageKey)
+        XCTAssertFalse(DockConfig.isCustomDockEnabled)
+        XCTAssertEqual(FloatingBarInsets.tabBarHeight, 62)
+
+        // 验证对战 Dock 模式切换与现有 Filter 双向同步且不覆盖收藏条件
+        let battleVM = BattleListViewModel.shared
+        let savedBattleFilter = battleVM.filter
+        defer {
+            battleVM.filter = savedBattleFilter
+            battleVM.syncNavigationTitle()
+        }
+        battleVM.filter = Filter()
+        battleVM.filter.showOnlyFavorites = true
+        await battleVM.selectModeFromDock(.anarchy)
+        XCTAssertEqual(battleVM.filter.modes, [BattleMode.anarchy.rawValue])
+        XCTAssertTrue(battleVM.filter.showOnlyFavorites)
+        XCTAssertEqual(battleVM.navigationTitle, BattleMode.anarchy.name)
+
+        // 模拟在 BattleFilterView 中多选模式后，标题与状态同步
+        battleVM.filter.modes = [BattleMode.anarchy.rawValue, BattleMode.xMatch.rawValue]
+        battleVM.syncNavigationTitle()
+        XCTAssertEqual(battleVM.navigationTitle, "对战 (2种模式)")
+
+        // 验证打工 Dock 规则切换与现有 Filter 双向同步
+        let coopVM = CoopListViewModel.shared
+        let savedCoopFilter = coopVM.filter
+        defer {
+            coopVM.filter = savedCoopFilter
+            coopVM.isShowingShiftCards = false
+            coopVM.syncNavigationTitle()
+        }
+        coopVM.filter = Filter()
+        coopVM.filter.showOnlyFavorites = true
+        await coopVM.selectRuleFromDock(.BIG_RUN)
+        XCTAssertEqual(coopVM.filter.rules, [CoopRule.BIG_RUN.rawValue])
+        XCTAssertTrue(coopVM.filter.showOnlyFavorites)
+        XCTAssertEqual(coopVM.navigationTitle, CoopRule.BIG_RUN.name)
+
+        // 验证对战规则快筛（如「涂地模式」TURF_WAR）与搜索大小写/空白忽略及最近使用 3 项上限
+        await battleVM.selectRuleFromDock(.turfWar)
+        XCTAssertEqual(battleVM.filter.rules, [BattleRule.turfWar.rawValue])
+        XCTAssertTrue(battleVM.filter.modes.isEmpty)
+        XCTAssertEqual(battleVM.navigationTitle, "涂地模式")
+
+        XCTAssertTrue(DockSearchSupport.matches(query: " 涂 地 ", candidates: ["涂地模式", "占地对战"]))
+        XCTAssertTrue(DockSearchSupport.matches(query: " x ", candidates: ["X比赛", "X比赛系列"]))
+        XCTAssertFalse(DockSearchSupport.matches(query: "zzz", candidates: ["涂地模式", "X比赛", "蛮颓比赛"]))
+
+        var recents = ""
+        recents = DockSearchSupport.recordRecentKey("battleMode:BANKARA", into: recents)
+        recents = DockSearchSupport.recordRecentKey("battleRule:TURF_WAR", into: recents)
+        recents = DockSearchSupport.recordRecentKey("battleMode:XMATCH", into: recents)
+        recents = DockSearchSupport.recordRecentKey("battleMode:FEST", into: recents)
+        XCTAssertEqual(
+            DockSearchSupport.parseRecentKeys(recents),
+            ["battleMode:FEST", "battleMode:XMATCH", "battleRule:TURF_WAR"]
+        )
+    }
+
+    func testDockMorphEarlyHandoffAndDetailPushGuardPolicies() {
+        // 1. 展开态绝不交接
+        XCTAssertFalse(
+            DockMorphHandoffPolicy.shouldHandoffToSystemTabBar(
+                isOpen: true,
+                closingElapsed: 0.25,
+                currentHeight: 62.0,
+                targetHeight: 62.0,
+                currentVelocity: 0,
+                scaleX: 1.0
+            )
+        )
+
+        // 2. 收起刚启动（< 100ms）不误交接
+        XCTAssertFalse(
+            DockMorphHandoffPolicy.shouldHandoffToSystemTabBar(
+                isOpen: false,
+                closingElapsed: 0.05,
+                currentHeight: 62.5,
+                targetHeight: 62.0,
+                currentVelocity: -10,
+                scaleX: 0.995
+            )
+        )
+
+        // 3. 高度误差 > 1.0pt 或水平收腰未回到 0.99~1.01 时不提前交接
+        XCTAssertFalse(
+            DockMorphHandoffPolicy.shouldHandoffToSystemTabBar(
+                isOpen: false,
+                closingElapsed: 0.20,
+                currentHeight: 63.6,
+                targetHeight: 62.0,
+                currentVelocity: -20,
+                scaleX: 0.995
+            )
+        )
+        XCTAssertFalse(
+            DockMorphHandoffPolicy.shouldHandoffToSystemTabBar(
+                isOpen: false,
+                closingElapsed: 0.20,
+                currentHeight: 62.4,
+                targetHeight: 62.0,
+                currentVelocity: -20,
+                scaleX: 0.97
+            )
+        )
+
+        // 4. 约 240~260ms 几何贴合（高度误差 ≤ 1.0pt 且 scaleX ∈ [0.99, 1.01]）立即交接，不等 400ms+ 长尾
+        XCTAssertTrue(
+            DockMorphHandoffPolicy.shouldHandoffToSystemTabBar(
+                isOpen: false,
+                closingElapsed: 0.25,
+                currentHeight: 62.8,
+                targetHeight: 62.0,
+                currentVelocity: -25,
+                scaleX: 0.994
+            )
+        )
+
+        // 5. 详情页 Push 保护：仅「对战 / 鲑鱼跑」根列表页（depth ≤ 1、无转场、无弹窗、完整底栏宽度）允许展开
+        XCTAssertTrue(
+            DockMorphHandoffPolicy.canExpandFilterMenu(
+                tab: .coop,
+                navigationStackDepths: [1],
+                hasActiveTransition: false,
+                hasPresentedModal: false,
+                platterWidth: 351,
+                containerWidth: 393,
+                tabBarHidden: false
+            )
+        )
+        XCTAssertTrue(
+            DockMorphHandoffPolicy.canExpandFilterMenu(
+                tab: .battle,
+                navigationStackDepths: [1],
+                hasActiveTransition: false,
+                hasPresentedModal: false,
+                platterWidth: 351,
+                containerWidth: 393,
+                tabBarHidden: false
+            )
+        )
+        // 主页与「我」不展开筛选菜单
+        XCTAssertFalse(
+            DockMorphHandoffPolicy.canExpandFilterMenu(
+                tab: .home,
+                navigationStackDepths: [1],
+                hasActiveTransition: false,
+                hasPresentedModal: false,
+                platterWidth: 351,
+                containerWidth: 393,
+                tabBarHidden: false
+            )
+        )
+        XCTAssertFalse(
+            DockMorphHandoffPolicy.canExpandFilterMenu(
+                tab: .me,
+                navigationStackDepths: [1],
+                hasActiveTransition: false,
+                hasPresentedModal: false,
+                platterWidth: 351,
+                containerWidth: 393,
+                tabBarHidden: false
+            )
+        )
+        // 进入详情页（depth == 2）禁止展开
+        XCTAssertFalse(
+            DockMorphHandoffPolicy.canExpandFilterMenu(
+                tab: .coop,
+                navigationStackDepths: [2],
+                hasActiveTransition: false,
+                hasPresentedModal: false,
+                platterWidth: 351,
+                containerWidth: 393,
+                tabBarHidden: false
+            )
+        )
+        // push 转场中或底栏缩成窄胶囊时禁止展开
+        XCTAssertFalse(
+            DockMorphHandoffPolicy.canExpandFilterMenu(
+                tab: .coop,
+                navigationStackDepths: [1],
+                hasActiveTransition: true,
+                hasPresentedModal: false,
+                platterWidth: 351,
+                containerWidth: 393,
+                tabBarHidden: false
+            )
+        )
+        XCTAssertFalse(
+            DockMorphHandoffPolicy.canExpandFilterMenu(
+                tab: .coop,
+                navigationStackDepths: [1],
+                hasActiveTransition: false,
+                hasPresentedModal: false,
+                platterWidth: 88,
+                containerWidth: 393,
+                tabBarHidden: false
+            )
+        )
     }
 
     func testNintendoLoginAcceptsUserWithoutBirthday() throws {

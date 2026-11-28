@@ -12,6 +12,7 @@ class PagedRecordListViewModel<Detail: GroupedRecord, Card: GroupStatusCard>: Ob
     @Published private(set) var rows: [RecordListRow<Detail, Card>] = []
     @Published var navigationTitle: String
     @Published var filter = Filter()
+    @Published var showFilterSheet = false
 
     /// 当前列表对应的记录类型，批量操作与变更通知都由它决定。
     let kind: SplatRecordKind

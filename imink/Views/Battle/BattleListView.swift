@@ -4,8 +4,8 @@ struct BattleListView: View {
     @EnvironmentObject var viewModel: BattleListViewModel
     @Namespace private var animation
     @State var activeID:String?
-    @State var showFilterSheet = false
     @State private var selection = RecordSelection<Int64>()
+    @AppStorage(DockConfig.storageKey) private var useCustomDock: Bool = true
     #if DEBUG
     @AppStorage("debugScrollToBottom") private var debugScrollToBottom: Bool = false
     #endif
@@ -83,6 +83,7 @@ struct BattleListView: View {
                     }
                 }
                 .scrollPosition(id: $activeID, anchor: .bottom)
+                .dockScrollMinimizeObserver()
                 .fixSafeareaBackground()
                 .modifier(LoginViewModifier(isLogin: AppState.shared.isLogin, iconName: "TabBarBattle"))
                 .navigationTitle(viewModel.navigationTitle)
@@ -95,7 +96,7 @@ struct BattleListView: View {
                         onDelete: batchDelete,
                         filterButton: AnyView(
                             Button {
-                                showFilterSheet = true
+                                viewModel.showFilterSheet = true
                             } label: {
                                 Label("筛选", systemImage: "line.3.horizontal.decrease.circle")
                             }
@@ -103,8 +104,8 @@ struct BattleListView: View {
                     )
                     .matchedTransitionSource(id: "filter", in: animation)
                 }
-                .sheet(isPresented: $showFilterSheet) {
-                    BattleFilterView(showFilterView: $showFilterSheet, filter: $viewModel.filter) {
+                .sheet(isPresented: $viewModel.showFilterSheet) {
+                    BattleFilterView(showFilterView: $viewModel.showFilterSheet, filter: $viewModel.filter) {
                         await viewModel.loadBattles()
                     }
                     .navigationTransition(.zoom(sourceID: "filter", in: animation))
@@ -116,25 +117,7 @@ struct BattleListView: View {
                         }
                     }
                 }
-                .toolbarTitleMenu {
-                    ForEach(BattleMode.allCases,id: \.rawValue){ mode in
-                        Button{
-                            viewModel.filter.modes.removeAll()
-                            if mode != .all {
-                                viewModel.filter.modes.insert(mode.rawValue)
-                            }
-                            viewModel.navigationTitle = mode.name
-                            Task{
-                                await viewModel.loadBattles()
-                            }
-                        } label: {
-                            Label(
-                                title: { Text("\(mode.name)") },
-                                icon: { mode.icon }
-                            )
-                        }
-                    }
-                }
+                .modifier(LegacyBattleTitleMenuModifier(isEnabled: !useCustomDock, viewModel: viewModel))
                     //                .onChange(of: scenePhase) { oldValue, newPhase in
                     //                    switch newPhase {
                     //                    case .active:
@@ -194,3 +177,29 @@ struct BattleListView: View {
     //#Preview {
     //    BattleListView()
     //}
+
+private struct LegacyBattleTitleMenuModifier: ViewModifier {
+    let isEnabled: Bool
+    @ObservedObject var viewModel: BattleListViewModel
+
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content.toolbarTitleMenu {
+                ForEach(BattleMode.allCases, id: \.rawValue) { mode in
+                    Button {
+                        Task {
+                            await viewModel.selectModeFromDock(mode)
+                        }
+                    } label: {
+                        Label(
+                            title: { Text("\(mode.name)") },
+                            icon: { mode.icon }
+                        )
+                    }
+                }
+            }
+        } else {
+            content
+        }
+    }
+}
