@@ -316,13 +316,13 @@ final class iminkUITests: XCTestCase {
         // 1. 捕获收起态截图 `uikit-dock-collapsed.png`（完整收起、底部仅 4 颗真实 Liquid Glass 按钮 + 彩色对战卡片）
         try saveDesignScreenshot(named: "uikit-dock-collapsed.png")
 
-        // 2. 二次点击「对战」Tab 展开面板 -> 校验 4 个 Tab 按钮全程仍在 -> 捕获 `uikit-dock-expanded.png`
+        // 2. 二次点击「对战」Tab 展开面板 -> 校验 4 个 Tab 按钮全程仍在 -> 捕获融合展开态截图 `uikit-dock-fused-expanded.png`
         battleTab.tap()
         let searchField = app.textFields["expandingDock.searchField"]
         XCTAssertTrue(searchField.waitForExistence(timeout: 3))
         XCTAssertTrue(homeTab.exists && battleTab.exists && coopTab.exists && meTab.exists)
-        Thread.sleep(forTimeInterval: 0.7)
-        try saveDesignScreenshot(named: "uikit-dock-expanded.png")
+        Thread.sleep(forTimeInterval: 0.8)
+        try saveDesignScreenshot(named: "uikit-dock-fused-expanded.png")
 
         // 3. 点击 36pt 搜索框 -> 软键盘弹出、面板整体上移避让 -> 输入「涂地」 -> 捕获 `uikit-dock-search.png`
         searchField.tap()
