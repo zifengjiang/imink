@@ -119,7 +119,8 @@ extension NSOAuthorization {
                 "timestamp": 0,
             ]),
             naId: naUser.id,
-            coralUserId: nil
+            coralUserId: nil,
+            naUser: naUser
         )
 
         AppUserDefaults.shared.NSOVersion = version
@@ -144,7 +145,8 @@ extension NSOAuthorization {
                 "timestamp": 0,
             ]),
             naId: naUser.id,
-            coralUserId: String(loginResult.result.user.id)
+            coralUserId: String(loginResult.result.user.id),
+            naUser: naUser
         )
 
             // 8. 获取web service token

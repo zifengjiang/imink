@@ -5,6 +5,10 @@ enum AppAPI {
 
     case imink_f(naId:String, naIdToken: String, hashMethod: HashMethod)
 
+    /// imink 官方 f API（`https://api.imink.app/f`）：nxapi 被限流时的备用 f 提供方。
+    /// 文档：https://github.com/imink-app/f-API
+    case imink_f_v2(token: String, naId: String, hashMethod: HashMethod, coralUserId: String?, country: String?, language: String?, naBirthday: String?)
+
     case nxapiZnca_f(naId:String, naIdToken: String, hashMethod: HashMethod)
     
     // 新增 nxapi-znca 相关 API
@@ -15,6 +19,18 @@ enum AppAPI {
 
     internal enum HashMethod: String {
         case hash1 = "1", hash2 = "2"
+    }
+
+    /// imink 官方 f API 的请求体。JSONEncoder 默认会省略值为 nil 的键，
+    /// 正好符合服务端「可选字段要么给值要么不出现」的要求。
+    internal struct IminkFBody: Encodable {
+        let hash_method: Int
+        let token: String
+        let na_id: String
+        var coral_user_id: String?
+        var country: String?
+        var language: String?
+        var naBirthday: String?
     }
 }
 
@@ -27,6 +43,8 @@ extension AppAPI: TargetType {
         switch self{
         case .config,.imink_f:
             return URL(string: "https://api.imink.jone.wang")!
+        case .imink_f_v2:
+            return URL(string: "https://api.imink.app")!
         case .nxapiZnca_f:
             return URL(string:"https://nxapi-znca-api.fancy.org.uk/api/znca")!
         case .nxapiZnca_auth_token:
@@ -42,7 +60,7 @@ extension AppAPI: TargetType {
         switch self {
         case .config:
             return "/config"
-        case .imink_f,.nxapiZnca_f:
+        case .imink_f,.nxapiZnca_f,.imink_f_v2:
             return "/f"
         case .nxapiZnca_auth_token:
             return "/token"
@@ -59,7 +77,7 @@ extension AppAPI: TargetType {
         switch self {
         case .config:
             return .get
-        case .imink_f,.nxapiZnca_f:
+        case .imink_f,.nxapiZnca_f,.imink_f_v2:
             return .post
         case .nxapiZnca_auth_token, .nxapiZnca_decrypt:
             return .post
@@ -72,6 +90,12 @@ extension AppAPI: TargetType {
 
     var headers: [String : String]? {
         switch self{
+        case .imink_f_v2:
+                // 文档要求带一个能识别调用方的 User-Agent
+            return [
+                "User-Agent": "imink/1.0.1 (iPhone; iOS)",
+                "Accept": "application/json"
+            ]
         case .nxapiZnca_f:
             return [
                 "User-Agent": "imink/1.0.0",
@@ -124,6 +148,17 @@ extension AppAPI: TargetType {
                 "token": naIdToken,
                 "na_id": naId
             ])
+        case .imink_f_v2(let token, let naId, let hashMethod, let coralUserId, let country, let language, let naBirthday):
+            let body = IminkFBody(
+                hash_method: Int(hashMethod.rawValue) ?? 1,
+                token: token,
+                na_id: naId,
+                coral_user_id: coralUserId?.isEmpty == false ? coralUserId : nil,
+                country: country?.isEmpty == false ? country : nil,
+                language: language?.isEmpty == false ? language : nil,
+                naBirthday: naBirthday?.isEmpty == false ? naBirthday : nil
+            )
+            return .jsonData(body)
         case .nxapiZnca_auth_token:
             let params = [
                 ("client_id", "U2DFLOy1kFnkrvM6QslVVg"),

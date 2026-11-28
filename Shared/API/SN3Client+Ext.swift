@@ -40,6 +40,12 @@ func syncFailureMessage(_ error: any Error) -> String {
     if nsError.domain == "SQLite" || nsError.domain.contains("GRDB") || nsError.domain == "SQLite.Result" {
         return "写入数据库失败：\(error.localizedDescription)"
     }
+        // 限流要告诉用户「到底要等多久」，而不是笼统的「稍后重试」；
+        // 诊断用的长链（哪家提供方、原始响应）留在 lastSyncDebug 里，不塞进 toast。
+    if let error = error as? NSOAuthorization.NSOAuthError, case let .rateLimited(until, provider, _) = error {
+        let remaining = max(0, (until - Int(Date().timeIntervalSince1970 * 1000) + 999) / 1000)
+        return "生成 f 值被限流（\(provider)），请在 \(FAPICooldown.durationText(remaining))后重试（\(FAPICooldown.clockText(until)) 之后）"
+    }
     if let localized = (error as? LocalizedError)?.errorDescription, !localized.isEmpty {
         return "同步失败：\(localized)"
     }
@@ -190,13 +196,19 @@ extension SN3Client {
                         return
                     }
                 }catch SN3Client.Error.tooManyRequests{
+                    failed = true
+                    let message = FAPICooldown.message(prefix: "FAPI 请求被限流")
+                    AppUserDefaults.shared.lastSyncError = message
                     if useTaskGroup, let groupId = groupId, let taskName = taskName {
                         await Indicators.shared.completeSubTask(groupId: groupId, taskName: taskName)
-                        await Indicators.shared.updateTitle(for: IndicatorID, title: "FAPI请求过于频繁，稍后重试...")
+                        await Indicators.shared.updateTitle(for: IndicatorID, title: message)
+                        await Indicators.shared.updateIcon(for: IndicatorID, icon: .systemImage("exclamationmark.triangle"))
                     } else {
-                        await Indicators.shared.updateTitle(for: IndicatorID, title: "FAPI请求过于频繁，稍后重试...")
-                        await Indicators.shared.dismiss(with: IndicatorID, after: 3)
+                        await Indicators.shared.updateTitle(for: IndicatorID, title: message)
+                        await Indicators.shared.updateIcon(for: IndicatorID, icon: .systemImage("exclamationmark.triangle"))
+                        await Indicators.shared.dismiss(with: IndicatorID, after: 4)
                     }
+                    Toast.failure(message)
                     return
                 }catch {
                     logError(error)

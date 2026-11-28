@@ -76,6 +76,25 @@ class AppUserDefaults: ObservableObject {
     
     @AppStorage("fapiRequestInterval", store: .appGroup)
     var fapiRequestInterval: Int = 1800000 // 默认30分钟间隔（30 * 60 * 1000毫秒）
+
+    /// 服务端限流窗口的结束时间（毫秒时间戳）。429 时按 `Retry-After` 写入，
+    /// 冷却结束前不再发起 f 请求，UI 会显示「请 X 分钟后再试」。
+    @AppStorage("fapiCooldownUntil", store: .appGroup)
+    var fapiCooldownUntil: Int = 0
+
+    @AppStorage("fapiCooldownProvider", store: .appGroup)
+    var fapiCooldownProvider: String = ""
+
+    @AppStorage("fapiCooldownReason", store: .appGroup)
+    var fapiCooldownReason: String = ""
+
+    /// nxapi 返回 429/5xx 时，是否再尝试一次 imink 官方 f API（`https://api.imink.app/f`）。
+    @AppStorage("fapiTryIminkFallback", store: .appGroup)
+    var fapiTryIminkFallback: Bool = true
+
+    /// 最近一次 f 值的来源（`nxapi` / `imink` / `manual`），写进诊断便于现场排查。
+    @AppStorage("fapiLastProvider", store: .appGroup)
+    var fapiLastProvider: String = ""
     
     @AppStorage("manualGameServiceToken", store: .appGroup)
     var manualGameServiceToken: String?

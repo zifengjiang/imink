@@ -101,7 +101,8 @@ public enum SyncDiagnostics {
         webVersionSource: String,
         status: Int?,
         responseBody: String?,
-        error: String
+        error: String,
+        note: String? = nil
     ) {
         lock.lock()
         let request = _lastRequest?.request
@@ -121,7 +122,7 @@ public enum SyncDiagnostics {
             requestBodyPrefix: request?.bodyPrefix ?? "",
             responseBody: String(body.prefix(400)),
             error: error,
-            note: nil
+            note: note
         )
 
         lock.lock()

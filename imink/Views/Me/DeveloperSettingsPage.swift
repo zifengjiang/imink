@@ -246,6 +246,56 @@ struct DeveloperSettingsPage: View {
             }
             .foregroundStyle(.orange)
 
+            // 429 的 Retry-After 现在会落到这两个值上：把「还要等多久」直接摆在设置里，
+            // 主人就不用靠 toast 里那句笼统的「稍后重试」猜了。
+            HStack(alignment: .firstTextBaseline) {
+                Text("限流冷却")
+                Spacer()
+                if FAPICooldown.isActive {
+                    Text("\(FAPICooldown.provider) · 剩 \(FAPICooldown.durationText(FAPICooldown.remainingSeconds()))（\(FAPICooldown.clockText(FAPICooldown.untilMs)) 之后）")
+                        .foregroundStyle(.red)
+                        .font(.caption)
+                        .multilineTextAlignment(.trailing)
+                } else {
+                    Text("无")
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                }
+            }
+
+            if !AppUserDefaults.shared.fapiCooldownReason.isEmpty {
+                HStack(alignment: .firstTextBaseline) {
+                    Text("限流原因")
+                    Spacer()
+                    Text(AppUserDefaults.shared.fapiCooldownReason)
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                        .multilineTextAlignment(.trailing)
+                }
+            }
+
+            HStack {
+                Text("上次 f 提供方")
+                Spacer()
+                Text(AppUserDefaults.shared.fapiLastProvider.isEmpty ? "未知" : AppUserDefaults.shared.fapiLastProvider)
+                    .foregroundStyle(.secondary)
+                    .font(.caption)
+            }
+
+            Toggle("nxapi 限流时尝试 imink 回退", isOn: Binding(
+                get: { AppUserDefaults.shared.fapiTryIminkFallback },
+                set: { AppUserDefaults.shared.fapiTryIminkFallback = $0 }
+            ))
+
+            Button("清除限流冷却") {
+                FAPICooldown.clear()
+            }
+            .foregroundStyle(.orange)
+
+            Text("说明：Nintendo 现在只接受 nxapi 的加密请求体（明文请求一律回 9427 Upgrade required），所以 imink 的 f 值只能用于诊断，会写进「最近同步错误」的详情里。nxapi 429 时请等冷却结束，别连续点刷新。")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
             Button("设置FAPI请求间隔") {
                 fapiIntervalMinutes = String(AppUserDefaults.shared.fapiRequestInterval / 60000)
                 showFAPIIntervalAlert = true

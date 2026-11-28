@@ -192,6 +192,8 @@ extension NSOAuthorization {
         case responseError(code: Int, url: URL? = nil, body: String? = nil)
         case nxapiError(message: String)
         case tooManyRequests
+        /// f 值提供方被限流（带下次可尝试时间），`until` 是毫秒时间戳。
+        case rateLimited(until: Int, provider: String, detail: String)
     }
 }
 
@@ -213,6 +215,13 @@ extension NSOAuthorization.NSOAuthError: LocalizedError {
             return "nxapi 请求失败：\(message)"
         case .tooManyRequests:
             return "请求过于频繁，请稍后再试（可在设置里调整请求间隔）"
+        case let .rateLimited(until, provider, detail):
+            let remaining = max(0, (until - Int(Date().timeIntervalSince1970 * 1000) + 999) / 1000)
+            var message = "生成 f 值被限流（\(provider)），请在 \(FAPICooldown.durationText(remaining))后重试（\(FAPICooldown.clockText(until)) 之后）"
+            if !detail.isEmpty {
+                message += "：\(detail)"
+            }
+            return message
         }
     }
 }
@@ -249,6 +258,8 @@ extension NSOAuthorization {
         var country: String
         var language: String
         var id: String
+        /// `/users/me` 里带生日，imink f API 的 `naBirthday` 需要它（可选，历史调用可能没有）。
+        var birthday: String?
     }
 }
 
