@@ -558,6 +558,72 @@ final class iminkUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 1.3)
     }
 
+    /// `UIGlassEffect(.clear)` + 可读性衬底（`scrim` + 顶部 8pt 淡出渐变 + `0.5pt` 内高光）验收采样套件：
+    /// 支持浅色与深色模式，捕获对战彩色卡透色图与鲑鱼跑「传说 / Clear!!」最坏情况文字对比度图。
+    func testCaptureGlass2ReadabilityAndContrastSuite() throws {
+        let isDarkRun = ProcessInfo.processInfo.environment["GLASS2_DARK_RUN"] == "1"
+        let app = XCUIApplication()
+        app.launchArguments += [
+            "-imink.useCustomDock", "YES",
+            "-imink.dockGlassStyle", "clear",
+            "-debugScrollToBottom", "NO",
+            "-session_token", "seed_preview_session_token",
+            "-accountId", "1",
+        ]
+        app.launch()
+
+        let battleTab = app.buttons["expandingDock.tab.1"]
+        let coopTab = app.buttons["expandingDock.tab.2"]
+        XCTAssertTrue(battleTab.waitForExistence(timeout: 10))
+
+        if !battleTab.isSelected {
+            battleTab.tap()
+            Thread.sleep(forTimeInterval: 0.9)
+        }
+        if !app.navigationBars["全部对战"].exists {
+            battleTab.tap()
+            let allRow = app.buttons["expandingDock.battleMode.ALL"]
+            if allRow.waitForExistence(timeout: 3) {
+                allRow.tap()
+                Thread.sleep(forTimeInterval: 0.9)
+            }
+        }
+        Thread.sleep(forTimeInterval: 0.6)
+
+        if isDarkRun {
+            battleTab.tap()
+            XCTAssertTrue(app.buttons["expandingDock.searchToggleButton"].waitForExistence(timeout: 3))
+            Thread.sleep(forTimeInterval: 0.8)
+            try saveDesignScreenshot(named: "uikit-dock-glass2-dark.png")
+            return
+        }
+
+        // 1. 浅色模式：同一 0.00px 坐标先存无面板原色基准 + 原生系统 UITabBar，再存展开态 `uikit-dock-glass2-expanded.png`
+        try saveDesignScreenshot(named: "_glass2_battle_uncovered.png")
+
+        battleTab.tap()
+        XCTAssertTrue(app.buttons["expandingDock.searchToggleButton"].waitForExistence(timeout: 3))
+        Thread.sleep(forTimeInterval: 0.8)
+        try saveDesignScreenshot(named: "uikit-dock-glass2-expanded.png")
+
+        // 2. 切至「鲑鱼跑」展开在最坏情况「传说 XXX / Clear!! / 鲑鱼心脏斗技场」彩色卡正上方，供 WCAG 对比度与标题栏裁切验收
+        coopTab.tap()
+        Thread.sleep(forTimeInterval: 0.9)
+        if !app.navigationBars["全部打工"].exists {
+            coopTab.tap()
+            let allCoop = app.buttons["expandingDock.coopRule.ALL_RULE"]
+            if allCoop.waitForExistence(timeout: 3) {
+                allCoop.tap()
+                Thread.sleep(forTimeInterval: 0.9)
+            }
+        }
+        Thread.sleep(forTimeInterval: 0.5)
+        coopTab.tap()
+        XCTAssertTrue(app.buttons["expandingDock.coopRule.ALL_RULE"].waitForExistence(timeout: 3))
+        Thread.sleep(forTimeInterval: 0.8)
+        try saveDesignScreenshot(named: "_glass2_coop_worstcase.png")
+    }
+
     private func saveDesignScreenshot(named filename: String) throws {
         let shot = XCUIScreen.main.screenshot()
         let attachment = XCTAttachment(screenshot: shot)

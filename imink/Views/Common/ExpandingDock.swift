@@ -1002,11 +1002,14 @@ final class DockFilterPanelViewController: UIViewController, UITextFieldDelegate
     private let upperAmbientShadowView = UIView()
     private let upperShadowClipMask = CAShapeLayer()
 
-    // 真 Liquid Glass (UIGlassEffect) 容器、内容裁切容器与唯一连续外轮廓细边
+    // 真 Liquid Glass (UIGlassEffect(.clear)) 容器、可读性衬底 (scrim + 顶部渐变)、内容裁切容器与 0.5pt 内侧高光边
     private let platterHostView = UIView()
     private let platterGlassView = UIVisualEffectView(effect: nil)
     private let contentClipContainer = UIView()
     private let contentSaddleMaskLayer = CAShapeLayer()
+    private let readabilityScrimView = UIView()
+    private let topHeaderGradientView = UIView()
+    private let topHeaderGradientLayer = CAGradientLayer()
     private let contentInnerCanvas = UIView()
     private let unionPerimeterStrokeView = UIView()
     private let unionOuterHairlineLayer = CAShapeLayer()
@@ -1112,6 +1115,17 @@ final class DockFilterPanelViewController: UIViewController, UITextFieldDelegate
         contentSaddleMaskLayer.fillColor = UIColor.black.cgColor
         view.addSubview(contentClipContainer)
 
+        // 玻璃之上、文字之下的轻量可读性衬底（与 contentClipContainer 共用同一并集 saddle mask，绝不溢出成方卡）
+        readabilityScrimView.isUserInteractionEnabled = false
+        contentClipContainer.addSubview(readabilityScrimView)
+
+        topHeaderGradientView.isUserInteractionEnabled = false
+        topHeaderGradientView.backgroundColor = .clear
+        topHeaderGradientLayer.startPoint = CGPoint(x: 0.5, y: 0.0)
+        topHeaderGradientLayer.endPoint = CGPoint(x: 0.5, y: 1.0)
+        topHeaderGradientView.layer.addSublayer(topHeaderGradientLayer)
+        contentClipContainer.addSubview(topHeaderGradientView)
+
         contentInnerCanvas.backgroundColor = .clear
         contentClipContainer.addSubview(contentInnerCanvas)
 
@@ -1121,7 +1135,7 @@ final class DockFilterPanelViewController: UIViewController, UITextFieldDelegate
         unionOuterHairlineLayer.lineWidth = 0.5
         unionPerimeterStrokeView.layer.addSublayer(unionOuterHairlineLayer)
         unionPerimeterStrokeLayer.fillColor = nil
-        unionPerimeterStrokeLayer.lineWidth = 0.75
+        unionPerimeterStrokeLayer.lineWidth = 0.5
         unionPerimeterStrokeView.layer.addSublayer(unionPerimeterStrokeLayer)
         unionStrokeFadeMask.colors = [
             UIColor.black.cgColor,
@@ -1142,7 +1156,7 @@ final class DockFilterPanelViewController: UIViewController, UITextFieldDelegate
         headerContainer.addSubview(grabberPill)
 
         headerTitleLabel.font = Font.gameUIFont(size: 15, weight: .semibold)
-        headerTitleLabel.textColor = UIColor(Color.appLabel)
+        headerTitleLabel.textColor = .label
         headerContainer.addSubview(headerTitleLabel)
 
         searchToggleGlassView.clipsToBounds = true
@@ -1237,6 +1251,8 @@ final class DockFilterPanelViewController: UIViewController, UITextFieldDelegate
         if reduceTrans {
             platterGlassView.effect = nil
             platterGlassView.backgroundColor = .secondarySystemBackground
+            readabilityScrimView.backgroundColor = .clear
+            topHeaderGradientLayer.colors = [UIColor.clear.cgColor, UIColor.clear.cgColor]
             unionOuterHairlineLayer.strokeColor = UIColor.clear.cgColor
             unionPerimeterStrokeLayer.strokeColor = UIColor.separator.withAlphaComponent(0.55).cgColor
             searchToggleGlassView.effect = nil
@@ -1246,11 +1262,20 @@ final class DockFilterPanelViewController: UIViewController, UITextFieldDelegate
         } else {
             platterGlassView.backgroundColor = .clear
             searchToggleGlassView.backgroundColor = .clear
-            searchBoxGlassView.backgroundColor = .clear
+            searchBoxGlassView.backgroundColor = UIColor.systemBackground.withAlphaComponent(isDark ? 0.28 : 0.22)
+
+            // 玻璃之上、文字之下的可读性衬底：浅色 ~0.25（保留 >=56% 色彩透过与饱和度，同时压住背景碎字）、深色 0.38
+            let baseBg = UIColor.systemBackground.resolvedColor(with: traitCollection)
+            readabilityScrimView.backgroundColor = baseBg.withAlphaComponent(isDark ? 0.38 : 0.25)
+            // 顶部承载缓冲 + 8pt 向列表方向淡出渐变（0.45 -> 0），让标题栏与首行稳稳落位而不污染下方透明行区
+            topHeaderGradientLayer.colors = [
+                baseBg.withAlphaComponent(0.45).cgColor,
+                baseBg.withAlphaComponent(isDark ? 0.30 : 0.26).cgColor,
+                baseBg.withAlphaComponent(0.0).cgColor,
+            ]
+            topHeaderGradientLayer.locations = [0.0, 0.84, 1.0]
 
             if #available(iOS 26.0, *) {
-                // 真 Liquid Glass：默认使用与系统浮动 UITabBar 同族的透亮玻璃（支持启动参数切换 clear / regular 实测比对），
-                // 彻底移除旧版 .systemThickMaterial 毛玻璃与白色/暗色 tint 补偿层；isInteractive 仅开启在可点击控件上。
                 let rawStyle = UserDefaults.standard.string(forKey: "imink.dockGlassStyle") ?? "clear"
                 let platterStyle: UIGlassEffect.Style = (rawStyle == "regular") ? .regular : .clear
                 let platterGlass = UIGlassEffect(style: platterStyle)
@@ -1271,10 +1296,11 @@ final class DockFilterPanelViewController: UIViewController, UITextFieldDelegate
             }
 
             unionOuterHairlineLayer.strokeColor = UIColor.black
-                .withAlphaComponent(isDark ? 0.28 : 0.11)
+                .withAlphaComponent(isDark ? 0.28 : 0.10)
                 .cgColor
+            // 并集轮廓内侧 0.5pt 高光：浅色 white @ 0.55、深色 white @ 0.18，把透明面板边缘与背后卡片清晰剥离
             unionPerimeterStrokeLayer.strokeColor = UIColor.white
-                .withAlphaComponent(isDark ? 0.22 : 0.38)
+                .withAlphaComponent(isDark ? 0.18 : 0.55)
                 .cgColor
         }
 
@@ -1702,6 +1728,12 @@ final class DockFilterPanelViewController: UIViewController, UITextFieldDelegate
         contentSaddleMaskLayer.frame = contentClipContainer.bounds
         contentSaddleMaskLayer.path = saddlePath.cgPath
 
+        readabilityScrimView.frame = contentClipContainer.bounds
+        // 顶部标题栏 (44pt) + 8pt 向列表方向淡出带 (总高 52pt)，严格受同一并集遮罩裁剪
+        let headerBandHeight = min(contentHostHeight, 52.0)
+        topHeaderGradientView.frame = CGRect(x: 0, y: 0, width: currentW, height: headerBandHeight)
+        topHeaderGradientLayer.frame = topHeaderGradientView.bounds
+
         let fullContentH = max(targetExpandedBodyHeight, clampedBodyH)
         let canvasOffsetX = (currentW - baseW) / 2
         let canvasOffsetY = clampedBodyH - fullContentH
@@ -1714,7 +1746,7 @@ final class DockFilterPanelViewController: UIViewController, UITextFieldDelegate
             width: currentW,
             bodyHeight: clampedBodyH,
             capsuleRadius: capsuleR,
-            inset: 0.33,
+            inset: 0.25,
             isFloatingAboveKeyboard: floating
         ).cgPath
         unionPerimeterStrokeLayer.frame = unionPerimeterStrokeView.bounds
@@ -1722,7 +1754,7 @@ final class DockFilterPanelViewController: UIViewController, UITextFieldDelegate
             width: currentW,
             bodyHeight: clampedBodyH,
             capsuleRadius: capsuleR,
-            inset: 0.9,
+            inset: 0.5,
             isFloatingAboveKeyboard: floating
         ).cgPath
         unionStrokeFadeMask.frame = unionPerimeterStrokeView.bounds
@@ -2399,7 +2431,9 @@ private final class DockFilterRowControl: UIControl {
     }
 
     private func setupRow() {
-        let accent = UIColor(Color.accentColor)
+        let selectedForeground = isDark
+            ? UIColor(red: 0.76, green: 0.70, blue: 1.0, alpha: 1.0)
+            : UIColor(red: 0.23, green: 0.12, blue: 0.70, alpha: 1.0)
         translatesAutoresizingMaskIntoConstraints = false
         heightAnchor.constraint(equalToConstant: DockConfig.panelRowHeight).isActive = true
 
@@ -2416,7 +2450,7 @@ private final class DockFilterRowControl: UIControl {
         applyRestingBackground()
 
         iconBadge.isUserInteractionEnabled = false
-        iconBadge.backgroundColor = model.tintColor.withAlphaComponent(model.isSelected ? 0.22 : 0.14)
+        iconBadge.backgroundColor = model.tintColor.withAlphaComponent(model.isSelected ? 0.24 : 0.16)
         iconBadge.layer.cornerRadius = 7.5
         iconBadge.layer.cornerCurve = .continuous
         iconBadge.translatesAutoresizingMaskIntoConstraints = false
@@ -2425,7 +2459,7 @@ private final class DockFilterRowControl: UIControl {
         iconView.contentMode = .scaleAspectFit
         if model.rendersAsTemplate {
             iconView.image = model.iconImage?.withRenderingMode(.alwaysTemplate)
-            iconView.tintColor = model.isSelected ? accent : model.tintColor
+            iconView.tintColor = model.isSelected ? selectedForeground : model.tintColor
         } else {
             iconView.image = model.iconImage?.withRenderingMode(.alwaysOriginal)
         }
@@ -2434,7 +2468,7 @@ private final class DockFilterRowControl: UIControl {
 
         titleLabel.text = model.title
         titleLabel.font = Font.gameUIFont(size: 14, weight: .semibold)
-        titleLabel.textColor = model.isSelected ? accent : UIColor(Color.appLabel)
+        titleLabel.textColor = model.isSelected ? selectedForeground : .label
         titleLabel.lineBreakMode = .byTruncatingTail
         titleLabel.adjustsFontSizeToFitWidth = true
         titleLabel.minimumScaleFactor = 0.85
@@ -2446,7 +2480,7 @@ private final class DockFilterRowControl: UIControl {
             systemName: "checkmark",
             withConfiguration: UIImage.SymbolConfiguration(pointSize: 13, weight: .bold)
         )
-        checkmarkView.tintColor = accent
+        checkmarkView.tintColor = selectedForeground
         checkmarkView.isHidden = !model.isSelected
         checkmarkView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(checkmarkView)
@@ -2485,9 +2519,11 @@ private final class DockFilterRowControl: UIControl {
     private func applyRestingBackground() {
         let accent = UIColor(Color.accentColor)
         if model.isSelected {
-            highlightPill.backgroundColor = accent.withAlphaComponent(isDark ? 0.20 : 0.12)
+            highlightPill.backgroundColor = isDark
+                ? UIColor.white.withAlphaComponent(0.14)
+                : UIColor(red: 0.94, green: 0.92, blue: 1.0, alpha: 0.56)
             highlightPill.layer.borderWidth = 0.65
-            highlightPill.layer.borderColor = accent.withAlphaComponent(0.24).cgColor
+            highlightPill.layer.borderColor = accent.withAlphaComponent(isDark ? 0.34 : 0.26).cgColor
         } else {
             highlightPill.backgroundColor = .clear
             highlightPill.layer.borderWidth = 0
