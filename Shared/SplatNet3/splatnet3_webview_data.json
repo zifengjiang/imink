@@ -63,8 +63,8 @@
             "MyOutfitsRefetchQuery" : "565bc1f16c0a5088d41b203775987c70756296747ba905c3e1c0ce8f3f27f925",
             "PagerLatestVsDetailQuery" : "73462e18d464acfdf7ac36bde08a1859aa2872a90ed0baed69c94864c20de046",
             "PagerUpdateBattleHistoriesByVsModeQuery" : "ac6561ff575363efcc9b876cf179929203dab17d3f25ab293a1123f4637e1dc7",
-            "PhotoAlbumQuery" : "62383a0595fab69bf49a2a6877bc47acc081bfa065cb2eae28aa881980bb30b2",
-            "PhotoAlbumRefetchQuery" : "0819c222d0b68fbcc7706f60b98e797da7d1fce637b45b3bdadca1ccdb692c86",
+            "PhotoAlbumQuery" : "903bd1344473a7221867315d0d897ac36604f52064b62a9510a394f2e62fa9c8",
+            "PhotoAlbumRefetchQuery" : "572baf921fa87dfd63eb6d7a753062d2fc567d16523253ebf6678fe2886a22dd",
             "PrivateBattleHistoriesQuery" : "fef94f39b9eeac6b2fac4de43bc0442c16a9f2df95f4d367dd8a79d7c5ed5ce7",
             "PrivateBattleHistoriesRefetchQuery" : "3dd1b491b2b563e9dfc613e01f0b8e977e122d901bc17466743a82b7c0e6c33a",
             "RankingHoldersFestTeamRankingHoldersPaginationQuery" : "34460535ce2b699ed0617d67e22a7e3290fd30041559bf6f05d408d06f1c9938",
@@ -116,5 +116,5 @@
             "useShareMyOutfitQuery" : "5502b09121f5e18bec8fefbe80cce21e1641624b579c57c1992b30dcff612b44"
         }
     },
-    "version" : "10.0.0-4787c271"
+    "version" : "10.0.0-d15503c4"
 }

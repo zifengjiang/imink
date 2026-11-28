@@ -135,11 +135,38 @@ extension NSOAuthorization {
             updateFAPILastRequestTime()
             break // OK
         case 401:
+            SyncDiagnostics.noteFailure(
+                api: "nxapi-f",
+                query: nil,
+                webVersion: "-",
+                webVersionSource: "nxapi",
+                status: 401,
+                responseBody: String(data: data, encoding: .utf8),
+                error: "nxapi f step\(step) 返回 401"
+            )
             throw SN3Client.Error.invalidGameServiceToken
         case 429:
             updateFAPILastRequestTime()
+            SyncDiagnostics.noteFailure(
+                api: "nxapi-f",
+                query: nil,
+                webVersion: "-",
+                webVersionSource: "nxapi",
+                status: 429,
+                responseBody: String(data: data, encoding: .utf8),
+                error: "nxapi f step\(step) 限流"
+            )
             throw SN3Client.Error.tooManyRequests
         case let code:
+            SyncDiagnostics.noteFailure(
+                api: "nxapi-f",
+                query: nil,
+                webVersion: "-",
+                webVersionSource: "nxapi",
+                status: code,
+                responseBody: String(data: data, encoding: .utf8),
+                error: "nxapi f step\(step) 返回 \(code)"
+            )
             throw SN3Client.Error.responseError(code: code, url: httpResponse.url, body: String(data: data, encoding: .utf8))
         }
         let json = JSON(data)

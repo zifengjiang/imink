@@ -62,6 +62,12 @@ class AppUserDefaults: ObservableObject {
     @AppStorage("lastSyncError", store: .appGroup)
     var lastSyncError: String?
 
+    /// 最近一次同步失败的诊断快照（JSON 字符串）：请求 URL、HTTP 状态、响应体前 400 字符、
+    /// 实际发送的 `X-Web-View-Ver`、失败的 Query 名、请求头。
+    /// 服务端 4xx 经常没有 body，只有把这些一起留下来才查得动。
+    @AppStorage("lastSyncDebug", store: .appGroup)
+    var lastSyncDebug: String?
+
     @AppStorage("scheduleRefreshTime", store: .appGroup)
     var scheduleRefreshTime: Int = 0
     

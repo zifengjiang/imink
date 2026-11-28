@@ -320,6 +320,8 @@ final class MyGearViewModel: ObservableObject {
 
         if let clientError = error as? SN3Client.Error {
             switch clientError {
+            case .noGameServiceToken, .missingGameServiceToken:
+                return "缺少游戏服务令牌，请重新登录后再试"
             case .invalidGameServiceToken, .invalidBulletToken:
                 return "Nintendo 账户登录已失效，请重新登录"
             case .tooManyRequests:

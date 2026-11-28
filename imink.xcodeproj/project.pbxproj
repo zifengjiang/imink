@@ -173,6 +173,7 @@
 		8BF3CB5E2CD4B61900B0FCA9 /* SN3AuthorizationStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB4F2CD4B61900B0FCA9 /* SN3AuthorizationStorage.swift */; };
 		8BF3CB5F2CD4B61900B0FCA9 /* SN3GameServiceToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB502CD4B61900B0FCA9 /* SN3GameServiceToken.swift */; };
 		8BF3CB602CD4B61900B0FCA9 /* WebVersionPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB542CD4B61900B0FCA9 /* WebVersionPlugin.swift */; };
+		0B2001A12E00000100000001 /* SyncDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2001A12E00000100000002 /* SyncDiagnostics.swift */; };
 		8BF3CB612CD4B61900B0FCA9 /* SN3PersistedQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB5B2CD4B61900B0FCA9 /* SN3PersistedQuery.swift */; };
 		8BF3CB622CD4B61900B0FCA9 /* AuthorizationMemoryStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB582CD4B61900B0FCA9 /* AuthorizationMemoryStorage.swift */; };
 		8BF3CB632CD4B61900B0FCA9 /* BulletTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF3CB4D2CD4B61900B0FCA9 /* BulletTokens.swift */; };
@@ -479,6 +480,7 @@
 		8BF3CB522CD4B61900B0FCA9 /* BulletTokenPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulletTokenPlugin.swift; sourceTree = "<group>"; };
 		8BF3CB532CD4B61900B0FCA9 /* GraphQLPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphQLPlugin.swift; sourceTree = "<group>"; };
 		8BF3CB542CD4B61900B0FCA9 /* WebVersionPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebVersionPlugin.swift; sourceTree = "<group>"; };
+		0B2001A12E00000100000002 /* SyncDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncDiagnostics.swift; sourceTree = "<group>"; };
 		8BF3CB562CD4B61900B0FCA9 /* Logging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
 		8BF3CB582CD4B61900B0FCA9 /* AuthorizationMemoryStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizationMemoryStorage.swift; sourceTree = "<group>"; };
 		8BF3CB592CD4B61900B0FCA9 /* SN3API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SN3API.swift; sourceTree = "<group>"; };
@@ -1085,6 +1087,7 @@
 				8BF3CB592CD4B61900B0FCA9 /* SN3API.swift */,
 				8BF3CB782CD4B76400B0FCA9 /* splatnet3_webview_data.json */,
 				8BF3CB5A2CD4B61900B0FCA9 /* SN3Client.swift */,
+				0B2001A12E00000100000002 /* SyncDiagnostics.swift */,
 				8BF3CB5B2CD4B61900B0FCA9 /* SN3PersistedQuery.swift */,
 				8BF3CB5C2CD4B61900B0FCA9 /* Splatoon3InkAPI.swift */,
 				8BF3CB872CD4BB3A00B0FCA9 /* SN3WebViewData.swift */,
@@ -1434,6 +1437,7 @@
 				8BF3CB5F2CD4B61900B0FCA9 /* SN3GameServiceToken.swift in Sources */,
 				8BF3CB7E2CD4B9F700B0FCA9 /* PluginType.swift in Sources */,
 				8BF3CB602CD4B61900B0FCA9 /* WebVersionPlugin.swift in Sources */,
+				0B2001A12E00000100000001 /* SyncDiagnostics.swift in Sources */,
 				8BF3CB612CD4B61900B0FCA9 /* SN3PersistedQuery.swift in Sources */,
 				0AADD2362E694D17002A19FF /* SubscriptionOptionsSheet.swift in Sources */,
 				8BF3CB622CD4B61900B0FCA9 /* AuthorizationMemoryStorage.swift in Sources */,

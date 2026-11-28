@@ -50,16 +50,11 @@ func syncFailureMessage(_ error: any Error) -> String {
     // MARK: - SN3Client token helper
 extension SN3Client {
     func ensureToken() async throws {
-            //        await NSOAccountManager.shared.refreshGameServiceTokenIfNeeded()
-        
-        // 优先使用手动输入的token
-        if AppUserDefaults.shared.useManualGameServiceToken, 
-           let manualToken = AppUserDefaults.shared.manualGameServiceToken,
-           !manualToken.isEmpty {
-            try await setToken(manualToken)
-        } else if let token = AppUserDefaults.shared.gameServiceToken {
-            try await setToken(token)
-        }
+        // 以前这里把 refreshGameServiceTokenIfNeeded() 注释掉了：一旦 app group 里没有
+        // `gameServiceToken`（重装/重登后很常见），后面所有 splatnet3 请求都会不带
+        // Authorization 发出去，服务端回「HTTP 400 + 空 body」，UI 上就是“加载完成但没有记录”。
+        let token = try await NSOAccountManager.shared.ensureGameServiceToken()
+        try await setToken(token)
     }
 }
 
@@ -128,6 +123,7 @@ extension SN3Client {
                         lastRefreshTime = Int(Date().timeIntervalSince1970)
                         // 整体拉取成功（只是没新数据）→ 清掉上次的错误，避免误导
                         AppUserDefaults.shared.lastSyncError = nil
+                        AppUserDefaults.shared.lastSyncDebug = nil
                         return
                     }
                     
@@ -143,6 +139,7 @@ extension SN3Client {
                     // 落库行数才是结果：抓到的 id 数 > 实际写入数 = 部分或全部写入失败
                     let isPartial = saved < ids.count
                     AppUserDefaults.shared.lastSyncError = isPartial ? "仅写入 \(saved)/\(ids.count) 条记录" : nil
+                    if !isPartial { AppUserDefaults.shared.lastSyncDebug = nil }
                     logSyncResult(kind: taskName ?? "records", requested: ids.count, saved: saved)
 
                     if useTaskGroup, let groupId = groupId, let taskName = taskName {
@@ -207,6 +204,19 @@ extension SN3Client {
                     // 落库/拉取失败必须对用户可见，而不是只把进度条收掉
                     let message = syncFailureMessage(error)
                     AppUserDefaults.shared.lastSyncError = message
+                    // 不是 HTTP 层错误（例如落库失败、解析失败）时，SN3Client 那边没有快照，
+                    // 这里补一条，保证 prefs 里总能看到「为什么失败」
+                    if SyncDiagnostics.last == nil {
+                        SyncDiagnostics.noteFailure(
+                            api: "local",
+                            query: taskName,
+                            webVersion: SN3Client.shared.webVersion,
+                            webVersionSource: SN3Client.shared.webVersionSourceLabel,
+                            status: nil,
+                            responseBody: nil,
+                            error: message
+                        )
+                    }
                     if useTaskGroup, let groupId = groupId, let taskName = taskName {
                         await Indicators.shared.completeSubTask(groupId: groupId, taskName: taskName)
                         await Indicators.shared.updateTitle(for: IndicatorID, title: message)
